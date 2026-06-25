@@ -1,6 +1,6 @@
-name = "LocalSemanticClosure"
+name = "meta"
 version = "0.1.0"
-defaultTargets = ["meta"]
+defaultTargets = ["Meta"]
 
 [[require]]
 scope = "FormalizedFormalLogic"
@@ -8,4 +8,4 @@ name = "Foundation"
 rev = "master"
 
 [[lean_lib]]
-name = "meta"
+name = "Meta"
