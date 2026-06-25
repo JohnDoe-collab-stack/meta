@@ -1,5 +1,32 @@
 # Presentation de l'operateur de gap
 
+## Introduction
+
+Ce document presente l'operateur de gap comme une structure formelle de
+mediation entre referentiels. Le point de depart n'est pas l'egalite entre deux
+poles, ni l'echec d'une identification, mais le passage constructif qui relie
+un visible projete a une interface formee.
+
+La notation de presentation :
+
+```text
+1 + gap + 1
+```
+
+designe cette mediation explicite. Elle ne doit pas etre lue comme une
+arithmetique de longueurs, mais comme une decomposition de role : un pole
+visible, une mediation typable, et un pole forme. L'egalite ou la presentation
+courte correspond alors a un cas contracte de cette mediation.
+
+Le noyau Lean formalise cette lecture par `LocalProjectiveRecovery`. Les
+sections suivantes precisent sa definition, les operations derivees qu'elle
+permet, puis ses lectures dans les couches Tarski, Beth, Bell, Tsirelson,
+arithmetique enrichie et dynamique arithmetique.
+
+Dans cette perspective, le cas de Tarski n'est pas pris comme point de depart :
+il apparait comme un cas diagonal particulier d'un schema de mediation plus
+general.
+
 ## Statut formel
 
 L'operateur de gap est formalise en Lean dans le noyau abstrait sous le nom
@@ -31,7 +58,7 @@ structure LocalProjectiveRecovery
 ```
 
 Le nom `operateur de gap` est le nom de presentation de cette structure dans
-l'histoire :
+le cadre :
 
 ```text
 1 + gap + 1
@@ -92,7 +119,7 @@ interface formee
 + recuperation du forme
 ```
 
-## Discours propre
+## Lecture structurelle
 
 Le gap porte la mediation constructive entre les referentiels.
 
@@ -270,10 +297,10 @@ refutable par contraction
 localement reparable
 ```
 
-L'operateur utilise le gap a l'affirmative : la separation devient une donnee
-formee, indexee par `formed`, portant sa propre reparation et consommable par
-les theoremes de stabilite. Les echecs de contraction sont des consequences de
-cette structure, pas son point de depart.
+L'operateur donne un usage constructif au gap : la separation devient une
+donnee formee, indexee par `formed`, portant sa propre reparation et
+consommable par les theoremes de stabilite. Les echecs de contraction sont des
+consequences de cette structure, pas son point de depart.
 
 La forme generale est :
 
@@ -422,7 +449,8 @@ localRecovery
 
 La projection conserve le payload visible. Le forme conserve le role enrichi.
 Le gap est l'operateur qui rend ce passage explicite et utilisable : il ne
-reste pas au statut de contre-exemple, il porte la reparation locale du forme.
+reste pas au statut d'obstruction externe, il porte la reparation locale du
+forme.
 
 ## Lecture `1 + gap + 1`
 
@@ -477,6 +505,19 @@ Lecture :
 
 ```text
 Tarski fournit un gap diagonal operationnel.
+```
+
+Dans cette presentation, Tarski n'est pas le point de depart du cadre. Il est
+une instance derivee : le cas ou la mediation constructive entre code syntaxique
+et assertion semantique est forcee dans une presentation courte.
+
+La hierarchie de lecture est donc :
+
+```text
+operateur de gap
+-> mediation constructive entre referentiels
+-> regimes de contraction ou non-contraction
+-> Tarski comme gap diagonal particulier
 ```
 
 ## Beth
@@ -705,100 +746,9 @@ le retour sur le meme observable transforme une egalite visible
 en index dynamique enrichi.
 ```
 
-## Collatz meta
-
-Cette section decrit l'horizon Collatz de la lecture `1 + gap + 1`. Les
-declarations ci-dessous ne sont pas presentes dans l'arbre Lean actuel de
-`Meta`; elles doivent donc etre lues comme noms de travail ou cible de
-formalisation, non comme references compilees du projet courant.
-
-Collatz utiliserait deux niveaux de gap.
-
-Premier niveau : le gap arithmetique local du state forme.
-
-```lean
-CollatzLocalArithmeticGap
-collatzLocalArithmeticGapTerminalExcess
-collatzCanonicalLocalArithmeticGap_terminalExcess_eq_one
-```
-
-Lecture :
-
-```text
-etat forme local
-+ gap de role arithmetique
-+ trace payload shadow
-```
-
-Dans le cas canonique, l'exces terminal local vaut :
-
-```text
-1
-```
-
-Second niveau : le gap dynamique de retour.
-
-```lean
-CollatzDynamicReturnGap
-collatzDynamicReturnIntersection
-collatzDynamicReturnGap_terminalExcess_eq_secondTime_add_one
-```
-
-Lecture :
-
-```text
-premiere occurrence observee
-+ gap temporel de retour
-+ collision repetee comme fermeture enrichie
-```
-
-La couche fibrewise fixerait ensuite la lecture locale par graine :
-
-```lean
-MetaCollatzSeedFiber
-MetaCollatzFiberWithVisibleMaximum
-MetaCollatzFiberFormedTransport
-MetaCollatzFiberCarryLock
-```
-
-Le maximum visible est propre a la fibre. Le transport forme reste indexe par
-cette fibre. Le verrou restant est le carry terminal local :
-
-```lean
-MetaCollatzFiberTerminalCarry
-MetaCollatzFiberCarrySlotFormation
-```
-
-Les portes equivalentes du verrou seraient :
-
-```lean
-MetaCollatzFiberTerminalCycle
-MetaCollatzFiberMinimalRaccord
-MetaCollatzFiberAxisUnitGap
-MetaCollatzFiberSharedTrace
-MetaCollatzFiberBalanceReadout
-```
-
-La porte affine unitaire se lit :
-
-```lean
-2 ^ evenCount source len - 3 ^ oddCount source len = 1
-```
-
-Dans l'histoire `1 + gap + 1` :
-
-```text
-source post-hauteur
-+ gap affine entre les axes 2^E et 3^O
-+ cycle terminal
-```
-
-Le `= 1` exprime que le gap affine est unitaire. C'est la forme Collatz du
-recollement minimal.
-
 ## Synthese
 
-L'operateur de gap est le geste commun :
+L'operateur de gap fournit le schema transversal :
 
 ```text
 Tarski :
@@ -818,10 +768,6 @@ valeur visible + gap de role + exces de recomposition
 
 Nat dynamique :
 occurrence + gap de retour + occurrence fermante
-
-Collatz :
-fibre post-hauteur + gap dynamique / affine + fermeture terminale
-  (horizon conceptuel, non formalise dans l'arbre Lean courant)
 ```
 
 Le cadre ne reduit pas ces cas a une analogie. Pour Tarski, Beth, Bell, Nat et
@@ -843,8 +789,8 @@ tuple structure
 + borne certifiee
 ```
 
-Il appartient donc a la meme histoire conceptuelle des gaps structures, mais
-pas encore au meme type projectif transversal.
+Il appartient donc a la meme famille conceptuelle des gaps structures, mais pas
+encore au meme type projectif transversal.
 
 La phrase finale est :
 
