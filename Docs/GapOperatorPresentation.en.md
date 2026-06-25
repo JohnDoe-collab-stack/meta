@@ -7,6 +7,12 @@ between referentials. The starting point is not equality between two poles, nor
 the failure of an identification, but the constructive passage that relates a
 projected visible object to a formed interface.
 
+In the dynamic layers, this mediation is produced by a return: an observed
+collision, or a bounded window that constructively produces a collision, is
+turned into a typed intersection and then into a recovered closed-stability
+row. This passage from observed return to formed closure gives the framework
+its dynamic content.
+
 The presentation notation:
 
 ```text
@@ -147,6 +153,11 @@ formed
 
 Non-contractibility statements do not define the gap. They appear only when
 this mediation is tested against a short reading.
+
+In the dynamic layer, this reading becomes a construction of stability: a
+return to the same observable is not contracted into a bare equality, but
+formed as a repeated collision, an intersection, an enriched trace, and a local
+recovery.
 
 ## Derived Operations
 
@@ -710,7 +721,9 @@ the final `1` is the positive excess of closure.
 
 ## Arithmetic Dynamics
 
-The dynamics adds the temporal index.
+The dynamics is where an observable return is transformed into closed
+stability. It adds the temporal index and converts a repetition into formed
+data.
 
 Short presentation:
 
@@ -732,6 +745,7 @@ A repeated collision gives:
 RepeatedIndexCollision
 repeatedIndexIntersection
 ArithmeticDynamicGapRow
+ArithmeticDynamicClosedStabilityRow
 ```
 
 The dynamic gap carries a terminal excess:
@@ -743,9 +757,24 @@ secondTime + 1
 Reading:
 
 ```text
-the return to the same observable turns a visible equality
-into an enriched dynamic index.
+the return to the same observable turns a visible coincidence
+into an enriched dynamic index, then into recovered typed closure.
 ```
+
+The observed bridge extends this construction to an arbitrary discrete system
+equipped with a natural-number observation:
+
+```lean
+ObservedDiscreteSystem
+ObservedRepeatedCollision
+ObservedBoundedWindow
+observedDynamicClosedStabilityRow
+observedBoundedWindowDynamicClosedStabilityRow
+```
+
+Thus, a bounded observed window constructively produces a collision, and that
+collision produces a closed-stability row. Stability does not come from a bare
+equality, but from the return formed as dynamic mediation.
 
 ## Synthesis
 
@@ -770,6 +799,9 @@ visible value + role gap + recomposition excess
 Nat dynamics:
 occurrence + return gap + closing occurrence
 ```
+
+In the dynamic layers, this scheme has a precise function: transforming an
+observable return into recovered closed stability.
 
 The framework does not reduce these cases to an analogy. For Tarski, Beth,
 Bell, Nat, and Nat dynamics, it gives them directly a projective or operational

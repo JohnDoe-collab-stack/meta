@@ -7,6 +7,12 @@ mediation entre referentiels. Le point de depart n'est pas l'egalite entre deux
 poles, ni l'echec d'une identification, mais le passage constructif qui relie
 un visible projete a une interface formee.
 
+Dans les couches dynamiques, cette mediation est produite par un retour :
+une collision observee, ou une fenetre bornee qui produit constructivement une
+collision, est transformee en intersection typee puis en ligne de stabilite
+fermee recuperee. C'est ce passage du retour observe vers la fermeture formee
+qui donne au cadre son contenu dynamique.
+
 La notation de presentation :
 
 ```text
@@ -148,6 +154,11 @@ forme
 
 Les enonces de non-contractibilite ne definissent pas le gap. Ils apparaissent
 seulement lorsque cette mediation est testee contre une lecture courte.
+
+Dans la couche dynamique, cette lecture devient une construction de stabilite :
+un retour sur le meme observable n'est pas contracte en simple egalite, mais
+forme comme collision repetee, intersection, trace enrichie et recuperation
+locale.
 
 ## Operations derivees
 
@@ -709,7 +720,9 @@ le `1` final est l'exces positif de fermeture.
 
 ## Dynamique arithmetique
 
-La dynamique ajoute l'index temporel.
+La dynamique est le lieu ou le retour observable est transforme en stabilite
+fermee. Elle ajoute l'index temporel et convertit une repetition en donnee
+formee.
 
 Presentation courte :
 
@@ -731,6 +744,7 @@ Une collision repetee donne :
 RepeatedIndexCollision
 repeatedIndexIntersection
 ArithmeticDynamicGapRow
+ArithmeticDynamicClosedStabilityRow
 ```
 
 Le gap dynamique porte un exces terminal :
@@ -742,9 +756,24 @@ secondTime + 1
 Lecture :
 
 ```text
-le retour sur le meme observable transforme une egalite visible
-en index dynamique enrichi.
+le retour sur le meme observable transforme une coincidence visible
+en index dynamique enrichi, puis en fermeture typee recuperee.
 ```
+
+Le pont observe etend cette construction a un systeme discret arbitraire muni
+d'une observation naturelle :
+
+```lean
+ObservedDiscreteSystem
+ObservedRepeatedCollision
+ObservedBoundedWindow
+observedDynamicClosedStabilityRow
+observedBoundedWindowDynamicClosedStabilityRow
+```
+
+Ainsi, une fenetre observee bornee produit constructivement une collision, et
+cette collision produit une ligne de stabilite fermee. La stabilite ne vient
+pas d'une egalite nue, mais du retour forme comme mediation dynamique.
 
 ## Synthese
 
@@ -769,6 +798,9 @@ valeur visible + gap de role + exces de recomposition
 Nat dynamique :
 occurrence + gap de retour + occurrence fermante
 ```
+
+Dans les couches dynamiques, ce schema a une fonction precise : transformer un
+retour observable en stabilite fermee recuperee.
 
 Le cadre ne reduit pas ces cas a une analogie. Pour Tarski, Beth, Bell, Nat et
 Nat dynamique, il leur donne directement une forme projective ou operationnelle
