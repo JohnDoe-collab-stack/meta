@@ -18,6 +18,7 @@ import Meta.Bell.Tsirelson.StandardCertificate
 import Meta.Beth.GapContraction
 import Meta.Beth.ImplicitExplicit
 import Meta.Core.ClosedStabilityTheorem
+import Meta.Core.Gap
 import Meta.Core.ReferentialLength
 import Meta.Dynamics.ObservedDiscrete
 import Meta.Dynamics.ObservedDynamicGap

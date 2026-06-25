@@ -1,4 +1,4 @@
-import Meta.Tarski.GapContraction
+import Meta.Core.Gap
 
 /-!
 # Referential length

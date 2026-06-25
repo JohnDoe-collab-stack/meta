@@ -1,5 +1,5 @@
 import Meta.Beth.ImplicitExplicit
-import Meta.Tarski.GapContraction
+import Meta.Core.Gap
 
 /-!
 # Beth gap contraction

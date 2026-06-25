@@ -1,4 +1,5 @@
 import Meta.Beth.GapContraction
+import Meta.Tarski.GapContraction
 
 /-!
 # Tarski gap and Beth collapse

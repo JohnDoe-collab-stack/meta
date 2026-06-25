@@ -1,5 +1,5 @@
 import Meta.Bell.Coindexation
-import Meta.Tarski.GapContraction
+import Meta.Core.Gap
 
 /-!
 # Bell gap contraction
