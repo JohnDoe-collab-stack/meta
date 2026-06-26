@@ -5,8 +5,8 @@ import Meta.Core.Gap
 
 This file isolates the abstract dynamic reading of closed stability.
 
-It does not define any concrete dynamics, time type, trajectory, bounded
-window, or arithmetic collision.  It only records the core pattern:
+Concrete dynamics, time types, trajectories, bounded windows, and arithmetic
+collisions are kept outside the core.  This file records the abstract pattern:
 
 * a dynamic source provides a typed intersection;
 * the intersection forms an interface;
@@ -25,7 +25,7 @@ universe u v w x y z r s a
 /--
 A formed dynamic return.
 
-The source is intentionally abstract: it may later be instantiated by an
+The source is abstract so it can later be instantiated by an
 observed collision, a bounded window, a repeated-index certificate, or another
 dynamic source.  The core datum is the typed intersection produced by that
 source.
@@ -79,7 +79,8 @@ structure LocallyRecoveredDynamicReturn
 /--
 The closed-stability package recovered from a locally recovered dynamic return.
 
-No new stability principle is proved here.  This is the dynamic packaging of
+This introduces no independent stability postulate.  It exposes the
+dynamic-return form of
 `locallyRecoveredNonProjectiveClosedStabilityFromIntersectionTheorem`.
 -/
 def locallyRecoveredClosedStabilityOfDynamicReturn

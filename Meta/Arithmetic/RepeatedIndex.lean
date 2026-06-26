@@ -15,7 +15,7 @@ open ClosedStabilityTheorem
 A repeated-index collision carries two positions and two observed Nat values.
 
 The endpoint equality is data produced outside the bidirectional completion
-interface; the completion consumes it only through the shared trace it induces.
+interface; the completion uses the shared trace induced by that equality.
 -/
 structure RepeatedIndexCollision where
   firstTime : Nat

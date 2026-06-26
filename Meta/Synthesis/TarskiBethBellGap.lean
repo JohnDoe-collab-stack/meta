@@ -4,15 +4,15 @@ import Meta.Bell.AmalgamationGap
 /-!
 # Tarski, Beth, and Bell gaps
 
-This file is only a facade over the established layers.  It records the common
-table:
+This file assembles the established layers into their common comparison table:
 
 * Tarski supplies an operational referential gap;
 * Beth tests contractibility of that gap as a short presentation;
 * Bell reads the classical CHSH bound as the result of short co-indexation,
   while an amalgamation obstruction is the corresponding pre-probabilistic gap.
 
-No new semantic principle is introduced here.
+The semantic principles remain in the source layers; this synthesis records
+their shared gap/contraction shape.
 -/
 
 namespace Meta

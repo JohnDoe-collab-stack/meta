@@ -15,9 +15,9 @@ It formalizes:
 * optional common stability, diagonal obstruction, recovery, and terminal
   projection packages.
 
-The package is intentionally abstract. It does not claim that `Forward` and
-`Backward` alone produce `Complete`; it only consumes an already typed
-`Intersection` through `completeOfIntersection`.
+The package is abstract by design.  `Forward` and `Backward` are related
+through an already typed `Intersection`, which is then recomposed by
+`completeOfIntersection`.
 -/
 
 namespace Meta

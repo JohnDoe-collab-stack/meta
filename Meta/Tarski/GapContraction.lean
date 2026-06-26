@@ -6,9 +6,8 @@ import Meta.Tarski.TruthGap
 
 This file is the Tarski instance layer over the standalone meta package.
 
-No new semantic assumption is introduced here.  The file only exposes the
-already proved projective consequences under the vocabulary of gap
-contraction.
+The semantic assumptions stay fixed while this layer exposes the projective
+consequences under the vocabulary of gap contraction.
 -/
 
 namespace Meta

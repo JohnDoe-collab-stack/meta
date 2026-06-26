@@ -293,11 +293,11 @@ does not depend on any axioms
 | Un retour dynamique localement recupere refute la contraction ordonnee. | Certifie au niveau abstrait | Le Core donne `dynamicReturn_not_orderContractive`. |
 | Un retour dynamique localement recupere refute la presentation courte. | Certifie au niveau abstrait | Le Core donne `dynamicReturn_refutes_shortReferentialPresentation`. |
 | Un ordre total visible totalise les projections. | Certifie au niveau abstrait | Le Core donne `visibleTotalOrder_project_comparable`, sans en faire une totalisation de l'interface. |
-| Toute incomparabilite vient d'un gap. | A ne pas dire | Le code traite la contraction par ordre visible, pas toutes les incomparabilites possibles. |
-| Tsirelson est un gap operationnel complet. | A ne pas dire | La documentation doit garder le statut plus faible : gap structure certifie par borne. |
-| La loi des grands nombres est demontree par le cadre. | A ne pas dire | Pour l'instant, c'est une lecture structurelle, pas un theoreme Lean du projet. |
-| Les nombres complexes sont formalises comme instance du gap. | A ne pas dire | Pour l'instant, c'est une interpretation possible, pas une instance Lean. |
-| Le cadre remplace les mathematiques classiques. | A ne pas dire | Le cadre organise une mediation plus fine ; il ne remplace pas les theories existantes. |
+| Toute incomparabilite vient d'un gap. | Non certifie actuellement | Le code traite la contraction par ordre visible, pas toutes les incomparabilites possibles. |
+| Tsirelson est un gap operationnel complet. | Non certifie actuellement | La documentation doit garder le statut certifie actuel : gap structure par borne. |
+| La loi des grands nombres est demontree par le cadre. | Non certifie actuellement | Pour l'instant, c'est une lecture structurelle, pas un theoreme Lean du projet. |
+| Les nombres complexes sont formalises comme instance du gap. | Non certifie actuellement | Pour l'instant, c'est une interpretation possible, pas une instance Lean. |
+| Le cadre remplace les mathematiques classiques. | Non certifie actuellement | Le cadre organise une mediation plus fine ; il ne remplace pas les theories existantes. |
 
 ## Formulations sures
 
