@@ -17,7 +17,7 @@ lake build
 Resultat :
 
 ```text
-Build completed successfully (1136 jobs).
+Build completed successfully (1138 jobs).
 ```
 
 Les avertissements observes viennent de la bibliotheque externe `Foundation`.
@@ -263,6 +263,96 @@ Statut :
 does not depend on any axioms
 ```
 
+## Tarski : longueur, ordre visibles et retour dynamique
+
+La couche Tarski instancie maintenant trois consequences transverses du Core :
+
+```text
+obstruction diagonale de Tarski
+-> gap operationnel
+-> longueur referentielle enrichie
+-> equivalence par ordre visible
+-> refutation de la contraction ordonnee
+-> retour diagonal forme
+-> stabilite fermee recuperee depuis ce retour
+```
+
+Dans le code :
+
+```lean
+TarskiDiagonalObstruction.operationalLength
+TarskiDiagonalObstruction.structuralLength
+TarskiDiagonalObstruction.refutesShortPresentation
+TarskiDiagonalObstruction.visible_le_formed_shadow
+TarskiDiagonalObstruction.visible_le_shadow_formed
+TarskiDiagonalObstruction.visibleOrderEquivalent
+TarskiDiagonalObstruction.visible_eq_of_partialOrder
+TarskiDiagonalObstruction.partialOrder_visible_eq_not_interface_eq
+TarskiDiagonalObstruction.notOrderContractive
+TarskiDiagonalObstruction.operationalLength_notOrderContractive
+TarskiDiagonalReturnSource
+TarskiProjectedDefinitionData
+TarskiDiagonalIntersection
+tarskiDiagonalIntersectionOfSource
+tarskiIntersectionCanonical
+tarskiBidirectionalCompleteness
+tarskiRoundTripCoherence
+tarskiFormedDynamicReturn
+tarskiLocallyRecoveredDynamicReturn
+tarskiLocallyRecoveredClosedStabilityOfDynamicReturn
+tarskiDynamicReturn_operationalGap
+tarskiDynamicReturn_structuralGap
+tarskiDynamicReturn_visibleOrderEquivalent
+tarskiDynamicReturn_visible_eq_of_partialOrder
+tarskiDynamicReturn_partialOrder_visible_eq_not_interface_eq
+tarskiDynamicReturn_notOrderContractive
+tarskiDynamicReturn_refutesShortPresentation
+```
+
+Lecture stricte :
+
+```text
+Tarski instancie les consequences ordre/longueur deja prouvees dans le Core.
+La syntaxe visible peut etre identifiee apres projection.
+Cette identification visible ne contracte pas les interfaces formees.
+Le retour dynamique Tarski part des donnees diagonales productrices, forme une
+intersection typee, puis consomme le Core dynamique abstrait.
+```
+
+Controle cible :
+
+```text
+TarskiDiagonalObstruction.operationalLength
+TarskiDiagonalObstruction.structuralLength
+TarskiDiagonalObstruction.refutesShortPresentation
+TarskiDiagonalObstruction.visibleOrderEquivalent
+TarskiDiagonalObstruction.visible_eq_of_partialOrder
+TarskiDiagonalObstruction.partialOrder_visible_eq_not_interface_eq
+TarskiDiagonalObstruction.notOrderContractive
+TarskiDiagonalObstruction.operationalLength_notOrderContractive
+TarskiDiagonalReturnSource
+TarskiProjectedDefinitionData
+TarskiDiagonalIntersection
+tarskiFormedDynamicReturn
+tarskiLocallyRecoveredDynamicReturn
+tarskiLocallyRecoveredClosedStabilityOfDynamicReturn
+tarskiDynamicReturn_operationalGap
+tarskiDynamicReturn_visibleOrderEquivalent
+tarskiDynamicReturn_visible_eq_of_partialOrder
+tarskiDynamicReturn_partialOrder_visible_eq_not_interface_eq
+tarskiDynamicReturn_notOrderContractive
+tarskiDynamicReturn_refutesShortPresentation
+```
+
+Statut :
+
+```text
+La ligne ordre/longueur ne depend d'aucun axiome.
+Les donnees source/intersection du retour dynamique ne dependent d'aucun axiome.
+Les consequences dynamiques recuperees dependent de `propext` via
+`tarskiRoundTripCoherence`.
+```
+
 ## Architecture
 
 | Point | Statut |
@@ -271,6 +361,8 @@ does not depend on any axioms
 | `Meta/Core/DynamicStability.lean` ne depend pas de `Meta.Dynamics` | Correct |
 | `Meta/Core/DynamicStability.lean` ne depend pas de `Meta.Arithmetic` | Correct |
 | `Meta/Core/DynamicStability.lean` ne depend pas de `Meta.Tarski` | Correct |
+| `Meta/Tarski/ReferentialOrder.lean` instancie la longueur et l'ordre du Core | Correct |
+| `Meta/Tarski/DynamicReturn.lean` instancie le retour dynamique du Core | Correct |
 | Les couches observees instancient le schema abstrait | Correct |
 | Le pont Foundation/Tarski reste dans la couche Tarski externe | Correct |
 
@@ -282,6 +374,9 @@ does not depend on any axioms
 | Le retour dynamique produit une stabilite fermee recuperee. | Certifie au niveau abstrait et pour les instances codees | Le schema abstrait et les instances observees sont presents. |
 | L'egalite visible est un cas contracte de la mediation. | Soutenu | A dire comme lecture structurelle, pas comme unique definition de l'egalite. |
 | Tarski apparait comme un cas diagonal particulier. | Soutenu dans le cadre | Le code fournit `TarskiDiagonalObstruction` comme gap operationnel. |
+| Tarski instancie une longueur referentielle enrichie. | Certifie dans la couche Tarski | Le code donne `TarskiDiagonalObstruction.operationalLength` et `refutesShortPresentation`. |
+| Tarski instancie les consequences d'ordre visible du Core. | Certifie dans la couche Tarski | Le code donne `visibleOrderEquivalent`, `partialOrder_visible_eq_not_interface_eq` et `notOrderContractive`. |
+| Tarski instancie le retour dynamique forme. | Certifie dans la couche Tarski | Le code donne `tarskiFormedDynamicReturn`, `tarskiLocallyRecoveredDynamicReturn` et les consequences dynamiques d'ordre et de presentation courte. |
 | Beth mesure une contractibilite du gap. | Soutenu | Le code relie collapse Beth et recuperation explicite sur fibres visibles. |
 | Bell fournit une instance pre-probabiliste. | Soutenu | Le code traite co-indexation, compatibilite et obstruction d'amalgamation. |
 | Un ordre visible ne suffit pas a contracter une interface formee. | Certifie au niveau abstrait | Le Core refute `OrderContractiveProjection` en presence d'un gap structurel ou operationnel. |

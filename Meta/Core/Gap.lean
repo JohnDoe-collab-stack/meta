@@ -12,8 +12,7 @@ It records three regimes:
 * operational gap: the structural gap carries a local repair indexed by the
   formed interface.
 
-The definitions are intentionally independent of any particular instance such
-as Tarski, Beth, Bell, or arithmetic dynamics.
+The definitions are intentionally independent of any particular instance.
 -/
 
 namespace Meta

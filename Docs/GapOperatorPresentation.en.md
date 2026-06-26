@@ -553,17 +553,42 @@ TarskiSyntaxFiberContractible
 TarskiDiagonalObstruction.notContractible
 TarskiDiagonalObstruction.structuralGap
 TarskiDiagonalObstruction.operationalGap
+TarskiDiagonalObstruction.operationalLength
+TarskiDiagonalObstruction.refutesShortPresentation
+TarskiDiagonalObstruction.visibleOrderEquivalent
+TarskiDiagonalObstruction.visible_eq_of_partialOrder
+TarskiDiagonalObstruction.partialOrder_visible_eq_not_interface_eq
+TarskiDiagonalObstruction.notOrderContractive
+TarskiDiagonalReturnSource
+TarskiDiagonalIntersection
+tarskiFormedDynamicReturn
+tarskiLocallyRecoveredDynamicReturn
+tarskiLocallyRecoveredClosedStabilityOfDynamicReturn
+tarskiDynamicReturn_operationalGap
+tarskiDynamicReturn_visibleOrderEquivalent
+tarskiDynamicReturn_visible_eq_of_partialOrder
+tarskiDynamicReturn_partialOrder_visible_eq_not_interface_eq
+tarskiDynamicReturn_notOrderContractive
+tarskiDynamicReturn_refutesShortPresentation
 ```
 
 Reading:
 
 ```text
 Tarski provides an operational diagonal gap.
+It also exposes an enriched referential-length row and a visible-order row
+refuting contraction.
+It finally exposes the diagonal process as a formed dynamic return:
+diagonal source, typed intersection, formed semantic interface,
+local recovery, and recovered closed stability.
 ```
 
 In this presentation, Tarski is not the starting point of the framework. It is
 a derived instance: the case where the constructive mediation between syntactic
-code and semantic assertion is forced into a short presentation.
+code and semantic assertion is forced into a short presentation. The dynamic
+layer states this positively: it does not start from the already-produced
+obstruction, but from the productive diagonal data, then forms the intersection
+where the return becomes recoverable.
 
 The reading hierarchy is therefore:
 
@@ -572,6 +597,8 @@ gap operator
 -> constructive mediation between referentials
 -> contraction or non-contraction regimes
 -> Tarski as a particular diagonal gap
+-> Tarski over visible orders: same projected syntax, separated interface
+-> Tarski as a formed diagonal return: source, intersection, recovery
 ```
 
 ## Beth
@@ -838,7 +865,7 @@ The gap operator provides the transverse scheme:
 
 ```text
 Tarski:
-code + diagonal gap + assertion
+code + diagonal gap + assertion + formed diagonal return
 
 Beth:
 visible + contractibility test + explicit definition

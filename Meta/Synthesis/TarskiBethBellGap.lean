@@ -1,5 +1,6 @@
 import Meta.Synthesis.TarskiBethGap
 import Meta.Bell.AmalgamationGap
+import Meta.Tarski.ReferentialOrder
 
 /-!
 # Tarski, Beth, and Bell gaps
@@ -35,7 +36,7 @@ def tarskiBethBell_tarskiOperationalLength
       Syntax
       project
       (@TarskiTruthRepair Meaning) :=
-  gap.operationalGap
+  gap.operationalLength
 
 /-- The Tarski operational row refutes the short presentation of the projection. -/
 theorem tarskiBethBell_tarskiRefutesShortPresentation
@@ -48,9 +49,7 @@ theorem tarskiBethBell_tarskiRefutesShortPresentation
     (short :
       ShortReferentialPresentation Meaning Syntax project) :
     False :=
-  operationalLength_refutes_shortPresentation
-    (tarskiBethBell_tarskiOperationalLength gap)
-    short
+  gap.refutesShortPresentation short
 
 /-- The Tarski operational row survives the Beth-collapse test. -/
 theorem tarskiBethBell_tarskiRefutesBethCollapse
@@ -108,13 +107,13 @@ theorem tarskiBethBell_bethCollapse_iff_explicitRecovery
 
 /-! ## Bell row: short co-indexation and amalgamation gap -/
 
-/-- The Bell short row: local contexts admit one global co-indexation. -/
+/-- The Bell short row: local contexts allow one global co-indexation. -/
 abbrev TarskiBethBellBellShortRow
     (contexts : BellFourContextAssignments) :
     Type :=
   BellShortCoindexationOfContexts contexts
 
-/-- The Bell gap row: local contexts fail to admit one global co-indexation. -/
+/-- The Bell gap row: local contexts do not allow one global co-indexation. -/
 abbrev TarskiBethBellBellGapRow
     (contexts : BellFourContextAssignments) :
     Prop :=

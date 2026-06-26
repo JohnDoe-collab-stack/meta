@@ -5,8 +5,8 @@ import Meta.Core.Gap
 
 This file isolates the abstract dynamic reading of closed stability.
 
-Concrete dynamics, time types, trajectories, bounded windows, and arithmetic
-collisions are kept outside the core.  This file records the abstract pattern:
+Concrete source-specific data are kept outside the core.  This file records
+the abstract pattern:
 
 * a dynamic source provides a typed intersection;
 * the intersection forms an interface;
@@ -25,10 +25,9 @@ universe u v w x y z r s a
 /--
 A formed dynamic return.
 
-The source is abstract so it can later be instantiated by an
-observed collision, a bounded window, a repeated-index certificate, or another
-dynamic source.  The core datum is the typed intersection produced by that
-source.
+The source is abstract so it can later be instantiated by any dynamic datum
+that produces a typed intersection.  The core datum is the typed intersection
+produced by that source.
 -/
 structure FormedDynamicReturn
     {Branch : Type u}

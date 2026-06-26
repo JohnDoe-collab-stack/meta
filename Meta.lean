@@ -29,4 +29,6 @@ import Meta.Synthesis.TarskiBethBellGap
 import Meta.Synthesis.TarskiBethGap
 import Meta.Tarski.FoundationBridge
 import Meta.Tarski.GapContraction
+import Meta.Tarski.ReferentialOrder
+import Meta.Tarski.DynamicReturn
 import Meta.Tarski.TruthGap
