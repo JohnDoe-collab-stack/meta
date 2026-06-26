@@ -283,7 +283,7 @@ recoveryBundleOfLocalProjectiveRecovery localRecovery
 terminalProjectionOfLocalProjectiveRecovery localRecovery
 ```
 
-Thus the gap operator is not merely defined: it is consumed by the abstract
+Thus the gap operator has an operational role: it is consumed by the abstract
 theorem as formed mediation, repair, and terminal projection.
 
 ## Lean Reference Table
@@ -871,7 +871,7 @@ projection
 + local recovery
 ```
 
-For Tsirelson, the formal connection is weaker and more precise:
+For Tsirelson, the current formal connection has a different precise status:
 
 ```text
 structured tuple
@@ -879,8 +879,8 @@ structured tuple
 + certified bound
 ```
 
-It therefore belongs to the same conceptual family of structured gaps, but not
-yet to the same transverse projective type.
+It therefore belongs to the same conceptual family of structured gaps, while
+the current Lean layer keeps it outside the transverse projective type.
 
 The final sentence is:
 

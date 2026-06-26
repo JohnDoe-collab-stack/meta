@@ -6,8 +6,8 @@ import Meta.Core.ReferentialLength
 
 This file is the arithmetic analogue of the Tarski and Bell gap layers.
 
-It does not introduce a new arithmetic principle.  It names the already proved
-enriched-Nat mechanism in the transverse vocabulary:
+The arithmetic principles remain in the constructed Nat layers.  This file
+exposes their enriched-Nat mechanism in the transverse vocabulary:
 
 * a short arithmetic presentation would make the payload projection faithful;
 * an arithmetic structural gap is the formed trace and its payload-only shadow

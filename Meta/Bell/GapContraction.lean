@@ -13,10 +13,10 @@ one global assignment of A0, A1, B0, B1
 → CHSH value is -2 or 2
 ```
 
-Here that global assignment is named as the short co-indexed regime.  A
-contextual gap is not used to claim any probabilistic or physical violation;
-it records, in the shared projection vocabulary, the obstruction to a
-contractible visible-to-interface reading.
+Here that global assignment is named as the short co-indexed regime.  The
+contextual gap layer stays pre-probabilistic: it records, in the shared
+projection vocabulary, the obstruction to a contractible visible-to-interface
+reading.
 -/
 
 namespace Meta

@@ -284,8 +284,8 @@ recoveryBundleOfLocalProjectiveRecovery localRecovery
 terminalProjectionOfLocalProjectiveRecovery localRecovery
 ```
 
-Donc le gap operator n'est pas seulement defini : il est consomme par le
-theoreme abstrait comme mediation formee, reparation et projection terminale.
+Donc le gap operator a un role operationnel : il est consomme par le theoreme
+abstrait comme mediation formee, reparation et projection terminale.
 
 ## Table de reference Lean
 
@@ -870,7 +870,7 @@ projection
 + recuperation locale
 ```
 
-Pour Tsirelson, le raccord formel est plus faible et plus precis :
+Pour Tsirelson, le raccord formel courant a un statut precis different :
 
 ```text
 tuple structure
@@ -878,8 +878,8 @@ tuple structure
 + borne certifiee
 ```
 
-Il appartient donc a la meme famille conceptuelle des gaps structures, mais pas
-encore au meme type projectif transversal.
+Il appartient donc a la meme famille conceptuelle des gaps structures, tandis
+que la couche Lean courante le maintient hors du type projectif transversal.
 
 La phrase finale est :
 
