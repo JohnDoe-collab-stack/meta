@@ -7,11 +7,11 @@ between referentials. The starting point is not equality between two poles, nor
 the failure of an identification, but the constructive passage that relates a
 projected visible object to a formed interface.
 
-In the dynamic layers, this mediation is produced by a return: an observed
-collision, or a bounded window that constructively produces a collision, is
-turned into a typed intersection and then into a recovered closed-stability
-row. This passage from observed return to formed closure gives the framework
-its dynamic content.
+In the dynamic reading, this mediation is produced by a return. An observable
+coincidence is not contracted into a bare equality: it is formed as a dynamic
+source, typed intersection, formed interface, operational gap, and then
+recovered closed stability. This passage from observed return to formed
+closure gives the framework its dynamic content.
 
 The presentation notation:
 
@@ -24,10 +24,12 @@ lengths, but as a decomposition of roles: a visible pole, a typable mediation,
 and a formed pole. Equality, or the short presentation, then corresponds to a
 contracted case of this mediation.
 
-The Lean core formalizes this reading through `LocalProjectiveRecovery`. The
-following sections specify its definition, the derived operations it supports,
-and its readings in the Tarski, Beth, Bell, Tsirelson, enriched arithmetic, and
-arithmetic dynamic layers.
+The Lean core formalizes this reading through `LocalProjectiveRecovery` and
+through the abstract dynamic scheme `FormedDynamicReturn` /
+`LocallyRecoveredDynamicReturn`. The following sections specify these
+definitions, the derived operations they support, and their readings in the
+Tarski, Beth, Bell, Tsirelson, enriched arithmetic, and arithmetic dynamic
+layers.
 
 From this perspective, the Tarski case is not taken as the starting point: it
 appears as a particular diagonal case of a more general mediation scheme.
@@ -41,8 +43,12 @@ name:
 LocalProjectiveRecovery
 ```
 
-Reference Lean file:
-[ClosedStabilityTheorem.lean](Meta/Core/ClosedStabilityTheorem.lean).
+Reference Lean files:
+
+```text
+Meta/Core/ClosedStabilityTheorem.lean
+Meta/Core/DynamicStability.lean
+```
 
 Central Lean declaration:
 
@@ -71,6 +77,35 @@ framework:
 
 Thus it is not an object absent from the code. It is the conceptual reading of
 `LocalProjectiveRecovery`.
+
+The abstract dynamic reading is formalized by:
+
+```lean
+FormedDynamicReturn
+LocallyRecoveredDynamicReturn
+locallyRecoveredClosedStabilityOfDynamicReturn
+```
+
+It encodes the passage:
+
+```text
+dynamic source
+-> typed intersection
+-> formed interface
+-> local recovery
+-> recovered closed stability
+```
+
+The observed layers instantiate this scheme through:
+
+```lean
+observedFormedDynamicReturn
+observedLocallyRecoveredDynamicReturn
+observedDynamicClosedStabilityRow
+observedBoundedWindowFormedDynamicReturn
+observedBoundedWindowLocallyRecoveredDynamicReturn
+observedBoundedWindowDynamicClosedStabilityRow
+```
 
 ## Mathematical Definition
 
@@ -158,6 +193,10 @@ In the dynamic layer, this reading becomes a construction of stability: a
 return to the same observable is not contracted into a bare equality, but
 formed as a repeated collision, an intersection, an enriched trace, and a local
 recovery.
+
+Dynamic stability therefore comes from the formation of the return. The visible
+coincidence supplies the entry point; the typed intersection and local recovery
+carry the closure.
 
 ## Derived Operations
 
@@ -256,6 +295,9 @@ theorem as formed mediation, repair, and terminal projection.
 | Refutation of faithfulness | `localProjectiveRecovery_notFiberFaithful` | [ClosedStabilityTheorem.lean](Meta/Core/ClosedStabilityTheorem.lean) |
 | Refutation of global reconstruction | `noProjectiveReconstructionOfLocalProjectiveRecovery` | [ClosedStabilityTheorem.lean](Meta/Core/ClosedStabilityTheorem.lean) |
 | Consumption by the abstract theorem | `locallyRecoveredNonProjectiveClosedStabilityFromIntersectionTheorem` | [ClosedStabilityTheorem.lean](Meta/Core/ClosedStabilityTheorem.lean) |
+| Formed dynamic return | `FormedDynamicReturn` | [DynamicStability.lean](Meta/Core/DynamicStability.lean) |
+| Locally recovered dynamic return | `LocallyRecoveredDynamicReturn` | [DynamicStability.lean](Meta/Core/DynamicStability.lean) |
+| Stability from dynamic return | `locallyRecoveredClosedStabilityOfDynamicReturn` | [DynamicStability.lean](Meta/Core/DynamicStability.lean) |
 | Short regime | `ShortReferentialPresentation` | [ReferentialLength.lean](Meta/Core/ReferentialLength.lean) |
 | Structural gap | `EnrichedStructuralReferentialLength` | [ReferentialLength.lean](Meta/Core/ReferentialLength.lean) |
 | Operational gap | `EnrichedOperationalReferentialLength` | [ReferentialLength.lean](Meta/Core/ReferentialLength.lean) |
@@ -722,8 +764,18 @@ the final `1` is the positive excess of closure.
 ## Arithmetic Dynamics
 
 The dynamics is where an observable return is transformed into closed
-stability. It adds the temporal index and converts a repetition into formed
-data.
+stability. It carries the temporal index and converts a repetition into formed
+data. At the abstract level, this conversion is the scheme:
+
+```lean
+FormedDynamicReturn
+LocallyRecoveredDynamicReturn
+locallyRecoveredClosedStabilityOfDynamicReturn
+```
+
+This scheme does not depend on `Nat`, on a particular trajectory, or on a
+bounded window. The arithmetic and observed layers are concrete realizations
+of it.
 
 Short presentation:
 
@@ -768,7 +820,11 @@ equipped with a natural-number observation:
 ObservedDiscreteSystem
 ObservedRepeatedCollision
 ObservedBoundedWindow
+observedFormedDynamicReturn
+observedLocallyRecoveredDynamicReturn
 observedDynamicClosedStabilityRow
+observedBoundedWindowFormedDynamicReturn
+observedBoundedWindowLocallyRecoveredDynamicReturn
 observedBoundedWindowDynamicClosedStabilityRow
 ```
 
@@ -801,7 +857,9 @@ occurrence + return gap + closing occurrence
 ```
 
 In the dynamic layers, this scheme has a precise function: transforming an
-observable return into recovered closed stability.
+observable return into recovered closed stability. Dynamics therefore gives the
+gap a positive reading: the return is not erased into visible equality; it is
+formed, separated from its shadow, and locally recovered.
 
 The framework does not reduce these cases to an analogy. For Tarski, Beth,
 Bell, Nat, and Nat dynamics, it gives them directly a projective or operational
@@ -813,7 +871,7 @@ projection
 + local recovery
 ```
 
-For Tsirelson, the currently formalized connection is weaker and more precise:
+For Tsirelson, the formal connection is weaker and more precise:
 
 ```text
 structured tuple

@@ -7,11 +7,11 @@ mediation entre referentiels. Le point de depart n'est pas l'egalite entre deux
 poles, ni l'echec d'une identification, mais le passage constructif qui relie
 un visible projete a une interface formee.
 
-Dans les couches dynamiques, cette mediation est produite par un retour :
-une collision observee, ou une fenetre bornee qui produit constructivement une
-collision, est transformee en intersection typee puis en ligne de stabilite
-fermee recuperee. C'est ce passage du retour observe vers la fermeture formee
-qui donne au cadre son contenu dynamique.
+Dans la lecture dynamique, cette mediation est produite par un retour. Une
+coincidence observable n'est pas contractee en simple egalite : elle est
+formee comme source dynamique, intersection typee, interface formee, gap
+operationnel, puis stabilite fermee recuperee. C'est ce passage du retour
+observe vers la fermeture formee qui donne au cadre son contenu dynamique.
 
 La notation de presentation :
 
@@ -24,10 +24,12 @@ arithmetique de longueurs, mais comme une decomposition de role : un pole
 visible, une mediation typable, et un pole forme. L'egalite ou la presentation
 courte correspond alors a un cas contracte de cette mediation.
 
-Le noyau Lean formalise cette lecture par `LocalProjectiveRecovery`. Les
-sections suivantes precisent sa definition, les operations derivees qu'elle
-permet, puis ses lectures dans les couches Tarski, Beth, Bell, Tsirelson,
-arithmetique enrichie et dynamique arithmetique.
+Le noyau Lean formalise cette lecture par `LocalProjectiveRecovery` et par le
+schema dynamique abstrait `FormedDynamicReturn` /
+`LocallyRecoveredDynamicReturn`. Les sections suivantes precisent ces
+definitions, les operations derivees qu'elles permettent, puis leurs lectures
+dans les couches Tarski, Beth, Bell, Tsirelson, arithmetique enrichie et
+dynamique arithmetique.
 
 Dans cette perspective, le cas de Tarski n'est pas pris comme point de depart :
 il apparait comme un cas diagonal particulier d'un schema de mediation plus
@@ -42,8 +44,12 @@ technique :
 LocalProjectiveRecovery
 ```
 
-Fichier Lean de reference :
-[ClosedStabilityTheorem.lean](../Meta/Core/ClosedStabilityTheorem.lean).
+Fichiers Lean de reference :
+
+```text
+Meta/Core/ClosedStabilityTheorem.lean
+Meta/Core/DynamicStability.lean
+```
 
 Declaration Lean centrale :
 
@@ -72,6 +78,35 @@ le cadre :
 
 Il ne s'agit donc pas d'un objet absent du code. Il s'agit de la lecture
 conceptuelle de `LocalProjectiveRecovery`.
+
+La lecture dynamique abstraite est formalisee par :
+
+```lean
+FormedDynamicReturn
+LocallyRecoveredDynamicReturn
+locallyRecoveredClosedStabilityOfDynamicReturn
+```
+
+Elle encode le passage :
+
+```text
+source dynamique
+-> intersection typee
+-> interface formee
+-> recuperation locale
+-> stabilite fermee recuperee
+```
+
+Les couches observees instancient ce schema par :
+
+```lean
+observedFormedDynamicReturn
+observedLocallyRecoveredDynamicReturn
+observedDynamicClosedStabilityRow
+observedBoundedWindowFormedDynamicReturn
+observedBoundedWindowLocallyRecoveredDynamicReturn
+observedBoundedWindowDynamicClosedStabilityRow
+```
 
 ## Definition mathematique
 
@@ -159,6 +194,10 @@ Dans la couche dynamique, cette lecture devient une construction de stabilite :
 un retour sur le meme observable n'est pas contracte en simple egalite, mais
 forme comme collision repetee, intersection, trace enrichie et recuperation
 locale.
+
+La stabilite dynamique vient donc de la formation du retour. La coincidence
+visible fournit le point d'entree ; l'intersection typee et la recuperation
+locale portent la fermeture.
 
 ## Operations derivees
 
@@ -257,6 +296,9 @@ theoreme abstrait comme mediation formee, reparation et projection terminale.
 | Refutation de la fidelite | `localProjectiveRecovery_notFiberFaithful` | [ClosedStabilityTheorem.lean](../Meta/Core/ClosedStabilityTheorem.lean) |
 | Refutation de la reconstruction globale | `noProjectiveReconstructionOfLocalProjectiveRecovery` | [ClosedStabilityTheorem.lean](../Meta/Core/ClosedStabilityTheorem.lean) |
 | Consommation par le theoreme abstrait | `locallyRecoveredNonProjectiveClosedStabilityFromIntersectionTheorem` | [ClosedStabilityTheorem.lean](../Meta/Core/ClosedStabilityTheorem.lean) |
+| Retour dynamique forme | `FormedDynamicReturn` | [DynamicStability.lean](../Meta/Core/DynamicStability.lean) |
+| Retour dynamique recupere | `LocallyRecoveredDynamicReturn` | [DynamicStability.lean](../Meta/Core/DynamicStability.lean) |
+| Stabilite issue du retour dynamique | `locallyRecoveredClosedStabilityOfDynamicReturn` | [DynamicStability.lean](../Meta/Core/DynamicStability.lean) |
 | Regime court | `ShortReferentialPresentation` | [ReferentialLength.lean](../Meta/Core/ReferentialLength.lean) |
 | Gap structurel | `EnrichedStructuralReferentialLength` | [ReferentialLength.lean](../Meta/Core/ReferentialLength.lean) |
 | Gap operationnel | `EnrichedOperationalReferentialLength` | [ReferentialLength.lean](../Meta/Core/ReferentialLength.lean) |
@@ -297,7 +339,7 @@ La presentation courte est le cas contracte :
 1 + 1 <= 2
 ```
 
-Il ne s'agit pas d'ajouter un nombre entre deux nombres. Il s'agit de rendre
+Il ne s'agit pas d'inserer un nombre entre deux nombres. Il s'agit de rendre
 explicite la mediation constructive, ou elle devient :
 
 ```text
@@ -721,8 +763,18 @@ le `1` final est l'exces positif de fermeture.
 ## Dynamique arithmetique
 
 La dynamique est le lieu ou le retour observable est transforme en stabilite
-fermee. Elle ajoute l'index temporel et convertit une repetition en donnee
-formee.
+fermee. Elle porte l'index temporel et convertit une repetition en donnee
+formee. Au niveau abstrait, cette conversion est le schema :
+
+```lean
+FormedDynamicReturn
+LocallyRecoveredDynamicReturn
+locallyRecoveredClosedStabilityOfDynamicReturn
+```
+
+Ce schema ne depend pas de `Nat`, d'une trajectoire particuliere, ni d'une
+fenetre bornee. Les couches arithmetiques et observees en sont des
+realisations concretes.
 
 Presentation courte :
 
@@ -767,7 +819,11 @@ d'une observation naturelle :
 ObservedDiscreteSystem
 ObservedRepeatedCollision
 ObservedBoundedWindow
+observedFormedDynamicReturn
+observedLocallyRecoveredDynamicReturn
 observedDynamicClosedStabilityRow
+observedBoundedWindowFormedDynamicReturn
+observedBoundedWindowLocallyRecoveredDynamicReturn
 observedBoundedWindowDynamicClosedStabilityRow
 ```
 
@@ -800,7 +856,9 @@ occurrence + gap de retour + occurrence fermante
 ```
 
 Dans les couches dynamiques, ce schema a une fonction precise : transformer un
-retour observable en stabilite fermee recuperee.
+retour observable en stabilite fermee recuperee. La dynamique donne ainsi une
+lecture positive du gap : le retour n'est pas efface dans l'egalite visible, il
+est forme, separe de son ombre, puis recupere localement.
 
 Le cadre ne reduit pas ces cas a une analogie. Pour Tarski, Beth, Bell, Nat et
 Nat dynamique, il leur donne directement une forme projective ou operationnelle
@@ -812,8 +870,7 @@ projection
 + recuperation locale
 ```
 
-Pour Tsirelson, le raccord actuellement formalise est plus faible et plus
-precis :
+Pour Tsirelson, le raccord formel est plus faible et plus precis :
 
 ```text
 tuple structure
