@@ -21,6 +21,7 @@ import Meta.Core.ClosedStabilityTheorem
 import Meta.Core.Gap
 import Meta.Core.DynamicStability
 import Meta.Core.ReferentialLength
+import Meta.Core.OrderGap
 import Meta.Dynamics.ObservedDiscrete
 import Meta.Dynamics.ObservedDynamicGap
 import Meta.Dynamics.ObservedWindow
