@@ -1,17 +1,22 @@
-# Presentation de l'operateur de gap
+# Meta : operateur dynamique de mediation referentielle
 
 ## Introduction
 
-Ce document presente l'operateur de gap comme une structure formelle de
-mediation entre referentiels. Le point de depart n'est pas l'egalite entre deux
-poles, ni l'echec d'une identification, mais le passage constructif qui relie
-un visible projete a une interface formee.
+Meta formalise un operateur dynamique de mediation entre referentiels.
+
+L'objet central n'est pas un cadre interpretatif pose sur des theoremes deja
+connus. C'est un operateur : il produit, type, transporte, separe, recupere
+localement et stabilise le passage entre un visible projete et une interface
+formee.
+
+Le point de depart n'est pas l'egalite entre deux poles, ni l'echec d'une
+identification, mais le passage constructif lui-meme.
 
 Dans la lecture dynamique, cette mediation est produite par un retour. Une
 coincidence observable n'est pas contractee en simple egalite : elle est
 formee comme source dynamique, intersection typee, interface formee, gap
 operationnel, puis stabilite fermee recuperee. C'est ce passage du retour
-observe vers la fermeture formee qui donne au cadre son contenu dynamique.
+vers la fermeture formee qui donne a l'operateur son contenu dynamique.
 
 La notation de presentation :
 
@@ -24,12 +29,13 @@ arithmetique de longueurs, mais comme une decomposition de role : un pole
 visible, une mediation typable, et un pole forme. L'egalite ou la presentation
 courte correspond alors a un cas contracte de cette mediation.
 
-Le noyau Lean formalise cette lecture par `LocalProjectiveRecovery` et par le
-schema dynamique abstrait `FormedDynamicReturn` /
-`LocallyRecoveredDynamicReturn`. Les sections suivantes precisent ces
-definitions, les operations derivees qu'elles permettent, puis leurs lectures
-dans les couches Tarski, Beth, Bell, Tsirelson, arithmetique enrichie et
-dynamique arithmetique.
+Le mot `cadre`, lorsqu'il apparait ci-dessous, designe le developpement Lean
+qui entoure l'operateur. Le centre mathematique est l'operateur. Le noyau Lean
+le formalise par `LocalProjectiveRecovery` et par le schema dynamique abstrait
+`FormedDynamicReturn` / `LocallyRecoveredDynamicReturn`. Les sections suivantes
+precisent ces definitions, les operations derivees qu'elles permettent, puis
+leurs lectures dans les couches Tarski, Beth, Bell, Tsirelson, arithmetique
+enrichie et dynamique arithmetique.
 
 Dans cette perspective, le cas de Tarski n'est pas pris comme point de depart :
 il apparait comme un cas diagonal particulier d'un schema de mediation plus
@@ -69,15 +75,14 @@ structure LocalProjectiveRecovery
   recovered_eq_formed : recovered = formed
 ```
 
-Le nom `operateur de gap` est le nom de presentation de cette structure dans
-le cadre :
+Le nom `operateur de gap` est le nom de presentation de cette structure :
 
 ```text
 1 + gap + 1
 ```
 
 Il ne s'agit donc pas d'un objet absent du code. Il s'agit de la lecture
-conceptuelle de `LocalProjectiveRecovery`.
+operationnelle de `LocalProjectiveRecovery`.
 
 La lecture dynamique abstraite est formalisee par :
 
@@ -164,7 +169,7 @@ interface formee
 
 Le gap porte la mediation constructive entre les referentiels.
 
-Le cadre ne part pas de l'egalite comme norme premiere. Il part d'un passage
+L'operateur ne part pas de l'egalite comme norme premiere. Il part d'un passage
 forme :
 
 ```text
@@ -174,8 +179,8 @@ forme :
 ```
 
 Dans ce passage, l'egalite est un cas particulier : le cas ou la mediation se
-contracte. La presentation courte n'est donc pas le point de depart du cadre ;
-elle est un regime derive, obtenu lorsque la fibre visible est fidele.
+contracte. La presentation courte n'est donc pas le point de depart ; elle est
+un regime derive, obtenu lorsque la fibre visible est fidele.
 
 L'operateur de gap donne une forme positive a la mediation :
 
@@ -284,14 +289,14 @@ recoveryBundleOfLocalProjectiveRecovery localRecovery
 terminalProjectionOfLocalProjectiveRecovery localRecovery
 ```
 
-Donc le gap operator a un role operationnel : il est consomme par le theoreme
+Donc l'operateur de gap a un role operationnel : il est consomme par le theoreme
 abstrait comme mediation formee, reparation et projection terminale.
 
 ## Table de reference Lean
 
 | Role | Declaration Lean | Fichier |
 |---|---|---|
-| Definition formelle du gap operator | `LocalProjectiveRecovery` | [ClosedStabilityTheorem.lean](../Meta/Core/ClosedStabilityTheorem.lean) |
+| Definition formelle de l'operateur de gap | `LocalProjectiveRecovery` | [ClosedStabilityTheorem.lean](../Meta/Core/ClosedStabilityTheorem.lean) |
 | Obstruction extraite | `localProjectiveRecovery_obstruction` | [ClosedStabilityTheorem.lean](../Meta/Core/ClosedStabilityTheorem.lean) |
 | Refutation de la fidelite | `localProjectiveRecovery_notFiberFaithful` | [ClosedStabilityTheorem.lean](../Meta/Core/ClosedStabilityTheorem.lean) |
 | Refutation de la reconstruction globale | `noProjectiveReconstructionOfLocalProjectiveRecovery` | [ClosedStabilityTheorem.lean](../Meta/Core/ClosedStabilityTheorem.lean) |
@@ -521,7 +526,7 @@ gap
 ```
 
 Le premier `1` et le second `1` n'ont pas toujours le meme role. Le point du
-cadre est precisement que le gap porte leur mediation constructive. La
+l'operateur est precisement que le gap porte leur mediation constructive. La
 projection visible peut ensuite contracter cette mediation en lecture courte,
 mais cette contraction n'est qu'un regime particulier.
 
@@ -582,7 +587,7 @@ source diagonale, intersection typee, interface semantique formee,
 recuperation locale et stabilite fermee recuperee.
 ```
 
-Dans cette presentation, Tarski n'est pas le point de depart du cadre. Il est
+Dans cette presentation, Tarski n'est pas le point de depart de l'operateur. Il est
 une instance derivee : le cas ou la mediation constructive entre code syntaxique
 et assertion semantique est forcee dans une presentation courte. La couche
 dynamique precise ce point positivement : elle ne part pas de l'obstruction
@@ -887,9 +892,9 @@ retour observable en stabilite fermee recuperee. La dynamique donne ainsi une
 lecture positive du gap : le retour n'est pas efface dans l'egalite visible, il
 est forme, separe de son ombre, puis recupere localement.
 
-Le cadre ne reduit pas ces cas a une analogie. Pour Tarski, Beth, Bell, Nat et
-Nat dynamique, il leur donne directement une forme projective ou operationnelle
-dans l'arbre Lean courant :
+Le developpement Lean ne reduit pas ces cas a une analogie. Pour Tarski, Beth,
+Bell, Nat et Nat dynamique, il leur donne directement une forme projective ou
+operationnelle dans l'arbre Lean courant :
 
 ```text
 projection

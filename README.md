@@ -1,17 +1,22 @@
-# Presentation of the Gap Operator
+# Meta: Dynamic Operator of Referential Mediation
 
 ## Introduction
 
-This document presents the gap operator as a formal structure of mediation
-between referentials. The starting point is not equality between two poles, nor
-the failure of an identification, but the constructive passage that relates a
-projected visible object to a formed interface.
+Meta formalizes a dynamic operator of mediation between referentials.
+
+The central object is not a loose framework placed over existing theorems. It
+is an operator: it produces, types, transports, separates, locally recovers,
+and stabilizes the passage between a projected visible object and a formed
+interface.
+
+The starting point is not equality between two poles, nor the failure of an
+identification, but the constructive passage itself.
 
 In the dynamic reading, this mediation is produced by a return. An observable
 coincidence is not contracted into a bare equality: it is formed as a dynamic
 source, typed intersection, formed interface, operational gap, and then
-recovered closed stability. This passage from observed return to formed
-closure gives the framework its dynamic content.
+recovered closed stability. This passage from return to formed closure is the
+dynamic content of the operator.
 
 The presentation notation:
 
@@ -24,12 +29,13 @@ lengths, but as a decomposition of roles: a visible pole, a typable mediation,
 and a formed pole. Equality, or the short presentation, then corresponds to a
 contracted case of this mediation.
 
-The Lean core formalizes this reading through `LocalProjectiveRecovery` and
-through the abstract dynamic scheme `FormedDynamicReturn` /
-`LocallyRecoveredDynamicReturn`. The following sections specify these
-definitions, the derived operations they support, and their readings in the
-Tarski, Beth, Bell, Tsirelson, enriched arithmetic, and arithmetic dynamic
-layers.
+The word "framework" below names the surrounding Lean development. The
+mathematical center is the operator. The Lean core formalizes it through
+`LocalProjectiveRecovery` and through the abstract dynamic scheme
+`FormedDynamicReturn` / `LocallyRecoveredDynamicReturn`. The following sections
+specify these definitions, the derived operations they support, and their
+readings in the Tarski, Beth, Bell, Tsirelson, enriched arithmetic, and
+arithmetic dynamic layers.
 
 From this perspective, the Tarski case is not taken as the starting point: it
 appears as a particular diagonal case of a more general mediation scheme.
@@ -68,14 +74,13 @@ structure LocalProjectiveRecovery
   recovered_eq_formed : recovered = formed
 ```
 
-The name `gap operator` is the presentation name of this structure in the
-framework:
+The name `gap operator` is the presentation name of this structure:
 
 ```text
 1 + gap + 1
 ```
 
-Thus it is not an object absent from the code. It is the conceptual reading of
+Thus it is not an object absent from the code. It is the operational reading of
 `LocalProjectiveRecovery`.
 
 The abstract dynamic reading is formalized by:
@@ -163,8 +168,8 @@ formed interface
 
 The gap carries the constructive mediation between referentials.
 
-The framework does not start from equality as the primary norm. It starts from
-a formed passage:
+The operator does not start from equality as the primary norm. It starts from a
+formed passage:
 
 ```text
  visible referential
@@ -173,8 +178,8 @@ a formed passage:
 ```
 
 In this passage, equality is a particular case: the case where the mediation
-contracts. The short presentation is therefore not the starting point of the
-framework; it is a derived regime, obtained when the visible fiber is faithful.
+contracts. The short presentation is therefore not the starting point; it is a
+derived regime, obtained when the visible fiber is faithful.
 
 The gap operator gives the mediation a positive form:
 
@@ -522,7 +527,7 @@ right 1
 ```
 
 The first `1` and the second `1` do not always have the same role. The point of
-the framework is precisely that the gap carries their constructive mediation.
+the operator is precisely that the gap carries their constructive mediation.
 The visible projection may then contract this mediation into a short reading,
 but this contraction is only a particular regime.
 
@@ -583,7 +588,7 @@ diagonal source, typed intersection, formed semantic interface,
 local recovery, and recovered closed stability.
 ```
 
-In this presentation, Tarski is not the starting point of the framework. It is
+In this presentation, Tarski is not the starting point of the operator. It is
 a derived instance: the case where the constructive mediation between syntactic
 code and semantic assertion is forced into a short presentation. The dynamic
 layer states this positively: it does not start from the already-produced
@@ -888,9 +893,9 @@ observable return into recovered closed stability. Dynamics therefore gives the
 gap a positive reading: the return is not erased into visible equality; it is
 formed, separated from its shadow, and locally recovered.
 
-The framework does not reduce these cases to an analogy. For Tarski, Beth,
-Bell, Nat, and Nat dynamics, it gives them directly a projective or operational
-form in the current Lean tree:
+The Lean development does not reduce these cases to an analogy. For Tarski,
+Beth, Bell, Nat, and Nat dynamics, it gives them directly a projective or
+operational form in the current Lean tree:
 
 ```text
 projection
