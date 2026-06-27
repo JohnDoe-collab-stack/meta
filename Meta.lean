@@ -2,6 +2,7 @@ import Meta.Core.ClosedStabilityTheorem
 import Meta.Core.Gap
 import Meta.Core.ReferentialLength
 import Meta.Core.TwoPole
+import Meta.Core.ParitySeparation
 import Meta.Core.DynamicStability
 import Meta.Core.DynamicTwoPole
 import Meta.Core.OrderGap

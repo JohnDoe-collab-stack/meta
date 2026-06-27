@@ -42,8 +42,8 @@ Ces objets vivent dans `Meta/Core/TwoPole.lean`. Ils ne creent pas une nouvelle
 donnee concurrente au gap : ils donnent une lecture positive des gaps
 structurels et operationnels deja portes par le noyau.
 
-La parite releve aussi de ce niveau, mais comme realisation separatrice
-particuliere. Elle reste a formaliser comme instance de cette structure.
+La parite separatrice minimale releve aussi de ce niveau. Elle est maintenant
+formalisee comme instance de cette structure dans `Meta/Core/ParitySeparation.lean`.
 
 La lecture classique voit :
 
@@ -324,9 +324,9 @@ fermeture.
 Dans cette lecture, la parite releve du meme probleme de structure, mais par un
 autre cote.
 
-Elle doit etre comprise comme une realisation separatrice possible, encore a
-formaliser, de la structure operationnelle du `2`, distincte de la realisation
-terminale donnee par le countdown.
+Elle doit etre comprise comme une realisation separatrice de la structure
+operationnelle du `2`, distincte de la realisation terminale donnee par le
+countdown.
 
 Countdown :
 
@@ -345,12 +345,11 @@ pas identiques.
 
 Le countdown realise deja le `2` cote fermeture.
 
-La parite doit encore etre formalisee comme realisation du `2` cote
-separation.
+La parite separatrice minimale realise maintenant le `2` cote separation.
 
-La structure transversale etant maintenant degagee, la prochaine etape
-eventuelle serait de raccorder la parite comme realisation separatrice, sans la
-confondre avec la realisation terminale du countdown.
+La prochaine etape eventuelle serait de raccorder des dynamiques particulieres
+a cette realisation separatrice, sans la confondre avec la realisation
+terminale du countdown.
 
 ## Consequence pour la formalisation
 
@@ -386,12 +385,12 @@ Les realisations se raccordent alors avec des statuts differents :
 countdown, deja formalise :
 deux poles comme double occurrence terminale
 
-parite, a formaliser :
+parite separatrice minimale, formalisee :
 deux poles comme separation de regimes
 ```
 
-Une dynamique particuliere pourra utiliser la parite comme interface
-operationnelle seulement apres ce raccord separateur.
+Les raccords dynamiques particuliers restent separes de cette formalisation
+minimale.
 
 ## Formule centrale
 
@@ -406,7 +405,7 @@ Le countdown fournit la realisation dynamique terminale de cette structure :
 +2 = premiere occurrence terminale + repetition terminale
 ```
 
-La parite devra fournir sa realisation separatrice :
+La parite fournit maintenant sa realisation separatrice :
 
 ```text
 2 = separation minimale de regimes
