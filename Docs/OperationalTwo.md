@@ -31,16 +31,19 @@ Deuxieme niveau, notation de lecture :
 Ces expressions ne designent pas encore un objet Lean autonome. Elles servent a
 lire la structure portee par les constructions deja formalisees.
 
-Troisieme niveau, objet transversal a formaliser :
+Troisieme niveau, objet transversal maintenant formalise :
 
 ```text
-OperationalTwo
-TwoPoleInterface
+StructuralTwoPole
+OperationalTwoPole
 ```
 
-La parite releve aussi de ce troisieme niveau : elle est ici indiquee comme
-realisation separatrice possible, mais elle n'est pas encore formalisee comme
-telle.
+Ces objets vivent dans `Meta/Core/TwoPole.lean`. Ils ne creent pas une nouvelle
+donnee concurrente au gap : ils donnent une lecture positive des gaps
+structurels et operationnels deja portes par le noyau.
+
+La parite releve aussi de ce niveau, mais comme realisation separatrice
+particuliere. Elle reste a formaliser comme instance de cette structure.
 
 La lecture classique voit :
 
@@ -72,7 +75,7 @@ contract(gap) = 0
 
 Dans cette lecture, le classique ne compense pas le gap. Il le contracte.
 
-## Structure a degager
+## Structure degagee
 
 Le `2` operationnel doit etre compris comme une structure minimale a deux
 poles.
@@ -111,6 +114,17 @@ Le cas classique se lit comme le regime ou cette mediation est contractee :
 ```text
 1 + contract(gap) + 1
 ```
+
+Dans le code, cette lecture est portee par :
+
+```lean
+StructuralTwoPole
+OperationalTwoPole
+```
+
+Un `StructuralTwoPole` donne deux poles separes ayant la meme projection
+visible. Un `OperationalTwoPole` ajoute la reparation locale portee par le pole
+forme.
 
 ## Trois lectures du meme 2
 
@@ -292,6 +306,19 @@ Le regime enrichi garde visible la mediation :
 1 + gap + 1
 ```
 
+Dans le code, cette realisation est exposee par :
+
+```lean
+countdownTerminalOperationalTwoPole
+countdownTerminalStructuralTwoPole
+fullyConstructedCountdownOperationalTwoPole
+fullyConstructedCountdownStructuralTwoPole
+```
+
+Ces declarations montrent que le countdown ne donne pas seulement un `+2`
+arithmetique : il realise une interface operationnelle a deux poles du cote
+fermeture.
+
 ## Rapport a la parite
 
 Dans cette lecture, la parite releve du meme probleme de structure, mais par un
@@ -321,37 +348,39 @@ Le countdown realise deja le `2` cote fermeture.
 La parite doit encore etre formalisee comme realisation du `2` cote
 separation.
 
-Il faut donc degager la structure du `2` avant de l'appliquer a une dynamique
-particuliere.
+La structure transversale etant maintenant degagee, la prochaine etape
+eventuelle serait de raccorder la parite comme realisation separatrice, sans la
+confondre avec la realisation terminale du countdown.
 
 ## Consequence pour la formalisation
 
 La formalisation transversale ne doit pas commencer par une dynamique
 particuliere.
 
-Elle doit d'abord isoler un objet transversal encore absent du code, par
-exemple :
+Elle isole deja un objet transversal dans le noyau :
 
-```text
-OperationalTwo
+```lean
+OperationalTwoPole
 ```
 
-ou :
+et sa version structurelle :
 
-```text
-TwoPoleInterface
+```lean
+StructuralTwoPole
 ```
 
-Cet objet devrait porter au minimum :
+Cet objet porte :
 
 ```text
 pole gauche
 pole droit
-mediation entre les deux poles
-contraction classique de la mediation
+meme projection visible
+separation conservee
+reparation locale dans le cas operationnel
+refus de la presentation contractee
 ```
 
-Puis on peut raccorder deux realisations, avec des statuts differents :
+Les realisations se raccordent alors avec des statuts differents :
 
 ```text
 countdown, deja formalise :
@@ -361,8 +390,8 @@ parite, a formaliser :
 deux poles comme separation de regimes
 ```
 
-Seulement apres ce raccord, une dynamique particuliere peut utiliser la parite
-comme interface operationnelle.
+Une dynamique particuliere pourra utiliser la parite comme interface
+operationnelle seulement apres ce raccord separateur.
 
 ## Formule centrale
 
