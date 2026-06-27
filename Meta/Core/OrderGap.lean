@@ -1,5 +1,5 @@
 import Meta.Core.ReferentialLength
-import Meta.Core.DynamicStability
+import Meta.Core.DynamicTwoPole
 
 /-!
 # Ordered projection gaps
@@ -483,71 +483,6 @@ theorem operationalLength_not_orderContractive
 /-! ## Dynamic returns over ordered visibles -/
 
 /--
-A locally recovered dynamic return exposes the operational gap carried by its
-local recovery package.
--/
-def dynamicReturn_operationalGap
-    {Branch : Type u}
-    {complete : BidirectionalCompleteness.{u, v, w} Branch}
-    {coherence : RoundTripCoherence complete}
-    {branch : Branch}
-    {Source : Type a}
-    {Interface : Type x}
-    {WitnessOf : Interface -> Type y}
-    {RealizesInterface :
-      StrongTerminalCycleFromIntersection complete branch -> Interface -> Type z}
-    {Visible : Type r}
-    {project : Interface -> Visible}
-    {RepairOf : Interface -> Type s}
-    (dynamicReturn :
-      LocallyRecoveredDynamicReturn
-        complete
-        coherence
-        branch
-        Source
-        Interface
-        WitnessOf
-        RealizesInterface
-        Visible
-        project
-        RepairOf) :
-    OperationalReferentialGap Interface Visible project RepairOf :=
-  dynamicReturn.localRecovery
-
-/--
-A locally recovered dynamic return exposes the structural gap underlying its
-operational local recovery.
--/
-def dynamicReturn_structuralGap
-    {Branch : Type u}
-    {complete : BidirectionalCompleteness.{u, v, w} Branch}
-    {coherence : RoundTripCoherence complete}
-    {branch : Branch}
-    {Source : Type a}
-    {Interface : Type x}
-    {WitnessOf : Interface -> Type y}
-    {RealizesInterface :
-      StrongTerminalCycleFromIntersection complete branch -> Interface -> Type z}
-    {Visible : Type r}
-    {project : Interface -> Visible}
-    {RepairOf : Interface -> Type s}
-    (dynamicReturn :
-      LocallyRecoveredDynamicReturn
-        complete
-        coherence
-        branch
-        Source
-        Interface
-        WitnessOf
-        RealizesInterface
-        Visible
-        project
-        RepairOf) :
-    StructuralReferentialGap Interface Visible project :=
-  structuralGapOfOperationalGap
-    (dynamicReturn_operationalGap dynamicReturn)
-
-/--
 The formed interface of a locally recovered dynamic return has a visible
 projection mutually comparable with its shadow.
 -/
@@ -772,41 +707,6 @@ theorem dynamicReturn_not_orderContractive
     (dynamicReturn_operationalGap dynamicReturn)
     contractive
 
-/--
-A locally recovered dynamic return refutes the short referential presentation.
--/
-theorem dynamicReturn_refutes_shortReferentialPresentation
-    {Branch : Type u}
-    {complete : BidirectionalCompleteness.{u, v, w} Branch}
-    {coherence : RoundTripCoherence complete}
-    {branch : Branch}
-    {Source : Type a}
-    {Interface : Type x}
-    {WitnessOf : Interface -> Type y}
-    {RealizesInterface :
-      StrongTerminalCycleFromIntersection complete branch -> Interface -> Type z}
-    {Visible : Type r}
-    {project : Interface -> Visible}
-    {RepairOf : Interface -> Type s}
-    (dynamicReturn :
-      LocallyRecoveredDynamicReturn
-        complete
-        coherence
-        branch
-        Source
-        Interface
-        WitnessOf
-        RealizesInterface
-        Visible
-        project
-        RepairOf)
-    (short :
-      ShortReferentialPresentation Interface Visible project) :
-    False :=
-  operationalLength_refutes_shortPresentation
-    (dynamicReturn_operationalGap dynamicReturn)
-    short
-
 end ClosedStabilityTheorem
 end Meta
 
@@ -840,13 +740,10 @@ end Meta
 #print axioms Meta.ClosedStabilityTheorem.operationalGap_partialOrder_visible_eq_not_interface_eq
 #print axioms Meta.ClosedStabilityTheorem.operationalGap_not_orderContractive
 #print axioms Meta.ClosedStabilityTheorem.operationalLength_not_orderContractive
-#print axioms Meta.ClosedStabilityTheorem.dynamicReturn_operationalGap
-#print axioms Meta.ClosedStabilityTheorem.dynamicReturn_structuralGap
 #print axioms Meta.ClosedStabilityTheorem.dynamicReturn_visible_le_formed_shadow
 #print axioms Meta.ClosedStabilityTheorem.dynamicReturn_visible_le_shadow_formed
 #print axioms Meta.ClosedStabilityTheorem.dynamicReturn_visibleOrderEquivalent
 #print axioms Meta.ClosedStabilityTheorem.dynamicReturn_visible_eq_of_partialOrder
 #print axioms Meta.ClosedStabilityTheorem.dynamicReturn_partialOrder_visible_eq_not_interface_eq
 #print axioms Meta.ClosedStabilityTheorem.dynamicReturn_not_orderContractive
-#print axioms Meta.ClosedStabilityTheorem.dynamicReturn_refutes_shortReferentialPresentation
 /- AXIOM_AUDIT_END -/
