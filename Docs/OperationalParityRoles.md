@@ -2,11 +2,10 @@
 
 ## Statut
 
-Ce document fixe le vocabulaire de la couche
-`Meta/Core/OperationalParityRoles.lean`. Il ne modifie pas la parite
+Ce document fixe le vocabulaire des roles operationnels portes par
+`Meta/Core/DynamicParitySeparation.lean`. Il ne modifie pas la parite
 separatrice minimale deja formalisee, et il ne remplace pas le raccord
-dynamique transversal deja present dans
-`Meta/Core/DynamicParitySeparation.lean`.
+dynamique transversal deja present dans ce meme fichier.
 
 Son role est d'expliciter l'orientation operationnelle des deux poles :
 
@@ -279,7 +278,7 @@ dynamicRepair   = operationalTwoPole_repair
 Commande executee :
 
 ```bash
-lake env lean Meta/Core/OperationalParityRoles.lean
+lake env lean Meta/Core/DynamicParitySeparation.lean
 ```
 
 Resultat :

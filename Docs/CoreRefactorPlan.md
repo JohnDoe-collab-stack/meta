@@ -35,8 +35,7 @@ Canonical instance layer currently still inside `Meta.Core`:
 
 ```text
 ParitySeparation
--> DynamicParitySeparation
--> OperationalParityRoles
+-> DynamicParitySeparation, including operational parity roles
 
 OrderGap
 ```
@@ -54,7 +53,8 @@ Synthesis
 
 Important current dependencies:
 
-- `Meta.Arithmetic.ParityRoles` depends on `Meta.Core.OperationalParityRoles`.
+- arithmetic parity must instantiate the Core parity/dynamic role layer from
+  the enriched natural-number instance, not from a detached parity-role file.
 - `Meta.Tarski.ReferentialOrder` and `Meta.Tarski.DynamicReturn` depend on
   `Meta.Core.OrderGap`.
 - `Meta.Beth.GapContraction`, `Meta.Bell.GapContraction`, and
@@ -92,7 +92,6 @@ These files are more instance-like:
 ```text
 ParitySeparation.lean
 DynamicParitySeparation.lean
-OperationalParityRoles.lean
 OrderGap.lean
 ```
 
@@ -126,7 +125,6 @@ New layout:
 ```text
 Meta/Parity/Separation.lean
 Meta/Parity/DynamicSeparation.lean
-Meta/Parity/OperationalRoles.lean
 ```
 
 Pros:
@@ -143,13 +141,15 @@ Cons:
 
 Recommended path:
 
-Do not move parity immediately.  First add compatibility wrappers or aliases if
-needed, then move only after `OrderGap` has been separated.  The current code is
-stable and should not be churned before the boundaries are clearer.
+Do not move parity immediately.  The order layer has been consolidated into a
+single `OrderGap` factor, so the remaining boundary to watch is whether parity
+should stay as the canonical minimal separated role realization in Core or move
+later to a dedicated `Meta.Parity` namespace.
 
 ## Phase 4: clean `OrderGap`
 
-`OrderGap.lean` currently contains four layers:
+`OrderGap.lean` is the single Core factor for the ordered visible test of a
+gap.  It contains four internal layers:
 
 ```text
 visible order data
@@ -158,26 +158,17 @@ structural / operational order consequences
 dynamic order consequences
 ```
 
-Recommended split:
+Current factor:
 
 ```text
-Meta/Core/VisibleOrder.lean
-Meta/Core/OrderContraction.lean
-Meta/Core/OrderGapStructural.lean
-Meta/Core/DynamicOrderGap.lean
 Meta/Core/OrderGap.lean
 ```
 
-During the first implementation pass, `Meta.Core.OrderGap` should remain the
-public module imported by downstream files.  It may import the new split files
-and expose the same declarations.  Downstream imports should be changed only
-after the split has compiled cleanly.
+Responsibilities inside `OrderGap.lean`:
 
-Proposed responsibilities:
+### Visible order data
 
-### `VisibleOrder.lean`
-
-Contains only:
+Contains:
 
 ```text
 VisiblePreorder
@@ -189,7 +180,7 @@ visibleOrderEquivalent_refl
 visible_eq_of_visibleOrderEquivalent
 ```
 
-### `OrderContraction.lean`
+### Order contraction
 
 Contains:
 
@@ -203,7 +194,7 @@ orderContractive_iff_shortReferentialPresentation
 orderContractive_of_informationConserving
 ```
 
-### `OrderGapStructural.lean`
+### Structural and operational order consequences
 
 Contains structural and operational order consequences only:
 
@@ -214,7 +205,7 @@ operationalGap_...
 operationalLength_...
 ```
 
-### `DynamicOrderGap.lean`
+### Dynamic order consequences
 
 Contains dynamic-return order consequences:
 
@@ -227,25 +218,20 @@ dynamicReturn_partialOrder_visible_eq_not_interface_eq
 dynamicReturn_not_orderContractive
 ```
 
-This split would make the order layer read as a test over visibles, not as the
+This factor makes the order layer read as a test over visibles, not as the
 central explanation of the framework.
-
-### `OrderGap.lean`
-
-Remains a compatibility entry point importing `DynamicOrderGap.lean`.  This
-keeps existing downstream imports valid during the first pass.
 
 ## Phase 5: move only after stabilizing wrappers
 
 Before moving files or changing module names:
 
-1. Add the new split files.
-2. Make old files import and re-export the new organization when possible.
-3. Run `lake build`.
-4. Only then update downstream imports.
-5. Remove compatibility files only after a separate commit.
+1. Keep the public import as `Meta.Core.OrderGap`.
+2. Avoid recreating detached order submodules unless a new independent factor
+   appears.
+3. Run `lake build` after any future boundary change.
+4. Update downstream imports only if a real module boundary changes.
 
-This avoids a large semantic and path-level change in one step.
+This keeps the order layer as one factor while preserving downstream stability.
 
 ## Non-negotiable constraints
 
@@ -263,11 +249,10 @@ refactor compile.
 
 ## Recommended execution order
 
-1. Implement the `OrderGap` split first.
+1. Keep `OrderGap` as the single ordered-visible test factor.
 2. Keep `ParitySeparation` in Core for the moment.
-3. Keep `Meta.Core.OrderGap` as the compatibility entry point during the first
-   split.
-4. Update `Meta.lean` order to show:
+3. Keep `Meta.Core.OrderGap` as the public order entry point.
+4. Keep `Meta.lean` ordered as:
 
 ```text
 Core primitives
@@ -279,7 +264,7 @@ Tarski / Beth / Bell
 Synthesis
 ```
 
-5. Run full build.
+5. Run full build after Core changes.
 6. Re-evaluate whether parity should move to `Meta.Parity`.
 
 ## Expected benefit

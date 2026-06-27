@@ -25,8 +25,8 @@ The pattern is currently distributed across several files:
   operational two-pole.
 - `DynamicParitySeparation.lean` connects that dynamic two-pole to the minimal
   parity separation.
-- `OperationalParityRoles.lean` names the closing and mediating roles once the
-  parity raccord is fixed.
+- `DynamicParitySeparation.lean` also names the closing and mediating roles
+  once the parity raccord is fixed.
 
 This is correct, but the generic structure is still hidden inside the parity
 specialization.
@@ -90,7 +90,7 @@ dynamicParitySeparation_roleCarrier
 so that every dynamic parity separation is visibly an instance of
 `DynamicRoleCarrier`.
 
-`OperationalParityRoles.lean` should expose:
+`DynamicParitySeparation.lean` should expose:
 
 ```text
 operationalParityRoles_mediatedDynamicRoles
@@ -106,5 +106,5 @@ The phase is acceptable only if:
 - the new Lean file is constructive;
 - it has exactly one final `AXIOM_AUDIT` block;
 - no `Classical`, `propext`, `Quot.sound`, `axiom`, `sorry`, or `admit` occurs;
-- `DynamicParitySeparation.lean` and `OperationalParityRoles.lean` still build;
+- `DynamicParitySeparation.lean` still builds;
 - `lake build` succeeds.

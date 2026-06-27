@@ -7,11 +7,6 @@ import Meta.Core.DynamicStability
 import Meta.Core.DynamicTwoPole
 import Meta.Core.DynamicRoleCarrier
 import Meta.Core.DynamicParitySeparation
-import Meta.Core.OperationalParityRoles
-import Meta.Core.VisibleOrder
-import Meta.Core.OrderContraction
-import Meta.Core.OrderGapStructural
-import Meta.Core.DynamicOrderGap
 import Meta.Core.OrderGap
 import Meta.Arithmetic.Core
 import Meta.Arithmetic.Canonical
@@ -25,11 +20,6 @@ import Meta.Arithmetic.GapContraction
 import Meta.Arithmetic.TwoPole
 import Meta.Arithmetic.Countdown
 import Meta.Arithmetic.CountdownDynamicGap
-import Meta.Arithmetic.ParityNames
-import Meta.Arithmetic.ArithmeticIntersectionPole
-import Meta.Arithmetic.DynamicParityInstance
-import Meta.Arithmetic.CountdownParity
-import Meta.Arithmetic.ParityRoles
 import Meta.Arithmetic.CountdownGapContraction
 import Meta.Dynamics.ObservedDiscrete
 import Meta.Dynamics.ObservedWindow
