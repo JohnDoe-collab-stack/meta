@@ -1,6 +1,5 @@
 import Meta.Arithmetic.Canonical
 import Meta.Arithmetic.Core
-import Meta.Arithmetic.Countdown
 import Meta.Arithmetic.DynamicGap
 import Meta.Arithmetic.FinitePigeonhole
 import Meta.Arithmetic.GapContraction
@@ -8,6 +7,10 @@ import Meta.Arithmetic.HeightDiagonal
 import Meta.Arithmetic.RepeatedIndex
 import Meta.Arithmetic.Trajectory
 import Meta.Arithmetic.Window
+import Meta.Arithmetic.TwoPole
+import Meta.Arithmetic.Countdown
+import Meta.Arithmetic.CountdownDynamicGap
+import Meta.Arithmetic.CountdownGapContraction
 import Meta.Bell.AmalgamationGap
 import Meta.Bell.Coindexation
 import Meta.Bell.ContextAmalgamation
@@ -19,8 +22,10 @@ import Meta.Beth.GapContraction
 import Meta.Beth.ImplicitExplicit
 import Meta.Core.ClosedStabilityTheorem
 import Meta.Core.Gap
-import Meta.Core.DynamicStability
 import Meta.Core.ReferentialLength
+import Meta.Core.TwoPole
+import Meta.Core.DynamicStability
+import Meta.Core.DynamicTwoPole
 import Meta.Core.OrderGap
 import Meta.Dynamics.ObservedDiscrete
 import Meta.Dynamics.ObservedDynamicGap

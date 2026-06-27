@@ -15,8 +15,7 @@ exposes their enriched-Nat mechanism in the transverse vocabulary:
 * an arithmetic operational gap is the same obstruction together with the
   local repair attached to the formed trace;
 * the dynamic arithmetic rows are the same gap transported through repeated
-  indices, trajectory collisions, bounded windows, post-peak windows, and the
-  countdown instance.
+  indices, trajectory collisions, bounded windows, and post-peak windows.
 
 The arithmetic gap is therefore the role distinction hidden by the visible
 payload projection:
@@ -268,17 +267,6 @@ theorem canonicalArithmeticGapTerminalExcess_eq_one
       (canonicalIntersection height) = 1 :=
   canonicalPositiveDiagonalTerminalExcess_eq_one height
 
-/-- The intrinsic countdown dynamic arithmetic gap has terminal excess `n + 2`. -/
-theorem countdownArithmeticGapTerminalExcess_eq_n_plus_two
-    (n : Nat) :
-    formedPositiveExcessOfIntersection
-      (repeatedIndexIntersection
-        (repeatedIndexCollision_of_trajectoryCollision
-          (trajectoryCollision_of_windowCollision
-            (countdownTerminalWindowCollision n)))) =
-        n + 2 :=
-  countdownTerminalExcess_eq_n_plus_two n
-
 end EnrichedNatClosedStabilityInstance
 end Meta
 
@@ -302,5 +290,4 @@ end Meta
 #print axioms Meta.EnrichedNatClosedStabilityInstance.boundedWindowArithmeticOperationalGap
 #print axioms Meta.EnrichedNatClosedStabilityInstance.postPeakWindowArithmeticOperationalGap
 #print axioms Meta.EnrichedNatClosedStabilityInstance.canonicalArithmeticGapTerminalExcess_eq_one
-#print axioms Meta.EnrichedNatClosedStabilityInstance.countdownArithmeticGapTerminalExcess_eq_n_plus_two
 /- AXIOM_AUDIT_END -/

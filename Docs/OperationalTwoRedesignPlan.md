@@ -279,6 +279,13 @@ Les declarations countdown doivent migrer vers un fichier dedie :
 Meta/Arithmetic/CountdownDynamicGap.lean
 ```
 
+Imports cibles de ce nouveau fichier :
+
+```lean
+import Meta.Arithmetic.DynamicGap
+import Meta.Arithmetic.Countdown
+```
+
 Declarations a deplacer :
 
 ```text
@@ -302,6 +309,13 @@ Les declarations explicitement countdown doivent migrer vers :
 
 ```text
 Meta/Arithmetic/CountdownGapContraction.lean
+```
+
+Imports cibles de ce nouveau fichier :
+
+```lean
+import Meta.Arithmetic.GapContraction
+import Meta.Arithmetic.CountdownDynamicGap
 ```
 
 Declaration a deplacer :
@@ -531,6 +545,13 @@ fullyConstructedCountdownDynamicGapRow
 fullyConstructedCountdownDynamicClosedStabilityRow
 ```
 
+Le nouveau fichier `CountdownDynamicGap.lean` devra importer :
+
+```lean
+import Meta.Arithmetic.DynamicGap
+import Meta.Arithmetic.Countdown
+```
+
 ### `GapContraction.lean`
 
 Fichier actuel :
@@ -577,6 +598,16 @@ Declaration qui doit migrer vers `CountdownGapContraction.lean` :
 ```text
 countdownArithmeticGapTerminalExcess_eq_n_plus_two
 ```
+
+Le nouveau fichier `CountdownGapContraction.lean` devra importer :
+
+```lean
+import Meta.Arithmetic.GapContraction
+import Meta.Arithmetic.CountdownDynamicGap
+```
+
+Cette importation evite que `GapContraction.lean` depende a nouveau du
+countdown.
 
 ### `ObservedDiscrete.lean`
 

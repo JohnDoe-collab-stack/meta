@@ -1,10 +1,10 @@
-import Meta.Arithmetic.DynamicGap
+import Meta.Arithmetic.RepeatedIndex
 
 /-!
 # Observed discrete systems
 
-This file bridges arbitrary Nat-time state dynamics to the completed
-arithmetic dynamic gap layer.
+This file bridges arbitrary Nat-time state dynamics to the repeated-index
+collision layer.
 
 The bridge is intentionally direct:
 
@@ -62,7 +62,7 @@ structure ObservedRepeatedCollision
 
 /--
 An observable repeated collision is exactly the repeated-index collision
-consumed by the arithmetic dynamic gap layer.
+consumed by the arithmetic dynamic layers.
 -/
 def repeatedIndexCollision_of_observedCollision
     {system : ObservedDiscreteSystem}
