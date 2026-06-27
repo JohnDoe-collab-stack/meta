@@ -347,9 +347,10 @@ Le countdown realise deja le `2` cote fermeture.
 
 La parite separatrice minimale realise maintenant le `2` cote separation.
 
-La prochaine etape eventuelle serait de raccorder des dynamiques particulieres
-a cette realisation separatrice, sans la confondre avec la realisation
-terminale du countdown.
+Le raccord dynamique transversal vit dans
+`Meta/Core/DynamicParitySeparation.lean`. Il permet a une dynamique localement
+recuperee de porter intrinsequement sa lecture separatrice, sans la confondre
+avec la realisation terminale du countdown.
 
 ## Consequence pour la formalisation
 
@@ -389,8 +390,8 @@ parite separatrice minimale, formalisee :
 deux poles comme separation de regimes
 ```
 
-Les raccords dynamiques particuliers restent separes de cette formalisation
-minimale.
+Le raccord dynamique transversal est formalise separement de cette
+formalisation minimale. Les instances particulieres restent separees.
 
 ## Formule centrale
 
