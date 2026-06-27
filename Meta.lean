@@ -18,6 +18,7 @@ import Meta.Arithmetic.HeightDiagonal
 import Meta.Arithmetic.DynamicGap
 import Meta.Arithmetic.GapContraction
 import Meta.Arithmetic.TwoPole
+import Meta.Arithmetic.Parity
 import Meta.Arithmetic.Countdown
 import Meta.Arithmetic.CountdownDynamicGap
 import Meta.Arithmetic.CountdownGapContraction

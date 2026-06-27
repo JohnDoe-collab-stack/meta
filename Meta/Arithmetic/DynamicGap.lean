@@ -50,6 +50,8 @@ structure ArithmeticDynamicGapRow where
       (List Nat)
       tracePayloads
       NatInterfaceRepair
+  recovery_formed : recovery.formed = formed
+  recovery_shadow : recovery.shadow = shadow
 
 /--
 Final row coupling an arithmetic dynamic gap with the recovered closed-stability
@@ -82,6 +84,8 @@ def arithmeticDynamicGapRowOfIntersection
   separated := formedTraceOfIntersection_ne_payloadOnlyTrace intersection
   obstruction := payloadProjectionObstructionOfIntersection intersection
   recovery := localProjectiveRecoveryOfIntersection intersection
+  recovery_formed := rfl
+  recovery_shadow := rfl
 
 /-! ## Repeated-index lock -/
 
