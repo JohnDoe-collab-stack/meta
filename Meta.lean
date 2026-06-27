@@ -6,6 +6,7 @@ import Meta.Core.ParitySeparation
 import Meta.Core.DynamicStability
 import Meta.Core.DynamicTwoPole
 import Meta.Core.DynamicParitySeparation
+import Meta.Core.OperationalParityRoles
 import Meta.Core.OrderGap
 import Meta.Arithmetic.Core
 import Meta.Arithmetic.Canonical

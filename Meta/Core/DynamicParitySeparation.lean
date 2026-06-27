@@ -108,7 +108,7 @@ def dynamicParitySeparation_dynamicOperationalTwoPole
     OperationalTwoPole Interface Visible project RepairOf :=
   dynamicReturn_operationalTwoPole dynamicReturn
 
-/-- The parity operational two-pole to which the dynamic return is raccorded. -/
+/-- The parity operational two-pole to which the dynamic return is connected. -/
 def dynamicParitySeparation_parityOperationalTwoPole
     (raccord : DynamicParitySeparation dynamicReturn) :
     OperationalTwoPole
@@ -125,7 +125,7 @@ def dynamicParitySeparation_dynamicStructuralTwoPole
   operationalTwoPole_structural
     (dynamicParitySeparation_dynamicOperationalTwoPole raccord)
 
-/-- The parity structural two-pole to which the dynamic return is raccorded. -/
+/-- The parity structural two-pole to which the dynamic return is connected. -/
 def dynamicParitySeparation_parityStructuralTwoPole
     (raccord : DynamicParitySeparation dynamicReturn) :
     StructuralTwoPole ParityRegime ParityVisible parityProjection :=
