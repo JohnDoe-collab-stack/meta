@@ -8,6 +8,10 @@ import Meta.Core.DynamicTwoPole
 import Meta.Core.DynamicRoleCarrier
 import Meta.Core.DynamicParitySeparation
 import Meta.Core.OperationalParityRoles
+import Meta.Core.VisibleOrder
+import Meta.Core.OrderContraction
+import Meta.Core.OrderGapStructural
+import Meta.Core.DynamicOrderGap
 import Meta.Core.OrderGap
 import Meta.Arithmetic.Core
 import Meta.Arithmetic.Canonical
