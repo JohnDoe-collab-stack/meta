@@ -1,4 +1,4 @@
-import Meta.Core.DynamicTwoPole
+import Meta.Core.DynamicRoleCarrier
 import Meta.Core.ParitySeparation
 
 /-!
@@ -131,6 +131,28 @@ def dynamicParitySeparation_parityStructuralTwoPole
     StructuralTwoPole ParityRegime ParityVisible parityProjection :=
   operationalTwoPole_structural
     (dynamicParitySeparation_parityOperationalTwoPole raccord)
+
+/-! ## Generic role-carrier reading -/
+
+/--
+A dynamic parity separation is a dynamic role carrier whose roles are the two
+minimal parity regimes.
+-/
+def dynamicParitySeparation_roleCarrier
+    (raccord : DynamicParitySeparation dynamicReturn) :
+    DynamicRoleCarrier
+      dynamicReturn
+      ParityRegime
+      ParityVisible
+      parityProjection
+      ParityRegimeRepair where
+  roleOf := raccord.regimeOf
+  visibleRoleOf := raccord.visibleOf
+  roleTwoPole := raccord.parityTwoPole
+  formed_role := raccord.formed_regime
+  shadow_role := raccord.shadow_regime
+  formed_visible := raccord.formed_visible
+  shadow_visible := raccord.shadow_visible
 
 /-! ## Readings of the dynamic formed and shadow sides -/
 
@@ -360,6 +382,7 @@ end Meta
 #print axioms Meta.ClosedStabilityTheorem.dynamicParitySeparation_parityOperationalTwoPole
 #print axioms Meta.ClosedStabilityTheorem.dynamicParitySeparation_dynamicStructuralTwoPole
 #print axioms Meta.ClosedStabilityTheorem.dynamicParitySeparation_parityStructuralTwoPole
+#print axioms Meta.ClosedStabilityTheorem.dynamicParitySeparation_roleCarrier
 #print axioms Meta.ClosedStabilityTheorem.dynamicParitySeparation_formedRegime
 #print axioms Meta.ClosedStabilityTheorem.dynamicParitySeparation_shadowRegime
 #print axioms Meta.ClosedStabilityTheorem.dynamicParitySeparation_formedVisible

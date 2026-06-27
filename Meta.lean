@@ -5,6 +5,7 @@ import Meta.Core.TwoPole
 import Meta.Core.ParitySeparation
 import Meta.Core.DynamicStability
 import Meta.Core.DynamicTwoPole
+import Meta.Core.DynamicRoleCarrier
 import Meta.Core.DynamicParitySeparation
 import Meta.Core.OperationalParityRoles
 import Meta.Core.OrderGap
@@ -20,6 +21,7 @@ import Meta.Arithmetic.GapContraction
 import Meta.Arithmetic.TwoPole
 import Meta.Arithmetic.Countdown
 import Meta.Arithmetic.CountdownDynamicGap
+import Meta.Arithmetic.ParityRoles
 import Meta.Arithmetic.CountdownGapContraction
 import Meta.Dynamics.ObservedDiscrete
 import Meta.Dynamics.ObservedWindow

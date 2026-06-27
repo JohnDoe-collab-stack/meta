@@ -121,6 +121,27 @@ def operationalParityRolesOfDynamicParitySeparation
   noParityVisibleReconstruction :=
     dynamicParitySeparation_noParityProjectiveReconstruction raccord
 
+/--
+Operational parity roles expose the generic mediated-role structure carried by
+their dynamic parity separation.
+-/
+def operationalParityRoles_mediatedDynamicRoles
+    {raccord : DynamicParitySeparation dynamicReturn}
+    (roles : OperationalParityRoles raccord) :
+    MediatedDynamicRoles
+      (dynamicParitySeparation_roleCarrier raccord) where
+  closingRole := roles.closingRegime
+  mediatingRole := roles.mediatingRegime
+  closing_eq_formed := roles.closing_eq_formed
+  mediating_eq_shadow := roles.mediating_eq_shadow
+  sameVisible := roles.sameVisible
+  separated := roles.separated
+  dynamicRepair := roles.dynamicRepair
+  roleRepair :=
+    dynamicRoleCarrier_roleRepair
+      (dynamicParitySeparation_roleCarrier raccord)
+  noRoleVisibleReconstruction := roles.noParityVisibleReconstruction
+
 /-! ## Projections -/
 
 /-- The closing parity regime of the operational role reading. -/
@@ -336,6 +357,7 @@ end Meta
 /- AXIOM_AUDIT_BEGIN -/
 #print axioms Meta.ClosedStabilityTheorem.OperationalParityRoles
 #print axioms Meta.ClosedStabilityTheorem.operationalParityRolesOfDynamicParitySeparation
+#print axioms Meta.ClosedStabilityTheorem.operationalParityRoles_mediatedDynamicRoles
 #print axioms Meta.ClosedStabilityTheorem.operationalParityRoles_closingRegime
 #print axioms Meta.ClosedStabilityTheorem.operationalParityRoles_mediatingRegime
 #print axioms Meta.ClosedStabilityTheorem.operationalParityRoles_closing_eq_formed
