@@ -765,7 +765,7 @@ Le gap arithmetique est donc :
 ```text
 nombre comme valeur
 + gap de role
-+ nombre comme exces de recomposition
++ nombre comme exces positif de recomposition
 ```
 
 Dans le code :
@@ -791,6 +791,23 @@ Lecture :
 ```text
 le `1` final est l'exces positif de fermeture.
 ```
+
+La distinction importante est que l'intersection porte d'abord un exces
+interne :
+
+```lean
+intersection.excess
+```
+
+puis la trace formee porte l'exces positif :
+
+```lean
+formedPositiveExcessOfIntersection intersection
+= intersection.excess + 1
+```
+
+Le gap arithmetique local est donc le role `excess` rendu visible comme payload
+tout en restant separe de `value` dans l'interface enrichie.
 
 ## Dynamique arithmetique
 
@@ -818,7 +835,7 @@ Lecture enrichie :
 
 ```text
 premiere occurrence
-+ gap temporel de retour
++ gap temporel de retour dont l'index devient excess interne
 + seconde occurrence comme fermeture
 ```
 
@@ -831,18 +848,123 @@ ArithmeticDynamicGapRow
 ArithmeticDynamicClosedStabilityRow
 ```
 
-Le gap dynamique porte un exces terminal :
+Le verrou propre a Nat dynamique est que l'index temporel du retour devient
+l'exces interne de l'intersection repetee :
 
-```text
-secondTime + 1
+```lean
+(repeatedIndexIntersection collision).excess = collision.secondTime
+```
+
+Puis l'exces positif forme est :
+
+```lean
+formedPositiveExcessOfIntersection
+  (repeatedIndexIntersection collision)
+= collision.secondTime + 1
 ```
 
 Lecture :
 
 ```text
 le retour sur le meme observable transforme une coincidence visible
-en index dynamique enrichi, puis en fermeture typee recuperee.
+en intersection repetee ; l'index temporel devient l'exces interne
+arithmetique, puis la trace formee porte l'exces positif terminal.
 ```
+
+### Countdown : realisation terminale du 2
+
+Le countdown donne une realisation interne du cas terminal.
+
+Dans le code :
+
+```lean
+countdownTerminalWindowCollision
+```
+
+porte une fenetre :
+
+```lean
+NatTrajectoryWindowCollision countdownStep n 0 (n + 2)
+```
+
+avec :
+
+```lean
+leftOffset  = n
+rightOffset = n + 1
+```
+
+La dynamique atteint donc le point fixe terminal puis le repete :
+
+```text
+temps n     : 0
+temps n + 1 : 0
+```
+
+Le retour terminal donne :
+
+```lean
+countdownTerminalCollision_secondTime_eq
+```
+
+c'est-a-dire :
+
+```text
+secondTime = n + 1
+```
+
+et le gap dynamique forme donne :
+
+```lean
+countdownTerminalExcess_eq_n_plus_two
+```
+
+c'est-a-dire :
+
+```text
+formedPositiveExcess = n + 2
+```
+
+La raison est exactement le verrou general de Nat dynamique :
+
+```text
+formedPositiveExcess = secondTime + 1
+```
+
+donc, pour le countdown :
+
+```text
+formedPositiveExcess = (n + 1) + 1 = n + 2
+```
+
+Lecture :
+
+```text
+n + 2
+=
+n etapes jusqu'au point fixe
++
+1 premiere occurrence terminale
++
+1 repetition terminale
+```
+
+Le `2` n'est pas introduit comme un nombre externe. Il apparait comme la
+double borne minimale de capture d'un point fixe :
+
+```text
+premiere occurrence terminale
++
+repetition terminale
+```
+
+Dans le vocabulaire de l'operateur :
+
+```text
+1 + gap + 1
+```
+
+le countdown realise le `2` comme fermeture dynamique minimale par retour.
 
 Le pont observe etend cette construction a un systeme discret arbitraire muni
 d'une observation naturelle :
@@ -861,7 +983,15 @@ observedBoundedWindowDynamicClosedStabilityRow
 
 Ainsi, une fenetre observee bornee produit constructivement une collision, et
 cette collision produit une ligne de stabilite fermee. La stabilite ne vient
-pas d'une egalite nue, mais du retour forme comme mediation dynamique.
+pas d'une egalite nue, mais du retour forme comme mediation dynamique. Dans le
+cas Collatz observe, cette specialisation est exactement le passage :
+
+```text
+retour visible
+-> repeatedIndexIntersection
+-> excess interne = secondTime
+-> formedPositiveExcess = secondTime + 1
+```
 
 ## Synthese
 
@@ -884,13 +1014,17 @@ Nat :
 valeur visible + gap de role + exces de recomposition
 
 Nat dynamique :
-occurrence + gap de retour + occurrence fermante
+occurrence + retour dont l'index devient excess interne + occurrence fermante ;
+dans le countdown, ce retour realise n + 2 comme n etapes + double borne
+terminale
 ```
 
 Dans les couches dynamiques, ce schema a une fonction precise : transformer un
 retour observable en stabilite fermee recuperee. La dynamique donne ainsi une
 lecture positive du gap : le retour n'est pas efface dans l'egalite visible, il
-est forme, separe de son ombre, puis recupere localement.
+est forme, separe de son ombre, puis recupere localement. Dans Nat dynamique,
+ce retour a une force supplementaire : son index temporel devient un contenu
+arithmetique interne de l'intersection.
 
 Le developpement Lean ne reduit pas ces cas a une analogie. Pour Tarski, Beth,
 Bell, Nat et Nat dynamique, il leur donne directement une forme projective ou

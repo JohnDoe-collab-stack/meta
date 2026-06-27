@@ -766,7 +766,7 @@ The arithmetic gap is therefore:
 ```text
 number as value
 + role gap
-+ number as recomposition excess
++ number as positive recomposition excess
 ```
 
 In the code:
@@ -792,6 +792,23 @@ Reading:
 ```text
 the final `1` is the positive excess of closure.
 ```
+
+The important distinction is that the intersection first carries an internal
+excess:
+
+```lean
+intersection.excess
+```
+
+then the formed trace carries the positive excess:
+
+```lean
+formedPositiveExcessOfIntersection intersection
+= intersection.excess + 1
+```
+
+The local arithmetic gap is therefore the `excess` role made visible as payload
+while remaining separated from `value` in the enriched interface.
 
 ## Arithmetic Dynamics
 
@@ -819,7 +836,7 @@ Enriched reading:
 
 ```text
 first occurrence
-+ temporal return gap
++ temporal return gap whose index becomes internal excess
 + second occurrence as closure
 ```
 
@@ -832,18 +849,123 @@ ArithmeticDynamicGapRow
 ArithmeticDynamicClosedStabilityRow
 ```
 
-The dynamic gap carries a terminal excess:
+The lock specific to Nat dynamics is that the temporal index of the return
+becomes the internal excess of the repeated intersection:
 
-```text
-secondTime + 1
+```lean
+(repeatedIndexIntersection collision).excess = collision.secondTime
+```
+
+Then the formed positive excess is:
+
+```lean
+formedPositiveExcessOfIntersection
+  (repeatedIndexIntersection collision)
+= collision.secondTime + 1
 ```
 
 Reading:
 
 ```text
 the return to the same observable turns a visible coincidence
-into an enriched dynamic index, then into recovered typed closure.
+into a repeated intersection; the temporal index becomes the internal
+arithmetic excess, then the formed trace carries the terminal positive excess.
 ```
+
+### Countdown: terminal realization of 2
+
+The countdown gives an internal realization of the terminal case.
+
+In the code:
+
+```lean
+countdownTerminalWindowCollision
+```
+
+carries a window:
+
+```lean
+NatTrajectoryWindowCollision countdownStep n 0 (n + 2)
+```
+
+with:
+
+```lean
+leftOffset  = n
+rightOffset = n + 1
+```
+
+The dynamics therefore reaches the terminal fixed point and then repeats it:
+
+```text
+time n     : 0
+time n + 1 : 0
+```
+
+The terminal return gives:
+
+```lean
+countdownTerminalCollision_secondTime_eq
+```
+
+that is:
+
+```text
+secondTime = n + 1
+```
+
+and the formed dynamic gap gives:
+
+```lean
+countdownTerminalExcess_eq_n_plus_two
+```
+
+that is:
+
+```text
+formedPositiveExcess = n + 2
+```
+
+The reason is exactly the general lock of Nat dynamics:
+
+```text
+formedPositiveExcess = secondTime + 1
+```
+
+so, for the countdown:
+
+```text
+formedPositiveExcess = (n + 1) + 1 = n + 2
+```
+
+Reading:
+
+```text
+n + 2
+=
+n steps to the fixed point
++
+1 first terminal occurrence
++
+1 terminal repetition
+```
+
+The `2` is not introduced as an external number. It appears as the minimal
+double bound capturing a fixed point:
+
+```text
+first terminal occurrence
++
+terminal repetition
+```
+
+In the vocabulary of the operator:
+
+```text
+1 + gap + 1
+```
+
+the countdown realizes the `2` as minimal dynamic closure by return.
 
 The observed bridge extends this construction to an arbitrary discrete system
 equipped with a natural-number observation:
@@ -862,7 +984,15 @@ observedBoundedWindowDynamicClosedStabilityRow
 
 Thus, a bounded observed window constructively produces a collision, and that
 collision produces a closed-stability row. Stability does not come from a bare
-equality, but from the return formed as dynamic mediation.
+equality, but from the return formed as dynamic mediation. In the observed
+Collatz case, this specialization is exactly the passage:
+
+```text
+visible return
+-> repeatedIndexIntersection
+-> internal excess = secondTime
+-> formedPositiveExcess = secondTime + 1
+```
 
 ## Synthesis
 
@@ -885,13 +1015,16 @@ Nat:
 visible value + role gap + recomposition excess
 
 Nat dynamics:
-occurrence + return gap + closing occurrence
+occurrence + return whose index becomes internal excess + closing occurrence;
+in the countdown, this return realizes n + 2 as n steps + terminal double bound
 ```
 
 In the dynamic layers, this scheme has a precise function: transforming an
 observable return into recovered closed stability. Dynamics therefore gives the
 gap a positive reading: the return is not erased into visible equality; it is
-formed, separated from its shadow, and locally recovered.
+formed, separated from its shadow, and locally recovered. In Nat dynamics, this
+return has an additional force: its temporal index becomes internal arithmetic
+content of the intersection.
 
 The Lean development does not reduce these cases to an analogy. For Tarski,
 Beth, Bell, Nat, and Nat dynamics, it gives them directly a projective or
