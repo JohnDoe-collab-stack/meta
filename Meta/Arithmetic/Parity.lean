@@ -264,6 +264,10 @@ The maximal relaxed divergence carried by the general mediating role at index
 `k`.  It is not obtained by coding the mediating role as a non-relaxed numeric
 odd.  It is the produced gap between the left closing payload and the relaxed
 right return payload.
+
+Here `maximal` means maximal non-contraction of the mediating role inside the
+enriched Nat parity layer.  It is not an external universal maximum over an
+ordered family of possible relaxations.
 -/
 def natEnrichedParityMaximalRelaxedDivergence
     (k : Nat) :
