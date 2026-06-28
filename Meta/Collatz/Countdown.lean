@@ -13,62 +13,7 @@ namespace EnrichedNatClosedStabilityInstance
 
 open ClosedStabilityTheorem
 
-/-! ## Countdown specialization -/
-
-/-- The countdown closing side returns the terminal formed payload `n+2`. -/
-def collatzCountdownClosingPayload
-    (n : Nat) :
-    Nat :=
-  collatzClosingPayloadOfIntersection
-    (countdownTerminalIntersection n)
-
-/-- The countdown shadow side returns to a closing role. -/
-def collatzCountdownShadowReturnRole
-    (n : Nat) :
-    NatEnrichedParityRole :=
-  collatzShadowReturnRoleOfIntersection
-    (countdownTerminalIntersection n)
-
-/-- The countdown closing side has payload `n+2`. -/
-theorem collatzCountdownClosingPayload_eq_n_plus_two
-    (n : Nat) :
-    collatzCountdownClosingPayload n = n + 2 := by
-  unfold collatzCountdownClosingPayload
-  rw [collatzClosingPayloadOfIntersection_eq,
-    countdownArithmeticGapTerminalExcess_eq_n_plus_two]
-
-/-- The countdown closing side has payload one step after terminal time. -/
-theorem collatzCountdownClosingPayload_eq_terminalTime_succ
-    (n : Nat) :
-    collatzCountdownClosingPayload n = countdownTerminalTime n + 1 := by
-  unfold collatzCountdownClosingPayload
-  rw [collatzClosingPayloadOfIntersection_eq_terminalTime_succ,
-    countdownTerminalIntersection_terminalTime_eq]
-
-/--
-The countdown shadow side returns to the closing role whose payload is
-`3*(n+2)+2`.
--/
-theorem collatzCountdownShadowReturnRole_eq_n_plus_two
-    (n : Nat) :
-    collatzCountdownShadowReturnRole n =
-      NatEnrichedParityRole.closingExcess (3 * (n + 2) + 2) := by
-  unfold collatzCountdownShadowReturnRole
-  rw [collatzShadowReturnRoleOfIntersection_eq,
-    countdownArithmeticGapTerminalExcess_eq_n_plus_two]
-
-/--
-The countdown shadow side returns to the closing role computed from one step
-after terminal time.
--/
-theorem collatzCountdownShadowReturnRole_eq_terminalTime_succ
-    (n : Nat) :
-    collatzCountdownShadowReturnRole n =
-      NatEnrichedParityRole.closingExcess
-        (3 * (countdownTerminalTime n + 1) + 2) := by
-  unfold collatzCountdownShadowReturnRole
-  rw [collatzShadowReturnRoleOfIntersection_eq_terminalTime_succ,
-    countdownTerminalIntersection_terminalTime_eq]
+/-! ## Countdown regime specialization -/
 
 /-- The countdown closing regime is the formed dynamic regime. -/
 theorem collatzCountdownClosingRegime_eq_formedRegime
@@ -125,12 +70,6 @@ end EnrichedNatClosedStabilityInstance
 end Meta
 
 /- AXIOM_AUDIT_BEGIN -/
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzCountdownClosingPayload
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzCountdownShadowReturnRole
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzCountdownClosingPayload_eq_n_plus_two
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzCountdownShadowReturnRole_eq_n_plus_two
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzCountdownClosingPayload_eq_terminalTime_succ
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzCountdownShadowReturnRole_eq_terminalTime_succ
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzCountdownClosingRegime_eq_formedRegime
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzCountdownMediatingRegime_eq_shadowRegime
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzCountdown_sameProjection

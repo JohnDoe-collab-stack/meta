@@ -142,95 +142,6 @@ def collatzOperationalParity_dynamicRepair
   operationalParityRoles_dynamicRepair
     (arithmeticOperationalParityRolesOfIntersection intersection)
 
-/-! ## Exact impact in enriched Nat coordinates -/
-
-/-- The closing/forming branch exposes the enriched payload carried by the formed role. -/
-def collatzClosingPayloadAction
-    (k : Nat) :
-    Nat :=
-  k
-
-/--
-The role produced by the shadow branch in enriched Nat coordinates.
-
-The shadow branch returns to a closing role.  The new closing payload is
-`3*k+2`, where `k` is the shared payload of the formed/shadow pair.
--/
-def collatzShadowReturnRole
-    (k : Nat) :
-    NatEnrichedParityRole :=
-  NatEnrichedParityRole.closingExcess (3 * k + 2)
-
-/-- The closing/forming branch returns exactly the shared enriched payload. -/
-theorem collatzClosingPayloadAction_eq
-    (k : Nat) :
-    collatzClosingPayloadAction k = k :=
-  rfl
-
-/-- The shadow branch returns to a closing role with payload `3*k+2`. -/
-theorem collatzShadowReturnRole_eq
-    (k : Nat) :
-    collatzShadowReturnRole k =
-      NatEnrichedParityRole.closingExcess (3 * k + 2) :=
-  rfl
-
-/-! ## Exact impact on one enriched Nat dynamic intersection -/
-
-/-- Collatz closing payload extracted from an enriched Nat intersection. -/
-def collatzClosingPayloadOfIntersection
-    {branch : MemoryBranch}
-    (intersection : PrimitiveMemoryReadingIntersection branch) :
-    Nat :=
-  collatzClosingPayloadAction
-    (formedPositiveExcessOfIntersection intersection)
-
-/-- Collatz shadow return role extracted from an enriched Nat intersection. -/
-def collatzShadowReturnRoleOfIntersection
-    {branch : MemoryBranch}
-    (intersection : PrimitiveMemoryReadingIntersection branch) :
-    NatEnrichedParityRole :=
-  collatzShadowReturnRole
-    (formedPositiveExcessOfIntersection intersection)
-
-/-- The extracted closing side returns exactly the formed payload. -/
-theorem collatzClosingPayloadOfIntersection_eq
-    {branch : MemoryBranch}
-    (intersection : PrimitiveMemoryReadingIntersection branch) :
-    collatzClosingPayloadOfIntersection intersection =
-      formedPositiveExcessOfIntersection intersection :=
-  rfl
-
-/-- The extracted closing side returns the successor of the terminal time. -/
-theorem collatzClosingPayloadOfIntersection_eq_terminalTime_succ
-    {branch : MemoryBranch}
-    (intersection : PrimitiveMemoryReadingIntersection branch) :
-    collatzClosingPayloadOfIntersection intersection =
-      terminalTimeOfIntersection intersection + 1 := by
-  rw [collatzClosingPayloadOfIntersection_eq]
-  rfl
-
-/-- The extracted shadow side returns to a closing role with payload `3*k+2`. -/
-theorem collatzShadowReturnRoleOfIntersection_eq
-    {branch : MemoryBranch}
-    (intersection : PrimitiveMemoryReadingIntersection branch) :
-    collatzShadowReturnRoleOfIntersection intersection =
-      NatEnrichedParityRole.closingExcess
-        (3 * formedPositiveExcessOfIntersection intersection + 2) :=
-  rfl
-
-/--
-The extracted shadow side returns to a closing role whose payload is computed
-from the successor of the terminal time.
--/
-theorem collatzShadowReturnRoleOfIntersection_eq_terminalTime_succ
-    {branch : MemoryBranch}
-    (intersection : PrimitiveMemoryReadingIntersection branch) :
-    collatzShadowReturnRoleOfIntersection intersection =
-      NatEnrichedParityRole.closingExcess
-        (3 * (terminalTimeOfIntersection intersection + 1) + 2) := by
-  rw [collatzShadowReturnRoleOfIntersection_eq]
-  rfl
-
 end EnrichedNatClosedStabilityInstance
 end Meta
 
@@ -247,14 +158,4 @@ end Meta
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzOperationalParity_sameProjection
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzOperationalParity_separated
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzOperationalParity_dynamicRepair
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzClosingPayloadAction
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzShadowReturnRole
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzClosingPayloadAction_eq
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzShadowReturnRole_eq
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzClosingPayloadOfIntersection
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzShadowReturnRoleOfIntersection
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzClosingPayloadOfIntersection_eq
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzShadowReturnRoleOfIntersection_eq
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzClosingPayloadOfIntersection_eq_terminalTime_succ
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzShadowReturnRoleOfIntersection_eq_terminalTime_succ
 /- AXIOM_AUDIT_END -/
