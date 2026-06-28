@@ -182,11 +182,13 @@ def tarskiRoundTripCoherence
       intro _branch intersection
       cases intersection with
       | mk source intersection =>
-          simp
-            [ intersectionOfComplete
-            , completeOfIntersection
-            , tarskiBidirectionalCompleteness
-            , tarskiIntersectionCanonical intersection ]
+          change
+            (⟨source, tarskiDiagonalIntersectionOfSource source⟩ :
+              Sigma fun source =>
+                TarskiDiagonalIntersection source) =
+              ⟨source, intersection⟩
+          cases tarskiIntersectionCanonical intersection
+          rfl
   }
 
 /-! ## Formed diagonal interface -/

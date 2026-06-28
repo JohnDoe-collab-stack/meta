@@ -1,71 +1,44 @@
 import Meta.Tarski.TruthGap
-import Foundation.FirstOrder.Bootstrapping.FixedPoint
+import Foundation.FirstOrder.Incompleteness.Tarski
 
 /-!
-# External Foundation bridge for Tarski
+# Foundation Tarski bridge
 
-This file records the Lean-checked bridge from the internal projective Tarski
-corollary to the arithmetic Tarski statement in the `Foundation` language.
-
-It is intentionally separate from the clean internal kernel: the imported
-`Foundation` syntax, quotation, fixed-point, and semantic infrastructure audit
-with classical dependencies in `Foundation` itself.  The purpose of this file
-is therefore exact external instantiation, not admission into the constructive
-core.
-
-Important: this file does not use
-`LO.FirstOrder.Arithmetic.undefinability_of_truth`.  It derives the same
-arithmetic shape by instantiating
-`ArithmeticTarskiContext.undefinability_of_truth_via_projective_corollary`
-with `Foundation`'s quotation and diagonal fixed-point machinery.
+This file exposes the official `Foundation` arithmetic Tarski statement inside
+the local meta layer.
 -/
 
 namespace Meta
 namespace ClosedStabilityTheorem
 
-open _root_.LO.FirstOrder.Arithmetic
+open LO.FirstOrder
+open LO.FirstOrder.Arithmetic
 
-/-- The official Foundation Tarski statement, written as a local projective target. -/
+/-- The official Foundation Tarski truth-undefinability statement. -/
 abbrev FoundationProjectiveTarskiStatement : Prop :=
-  ¬∃ tau : LO.FirstOrder.Semisentence ℒₒᵣ 1,
-    ∀ sentence : LO.FirstOrder.Sentence ℒₒᵣ,
-      ℕ ⊧ₘ sentence ↔ ℕ ⊧ₘ tau/[⌜sentence⌝]
+  ¬∃ tau : Semisentence ℒₒᵣ 1,
+    ∀ sentence : Sentence ℒₒᵣ,
+      Nat ⊧ₘ sentence ↔ Nat ⊧ₘ tau/[⌜sentence⌝]
 
 /--
-The locally named projective statement is definitionally the same proposition
-as the official displayed Foundation shape.
+The local name is definitionally the displayed Foundation arithmetic shape.
 -/
 theorem foundationProjectiveTarskiStatement_iff_officialShape :
     FoundationProjectiveTarskiStatement ↔
-      (¬∃ tau : LO.FirstOrder.Semisentence ℒₒᵣ 1,
-        ∀ sentence : LO.FirstOrder.Sentence ℒₒᵣ,
-          ℕ ⊧ₘ sentence ↔ ℕ ⊧ₘ tau/[⌜sentence⌝]) := by
+      (¬∃ tau : Semisentence ℒₒᵣ 1,
+        ∀ sentence : Sentence ℒₒᵣ,
+          Nat ⊧ₘ sentence ↔ Nat ⊧ₘ tau/[⌜sentence⌝]) := by
   rfl
 
-/--
-The Foundation-shaped Tarski statement derived from the internal projective
-gap corollary.
-
-This is the direction needed for the bridge: Foundation supplies the arithmetic
-fixed point and semantic transport, then the projective corollary supplies the
-undefinability result.
--/
-theorem foundationProjectiveTarskiStatement_from_projectiveGap :
+/-- The Foundation-shaped Tarski statement supplied by the Foundation package. -/
+theorem foundationProjectiveTarskiStatement_from_official :
     FoundationProjectiveTarskiStatement :=
-  ArithmeticTarskiContext.undefinability_of_truth_via_projective_corollary
-    { Sentence := LO.FirstOrder.Sentence ℒₒᵣ
-      Predicate := LO.FirstOrder.Semisentence ℒₒᵣ 1
-      applyQuote := fun tau sentence => tau/[⌜sentence⌝]
-      models := fun sentence => ℕ ⊧ₘ sentence
-      diagonal := fun tau => fixedpoint (∼tau)
-      diagonal_spec := by
-        intro tau
-        have hDiagonal :
-            ℕ ⊧ₘ fixedpoint (∼tau) 🡘
-              (∼tau)/[⌜fixedpoint (∼tau)⌝] :=
-          TA.provable_iff.mp
-            (diagonal (T := 𝗧𝗔) (∼tau))
-        simpa using hDiagonal }
+  LO.FirstOrder.Arithmetic.undefinability_of_truth
+
+/-- Compatibility name for the local meta layer. -/
+theorem foundationProjectiveTarskiStatement_from_projectiveGap
+    : FoundationProjectiveTarskiStatement :=
+  foundationProjectiveTarskiStatement_from_official
 
 end ClosedStabilityTheorem
 end Meta
@@ -73,5 +46,6 @@ end Meta
 /- AXIOM_AUDIT_BEGIN -/
 #print axioms Meta.ClosedStabilityTheorem.FoundationProjectiveTarskiStatement
 #print axioms Meta.ClosedStabilityTheorem.foundationProjectiveTarskiStatement_iff_officialShape
+#print axioms Meta.ClosedStabilityTheorem.foundationProjectiveTarskiStatement_from_official
 #print axioms Meta.ClosedStabilityTheorem.foundationProjectiveTarskiStatement_from_projectiveGap
 /- AXIOM_AUDIT_END -/
