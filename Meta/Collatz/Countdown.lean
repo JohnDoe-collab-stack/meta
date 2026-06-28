@@ -37,6 +37,14 @@ theorem collatzCountdownClosingPayload_eq_n_plus_two
   rw [collatzClosingPayloadOfIntersection_eq,
     countdownArithmeticGapTerminalExcess_eq_n_plus_two]
 
+/-- The countdown closing side has payload one step after terminal time. -/
+theorem collatzCountdownClosingPayload_eq_terminalTime_succ
+    (n : Nat) :
+    collatzCountdownClosingPayload n = countdownTerminalTime n + 1 := by
+  unfold collatzCountdownClosingPayload
+  rw [collatzClosingPayloadOfIntersection_eq_terminalTime_succ,
+    countdownTerminalIntersection_terminalTime_eq]
+
 /--
 The countdown shadow side returns to the closing role whose payload is
 `3*(n+2)+2`.
@@ -48,6 +56,19 @@ theorem collatzCountdownShadowReturnRole_eq_n_plus_two
   unfold collatzCountdownShadowReturnRole
   rw [collatzShadowReturnRoleOfIntersection_eq,
     countdownArithmeticGapTerminalExcess_eq_n_plus_two]
+
+/--
+The countdown shadow side returns to the closing role computed from one step
+after terminal time.
+-/
+theorem collatzCountdownShadowReturnRole_eq_terminalTime_succ
+    (n : Nat) :
+    collatzCountdownShadowReturnRole n =
+      NatEnrichedParityRole.closingExcess
+        (3 * (countdownTerminalTime n + 1) + 2) := by
+  unfold collatzCountdownShadowReturnRole
+  rw [collatzShadowReturnRoleOfIntersection_eq_terminalTime_succ,
+    countdownTerminalIntersection_terminalTime_eq]
 
 /-- The countdown closing regime is the formed dynamic regime. -/
 theorem collatzCountdownClosingRegime_eq_formedRegime
@@ -108,6 +129,8 @@ end Meta
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzCountdownShadowReturnRole
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzCountdownClosingPayload_eq_n_plus_two
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzCountdownShadowReturnRole_eq_n_plus_two
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzCountdownClosingPayload_eq_terminalTime_succ
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzCountdownShadowReturnRole_eq_terminalTime_succ
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzCountdownClosingRegime_eq_formedRegime
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzCountdownMediatingRegime_eq_shadowRegime
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzCountdown_sameProjection

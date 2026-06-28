@@ -200,6 +200,15 @@ theorem collatzClosingPayloadOfIntersection_eq
       formedPositiveExcessOfIntersection intersection :=
   rfl
 
+/-- The extracted closing side returns the successor of the terminal time. -/
+theorem collatzClosingPayloadOfIntersection_eq_terminalTime_succ
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    collatzClosingPayloadOfIntersection intersection =
+      terminalTimeOfIntersection intersection + 1 := by
+  rw [collatzClosingPayloadOfIntersection_eq]
+  rfl
+
 /-- The extracted shadow side returns to a closing role with payload `3*k+2`. -/
 theorem collatzShadowReturnRoleOfIntersection_eq
     {branch : MemoryBranch}
@@ -207,6 +216,19 @@ theorem collatzShadowReturnRoleOfIntersection_eq
     collatzShadowReturnRoleOfIntersection intersection =
       NatEnrichedParityRole.closingExcess
         (3 * formedPositiveExcessOfIntersection intersection + 2) :=
+  rfl
+
+/--
+The extracted shadow side returns to a closing role whose payload is computed
+from the successor of the terminal time.
+-/
+theorem collatzShadowReturnRoleOfIntersection_eq_terminalTime_succ
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    collatzShadowReturnRoleOfIntersection intersection =
+      NatEnrichedParityRole.closingExcess
+        (3 * (terminalTimeOfIntersection intersection + 1) + 2) := by
+  rw [collatzShadowReturnRoleOfIntersection_eq]
   rfl
 
 end EnrichedNatClosedStabilityInstance
@@ -233,4 +255,6 @@ end Meta
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzShadowReturnRoleOfIntersection
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzClosingPayloadOfIntersection_eq
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzShadowReturnRoleOfIntersection_eq
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzClosingPayloadOfIntersection_eq_terminalTime_succ
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzShadowReturnRoleOfIntersection_eq_terminalTime_succ
 /- AXIOM_AUDIT_END -/
