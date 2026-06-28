@@ -24,6 +24,21 @@ open ClosedStabilityTheorem
 
 /-! ## Dynamic gap row -/
 
+/-- Terminal time carried by one primitive arithmetic intersection. -/
+def terminalTimeOfIntersection
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    Nat :=
+  intersection.excess
+
+/-- The formed positive excess is the successor of the terminal time. -/
+theorem formedPositiveExcessOfIntersection_eq_terminalTime_succ
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    formedPositiveExcessOfIntersection intersection =
+      terminalTimeOfIntersection intersection + 1 :=
+  rfl
+
 /--
 Public row of an arithmetic dynamic gap.
 
@@ -36,7 +51,10 @@ structure ArithmeticDynamicGapRow where
   formed : List NatTraceAtom
   shadow : List NatTraceAtom
   visible : List Nat
+  terminalTime : Nat
   terminalExcess : Nat
+  terminalExcess_eq_terminalTime_succ :
+    terminalExcess = terminalTime + 1
   sameVisible : tracePayloads formed = tracePayloads shadow
   separated : formed = shadow -> False
   obstruction :
@@ -79,7 +97,10 @@ def arithmeticDynamicGapRowOfIntersection
   formed := formedTraceOfIntersection intersection
   shadow := payloadOnlyTraceOfIntersection intersection
   visible := tracePayloads (payloadOnlyTraceOfIntersection intersection)
+  terminalTime := terminalTimeOfIntersection intersection
   terminalExcess := formedPositiveExcessOfIntersection intersection
+  terminalExcess_eq_terminalTime_succ :=
+    formedPositiveExcessOfIntersection_eq_terminalTime_succ intersection
   sameVisible := formedTraceOfIntersection_same_payloadOnlyPayload intersection
   separated := formedTraceOfIntersection_ne_payloadOnlyTrace intersection
   obstruction := payloadProjectionObstructionOfIntersection intersection
@@ -87,12 +108,25 @@ def arithmeticDynamicGapRowOfIntersection
   recovery_formed := rfl
   recovery_shadow := rfl
 
+/-- Every arithmetic dynamic gap row stores an excess one step after its terminal time. -/
+theorem arithmeticDynamicGapRow_terminalExcess_eq_terminalTime_succ
+    (row : ArithmeticDynamicGapRow) :
+    row.terminalExcess = row.terminalTime + 1 :=
+  row.terminalExcess_eq_terminalTime_succ
+
 /-! ## Repeated-index lock -/
 
 /-- The primitive repeated-index intersection stores `secondTime` as excess. -/
 theorem repeatedIndexIntersection_excess_eq
     (collision : RepeatedIndexCollision) :
     (repeatedIndexIntersection collision).excess = collision.secondTime :=
+  rfl
+
+/-- The repeated-index terminal time is the second collision time. -/
+theorem repeatedIndexTerminalTime_eq_secondTime
+    (collision : RepeatedIndexCollision) :
+    terminalTimeOfIntersection (repeatedIndexIntersection collision) =
+      collision.secondTime :=
   rfl
 
 /-- The terminal excess of a repeated-index dynamic gap is `secondTime + 1`. -/
@@ -130,6 +164,13 @@ def repeatedIndexDynamicGapRow
   arithmeticDynamicGapRowOfIntersection
     (repeatedIndexIntersection collision)
 
+/-- The repeated-index dynamic row stores `secondTime` as terminal time. -/
+theorem repeatedIndexDynamicGapRow_terminalTime_eq_secondTime
+    (collision : RepeatedIndexCollision) :
+    (repeatedIndexDynamicGapRow collision).terminalTime =
+      collision.secondTime :=
+  rfl
+
 /-- Final repeated-index row: dynamic gap plus recovered closed stability. -/
 def repeatedIndexDynamicClosedStabilityRow
     (collision : RepeatedIndexCollision) :
@@ -139,6 +180,19 @@ def repeatedIndexDynamicClosedStabilityRow
   closedStability := repeatedIndexClosedStabilityInstance collision
 
 /-! ## Trajectory lock -/
+
+/--
+A repeated value in a Nat trajectory has terminal excess `secondTime + 1`.
+-/
+theorem trajectoryCollision_terminalTime_eq
+    {step : Nat -> Nat}
+    {start : Nat}
+    (collision : NatTrajectoryRepeatedIndexCollision step start) :
+    terminalTimeOfIntersection
+      (repeatedIndexIntersection
+        (repeatedIndexCollision_of_trajectoryCollision collision)) =
+        collision.secondTime :=
+  rfl
 
 /--
 A repeated value in a Nat trajectory has terminal excess `secondTime + 1`.
@@ -162,6 +216,15 @@ def trajectoryDynamicGapRow
   repeatedIndexDynamicGapRow
     (repeatedIndexCollision_of_trajectoryCollision collision)
 
+/-- The trajectory dynamic row stores the collision's second time as terminal time. -/
+theorem trajectoryDynamicGapRow_terminalTime_eq
+    {step : Nat -> Nat}
+    {start : Nat}
+    (collision : NatTrajectoryRepeatedIndexCollision step start) :
+    (trajectoryDynamicGapRow collision).terminalTime =
+      collision.secondTime :=
+  rfl
+
 /-- Final trajectory row: dynamic gap plus recovered closed stability. -/
 def trajectoryDynamicClosedStabilityRow
     {step : Nat -> Nat}
@@ -174,6 +237,21 @@ def trajectoryDynamicClosedStabilityRow
   closedStability := trajectoryRepeatedIndexClosedStabilityInstance collision
 
 /-! ## Window lock -/
+
+/--
+A finite-window collision has terminal excess at the absolute right time.
+-/
+theorem windowCollision_terminalTime_eq
+    {step : Nat -> Nat}
+    {start windowStart windowLength : Nat}
+    (collision :
+      NatTrajectoryWindowCollision step start windowStart windowLength) :
+    terminalTimeOfIntersection
+      (repeatedIndexIntersection
+        (repeatedIndexCollision_of_trajectoryCollision
+          (trajectoryCollision_of_windowCollision collision))) =
+        windowStart + collision.rightOffset :=
+  rfl
 
 /--
 A finite-window collision has terminal excess at the absolute right time.
@@ -199,6 +277,16 @@ def windowCollisionDynamicGapRow
     ArithmeticDynamicGapRow :=
   trajectoryDynamicGapRow
     (trajectoryCollision_of_windowCollision collision)
+
+/-- The window dynamic row stores the absolute right time as terminal time. -/
+theorem windowCollisionDynamicGapRow_terminalTime_eq
+    {step : Nat -> Nat}
+    {start windowStart windowLength : Nat}
+    (collision :
+      NatTrajectoryWindowCollision step start windowStart windowLength) :
+    (windowCollisionDynamicGapRow collision).terminalTime =
+      windowStart + collision.rightOffset :=
+  rfl
 
 /-- Final window-collision row: dynamic gap plus recovered closed stability. -/
 def windowCollisionDynamicClosedStabilityRow
@@ -273,16 +361,25 @@ end EnrichedNatClosedStabilityInstance
 end Meta
 
 /- AXIOM_AUDIT_BEGIN -/
+#print axioms Meta.EnrichedNatClosedStabilityInstance.terminalTimeOfIntersection
+#print axioms Meta.EnrichedNatClosedStabilityInstance.formedPositiveExcessOfIntersection_eq_terminalTime_succ
 #print axioms Meta.EnrichedNatClosedStabilityInstance.ArithmeticDynamicGapRow
 #print axioms Meta.EnrichedNatClosedStabilityInstance.ArithmeticDynamicClosedStabilityRow
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticDynamicGapRowOfIntersection
+#print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticDynamicGapRow_terminalExcess_eq_terminalTime_succ
+#print axioms Meta.EnrichedNatClosedStabilityInstance.repeatedIndexTerminalTime_eq_secondTime
 #print axioms Meta.EnrichedNatClosedStabilityInstance.repeatedIndexTerminalExcess_eq
 #print axioms Meta.EnrichedNatClosedStabilityInstance.repeatedIndexDynamicGapRow
+#print axioms Meta.EnrichedNatClosedStabilityInstance.repeatedIndexDynamicGapRow_terminalTime_eq_secondTime
 #print axioms Meta.EnrichedNatClosedStabilityInstance.repeatedIndexDynamicClosedStabilityRow
+#print axioms Meta.EnrichedNatClosedStabilityInstance.trajectoryCollision_terminalTime_eq
 #print axioms Meta.EnrichedNatClosedStabilityInstance.trajectoryCollision_terminalExcess_eq
 #print axioms Meta.EnrichedNatClosedStabilityInstance.trajectoryDynamicGapRow
+#print axioms Meta.EnrichedNatClosedStabilityInstance.trajectoryDynamicGapRow_terminalTime_eq
 #print axioms Meta.EnrichedNatClosedStabilityInstance.trajectoryDynamicClosedStabilityRow
+#print axioms Meta.EnrichedNatClosedStabilityInstance.windowCollision_terminalTime_eq
 #print axioms Meta.EnrichedNatClosedStabilityInstance.windowCollision_terminalExcess_eq
+#print axioms Meta.EnrichedNatClosedStabilityInstance.windowCollisionDynamicGapRow_terminalTime_eq
 #print axioms Meta.EnrichedNatClosedStabilityInstance.boundedWindowDynamicGapRow
 #print axioms Meta.EnrichedNatClosedStabilityInstance.windowCollisionDynamicClosedStabilityRow
 #print axioms Meta.EnrichedNatClosedStabilityInstance.boundedWindowDynamicClosedStabilityRow

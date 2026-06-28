@@ -18,7 +18,7 @@ the abstract pattern:
 namespace Meta
 namespace ClosedStabilityTheorem
 
-universe u v w x y z r s a
+universe u v w x y z r s a p q
 
 /-! ## Formed dynamic return -/
 
@@ -37,6 +37,31 @@ structure FormedDynamicReturn
     Type (max u v w a) where
   source : Source
   intersection : complete.Intersection branch
+
+/-! ## Temporal provenance of formed excess -/
+
+/--
+Temporal provenance of a formed excess carried by a formed dynamic return.
+
+The terminal time is read from the dynamic source; the formed excess is read
+from the produced typed intersection.  The `advance` map records the intrinsic
+step from terminal time to formed excess.
+-/
+structure TemporalExcessDynamicReturn
+    {Branch : Type u}
+    (complete : BidirectionalCompleteness.{u, v, w} Branch)
+    (branch : Branch)
+    (Source : Type a)
+    (dynamicReturn : FormedDynamicReturn complete branch Source)
+    (Time : Type p)
+    (Excess : Type q) :
+    Type (max u v w a p q) where
+  terminalTimeOf : Source -> Time
+  formedExcessOf : complete.Intersection branch -> Excess
+  advance : Time -> Excess
+  formedExcess_eq_advance_terminalTime :
+    formedExcessOf dynamicReturn.intersection =
+      advance (terminalTimeOf dynamicReturn.source)
 
 /-! ## Locally recovered dynamic return -/
 
@@ -130,6 +155,7 @@ end Meta
 
 /- AXIOM_AUDIT_BEGIN -/
 #print axioms Meta.ClosedStabilityTheorem.FormedDynamicReturn
+#print axioms Meta.ClosedStabilityTheorem.TemporalExcessDynamicReturn
 #print axioms Meta.ClosedStabilityTheorem.LocallyRecoveredDynamicReturn
 #print axioms Meta.ClosedStabilityTheorem.locallyRecoveredClosedStabilityOfDynamicReturn
 /- AXIOM_AUDIT_END -/

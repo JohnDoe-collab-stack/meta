@@ -29,6 +29,24 @@ def countdownTerminalIntersection
       (trajectoryCollision_of_windowCollision
         (countdownTerminalWindowCollision n)))
 
+/-- The countdown terminal intersection carries the countdown terminal time. -/
+theorem countdownTerminalIntersection_terminalTime_eq
+    (n : Nat) :
+    terminalTimeOfIntersection (countdownTerminalIntersection n) =
+      countdownTerminalTime n := by
+  unfold countdownTerminalIntersection
+  unfold terminalTimeOfIntersection
+  unfold countdownTerminalTime
+  rfl
+
+/-- The intrinsic countdown terminal excess is the successor of its terminal time. -/
+theorem countdownArithmeticGapTerminalExcess_eq_terminalTime_succ
+    (n : Nat) :
+    formedPositiveExcessOfIntersection (countdownTerminalIntersection n) =
+        countdownTerminalTime n + 1 := by
+  unfold countdownTerminalIntersection
+  exact countdownTerminalExcess_eq_terminalTime_succ n
+
 /-- The intrinsic countdown dynamic arithmetic gap has terminal excess `n + 2`. -/
 theorem countdownArithmeticGapTerminalExcess_eq_n_plus_two
     (n : Nat) :
@@ -49,12 +67,46 @@ theorem countdownTerminalDynamicGapRow_terminalExcess_eq_n_plus_two
   unfold arithmeticDynamicGapRowOfIntersection
   exact countdownTerminalExcess_eq_n_plus_two n
 
+/-- The terminal countdown dynamic row stores terminal time `n + 1`. -/
+theorem countdownTerminalDynamicGapRow_terminalTime_eq_n_plus_one
+    (n : Nat) :
+    (countdownTerminalDynamicGapRow n).terminalTime = n + 1 := by
+  unfold countdownTerminalDynamicGapRow
+  unfold windowCollisionDynamicGapRow
+  unfold trajectoryDynamicGapRow
+  unfold repeatedIndexDynamicGapRow
+  unfold arithmeticDynamicGapRowOfIntersection
+  exact countdownTerminalTime_eq_n_plus_one n
+
+/-- The terminal countdown dynamic row stores excess one step after terminal time. -/
+theorem countdownTerminalDynamicGapRow_terminalExcess_eq_terminalTime_succ
+    (n : Nat) :
+    (countdownTerminalDynamicGapRow n).terminalExcess =
+      (countdownTerminalDynamicGapRow n).terminalTime + 1 :=
+  arithmeticDynamicGapRow_terminalExcess_eq_terminalTime_succ
+    (countdownTerminalDynamicGapRow n)
+
 /-- The fully constructed countdown dynamic row stores the same `n + 2` excess. -/
 theorem fullyConstructedCountdownDynamicGapRow_terminalExcess_eq_n_plus_two
     (n : Nat) :
     (fullyConstructedCountdownDynamicGapRow n).terminalExcess = n + 2 := by
   unfold fullyConstructedCountdownDynamicGapRow
   exact countdownTerminalDynamicGapRow_terminalExcess_eq_n_plus_two n
+
+/-- The fully constructed countdown dynamic row stores terminal time `n + 1`. -/
+theorem fullyConstructedCountdownDynamicGapRow_terminalTime_eq_n_plus_one
+    (n : Nat) :
+    (fullyConstructedCountdownDynamicGapRow n).terminalTime = n + 1 := by
+  unfold fullyConstructedCountdownDynamicGapRow
+  exact countdownTerminalDynamicGapRow_terminalTime_eq_n_plus_one n
+
+/-- The fully constructed countdown dynamic row stores excess after terminal time. -/
+theorem fullyConstructedCountdownDynamicGapRow_terminalExcess_eq_terminalTime_succ
+    (n : Nat) :
+    (fullyConstructedCountdownDynamicGapRow n).terminalExcess =
+      (fullyConstructedCountdownDynamicGapRow n).terminalTime + 1 :=
+  arithmeticDynamicGapRow_terminalExcess_eq_terminalTime_succ
+    (fullyConstructedCountdownDynamicGapRow n)
 
 /-- The countdown closing role is the closing excess role at `n + 2`. -/
 theorem countdownTerminalClosingRole_eq_n_plus_two
@@ -64,6 +116,14 @@ theorem countdownTerminalClosingRole_eq_n_plus_two
   rw [arithmeticClosingRoleOfIntersection_eq,
     countdownArithmeticGapTerminalExcess_eq_n_plus_two]
 
+/-- The countdown closing role is indexed by the successor of the terminal time. -/
+theorem countdownTerminalClosingRole_eq_terminalTime_succ
+    (n : Nat) :
+    arithmeticClosingRoleOfIntersection (countdownTerminalIntersection n) =
+      NatEnrichedParityRole.closingExcess (countdownTerminalTime n + 1) := by
+  rw [arithmeticClosingRoleOfIntersection_eq,
+    countdownArithmeticGapTerminalExcess_eq_terminalTime_succ]
+
 /-- The countdown mediating role is the mediating value role at `n + 2`. -/
 theorem countdownTerminalMediatingRole_eq_n_plus_two
     (n : Nat) :
@@ -71,6 +131,14 @@ theorem countdownTerminalMediatingRole_eq_n_plus_two
       NatEnrichedParityRole.mediatingValue (n + 2) := by
   rw [arithmeticMediatingRoleOfIntersection_eq,
     countdownArithmeticGapTerminalExcess_eq_n_plus_two]
+
+/-- The countdown mediating role is indexed by the successor of the terminal time. -/
+theorem countdownTerminalMediatingRole_eq_terminalTime_succ
+    (n : Nat) :
+    arithmeticMediatingRoleOfIntersection (countdownTerminalIntersection n) =
+      NatEnrichedParityRole.mediatingValue (countdownTerminalTime n + 1) := by
+  rw [arithmeticMediatingRoleOfIntersection_eq,
+    countdownArithmeticGapTerminalExcess_eq_terminalTime_succ]
 
 /-- Arithmetic closing code extracted from the countdown terminal return. -/
 def countdownTerminalClosingCode
@@ -165,11 +233,19 @@ end Meta
 
 /- AXIOM_AUDIT_BEGIN -/
 #print axioms Meta.EnrichedNatClosedStabilityInstance.countdownTerminalIntersection
+#print axioms Meta.EnrichedNatClosedStabilityInstance.countdownTerminalIntersection_terminalTime_eq
+#print axioms Meta.EnrichedNatClosedStabilityInstance.countdownArithmeticGapTerminalExcess_eq_terminalTime_succ
 #print axioms Meta.EnrichedNatClosedStabilityInstance.countdownArithmeticGapTerminalExcess_eq_n_plus_two
 #print axioms Meta.EnrichedNatClosedStabilityInstance.countdownTerminalDynamicGapRow_terminalExcess_eq_n_plus_two
+#print axioms Meta.EnrichedNatClosedStabilityInstance.countdownTerminalDynamicGapRow_terminalTime_eq_n_plus_one
+#print axioms Meta.EnrichedNatClosedStabilityInstance.countdownTerminalDynamicGapRow_terminalExcess_eq_terminalTime_succ
 #print axioms Meta.EnrichedNatClosedStabilityInstance.fullyConstructedCountdownDynamicGapRow_terminalExcess_eq_n_plus_two
+#print axioms Meta.EnrichedNatClosedStabilityInstance.fullyConstructedCountdownDynamicGapRow_terminalTime_eq_n_plus_one
+#print axioms Meta.EnrichedNatClosedStabilityInstance.fullyConstructedCountdownDynamicGapRow_terminalExcess_eq_terminalTime_succ
 #print axioms Meta.EnrichedNatClosedStabilityInstance.countdownTerminalClosingRole_eq_n_plus_two
 #print axioms Meta.EnrichedNatClosedStabilityInstance.countdownTerminalMediatingRole_eq_n_plus_two
+#print axioms Meta.EnrichedNatClosedStabilityInstance.countdownTerminalClosingRole_eq_terminalTime_succ
+#print axioms Meta.EnrichedNatClosedStabilityInstance.countdownTerminalMediatingRole_eq_terminalTime_succ
 #print axioms Meta.EnrichedNatClosedStabilityInstance.countdownTerminalClosingCode
 #print axioms Meta.EnrichedNatClosedStabilityInstance.countdownTerminalMediatingCode
 #print axioms Meta.EnrichedNatClosedStabilityInstance.countdownTerminalClosingCode_eq_n_plus_two

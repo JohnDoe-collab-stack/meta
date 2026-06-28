@@ -243,6 +243,27 @@ def arithmeticFormedDynamicReturnOfIntersection
   source := ⟨intersection⟩
   intersection := intersection
 
+/--
+Temporal provenance of the formed excess carried by an exact arithmetic
+intersection.
+-/
+def arithmeticTemporalExcessOfIntersection
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    TemporalExcessDynamicReturn
+      bidirectionalCompleteness
+      branch
+      (ArithmeticIntersectionSource branch)
+      (arithmeticFormedDynamicReturnOfIntersection intersection)
+      Nat
+      Nat where
+  terminalTimeOf := fun source =>
+    terminalTimeOfIntersection source.down
+  formedExcessOf := fun inter =>
+    formedPositiveExcessOfIntersection inter
+  advance := fun time => time + 1
+  formedExcess_eq_advance_terminalTime := rfl
+
 /-- Interface witness carried by the formed trace of an intersection. -/
 def arithmeticInterfaceWitnessOfIntersection
     {branch : MemoryBranch}
@@ -659,6 +680,26 @@ theorem arithmeticMediatingRoleOfIntersection_eq
         (formedPositiveExcessOfIntersection intersection)
   exact terminalTraceRole_payloadOnlyTraceOfIntersection intersection
 
+/-- The extracted closing role is indexed by the successor of the terminal time. -/
+theorem arithmeticClosingRoleOfIntersection_eq_terminalTime_succ
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    arithmeticClosingRoleOfIntersection intersection =
+      NatEnrichedParityRole.closingExcess
+        (terminalTimeOfIntersection intersection + 1) := by
+  rw [arithmeticClosingRoleOfIntersection_eq]
+  rfl
+
+/-- The extracted mediating role is indexed by the successor of the terminal time. -/
+theorem arithmeticMediatingRoleOfIntersection_eq_terminalTime_succ
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    arithmeticMediatingRoleOfIntersection intersection =
+      NatEnrichedParityRole.mediatingValue
+        (terminalTimeOfIntersection intersection + 1) := by
+  rw [arithmeticMediatingRoleOfIntersection_eq]
+  rfl
+
 /-- Arithmetic code of the closing role extracted from one exact dynamic gap. -/
 def arithmeticClosingCodeOfIntersection
     {branch : MemoryBranch}
@@ -734,6 +775,7 @@ end Meta
 #print axioms Meta.EnrichedNatClosedStabilityInstance.NatEnrichedParityRoleRepair
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityRoleOperationalTwoPole
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticFormedDynamicReturnOfIntersection
+#print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticTemporalExcessOfIntersection
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticLocallyRecoveredDynamicReturnOfIntersection
 #print axioms Meta.EnrichedNatClosedStabilityInstance.terminalTraceRole_formedTraceOfIntersection
 #print axioms Meta.EnrichedNatClosedStabilityInstance.terminalTraceRole_payloadOnlyTraceOfIntersection
@@ -756,6 +798,8 @@ end Meta
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticMediatingRoleOfIntersection
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticClosingRoleOfIntersection_eq
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticMediatingRoleOfIntersection_eq
+#print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticClosingRoleOfIntersection_eq_terminalTime_succ
+#print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticMediatingRoleOfIntersection_eq_terminalTime_succ
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticClosingCodeOfIntersection
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticMediatingCodeOfIntersection
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticClosingCodeOfIntersection_eq
