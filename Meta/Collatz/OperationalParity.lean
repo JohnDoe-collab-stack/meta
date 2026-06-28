@@ -231,6 +231,147 @@ theorem collatzShadowReturnRoleOfIntersection_eq_terminalTime_succ
   rw [collatzShadowReturnRoleOfIntersection_eq]
   rfl
 
+/-! ## Local relaxed divergence and positive diagonal support -/
+
+/-- Support read from the relaxed Collatz shadow-return role. -/
+def collatzRelaxedRightSupport
+    (n : Nat) :
+    Nat :=
+  natEnrichedParityRolePayload (collatzShadowReturnRole n)
+
+/-- The relaxed Collatz shadow-return support is the payload of its closing role. -/
+theorem collatzRelaxedRightSupport_eq
+    (n : Nat) :
+    collatzRelaxedRightSupport n = 3 * n + 2 :=
+  rfl
+
+/--
+Local Collatz role divergence over one enriched Nat role index.
+
+The structure keeps the classical bilateral gap as a base, but records a
+separate relaxed right role.  The support is produced by that relaxed role
+through `natEnrichedParityRolePayload`; it is not supplied as an external
+height.
+-/
+structure CollatzRoleDivergenceMaximum
+    (n : Nat) where
+  baseGap : NatEnrichedParityBilateralGap n
+  base_leftStep_eq_one : baseGap.leftStep = 1
+  base_rightStep_eq_one : baseGap.rightStep = 1
+  formedRole : NatEnrichedParityRole
+  mediatingRole : NatEnrichedParityRole
+  classicalRightRole : NatEnrichedParityRole
+  relaxedRightRole : NatEnrichedParityRole
+  support : Nat
+  formedRole_eq :
+    formedRole = NatEnrichedParityRole.closingExcess n
+  mediatingRole_eq :
+    mediatingRole = NatEnrichedParityRole.mediatingValue n
+  classicalRightRole_eq :
+    classicalRightRole =
+      NatEnrichedParityRole.closingExcess (n + baseGap.rightStep)
+  relaxedRightRole_eq :
+    relaxedRightRole = collatzShadowReturnRole n
+  support_eq_relaxedPayload :
+    support = natEnrichedParityRolePayload relaxedRightRole
+  relaxedRightRole_eq_support :
+    relaxedRightRole = NatEnrichedParityRole.closingExcess support
+
+/--
+Canonical local Collatz divergence package.
+
+The classical right step remains stored in `baseGap.rightStep`; the relaxed
+right role is stored separately and is the source of `support`.
+-/
+def collatzRoleDivergenceMaximum
+    (n : Nat) :
+    CollatzRoleDivergenceMaximum n where
+  baseGap := natEnrichedParityClassicalBilateralGap n
+  base_leftStep_eq_one := rfl
+  base_rightStep_eq_one := rfl
+  formedRole := NatEnrichedParityRole.closingExcess n
+  mediatingRole := NatEnrichedParityRole.mediatingValue n
+  classicalRightRole := NatEnrichedParityRole.closingExcess (n + 1)
+  relaxedRightRole := collatzShadowReturnRole n
+  support := collatzRelaxedRightSupport n
+  formedRole_eq := rfl
+  mediatingRole_eq := rfl
+  classicalRightRole_eq := rfl
+  relaxedRightRole_eq := rfl
+  support_eq_relaxedPayload := rfl
+  relaxedRightRole_eq_support := rfl
+
+/-- The canonical Collatz role divergence support is read from the relaxed role. -/
+theorem collatzRoleDivergenceMaximum_support_eq_relaxed
+    (n : Nat) :
+    (collatzRoleDivergenceMaximum n).support =
+      collatzRelaxedRightSupport n :=
+  rfl
+
+/-- The canonical Collatz role divergence support has payload `3*n+2`. -/
+theorem collatzRoleDivergenceMaximum_support_eq
+    (n : Nat) :
+    (collatzRoleDivergenceMaximum n).support = 3 * n + 2 :=
+  rfl
+
+/--
+Positive diagonal witness generated from a local Collatz role divergence
+support.
+-/
+structure CollatzRoleDivergencePositiveDiagonalWitness
+    (n : Nat) where
+  roleDivergence : CollatzRoleDivergenceMaximum n
+  diagonalIntersection :
+    bidirectionalCompleteness.Intersection
+      (canonicalBranch roleDivergence.support)
+  diagonalIntersection_eq :
+    diagonalIntersection =
+      canonicalIntersection roleDivergence.support
+  positiveWitness : Nat
+  positiveWitness_eq :
+    positiveWitness =
+      formedPositiveExcessOfIntersection diagonalIntersection
+  positiveWitness_pos :
+    0 < positiveWitness
+  diagonal :
+    DiagonalCertificate
+      (List NatTraceAtom)
+      (List Nat)
+      tracePayloads
+  diagonal_eq :
+    diagonal =
+      diagonalCertificateOfIntersection diagonalIntersection
+
+/-- Canonical positive diagonal witness of the Collatz role-divergence support. -/
+def collatzRoleDivergencePositiveDiagonalWitness
+    {n : Nat}
+    (divergence : CollatzRoleDivergenceMaximum n) :
+    CollatzRoleDivergencePositiveDiagonalWitness n where
+  roleDivergence := divergence
+  diagonalIntersection := canonicalIntersection divergence.support
+  diagonalIntersection_eq := rfl
+  positiveWitness :=
+    formedPositiveExcessOfIntersection
+      (canonicalIntersection divergence.support)
+  positiveWitness_eq := rfl
+  positiveWitness_pos :=
+    formedPositiveExcessOfIntersection_pos
+      (canonicalIntersection divergence.support)
+  diagonal :=
+    diagonalCertificateOfIntersection
+      (canonicalIntersection divergence.support)
+  diagonal_eq := rfl
+
+/--
+Canonical positive diagonal witness of the canonical Collatz role-divergence
+support.
+-/
+def canonicalCollatzRoleDivergencePositiveDiagonalWitness
+    (n : Nat) :
+    CollatzRoleDivergencePositiveDiagonalWitness n :=
+  collatzRoleDivergencePositiveDiagonalWitness
+    (collatzRoleDivergenceMaximum n)
+
 end EnrichedNatClosedStabilityInstance
 end Meta
 
@@ -257,4 +398,13 @@ end Meta
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzShadowReturnRoleOfIntersection_eq
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzClosingPayloadOfIntersection_eq_terminalTime_succ
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzShadowReturnRoleOfIntersection_eq_terminalTime_succ
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRelaxedRightSupport
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRelaxedRightSupport_eq
+#print axioms Meta.EnrichedNatClosedStabilityInstance.CollatzRoleDivergenceMaximum
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRoleDivergenceMaximum
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRoleDivergenceMaximum_support_eq_relaxed
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRoleDivergenceMaximum_support_eq
+#print axioms Meta.EnrichedNatClosedStabilityInstance.CollatzRoleDivergencePositiveDiagonalWitness
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRoleDivergencePositiveDiagonalWitness
+#print axioms Meta.EnrichedNatClosedStabilityInstance.canonicalCollatzRoleDivergencePositiveDiagonalWitness
 /- AXIOM_AUDIT_END -/
