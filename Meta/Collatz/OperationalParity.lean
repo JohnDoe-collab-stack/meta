@@ -142,6 +142,96 @@ def collatzOperationalParity_dynamicRepair
   operationalParityRoles_dynamicRepair
     (arithmeticOperationalParityRolesOfIntersection intersection)
 
+/-! ## Relaxed diagonal instantiated by Collatz operational parity -/
+
+/--
+Collatz instantiates the positive internal diagonal witness already carried by
+the maximally relaxed enriched-Nat parity gap at the intersection index.
+-/
+def collatzRelaxedPositiveInternalDiagonalWitnessOfIntersection
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    NatEnrichedParityPositiveInternalDiagonalWitness
+      (formedPositiveExcessOfIntersection intersection) :=
+  natEnrichedParityPositiveInternalDiagonalWitnessOfMaximallyRelaxedGap
+    (formedPositiveExcessOfIntersection intersection)
+
+/-- The relaxed gap instantiated by one Collatz operational intersection. -/
+def collatzRelaxedGapOfIntersection
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    NatEnrichedParityRelaxedBilateralGap
+      (formedPositiveExcessOfIntersection intersection) :=
+  (collatzRelaxedPositiveInternalDiagonalWitnessOfIntersection
+    intersection).relaxedGap
+
+/-- The core diagonal certificate carried by the Collatz relaxed gap. -/
+def collatzRelaxedDiagonalCertificateOfIntersection
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    DiagonalCertificate
+      NatEnrichedParityRole
+      Nat
+      natEnrichedParityRolePayload :=
+  (collatzRelaxedPositiveInternalDiagonalWitnessOfIntersection
+    intersection).diagonalCertificate
+
+/-- The projection obstruction carried by the Collatz relaxed diagonal. -/
+def collatzRelaxedProjectionObstructionOfIntersection
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    ProjectionObstruction
+      NatEnrichedParityRole
+      Nat
+      natEnrichedParityRolePayload :=
+  (collatzRelaxedPositiveInternalDiagonalWitnessOfIntersection
+    intersection).projectionObstruction
+
+/-- The positive diagonal value carried by the Collatz relaxed diagonal. -/
+def collatzRelaxedPositiveDiagonalValueOfIntersection
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    Nat :=
+  (collatzRelaxedPositiveInternalDiagonalWitnessOfIntersection
+    intersection).witness
+
+/-- The Collatz relaxed diagonal value is strictly positive. -/
+theorem collatzRelaxedPositiveDiagonalValue_pos
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    0 <
+      collatzRelaxedPositiveDiagonalValueOfIntersection intersection :=
+  (collatzRelaxedPositiveInternalDiagonalWitnessOfIntersection
+    intersection).witness_pos
+
+/-- The Collatz relaxed diagonal value is the maximal relaxed divergence at the intersection index. -/
+theorem collatzRelaxedPositiveDiagonalValue_eq_maximalDivergence
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    collatzRelaxedPositiveDiagonalValueOfIntersection intersection =
+      natEnrichedParityMaximalRelaxedDivergence
+        (formedPositiveExcessOfIntersection intersection) :=
+  (collatzRelaxedPositiveInternalDiagonalWitnessOfIntersection
+    intersection).witness_eq_maximal
+
+/-- The left side of the Collatz relaxed diagonal is the extracted closing role. -/
+theorem collatzRelaxedDiagonalCertificate_left_eq_closingRole
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    (collatzRelaxedDiagonalCertificateOfIntersection intersection).left =
+      arithmeticClosingRoleOfIntersection intersection := by
+  rw [arithmeticClosingRoleOfIntersection_eq intersection]
+  rfl
+
+/-- The right side of the Collatz relaxed diagonal is the extracted mediating role. -/
+theorem collatzRelaxedDiagonalCertificate_right_eq_mediatingRole
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    (collatzRelaxedDiagonalCertificateOfIntersection intersection).right =
+      arithmeticMediatingRoleOfIntersection intersection := by
+  rw [arithmeticMediatingRoleOfIntersection_eq intersection]
+  rfl
+
 end EnrichedNatClosedStabilityInstance
 end Meta
 
@@ -158,4 +248,13 @@ end Meta
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzOperationalParity_sameProjection
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzOperationalParity_separated
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzOperationalParity_dynamicRepair
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRelaxedPositiveInternalDiagonalWitnessOfIntersection
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRelaxedGapOfIntersection
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRelaxedDiagonalCertificateOfIntersection
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRelaxedProjectionObstructionOfIntersection
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRelaxedPositiveDiagonalValueOfIntersection
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRelaxedPositiveDiagonalValue_pos
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRelaxedPositiveDiagonalValue_eq_maximalDivergence
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRelaxedDiagonalCertificate_left_eq_closingRole
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRelaxedDiagonalCertificate_right_eq_mediatingRole
 /- AXIOM_AUDIT_END -/
