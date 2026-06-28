@@ -700,6 +700,363 @@ theorem arithmeticMediatingRoleOfIntersection_eq_terminalTime_succ
   rw [arithmeticMediatingRoleOfIntersection_eq]
   rfl
 
+/-! ## Indexed diagonal parity carried by enriched Nat -/
+
+/--
+The intrinsic indexed diagonal parity carried by one enriched Nat intersection.
+
+This is the arithmetic source object: it packages the Core diagonal
+certificate, the terminal-time index, the formed excess, the two operational
+parity roles, the formed/shadow parity regimes, their common contracted
+projection, their separation, and the local repair carried by the formed side.
+-/
+structure ArithmeticIndexedDiagonalParity
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    Type where
+  diagonal :
+    DiagonalCertificate
+      (List NatTraceAtom)
+      (List Nat)
+      tracePayloads
+  diagonal_eq :
+    diagonal = diagonalCertificateOfIntersection intersection
+  terminalTime : Nat
+  terminalTime_eq :
+    terminalTime = terminalTimeOfIntersection intersection
+  formedExcess : Nat
+  formedExcess_eq_terminalTime_succ :
+    formedExcess = terminalTime + 1
+  closingRole : NatEnrichedParityRole
+  closingRole_eq_terminalTime_succ :
+    closingRole =
+      NatEnrichedParityRole.closingExcess (terminalTime + 1)
+  mediatingRole : NatEnrichedParityRole
+  mediatingRole_eq_terminalTime_succ :
+    mediatingRole =
+      NatEnrichedParityRole.mediatingValue (terminalTime + 1)
+  closingRegime_eq_formedRegime :
+    operationalParityRoles_closingRegime
+        (arithmeticOperationalParityRolesOfIntersection intersection) =
+      dynamicParitySeparation_formedRegime
+        (arithmeticDynamicParitySeparationOfIntersection intersection)
+  mediatingRegime_eq_shadowRegime :
+    operationalParityRoles_mediatingRegime
+        (arithmeticOperationalParityRolesOfIntersection intersection) =
+      dynamicParitySeparation_shadowRegime
+        (arithmeticDynamicParitySeparationOfIntersection intersection)
+  sameProjection :
+    parityProjection
+        (operationalParityRoles_closingRegime
+          (arithmeticOperationalParityRolesOfIntersection intersection)) =
+      parityProjection
+        (operationalParityRoles_mediatingRegime
+          (arithmeticOperationalParityRolesOfIntersection intersection))
+  separated :
+    operationalParityRoles_closingRegime
+        (arithmeticOperationalParityRolesOfIntersection intersection) =
+      operationalParityRoles_mediatingRegime
+        (arithmeticOperationalParityRolesOfIntersection intersection) ->
+        False
+  repair :
+    NatInterfaceRepair
+      (operationalTwoPole_leftPole
+        (dynamicParitySeparation_dynamicOperationalTwoPole
+          (arithmeticDynamicParitySeparationOfIntersection intersection)))
+
+/--
+Canonical indexed diagonal parity carried by one enriched Nat intersection.
+-/
+def arithmeticIndexedDiagonalParityOfIntersection
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    ArithmeticIndexedDiagonalParity intersection where
+  diagonal := diagonalCertificateOfIntersection intersection
+  diagonal_eq := rfl
+  terminalTime := terminalTimeOfIntersection intersection
+  terminalTime_eq := rfl
+  formedExcess := formedPositiveExcessOfIntersection intersection
+  formedExcess_eq_terminalTime_succ :=
+    formedPositiveExcessOfIntersection_eq_terminalTime_succ intersection
+  closingRole := arithmeticClosingRoleOfIntersection intersection
+  closingRole_eq_terminalTime_succ :=
+    arithmeticClosingRoleOfIntersection_eq_terminalTime_succ intersection
+  mediatingRole := arithmeticMediatingRoleOfIntersection intersection
+  mediatingRole_eq_terminalTime_succ :=
+    arithmeticMediatingRoleOfIntersection_eq_terminalTime_succ intersection
+  closingRegime_eq_formedRegime :=
+    operationalParityRoles_closing_eq_formed
+      (arithmeticOperationalParityRolesOfIntersection intersection)
+  mediatingRegime_eq_shadowRegime :=
+    operationalParityRoles_mediating_eq_shadow
+      (arithmeticOperationalParityRolesOfIntersection intersection)
+  sameProjection :=
+    operationalParityRoles_sameParityProjection
+      (arithmeticOperationalParityRolesOfIntersection intersection)
+  separated :=
+    operationalParityRoles_separated
+      (arithmeticOperationalParityRolesOfIntersection intersection)
+  repair :=
+    operationalParityRoles_dynamicRepair
+      (arithmeticOperationalParityRolesOfIntersection intersection)
+
+/-- The arithmetic indexed parity carries the exact Core diagonal certificate. -/
+theorem arithmeticIndexedDiagonalParity_carries_diagonal
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    (arithmeticIndexedDiagonalParityOfIntersection intersection).diagonal =
+      diagonalCertificateOfIntersection intersection :=
+  rfl
+
+/-- The arithmetic indexed parity is indexed by its terminal time. -/
+theorem arithmeticIndexedDiagonalParity_formedExcess_eq_terminalTime_succ
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    (arithmeticIndexedDiagonalParityOfIntersection intersection).formedExcess =
+      (arithmeticIndexedDiagonalParityOfIntersection intersection).terminalTime + 1 :=
+  formedPositiveExcessOfIntersection_eq_terminalTime_succ intersection
+
+/-- The arithmetic closing role is indexed by the successor of terminal time. -/
+theorem arithmeticIndexedDiagonalParity_closingRole_eq_terminalTime_succ
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    (arithmeticIndexedDiagonalParityOfIntersection intersection).closingRole =
+      NatEnrichedParityRole.closingExcess
+        ((arithmeticIndexedDiagonalParityOfIntersection intersection).terminalTime + 1) :=
+  arithmeticClosingRoleOfIntersection_eq_terminalTime_succ intersection
+
+/-- The arithmetic mediating role is indexed by the successor of terminal time. -/
+theorem arithmeticIndexedDiagonalParity_mediatingRole_eq_terminalTime_succ
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    (arithmeticIndexedDiagonalParityOfIntersection intersection).mediatingRole =
+      NatEnrichedParityRole.mediatingValue
+        ((arithmeticIndexedDiagonalParityOfIntersection intersection).terminalTime + 1) :=
+  arithmeticMediatingRoleOfIntersection_eq_terminalTime_succ intersection
+
+/-! ## Positive-window indexed diagonal parity -/
+
+/--
+Positive-window indexed diagonal parity.
+
+The positive diagonal witness stays sourced in `HeightDiagonal`: it certifies
+that the realized height has a positive canonical diagonal.  The post-peak
+window then produces a repeated-index terminal intersection, and the indexed
+parity is read on that terminal intersection.
+-/
+structure ArithmeticPositiveWindowIndexedDiagonalParity
+    {step : Nat -> Nat}
+    {start : Nat}
+    (cert : NatTrajectoryFinitePrefixHeightCertificate step start) :
+    Type where
+  window : NatTrajectoryPostPeakWindow cert
+  positiveDiagonal :
+    NatTrajectoryPositiveDiagonalHeightWitness cert
+  positiveWitness_pos :
+    0 < positiveDiagonal.positiveWitness
+  boundedWindow :
+    NatTrajectoryBoundedWindow step start cert.peakTime cert.height
+  boundedWindow_eq :
+    boundedWindow = boundedWindow_of_postPeakWindow window
+  windowCollision :
+    NatTrajectoryWindowCollision step start cert.peakTime (cert.height + 2)
+  windowCollision_eq :
+    windowCollision = windowCollision_of_boundedWindow boundedWindow
+  trajectoryCollision :
+    NatTrajectoryRepeatedIndexCollision step start
+  trajectoryCollision_eq :
+    trajectoryCollision = trajectoryCollision_of_windowCollision windowCollision
+  repeatedIndexCollision :
+    RepeatedIndexCollision
+  repeatedIndexCollision_eq :
+    repeatedIndexCollision =
+      repeatedIndexCollision_of_trajectoryCollision trajectoryCollision
+  terminalIntersection :
+    PrimitiveMemoryReadingIntersection
+      (repeatedIndexBranch repeatedIndexCollision)
+  terminalIntersection_eq :
+    terminalIntersection = repeatedIndexIntersection repeatedIndexCollision
+  indexedParity :
+    ArithmeticIndexedDiagonalParity terminalIntersection
+  indexedParity_eq :
+    indexedParity =
+      arithmeticIndexedDiagonalParityOfIntersection terminalIntersection
+  terminalParity_carries_diagonal :
+    indexedParity.diagonal =
+      diagonalCertificateOfIntersection terminalIntersection
+  terminalTime_eq_rightOffset :
+    terminalTimeOfIntersection terminalIntersection =
+      cert.peakTime + windowCollision.rightOffset
+  terminalExcess_eq_rightOffset_succ :
+    formedPositiveExcessOfIntersection terminalIntersection =
+      cert.peakTime + windowCollision.rightOffset + 1
+
+/--
+Canonical positive-window indexed diagonal parity generated by a post-peak
+window.
+-/
+def arithmeticPositiveWindowIndexedDiagonalParityOfPostPeakWindow
+    {step : Nat -> Nat}
+    {start : Nat}
+    {cert : NatTrajectoryFinitePrefixHeightCertificate step start}
+    (window : NatTrajectoryPostPeakWindow cert) :
+    ArithmeticPositiveWindowIndexedDiagonalParity cert where
+  window := window
+  positiveDiagonal :=
+    natTrajectoryPositiveDiagonalHeightWitness cert
+  positiveWitness_pos :=
+    (natTrajectoryPositiveDiagonalHeightWitness cert).positiveWitness_pos
+  boundedWindow :=
+    boundedWindow_of_postPeakWindow window
+  boundedWindow_eq := rfl
+  windowCollision :=
+    windowCollision_of_boundedWindow
+      (boundedWindow_of_postPeakWindow window)
+  windowCollision_eq := rfl
+  trajectoryCollision :=
+    trajectoryCollision_of_windowCollision
+      (windowCollision_of_boundedWindow
+        (boundedWindow_of_postPeakWindow window))
+  trajectoryCollision_eq := rfl
+  repeatedIndexCollision :=
+    repeatedIndexCollision_of_trajectoryCollision
+      (trajectoryCollision_of_windowCollision
+        (windowCollision_of_boundedWindow
+          (boundedWindow_of_postPeakWindow window)))
+  repeatedIndexCollision_eq := rfl
+  terminalIntersection :=
+    repeatedIndexIntersection
+      (repeatedIndexCollision_of_trajectoryCollision
+        (trajectoryCollision_of_windowCollision
+          (windowCollision_of_boundedWindow
+            (boundedWindow_of_postPeakWindow window))))
+  terminalIntersection_eq := rfl
+  indexedParity :=
+    arithmeticIndexedDiagonalParityOfIntersection
+      (repeatedIndexIntersection
+        (repeatedIndexCollision_of_trajectoryCollision
+          (trajectoryCollision_of_windowCollision
+            (windowCollision_of_boundedWindow
+              (boundedWindow_of_postPeakWindow window)))))
+  indexedParity_eq := rfl
+  terminalParity_carries_diagonal := rfl
+  terminalTime_eq_rightOffset :=
+    windowCollision_terminalTime_eq
+      (windowCollision_of_boundedWindow
+        (boundedWindow_of_postPeakWindow window))
+  terminalExcess_eq_rightOffset_succ :=
+    windowCollision_terminalExcess_eq
+      (windowCollision_of_boundedWindow
+        (boundedWindow_of_postPeakWindow window))
+
+/-- The package carries the positive witness produced by the height certificate. -/
+theorem arithmeticPositiveWindowIndexedDiagonalParity_carries_positiveWitness
+    {step : Nat -> Nat}
+    {start : Nat}
+    {cert : NatTrajectoryFinitePrefixHeightCertificate step start}
+    (window : NatTrajectoryPostPeakWindow cert) :
+    (arithmeticPositiveWindowIndexedDiagonalParityOfPostPeakWindow
+        window).positiveDiagonal.positiveWitness =
+      formedPositiveExcessOfIntersection
+        (arithmeticPositiveWindowIndexedDiagonalParityOfPostPeakWindow
+          window).positiveDiagonal.diagonalIntersection :=
+  (arithmeticPositiveWindowIndexedDiagonalParityOfPostPeakWindow
+    window).positiveDiagonal.positiveWitness_eq
+
+/-- The positive witness carried by the package is positive. -/
+theorem arithmeticPositiveWindowIndexedDiagonalParity_positiveWitness_pos
+    {step : Nat -> Nat}
+    {start : Nat}
+    {cert : NatTrajectoryFinitePrefixHeightCertificate step start}
+    (window : NatTrajectoryPostPeakWindow cert) :
+    0 <
+      (arithmeticPositiveWindowIndexedDiagonalParityOfPostPeakWindow
+        window).positiveDiagonal.positiveWitness :=
+  (arithmeticPositiveWindowIndexedDiagonalParityOfPostPeakWindow
+    window).positiveWitness_pos
+
+/-- The package uses the bounded window produced by the post-peak window. -/
+theorem arithmeticPositiveWindowIndexedDiagonalParity_carries_boundedWindow
+    {step : Nat -> Nat}
+    {start : Nat}
+    {cert : NatTrajectoryFinitePrefixHeightCertificate step start}
+    (window : NatTrajectoryPostPeakWindow cert) :
+    (arithmeticPositiveWindowIndexedDiagonalParityOfPostPeakWindow
+        window).boundedWindow =
+      boundedWindow_of_postPeakWindow window :=
+  rfl
+
+/-- The package uses the finite-window collision produced from its bounded window. -/
+theorem arithmeticPositiveWindowIndexedDiagonalParity_carries_windowCollision
+    {step : Nat -> Nat}
+    {start : Nat}
+    {cert : NatTrajectoryFinitePrefixHeightCertificate step start}
+    (window : NatTrajectoryPostPeakWindow cert) :
+    (arithmeticPositiveWindowIndexedDiagonalParityOfPostPeakWindow
+        window).windowCollision =
+      windowCollision_of_boundedWindow
+        (arithmeticPositiveWindowIndexedDiagonalParityOfPostPeakWindow
+          window).boundedWindow :=
+  rfl
+
+/-- The package reads indexed diagonal parity on the terminal intersection. -/
+theorem arithmeticPositiveWindowIndexedDiagonalParity_carries_indexedParity
+    {step : Nat -> Nat}
+    {start : Nat}
+    {cert : NatTrajectoryFinitePrefixHeightCertificate step start}
+    (window : NatTrajectoryPostPeakWindow cert) :
+    (arithmeticPositiveWindowIndexedDiagonalParityOfPostPeakWindow
+        window).indexedParity =
+      arithmeticIndexedDiagonalParityOfIntersection
+        (arithmeticPositiveWindowIndexedDiagonalParityOfPostPeakWindow
+          window).terminalIntersection :=
+  rfl
+
+/-- The terminal indexed parity carries the diagonal of the terminal intersection. -/
+theorem arithmeticPositiveWindowIndexedDiagonalParity_terminalParity_carries_diagonal
+    {step : Nat -> Nat}
+    {start : Nat}
+    {cert : NatTrajectoryFinitePrefixHeightCertificate step start}
+    (window : NatTrajectoryPostPeakWindow cert) :
+    (arithmeticPositiveWindowIndexedDiagonalParityOfPostPeakWindow
+        window).indexedParity.diagonal =
+      diagonalCertificateOfIntersection
+        (arithmeticPositiveWindowIndexedDiagonalParityOfPostPeakWindow
+          window).terminalIntersection :=
+  rfl
+
+/-- The terminal time is the absolute right endpoint of the produced collision. -/
+theorem arithmeticPositiveWindowIndexedDiagonalParity_terminalTime_eq_rightOffset
+    {step : Nat -> Nat}
+    {start : Nat}
+    {cert : NatTrajectoryFinitePrefixHeightCertificate step start}
+    (window : NatTrajectoryPostPeakWindow cert) :
+    terminalTimeOfIntersection
+        (arithmeticPositiveWindowIndexedDiagonalParityOfPostPeakWindow
+          window).terminalIntersection =
+      cert.peakTime +
+        (arithmeticPositiveWindowIndexedDiagonalParityOfPostPeakWindow
+          window).windowCollision.rightOffset :=
+  windowCollision_terminalTime_eq
+    (windowCollision_of_boundedWindow
+      (boundedWindow_of_postPeakWindow window))
+
+/-- The terminal formed excess is the successor of the absolute right endpoint. -/
+theorem arithmeticPositiveWindowIndexedDiagonalParity_terminalExcess_eq_rightOffset_succ
+    {step : Nat -> Nat}
+    {start : Nat}
+    {cert : NatTrajectoryFinitePrefixHeightCertificate step start}
+    (window : NatTrajectoryPostPeakWindow cert) :
+    formedPositiveExcessOfIntersection
+        (arithmeticPositiveWindowIndexedDiagonalParityOfPostPeakWindow
+          window).terminalIntersection =
+      cert.peakTime +
+        (arithmeticPositiveWindowIndexedDiagonalParityOfPostPeakWindow
+          window).windowCollision.rightOffset + 1 :=
+  windowCollision_terminalExcess_eq
+    (windowCollision_of_boundedWindow
+      (boundedWindow_of_postPeakWindow window))
+
 /-- Arithmetic code of the closing role extracted from one exact dynamic gap. -/
 def arithmeticClosingCodeOfIntersection
     {branch : MemoryBranch}
@@ -800,6 +1157,22 @@ end Meta
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticMediatingRoleOfIntersection_eq
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticClosingRoleOfIntersection_eq_terminalTime_succ
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticMediatingRoleOfIntersection_eq_terminalTime_succ
+#print axioms Meta.EnrichedNatClosedStabilityInstance.ArithmeticIndexedDiagonalParity
+#print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticIndexedDiagonalParityOfIntersection
+#print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticIndexedDiagonalParity_carries_diagonal
+#print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticIndexedDiagonalParity_formedExcess_eq_terminalTime_succ
+#print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticIndexedDiagonalParity_closingRole_eq_terminalTime_succ
+#print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticIndexedDiagonalParity_mediatingRole_eq_terminalTime_succ
+#print axioms Meta.EnrichedNatClosedStabilityInstance.ArithmeticPositiveWindowIndexedDiagonalParity
+#print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticPositiveWindowIndexedDiagonalParityOfPostPeakWindow
+#print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticPositiveWindowIndexedDiagonalParity_carries_positiveWitness
+#print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticPositiveWindowIndexedDiagonalParity_positiveWitness_pos
+#print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticPositiveWindowIndexedDiagonalParity_carries_boundedWindow
+#print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticPositiveWindowIndexedDiagonalParity_carries_windowCollision
+#print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticPositiveWindowIndexedDiagonalParity_carries_indexedParity
+#print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticPositiveWindowIndexedDiagonalParity_terminalParity_carries_diagonal
+#print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticPositiveWindowIndexedDiagonalParity_terminalTime_eq_rightOffset
+#print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticPositiveWindowIndexedDiagonalParity_terminalExcess_eq_rightOffset_succ
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticClosingCodeOfIntersection
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticMediatingCodeOfIntersection
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticClosingCodeOfIntersection_eq
