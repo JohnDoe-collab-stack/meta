@@ -47,52 +47,6 @@ theorem collatzDiagonalSupport_eq_consumerTerminalExcess
         (collatzDiagonalConsumerIndex n)).terminalExcess :=
   Eq.symm (collatzDiagonalConsumer_terminalExcess_eq_support n)
 
-/-! ## Support carried by an arbitrary divergence -/
-
-/-- The support of a carried divergence is the relaxed support selected by its role. -/
-theorem collatzRoleDivergence_support_eq_relaxed
-    {n : Nat}
-    (divergence : CollatzRoleDivergenceMaximum n) :
-    divergence.support =
-      collatzRelaxedRightSupport n := by
-  rw [divergence.support_eq_relaxedPayload]
-  rw [divergence.relaxedRightRole_eq]
-  rfl
-
-/-- The support of a carried divergence coincides with the canonical support. -/
-theorem collatzRoleDivergence_support_eq_canonical
-    {n : Nat}
-    (divergence : CollatzRoleDivergenceMaximum n) :
-    divergence.support =
-      (collatzRoleDivergenceMaximum n).support := by
-  rw [collatzRoleDivergence_support_eq_relaxed divergence]
-  rfl
-
-/--
-The countdown row at the consumer index consumes the support of any carried
-Collatz role divergence.
--/
-theorem collatzDiagonalConsumer_terminalExcess_eq_divergenceSupport
-    {n : Nat}
-    (divergence : CollatzRoleDivergenceMaximum n) :
-    (countdownTerminalDynamicGapRow
-        (collatzDiagonalConsumerIndex n)).terminalExcess =
-      divergence.support := by
-  rw [collatzDiagonalConsumer_terminalExcess_eq_support n]
-  exact Eq.symm
-    (collatzRoleDivergence_support_eq_canonical divergence)
-
-/-- A carried Collatz divergence support is consumed as terminal excess. -/
-theorem collatzDivergenceSupport_eq_consumerTerminalExcess
-    {n : Nat}
-    (divergence : CollatzRoleDivergenceMaximum n) :
-    divergence.support =
-      (countdownTerminalDynamicGapRow
-        (collatzDiagonalConsumerIndex n)).terminalExcess :=
-  Eq.symm
-    (collatzDiagonalConsumer_terminalExcess_eq_divergenceSupport
-      divergence)
-
 /-! ## Diagonal consumption package -/
 
 /--
@@ -132,14 +86,13 @@ structure CollatzDiagonalConsumption
   support_eq_terminalExcess :
     divergence.support = consumerRow.terminalExcess
 
-/-- Consumption of the support carried by a specific Collatz role divergence. -/
-def collatzDiagonalConsumptionOfDivergence
-    {n : Nat}
-    (divergence : CollatzRoleDivergenceMaximum n) :
+/-- Canonical consumption of the carried Collatz diagonal support. -/
+def collatzDiagonalConsumption
+    (n : Nat) :
     CollatzDiagonalConsumption n where
-  divergence := divergence
+  divergence := collatzRoleDivergenceMaximum n
   positiveDiagonal :=
-    collatzRoleDivergencePositiveDiagonalWitness divergence
+    canonicalCollatzRoleDivergencePositiveDiagonalWitness n
   positiveDiagonal_roleDivergence_eq := rfl
   consumerIntersection :=
     countdownTerminalIntersection (collatzDiagonalConsumerIndex n)
@@ -148,14 +101,7 @@ def collatzDiagonalConsumptionOfDivergence
     countdownTerminalDynamicGapRow (collatzDiagonalConsumerIndex n)
   consumerRow_eq := rfl
   support_eq_terminalExcess :=
-    collatzDivergenceSupport_eq_consumerTerminalExcess divergence
-
-/-- Canonical consumption of the carried Collatz diagonal support. -/
-def collatzDiagonalConsumption
-    (n : Nat) :
-    CollatzDiagonalConsumption n :=
-  collatzDiagonalConsumptionOfDivergence
-    (collatzRoleDivergenceMaximum n)
+    collatzDiagonalSupport_eq_consumerTerminalExcess n
 
 /-- The canonical package consumes exactly the support carried by its divergence. -/
 theorem collatzDiagonalConsumption_support_eq_terminalExcess
@@ -171,22 +117,6 @@ theorem collatzDiagonalConsumption_positiveDiagonal_eq
       (collatzDiagonalConsumption n).divergence :=
   (collatzDiagonalConsumption n).positiveDiagonal_roleDivergence_eq
 
-/-- The carried-divergence package consumes exactly its divergence support. -/
-theorem collatzDiagonalConsumptionOfDivergence_support_eq_terminalExcess
-    {n : Nat}
-    (divergence : CollatzRoleDivergenceMaximum n) :
-    (collatzDiagonalConsumptionOfDivergence divergence).divergence.support =
-      (collatzDiagonalConsumptionOfDivergence divergence).consumerRow.terminalExcess :=
-  (collatzDiagonalConsumptionOfDivergence divergence).support_eq_terminalExcess
-
-/-- The carried-divergence package uses the internal positive diagonal of its divergence. -/
-theorem collatzDiagonalConsumptionOfDivergence_positiveDiagonal_eq
-    {n : Nat}
-    (divergence : CollatzRoleDivergenceMaximum n) :
-    (collatzDiagonalConsumptionOfDivergence divergence).positiveDiagonal.roleDivergence =
-      (collatzDiagonalConsumptionOfDivergence divergence).divergence :=
-  (collatzDiagonalConsumptionOfDivergence divergence).positiveDiagonal_roleDivergence_eq
-
 end EnrichedNatClosedStabilityInstance
 end Meta
 
@@ -194,15 +124,8 @@ end Meta
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDiagonalConsumerIndex
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDiagonalConsumer_terminalExcess_eq_support
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDiagonalSupport_eq_consumerTerminalExcess
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRoleDivergence_support_eq_relaxed
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRoleDivergence_support_eq_canonical
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDiagonalConsumer_terminalExcess_eq_divergenceSupport
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDivergenceSupport_eq_consumerTerminalExcess
 #print axioms Meta.EnrichedNatClosedStabilityInstance.CollatzDiagonalConsumption
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDiagonalConsumptionOfDivergence
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDiagonalConsumption
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDiagonalConsumption_support_eq_terminalExcess
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDiagonalConsumption_positiveDiagonal_eq
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDiagonalConsumptionOfDivergence_support_eq_terminalExcess
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDiagonalConsumptionOfDivergence_positiveDiagonal_eq
 /- AXIOM_AUDIT_END -/
