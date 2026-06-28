@@ -248,19 +248,28 @@ theorem collatzRelaxedRightSupport_eq
 /--
 Local Collatz role divergence over one enriched Nat role index.
 
-The support is produced by the relaxed right role through
-`natEnrichedParityRolePayload`; it is not supplied as an external height.
+The structure keeps the classical bilateral gap as a base, but records a
+separate relaxed right role.  The support is produced by that relaxed role
+through `natEnrichedParityRolePayload`; it is not supplied as an external
+height.
 -/
 structure CollatzRoleDivergenceMaximum
     (n : Nat) where
+  baseGap : NatEnrichedParityBilateralGap n
+  base_leftStep_eq_one : baseGap.leftStep = 1
+  base_rightStep_eq_one : baseGap.rightStep = 1
   formedRole : NatEnrichedParityRole
   mediatingRole : NatEnrichedParityRole
+  classicalRightRole : NatEnrichedParityRole
   relaxedRightRole : NatEnrichedParityRole
   support : Nat
   formedRole_eq :
     formedRole = NatEnrichedParityRole.closingExcess n
   mediatingRole_eq :
     mediatingRole = NatEnrichedParityRole.mediatingValue n
+  classicalRightRole_eq :
+    classicalRightRole =
+      NatEnrichedParityRole.closingExcess (n + baseGap.rightStep)
   relaxedRightRole_eq :
     relaxedRightRole = collatzShadowReturnRole n
   support_eq_relaxedPayload :
@@ -271,17 +280,23 @@ structure CollatzRoleDivergenceMaximum
 /--
 Canonical local Collatz divergence package.
 
-The relaxed right role is the source of `support`.
+The classical right step remains stored in `baseGap.rightStep`; the relaxed
+right role is stored separately and is the source of `support`.
 -/
 def collatzRoleDivergenceMaximum
     (n : Nat) :
     CollatzRoleDivergenceMaximum n where
+  baseGap := natEnrichedParityClassicalBilateralGap n
+  base_leftStep_eq_one := rfl
+  base_rightStep_eq_one := rfl
   formedRole := NatEnrichedParityRole.closingExcess n
   mediatingRole := NatEnrichedParityRole.mediatingValue n
+  classicalRightRole := NatEnrichedParityRole.closingExcess (n + 1)
   relaxedRightRole := collatzShadowReturnRole n
   support := collatzRelaxedRightSupport n
   formedRole_eq := rfl
   mediatingRole_eq := rfl
+  classicalRightRole_eq := rfl
   relaxedRightRole_eq := rfl
   support_eq_relaxedPayload := rfl
   relaxedRightRole_eq_support := rfl

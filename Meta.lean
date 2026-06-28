@@ -24,7 +24,6 @@ import Meta.Arithmetic.CountdownDynamicGap
 import Meta.Arithmetic.CountdownGapContraction
 import Meta.Collatz.OperationalParity
 import Meta.Collatz.Countdown
-import Meta.Collatz.DiagonalConsumption
 import Meta.Dynamics.ObservedDiscrete
 import Meta.Dynamics.ObservedWindow
 import Meta.Dynamics.ObservedDynamicGap
