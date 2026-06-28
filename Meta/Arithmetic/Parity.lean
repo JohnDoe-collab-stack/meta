@@ -572,6 +572,78 @@ def natEnrichedParityRoleCode :
   | NatEnrichedParityRole.closingExcess k => 2 * k
   | NatEnrichedParityRole.mediatingValue k => 2 * k + 1
 
+/-! ## Bilateral arithmetic gap around the mediating role -/
+
+/-- The mediating role is one arithmetic step after the closing role at the same index. -/
+theorem natEnrichedParityRoleCode_leftAdjacency
+    (k : Nat) :
+    natEnrichedParityRoleCode
+        (NatEnrichedParityRole.mediatingValue k) =
+      natEnrichedParityRoleCode
+        (NatEnrichedParityRole.closingExcess k) + 1 :=
+  rfl
+
+/--
+The next closing role is one arithmetic step after the mediating role.
+
+This is kept as a separate theorem from left adjacency: the two sides are not
+identified as a single symmetric fact.
+-/
+theorem natEnrichedParityRoleCode_rightAdjacency
+    (k : Nat) :
+    natEnrichedParityRoleCode
+        (NatEnrichedParityRole.closingExcess (k + 1)) =
+      natEnrichedParityRoleCode
+        (NatEnrichedParityRole.mediatingValue k) + 1 := by
+  change 2 * (k + 1) = (2 * k + 1) + 1
+  rw [Nat.mul_add, Nat.mul_one]
+
+/--
+Bilateral arithmetic gap around one mediating role.
+
+The left and right steps are stored independently.  The structure deliberately
+does not contain a field identifying them, so later instances can relax one
+side without changing the other.
+-/
+structure NatEnrichedParityBilateralGap
+    (k : Nat) where
+  leftStep : Nat
+  rightStep : Nat
+  mediating_from_left :
+    natEnrichedParityRoleCode
+        (NatEnrichedParityRole.mediatingValue k) =
+      natEnrichedParityRoleCode
+        (NatEnrichedParityRole.closingExcess k) + leftStep
+  closing_from_right :
+    natEnrichedParityRoleCode
+        (NatEnrichedParityRole.closingExcess (k + 1)) =
+      natEnrichedParityRoleCode
+        (NatEnrichedParityRole.mediatingValue k) + rightStep
+
+/--
+The classical enriched-Nat bilateral gap has unit steps on both sides, without
+collapsing the two step fields into one symmetric datum.
+-/
+def natEnrichedParityClassicalBilateralGap
+    (k : Nat) :
+    NatEnrichedParityBilateralGap k where
+  leftStep := 1
+  rightStep := 1
+  mediating_from_left := natEnrichedParityRoleCode_leftAdjacency k
+  closing_from_right := natEnrichedParityRoleCode_rightAdjacency k
+
+/-- The left step of the classical enriched-Nat bilateral gap is `1`. -/
+theorem natEnrichedParityClassicalBilateralGap_leftStep_eq_one
+    (k : Nat) :
+    (natEnrichedParityClassicalBilateralGap k).leftStep = 1 :=
+  rfl
+
+/-- The right step of the classical enriched-Nat bilateral gap is `1`. -/
+theorem natEnrichedParityClassicalBilateralGap_rightStep_eq_one
+    (k : Nat) :
+    (natEnrichedParityClassicalBilateralGap k).rightStep = 1 :=
+  rfl
+
 /-- Closing roles code as classical even numbers. -/
 theorem closingExcess_code_even
     (k : Nat) :
@@ -736,6 +808,32 @@ theorem arithmeticMediatingCodeOfIntersection_eq
   rw [arithmeticMediatingRoleOfIntersection_eq intersection]
   rfl
 
+/--
+The bilateral arithmetic gap carried by the dynamic intersection at its formed
+positive excess.
+-/
+def arithmeticBilateralGapOfIntersection
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    NatEnrichedParityBilateralGap
+      (formedPositiveExcessOfIntersection intersection) :=
+  natEnrichedParityClassicalBilateralGap
+    (formedPositiveExcessOfIntersection intersection)
+
+/-- The left step of the intersection bilateral gap is `1`. -/
+theorem arithmeticBilateralGapOfIntersection_leftStep_eq_one
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    (arithmeticBilateralGapOfIntersection intersection).leftStep = 1 :=
+  rfl
+
+/-- The right step of the intersection bilateral gap is `1`. -/
+theorem arithmeticBilateralGapOfIntersection_rightStep_eq_one
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    (arithmeticBilateralGapOfIntersection intersection).rightStep = 1 :=
+  rfl
+
 /-- The closing code extracted from the dynamic gap is Mathlib-even. -/
 theorem arithmeticClosingCodeOfIntersection_even
     {branch : MemoryBranch}
@@ -788,6 +886,12 @@ end Meta
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticDynamicRow_visible_eq_not_interface_eq
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticDynamicRow_not_orderContractive
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityRoleCode
+#print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityRoleCode_leftAdjacency
+#print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityRoleCode_rightAdjacency
+#print axioms Meta.EnrichedNatClosedStabilityInstance.NatEnrichedParityBilateralGap
+#print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityClassicalBilateralGap
+#print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityClassicalBilateralGap_leftStep_eq_one
+#print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityClassicalBilateralGap_rightStep_eq_one
 #print axioms Meta.EnrichedNatClosedStabilityInstance.closingExcess_code_even
 #print axioms Meta.EnrichedNatClosedStabilityInstance.mediatingValue_code_odd
 #print axioms Meta.EnrichedNatClosedStabilityInstance.isClosingCode_iff_evenClassical
@@ -804,6 +908,9 @@ end Meta
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticMediatingCodeOfIntersection
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticClosingCodeOfIntersection_eq
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticMediatingCodeOfIntersection_eq
+#print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticBilateralGapOfIntersection
+#print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticBilateralGapOfIntersection_leftStep_eq_one
+#print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticBilateralGapOfIntersection_rightStep_eq_one
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticClosingCodeOfIntersection_even
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticMediatingCodeOfIntersection_oddClassical
 /- AXIOM_AUDIT_END -/
