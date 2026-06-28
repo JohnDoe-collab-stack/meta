@@ -235,44 +235,131 @@ exhiber la divergence maximale
 et montrer qu'elle est le temoin positif de diagonalisation interne.
 ```
 
-## Forme Lean attendue
+## Forme Lean implementee
 
-La structure a viser doit separer les niveaux :
-
-```lean
-structure GeneralOddRelaxedMediation (Role : Type) where
-  mediatorRole : Role
-  leftLink : Role
-  rightLink : Role
-  relaxation : Prop
-  asymmetry : Prop
-  maximality : Prop
-```
-
-Le nom exact reste a fixer dans le code. Le point important est que la
-structure doit porter distinctement, sans recoder le role mediateur comme
-payload numerique :
+La structure implementee se trouve dans :
 
 ```text
-role mediateur
-raccord gauche
-raccord droit
-relaxation
-asymetrie
-maximalite
+Meta/Arithmetic/Parity.lean
 ```
 
-Puis le vrai theoreme cible doit avoir la forme :
+Elle separe les niveaux sans recoder la mediation par la forme non relaxee :
 
 ```lean
-theorem positiveDiagonalWitness_of_maximalRelaxedMediation
-    {Role : Type}
-    (odd : GeneralOddRelaxedMediation Role) :
-    PositiveInternalDiagonalWitness odd
+structure NatEnrichedParityRelaxedBilateralGap
+    (k : Nat) where
+  leftRole : NatEnrichedParityRole
+  mediatingRole : NatEnrichedParityRole
+  rightPayload : Nat
+  rightRole : NatEnrichedParityRole
+  same_left_mediating_payload :
+    natEnrichedParityRolePayload leftRole =
+      natEnrichedParityRolePayload mediatingRole
+  separated_left_mediating :
+    leftRole = mediatingRole -> False
+  divergence : Nat
+  right_payload_eq_left_plus_divergence :
+    natEnrichedParityRolePayload rightRole =
+      natEnrichedParityRolePayload leftRole + divergence
+  divergence_pos :
+    0 < divergence
 ```
 
-La cible n'est pas encore de fournir ce code. La cible de ce document est de
-fixer la lecture afin d'eviter de reconstruire une contraction non relaxee.
+Le cas maximalement relaxe est :
+
+```lean
+natEnrichedParityMaximallyRelaxedBilateralGap
+```
+
+et sa divergence est :
+
+```lean
+natEnrichedParityMaximalRelaxedDivergence
+```
+
+Le raccord strict au core est donne par :
+
+```lean
+natEnrichedParityRelaxedDiagonalCertificate
+```
+
+qui produit un vrai :
+
+```lean
+DiagonalCertificate
+  NatEnrichedParityRole
+  Nat
+  natEnrichedParityRolePayload
+```
+
+et par :
+
+```lean
+natEnrichedParityRelaxedProjectionObstruction
+```
+
+qui produit :
+
+```lean
+ProjectionObstruction
+  NatEnrichedParityRole
+  Nat
+  natEnrichedParityRolePayload
+```
+
+Le temoin strict est donc :
+
+```lean
+structure NatEnrichedParityPositiveInternalDiagonalWitness
+    (k : Nat) where
+  relaxedGap : NatEnrichedParityRelaxedBilateralGap k
+  diagonalCertificate :
+    DiagonalCertificate
+      NatEnrichedParityRole
+      Nat
+      natEnrichedParityRolePayload
+  projectionObstruction :
+    ProjectionObstruction
+      NatEnrichedParityRole
+      Nat
+      natEnrichedParityRolePayload
+  witness : Nat
+  witness_eq_divergence :
+    witness = relaxedGap.divergence
+  witness_pos :
+    0 < witness
+  witness_eq_maximal :
+    witness = natEnrichedParityMaximalRelaxedDivergence k
+```
+
+Le constructeur principal est :
+
+```lean
+natEnrichedParityPositiveInternalDiagonalWitnessOfMaximallyRelaxedGap
+```
+
+Il donne simultanement :
+
+```text
+une divergence positive,
+un vrai DiagonalCertificate core,
+une ProjectionObstruction core,
+et l'identification du temoin avec la divergence maximale relaxee.
+```
+
+Enfin, l'incompatibilite statique avec la forme non relaxee est formalisee par :
+
+```lean
+natEnrichedParityMaximalRelaxedDivergence_ne_nonrelaxedMediatingCode
+```
+
+Ce resultat dit que la divergence maximale relaxee ne coincide pas avec :
+
+```lean
+natEnrichedParityRoleCode (NatEnrichedParityRole.mediatingValue k)
+```
+
+au meme index `k`.
 
 ## Formule courte
 
