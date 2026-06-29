@@ -16,6 +16,20 @@ namespace EnrichedNatClosedStabilityInstance
 
 open ClosedStabilityTheorem
 
+/-! ## Generic countdown consumption of the fibrewise structural peak -/
+
+/--
+For every enriched Nat index, the fibrewise structural peak is consumed as the
+terminal excess of the canonical countdown at the doubled index.
+-/
+theorem natEnrichedParityFibrewiseStructuralPeak_eq_countdownTerminalExcess
+    (k : Nat) :
+    natEnrichedParityFibrewiseStructuralPeak k =
+      formedPositiveExcessOfIntersection
+        (countdownTerminalIntersection (k + k)) := by
+  rw [natEnrichedParityFibrewiseStructuralPeak_eq_double_add_two]
+  rw [countdownArithmeticGapTerminalExcess_eq_n_plus_two]
+
 /-! ## Relaxed diagonal at the countdown terminal index -/
 
 /--
@@ -130,6 +144,7 @@ end EnrichedNatClosedStabilityInstance
 end Meta
 
 /- AXIOM_AUDIT_BEGIN -/
+#print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityFibrewiseStructuralPeak_eq_countdownTerminalExcess
 #print axioms Meta.EnrichedNatClosedStabilityInstance.countdownRelaxedPositiveInternalDiagonalWitness
 #print axioms Meta.EnrichedNatClosedStabilityInstance.countdownRelaxedGap
 #print axioms Meta.EnrichedNatClosedStabilityInstance.countdownRelaxedDiagonalCertificate
