@@ -26,6 +26,7 @@ import Meta.Arithmetic.CountdownRelaxedParity
 import Meta.Collatz.OperationalParity
 import Meta.Collatz.Countdown
 import Meta.Collatz.CountdownConsumptionBridge
+import Meta.Collatz.DynamicClosureLoop
 import Meta.Dynamics.ObservedDiscrete
 import Meta.Dynamics.ObservedWindow
 import Meta.Dynamics.ObservedDynamicGap
@@ -53,4 +54,6 @@ import Meta.Synthesis.TarskiBethBellGap
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRelaxedPositiveDiagonalValue_eq_countdownTerminalExcess
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRelaxedCountdownConsumer_closingRole_eq_positiveDiagonal
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzFibrewiseStructuralPeakPackage
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDynamicClosureLoop
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDynamicClosureLoop_reenters_as_closing
 /- AXIOM_AUDIT_END -/
