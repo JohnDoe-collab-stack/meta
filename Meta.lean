@@ -44,3 +44,8 @@ import Meta.Bell.Tsirelson.StandardCertificate
 import Meta.Bell.Tsirelson.AlgebraicCHSH
 import Meta.Synthesis.TarskiBethGap
 import Meta.Synthesis.TarskiBethBellGap
+
+/- AXIOM_AUDIT_BEGIN -/
+#print axioms Meta.EnrichedNatClosedStabilityInstance.countdownRelaxedPositiveInternalDiagonalWitness
+#print axioms Meta.EnrichedNatClosedStabilityInstance.countdownRelaxedPositiveDiagonalValue_eq_maximalDivergence_n_plus_two
+/- AXIOM_AUDIT_END -/
