@@ -280,6 +280,16 @@ theorem natEnrichedParityMaximalRelaxedDivergence_pos
     0 < natEnrichedParityMaximalRelaxedDivergence k :=
   Nat.succ_pos (k + Nat.succ k)
 
+/--
+The maximal relaxed divergence is a double mediation followed by the two
+terminal poles consumed by countdown.
+-/
+theorem natEnrichedParityMaximalRelaxedDivergence_eq_double_add_two
+    (k : Nat) :
+    natEnrichedParityMaximalRelaxedDivergence k = (k + k) + 2 := by
+  unfold natEnrichedParityMaximalRelaxedDivergence
+  rw [Nat.add_succ]
+
 /-- Right payload obtained by adding the maximal relaxed divergence to the left payload. -/
 def natEnrichedParityMaximallyRelaxedRightPayload
     (k : Nat) :
@@ -1089,6 +1099,7 @@ end Meta
 #print axioms Meta.EnrichedNatClosedStabilityInstance.NatEnrichedParityRelaxedBilateralGap
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityMaximalRelaxedDivergence
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityMaximalRelaxedDivergence_pos
+#print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityMaximalRelaxedDivergence_eq_double_add_two
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityMaximallyRelaxedRightPayload
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityMaximallyRelaxedBilateralGap
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityRelaxedDiagonalCertificate
