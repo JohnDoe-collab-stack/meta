@@ -59,6 +59,38 @@ theorem collatzRelaxedPositiveDiagonalValue_eq_countdownTerminalExcess
   rw [countdownArithmeticGapTerminalExcess_eq_n_plus_two]
   rw [natEnrichedParityMaximalRelaxedDivergence_eq_double_add_two]
 
+/-! ## Fibrewise structural peak activated by Collatz -/
+
+/--
+The fibrewise structural peak met by one Collatz operational intersection.
+
+Collatz does not create this peak.  The intersection activates the peak already
+carried by its formed enriched Nat index.
+-/
+def collatzFibrewiseStructuralPeak
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    Nat :=
+  collatzRelaxedPositiveDiagonalValueOfIntersection intersection
+
+/-- The Collatz peak is the enriched Nat peak of the formed index. -/
+theorem collatzFibrewiseStructuralPeak_eq_natPeak
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    collatzFibrewiseStructuralPeak intersection =
+      natEnrichedParityFibrewiseStructuralPeak
+        (formedPositiveExcessOfIntersection intersection) :=
+  collatzRelaxedPositiveDiagonalValue_eq_maximalDivergence intersection
+
+/-- The Collatz peak is consumed as terminal excess by the canonical countdown consumer. -/
+theorem collatzFibrewiseStructuralPeak_eq_countdownTerminalExcess
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    collatzFibrewiseStructuralPeak intersection =
+      formedPositiveExcessOfIntersection
+        (collatzRelaxedCountdownConsumerIntersection intersection) :=
+  collatzRelaxedPositiveDiagonalValue_eq_countdownTerminalExcess intersection
+
 /-! ## Formed reinsertion -/
 
 /--
@@ -76,8 +108,22 @@ theorem collatzRelaxedCountdownConsumer_closingRole_eq_positiveDiagonal
   rw [← collatzRelaxedPositiveDiagonalValue_eq_countdownTerminalExcess]
 
 /--
-Facade exposing that the positive value activated by Collatz reenters through a
-forming/closing role of the canonical countdown consumer.
+The peak activated by Collatz reenters through a forming/closing role of the
+canonical countdown consumer.
+-/
+theorem collatzFibrewiseStructuralPeak_reenters_as_closing
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    arithmeticClosingRoleOfIntersection
+        (collatzRelaxedCountdownConsumerIntersection intersection) =
+      NatEnrichedParityRole.closingExcess
+        (collatzFibrewiseStructuralPeak intersection) :=
+  collatzRelaxedCountdownConsumer_closingRole_eq_positiveDiagonal
+    intersection
+
+/--
+The positive value activated by Collatz reenters through a forming/closing role
+of the canonical countdown consumer.
 -/
 theorem collatzRelaxedCountdownConsumer_reenters_formingRole
     {branch : MemoryBranch}
@@ -92,6 +138,45 @@ theorem collatzRelaxedCountdownConsumer_reenters_formingRole
       rfl,
       collatzRelaxedCountdownConsumer_closingRole_eq_positiveDiagonal
         intersection⟩
+
+/--
+Structural package exposing the full fibrewise peak chain:
+formed index, Nat peak, countdown consumption, and closing reinsertion.
+-/
+structure CollatzFibrewiseStructuralPeakPackage
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) where
+  peak : Nat
+  peak_eq :
+    peak = collatzFibrewiseStructuralPeak intersection
+  peak_eq_natPeak :
+    peak =
+      natEnrichedParityFibrewiseStructuralPeak
+        (formedPositiveExcessOfIntersection intersection)
+  consumed_as_terminal_excess :
+    peak =
+      formedPositiveExcessOfIntersection
+        (collatzRelaxedCountdownConsumerIntersection intersection)
+  reenters_as_closing :
+    arithmeticClosingRoleOfIntersection
+        (collatzRelaxedCountdownConsumerIntersection intersection) =
+      NatEnrichedParityRole.closingExcess peak
+
+/-- The canonical fibrewise structural peak package for one Collatz intersection. -/
+def collatzFibrewiseStructuralPeakPackage
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    CollatzFibrewiseStructuralPeakPackage intersection where
+  peak := collatzFibrewiseStructuralPeak intersection
+  peak_eq := rfl
+  peak_eq_natPeak :=
+    collatzFibrewiseStructuralPeak_eq_natPeak intersection
+  consumed_as_terminal_excess :=
+    collatzFibrewiseStructuralPeak_eq_countdownTerminalExcess
+      intersection
+  reenters_as_closing :=
+    collatzFibrewiseStructuralPeak_reenters_as_closing
+      intersection
 
 /--
 Structural package for the Collatz/countdown loop:
@@ -149,8 +234,14 @@ end Meta
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRelaxedCountdownConsumerIndex
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRelaxedCountdownConsumerIntersection
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRelaxedPositiveDiagonalValue_eq_countdownTerminalExcess
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzFibrewiseStructuralPeak
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzFibrewiseStructuralPeak_eq_natPeak
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzFibrewiseStructuralPeak_eq_countdownTerminalExcess
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRelaxedCountdownConsumer_closingRole_eq_positiveDiagonal
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzFibrewiseStructuralPeak_reenters_as_closing
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRelaxedCountdownConsumer_reenters_formingRole
+#print axioms Meta.EnrichedNatClosedStabilityInstance.CollatzFibrewiseStructuralPeakPackage
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzFibrewiseStructuralPeakPackage
 #print axioms Meta.EnrichedNatClosedStabilityInstance.CollatzRelaxedCountdownReinsertion
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRelaxedCountdownReinsertion
 /- AXIOM_AUDIT_END -/

@@ -290,6 +290,38 @@ theorem natEnrichedParityMaximalRelaxedDivergence_eq_double_add_two
   unfold natEnrichedParityMaximalRelaxedDivergence
   rw [Nat.add_succ]
 
+/-! ## Fibrewise structural peak carried by each index -/
+
+/--
+The fibrewise structural peak carried by one enriched Nat index.
+
+This is not a trajectory height.  It is the maximal relaxed divergence already
+carried by the enriched parity structure at the index.
+-/
+def natEnrichedParityFibrewiseStructuralPeak
+    (k : Nat) :
+    Nat :=
+  natEnrichedParityMaximalRelaxedDivergence k
+
+/-- The fibrewise structural peak is exactly the maximal relaxed divergence. -/
+theorem natEnrichedParityFibrewiseStructuralPeak_eq_maximalDivergence
+    (k : Nat) :
+    natEnrichedParityFibrewiseStructuralPeak k =
+      natEnrichedParityMaximalRelaxedDivergence k :=
+  rfl
+
+/-- The fibrewise structural peak is strictly positive for every index. -/
+theorem natEnrichedParityFibrewiseStructuralPeak_pos
+    (k : Nat) :
+    0 < natEnrichedParityFibrewiseStructuralPeak k :=
+  natEnrichedParityMaximalRelaxedDivergence_pos k
+
+/-- The fibrewise structural peak is already in countdown-consumable form. -/
+theorem natEnrichedParityFibrewiseStructuralPeak_eq_double_add_two
+    (k : Nat) :
+    natEnrichedParityFibrewiseStructuralPeak k = (k + k) + 2 :=
+  natEnrichedParityMaximalRelaxedDivergence_eq_double_add_two k
+
 /-- Right payload obtained by adding the maximal relaxed divergence to the left payload. -/
 def natEnrichedParityMaximallyRelaxedRightPayload
     (k : Nat) :
@@ -419,6 +451,28 @@ def natEnrichedParityPositiveInternalDiagonalWitnessOfMaximallyRelaxedGap
   witness_eq_divergence := rfl
   witness_pos := natEnrichedParityMaximalRelaxedDivergence_pos k
   witness_eq_maximal := rfl
+
+/--
+The positive internal diagonal witness carried by the fibrewise structural peak
+at one enriched Nat index.
+-/
+def natEnrichedParityFibrewiseStructuralPeakWitness
+    (k : Nat) :
+    NatEnrichedParityPositiveInternalDiagonalWitness k :=
+  natEnrichedParityPositiveInternalDiagonalWitnessOfMaximallyRelaxedGap k
+
+/-- The witness value of the peak witness is the fibrewise structural peak. -/
+theorem natEnrichedParityFibrewiseStructuralPeakWitness_witness_eq_peak
+    (k : Nat) :
+    (natEnrichedParityFibrewiseStructuralPeakWitness k).witness =
+      natEnrichedParityFibrewiseStructuralPeak k :=
+  rfl
+
+/-- The peak witness certifies a positive value. -/
+theorem natEnrichedParityFibrewiseStructuralPeakWitness_witness_pos
+    (k : Nat) :
+    0 < (natEnrichedParityFibrewiseStructuralPeakWitness k).witness :=
+  (natEnrichedParityFibrewiseStructuralPeakWitness k).witness_pos
 
 /-! ## Arithmetic dynamic return from an exact intersection -/
 
@@ -1100,6 +1154,10 @@ end Meta
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityMaximalRelaxedDivergence
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityMaximalRelaxedDivergence_pos
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityMaximalRelaxedDivergence_eq_double_add_two
+#print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityFibrewiseStructuralPeak
+#print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityFibrewiseStructuralPeak_eq_maximalDivergence
+#print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityFibrewiseStructuralPeak_pos
+#print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityFibrewiseStructuralPeak_eq_double_add_two
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityMaximallyRelaxedRightPayload
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityMaximallyRelaxedBilateralGap
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityRelaxedDiagonalCertificate
@@ -1109,6 +1167,9 @@ end Meta
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityMaximallyRelaxedProjectionObstruction
 #print axioms Meta.EnrichedNatClosedStabilityInstance.NatEnrichedParityPositiveInternalDiagonalWitness
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityPositiveInternalDiagonalWitnessOfMaximallyRelaxedGap
+#print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityFibrewiseStructuralPeakWitness
+#print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityFibrewiseStructuralPeakWitness_witness_eq_peak
+#print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityFibrewiseStructuralPeakWitness_witness_pos
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticFormedDynamicReturnOfIntersection
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticTemporalExcessOfIntersection
 #print axioms Meta.EnrichedNatClosedStabilityInstance.arithmeticLocallyRecoveredDynamicReturnOfIntersection
