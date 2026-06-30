@@ -302,6 +302,98 @@ theorem natEnrichedDiagonalGapStrictOrder_iff_nat_lt
       Nat.succ_lt_succ
         (Nat.add_lt_add strictIndex (Nat.succ_lt_succ strictIndex))
 
+/-! ## Audit-clean closing half fold for the diagonal peak shape -/
+
+/--
+Fuel irrelevance for `Nat.div.go`, reproved locally so the diagonal peak fold
+does not depend on the audited `Nat.div_eq` family.
+-/
+theorem nat_div_go_fuel_congr
+    (x y fuel1 fuel2 : Nat)
+    (hy : 0 < y)
+    (h1 : x < fuel1)
+    (h2 : x < fuel2) :
+    Nat.div.go y hy fuel1 x h1 =
+      Nat.div.go y hy fuel2 x h2 := by
+  match fuel1, fuel2 with
+  | 0, _ => contradiction
+  | _, 0 => contradiction
+  | Nat.succ fuel1, Nat.succ fuel2 =>
+      simp only [Nat.div.go]
+      split
+      next => rw [nat_div_go_fuel_congr]
+      next => rfl
+termination_by structural fuel1
+
+/--
+The internal `Nat.div.go` computation for the diagonal peak shape
+`(k + k) + 2`, proved by direct recursion on the peak index.
+-/
+theorem nat_div_go_two_double_add_two
+    (k : Nat) :
+    Nat.div.go
+        2
+        (by decide)
+        (((k + k) + 2).succ)
+        ((k + k) + 2)
+        (Nat.lt_succ_self _) =
+      k + 1 := by
+  induction k with
+  | zero =>
+      unfold Nat.div.go
+      split
+      next _ =>
+        unfold Nat.div.go
+        split
+        next h => cases h
+        next _ => rfl
+      next h => cases h (by decide)
+  | succ k ih =>
+      unfold Nat.div.go
+      split
+      next _ =>
+        simp only [Nat.succ_add, Nat.add_succ, Nat.add_zero] at ih ⊢
+        change
+          (Nat.div.go
+              2
+              (by decide)
+              (k + k).succ.succ.succ.succ
+              (k + k).succ.succ
+              ?h).succ =
+            k.succ.succ
+        rw [
+          nat_div_go_fuel_congr
+            (k + k).succ.succ
+            2
+            (k + k).succ.succ.succ.succ
+            (k + k).succ.succ.succ
+            (by decide)
+            (Nat.lt_succ_of_lt (Nat.lt_succ_self _))
+            (Nat.lt_succ_self _)]
+        exact congrArg Nat.succ ih
+      next h =>
+        apply False.elim
+        apply h
+        exact Nat.succ_le_succ (Nat.succ_le_succ (Nat.zero_le _))
+
+/--
+The diagonal peak shape folds by the closing half-action to the successor of
+the index.  This proof avoids the audited `Nat.div_eq` lemmas and computes via
+`Nat.div.go` directly.
+-/
+theorem nat_double_add_two_div_two
+    (k : Nat) :
+    ((k + k) + 2) / 2 = k + 1 := by
+  change Nat.div ((k + k) + 2) 2 = k + 1
+  unfold Nat.div
+  split
+  next _ =>
+    exact nat_div_go_two_double_add_two k
+  next h =>
+    apply False.elim
+    apply h
+    exact Nat.succ_pos 1
+
 end EnrichedNatClosedStabilityInstance
 end Meta
 
@@ -327,4 +419,7 @@ end Meta
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedDiagonalGapTotalOrder
 #print axioms Meta.EnrichedNatClosedStabilityInstance.NatEnrichedDiagonalGapStrictOrder
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedDiagonalGapStrictOrder_iff_nat_lt
+#print axioms Meta.EnrichedNatClosedStabilityInstance.nat_div_go_fuel_congr
+#print axioms Meta.EnrichedNatClosedStabilityInstance.nat_div_go_two_double_add_two
+#print axioms Meta.EnrichedNatClosedStabilityInstance.nat_double_add_two_div_two
 /- AXIOM_AUDIT_END -/
