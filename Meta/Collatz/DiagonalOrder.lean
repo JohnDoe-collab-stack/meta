@@ -317,6 +317,115 @@ theorem collatzIntersectionDiagonalGap_reenters_as_closing
         (collatzIntersectionDiagonalGap intersection) :=
   collatzDynamicClosureLoop_reenters_as_closing intersection
 
+/-! ## Dynamic order carried by the closure loop -/
+
+/--
+Ordered closure predicate carried by the canonical Collatz dynamic loop.
+
+This is not a binary order on all intersections.  It compares the source
+intersection diagonal gap with the terminal excess of its own canonical
+consumer.
+-/
+def CollatzDynamicClosureOrder
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    Prop :=
+  collatzIntersectionDiagonalGap intersection <=
+    formedPositiveExcessOfIntersection
+      (collatzDynamicClosureLoop intersection).consumer
+
+/-- Every Collatz operational intersection carries its canonical ordered closure. -/
+theorem collatzDynamicClosureOrder_of_intersection
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    CollatzDynamicClosureOrder intersection := by
+  unfold CollatzDynamicClosureOrder
+  rw [collatzIntersectionDiagonalGap_consumed_as_terminal_excess intersection]
+  exact Nat.le_refl _
+
+/--
+The dynamic ordered closure package for one Collatz operational intersection.
+
+It records the source diagonal gap, the peak of the dynamic loop, the terminal
+excess of the canonical consumer, their equality, the induced order, and the
+closing/forming reinsertion.
+-/
+structure CollatzDynamicOrderedClosure
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) where
+  loop : CollatzDynamicClosureLoop intersection
+  sourceGap : Nat
+  sourceGap_eq :
+    sourceGap = collatzIntersectionDiagonalGap intersection
+  sourceGap_eq_peak :
+    sourceGap = loop.peak
+  consumerGap : Nat
+  consumerGap_eq :
+    consumerGap = formedPositiveExcessOfIntersection loop.consumer
+  sourceGap_eq_consumerGap :
+    sourceGap = consumerGap
+  ordered :
+    sourceGap <= consumerGap
+  reenters_as_closing :
+    arithmeticClosingRoleOfIntersection loop.consumer =
+      NatEnrichedParityRole.closingExcess sourceGap
+
+/-- The canonical dynamic ordered closure package for one Collatz intersection. -/
+def collatzDynamicOrderedClosure
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    CollatzDynamicOrderedClosure intersection where
+  loop := collatzDynamicClosureLoop intersection
+  sourceGap := collatzIntersectionDiagonalGap intersection
+  sourceGap_eq := rfl
+  sourceGap_eq_peak :=
+    collatzIntersectionDiagonalGap_eq_dynamicClosureLoop_peak intersection
+  consumerGap :=
+    formedPositiveExcessOfIntersection
+      (collatzDynamicClosureLoop intersection).consumer
+  consumerGap_eq := rfl
+  sourceGap_eq_consumerGap :=
+    collatzIntersectionDiagonalGap_consumed_as_terminal_excess intersection
+  ordered := by
+    rw [collatzIntersectionDiagonalGap_consumed_as_terminal_excess intersection]
+    exact Nat.le_refl _
+  reenters_as_closing :=
+    collatzIntersectionDiagonalGap_reenters_as_closing intersection
+
+/-- The canonical ordered closure identifies source gap and consumer terminal excess. -/
+theorem collatzDynamicOrderedClosure_sourceGap_eq_consumerGap
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    (collatzDynamicOrderedClosure intersection).sourceGap =
+      (collatzDynamicOrderedClosure intersection).consumerGap :=
+  (collatzDynamicOrderedClosure intersection).sourceGap_eq_consumerGap
+
+/-- The canonical ordered closure identifies the source gap with the loop peak. -/
+theorem collatzDynamicOrderedClosure_sourceGap_eq_peak
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    (collatzDynamicOrderedClosure intersection).sourceGap =
+      (collatzDynamicOrderedClosure intersection).loop.peak :=
+  (collatzDynamicOrderedClosure intersection).sourceGap_eq_peak
+
+/-- The canonical ordered closure exposes the induced comparison. -/
+theorem collatzDynamicOrderedClosure_ordered
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    (collatzDynamicOrderedClosure intersection).sourceGap <=
+      (collatzDynamicOrderedClosure intersection).consumerGap :=
+  (collatzDynamicOrderedClosure intersection).ordered
+
+/-- The canonical ordered closure reenters through a closing/forming role. -/
+theorem collatzDynamicOrderedClosure_reenters_as_closing
+    {branch : MemoryBranch}
+    (intersection : PrimitiveMemoryReadingIntersection branch) :
+    arithmeticClosingRoleOfIntersection
+        (collatzDynamicOrderedClosure intersection).loop.consumer =
+      NatEnrichedParityRole.closingExcess
+        (collatzDynamicOrderedClosure intersection).sourceGap :=
+  (collatzDynamicOrderedClosure intersection).reenters_as_closing
+
 end EnrichedNatClosedStabilityInstance
 end Meta
 
@@ -353,4 +462,12 @@ end Meta
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzIntersectionDiagonalGap_eq_dynamicClosureLoop_peak
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzIntersectionDiagonalGap_consumed_as_terminal_excess
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzIntersectionDiagonalGap_reenters_as_closing
+#print axioms Meta.EnrichedNatClosedStabilityInstance.CollatzDynamicClosureOrder
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDynamicClosureOrder_of_intersection
+#print axioms Meta.EnrichedNatClosedStabilityInstance.CollatzDynamicOrderedClosure
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDynamicOrderedClosure
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDynamicOrderedClosure_sourceGap_eq_consumerGap
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDynamicOrderedClosure_sourceGap_eq_peak
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDynamicOrderedClosure_ordered
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDynamicOrderedClosure_reenters_as_closing
 /- AXIOM_AUDIT_END -/
