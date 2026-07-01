@@ -1,24 +1,15 @@
-import Meta.Arithmetic.DiagonalOrder
 import Meta.Collatz.DynamicClosureLoop
 
 /-!
 # Collatz diagonal order
 
-This file specializes the enriched-Nat diagonal order to Collatz operational
-intersections.
+This file exposes the order induced by the positive diagonal gap.
 
-The pure index order is owned by `Meta.Arithmetic.DiagonalOrder`.  This file
-keeps Collatz-facing compatibility names and proves the intersection-specific
-facts:
-
-```text
-Collatz intersection
--> formedPositiveExcessOfIntersection
--> enriched Nat diagonal gap
-```
-
-Mutual comparison of intersections contracts only to equality of formed
-positive excess.  It does not collapse enriched intersections themselves.
+Definitionally, the comparison is introduced through the positive diagonal gap
+carried by enriched Nat indices and by Collatz operational intersections.
+Extensionally, on bare Nat indices, this order calibrates to the usual Nat
+order.  On intersections, the order is induced by the formed positive excess
+activated by each intersection, without collapsing intersections themselves.
 -/
 
 namespace Meta
@@ -26,138 +17,289 @@ namespace EnrichedNatClosedStabilityInstance
 
 open ClosedStabilityTheorem
 
-/-! ## Collatz-facing aliases for the pure enriched-Nat diagonal order -/
+/-! ## Index order induced by the diagonal gap -/
 
-/-- Collatz-facing name for the enriched Nat diagonal gap. -/
-abbrev collatzDiagonalGap
+/-- The positive diagonal gap carried by an enriched Nat index in the Collatz layer. -/
+def collatzDiagonalGap
     (index : Nat) :
     Nat :=
-  natEnrichedDiagonalGap index
+  natEnrichedParityFibrewiseStructuralPeak index
 
 /-- The Collatz diagonal gap is the enriched Nat fibrewise structural peak. -/
 theorem collatzDiagonalGap_eq_fibrewiseStructuralPeak
     (index : Nat) :
     collatzDiagonalGap index =
       natEnrichedParityFibrewiseStructuralPeak index :=
-  natEnrichedDiagonalGap_eq_fibrewiseStructuralPeak index
+  rfl
 
 /-- The Collatz diagonal gap is the maximal relaxed divergence at the index. -/
 theorem collatzDiagonalGap_eq_maximalRelaxedDivergence
     (index : Nat) :
     collatzDiagonalGap index =
       natEnrichedParityMaximalRelaxedDivergence index :=
-  natEnrichedDiagonalGap_eq_maximalRelaxedDivergence index
+  natEnrichedParityFibrewiseStructuralPeak_eq_maximalDivergence index
 
 /-- The Collatz diagonal gap has the countdown-consumable form `(index + index) + 2`. -/
 theorem collatzDiagonalGap_eq_double_add_two
     (index : Nat) :
     collatzDiagonalGap index = (index + index) + 2 :=
-  natEnrichedDiagonalGap_eq_double_add_two index
+  natEnrichedParityFibrewiseStructuralPeak_eq_double_add_two index
 
 /-- The Collatz diagonal gap is strictly positive at every index. -/
 theorem collatzDiagonalGap_pos
     (index : Nat) :
     0 < collatzDiagonalGap index :=
-  natEnrichedDiagonalGap_pos index
+  natEnrichedParityFibrewiseStructuralPeak_pos index
 
-/-- Collatz-facing name for the enriched Nat diagonal-gap order. -/
-abbrev CollatzDiagonalGapOrder
+/--
+Diagonal-gap order on indices.
+
+`left` is below `right` when the positive diagonal gap carried by `left` is
+below the positive diagonal gap carried by `right`.
+-/
+def CollatzDiagonalGapOrder
     (left right : Nat) :
     Prop :=
-  NatEnrichedDiagonalGapOrder left right
+  collatzDiagonalGap left <= collatzDiagonalGap right
 
-/-- The Collatz-facing diagonal-gap order is reflexive. -/
+/-- The diagonal-gap order is reflexive. -/
 theorem collatzDiagonalGapOrder_refl
     (index : Nat) :
     CollatzDiagonalGapOrder index index :=
-  natEnrichedDiagonalGapOrder_refl index
+  Nat.le_refl (collatzDiagonalGap index)
 
-/-- The Collatz-facing diagonal-gap order is transitive. -/
+/-- The diagonal-gap order is transitive. -/
 theorem collatzDiagonalGapOrder_trans
     {left middle right : Nat}
     (left_middle : CollatzDiagonalGapOrder left middle)
     (middle_right : CollatzDiagonalGapOrder middle right) :
     CollatzDiagonalGapOrder left right :=
-  natEnrichedDiagonalGapOrder_trans left_middle middle_right
+  Nat.le_trans left_middle middle_right
 
-/-- The Collatz-facing diagonal-gap order is antisymmetric on bare indices. -/
+/--
+Cancellation for doubled natural numbers, proved directly to avoid importing
+non-constructive cancellation lemmas into the audit path.
+-/
+theorem nat_add_self_eq_add_self_cancel :
+    forall left right : Nat,
+      left + left = right + right ->
+        left = right
+  | 0, 0, _ => rfl
+  | 0, Nat.succ right, sameDouble => by
+      rw [Nat.zero_add] at sameDouble
+      cases sameDouble
+  | Nat.succ left, 0, sameDouble => by
+      rw [Nat.zero_add] at sameDouble
+      cases sameDouble
+  | Nat.succ left, Nat.succ right, sameDouble => by
+      rw [Nat.succ_add, Nat.add_succ, Nat.succ_add, Nat.add_succ] at sameDouble
+      have coreDouble :
+          left + left = right + right :=
+        Nat.succ.inj (Nat.succ.inj sameDouble)
+      exact
+        congrArg Nat.succ
+          (nat_add_self_eq_add_self_cancel left right coreDouble)
+
+/--
+Order cancellation for the diagonal core `n + succ n`, proved directly to keep
+the diagonal-order calibration constructive.
+-/
+theorem nat_add_succ_self_le_cancel :
+    forall left right : Nat,
+      left + Nat.succ left <= right + Nat.succ right ->
+        left <= right
+  | 0, right, _ => Nat.zero_le right
+  | Nat.succ left, 0, diagonalLe => by
+      rw [Nat.zero_add] at diagonalLe
+      rw [Nat.succ_add] at diagonalLe
+      have impossible :
+          left + Nat.succ (Nat.succ left) <= 0 :=
+        Nat.le_of_succ_le_succ diagonalLe
+      rw [Nat.add_succ] at impossible
+      exact
+        False.elim
+          ((Nat.not_succ_le_zero (left + Nat.succ left)) impossible)
+  | Nat.succ left, Nat.succ right, diagonalLe => by
+      rw [Nat.succ_add, Nat.add_succ, Nat.succ_add, Nat.add_succ] at diagonalLe
+      have coreLe :
+          left + Nat.succ left <= right + Nat.succ right :=
+        Nat.le_of_succ_le_succ (Nat.le_of_succ_le_succ diagonalLe)
+      exact
+        Nat.succ_le_succ
+          (nat_add_succ_self_le_cancel left right coreLe)
+
+/-- The diagonal-gap order is antisymmetric on indices. -/
 theorem collatzDiagonalGapOrder_antisymm
     {left right : Nat}
     (left_right : CollatzDiagonalGapOrder left right)
     (right_left : CollatzDiagonalGapOrder right left) :
-    left = right :=
-  natEnrichedDiagonalGapOrder_antisymm left_right right_left
+    left = right := by
+  have sameGap :
+      collatzDiagonalGap left = collatzDiagonalGap right :=
+    Nat.le_antisymm left_right right_left
+  unfold collatzDiagonalGap at sameGap
+  unfold natEnrichedParityFibrewiseStructuralPeak at sameGap
+  unfold natEnrichedParityMaximalRelaxedDivergence at sameGap
+  have gapCore :
+      left + Nat.succ left = right + Nat.succ right :=
+    Nat.succ.inj sameGap
+  rw [Nat.add_succ, Nat.add_succ] at gapCore
+  have doubleEq :
+      left + left = right + right :=
+    Nat.succ.inj gapCore
+  exact nat_add_self_eq_add_self_cancel left right doubleEq
 
-/-- The Collatz-facing diagonal-gap order as visible preorder data. -/
+/-- The diagonal-gap order as visible preorder data. -/
 def collatzDiagonalGapPreorder :
-    VisiblePreorder Nat :=
-  natEnrichedDiagonalGapPreorder
+    VisiblePreorder Nat where
+  le := CollatzDiagonalGapOrder
+  refl := collatzDiagonalGapOrder_refl
+  trans := by
+    intro left middle right left_middle middle_right
+    exact collatzDiagonalGapOrder_trans left_middle middle_right
 
-/-- The Collatz-facing diagonal-gap order as visible partial order data. -/
+/-- The diagonal-gap order as visible partial order data on indices. -/
 def collatzDiagonalGapPartialOrder :
-    VisiblePartialOrder Nat :=
-  natEnrichedDiagonalGapPartialOrder
+    VisiblePartialOrder Nat where
+  le := CollatzDiagonalGapOrder
+  refl := collatzDiagonalGapOrder_refl
+  trans := by
+    intro left middle right left_middle middle_right
+    exact collatzDiagonalGapOrder_trans left_middle middle_right
+  antisymm := by
+    intro left right left_right right_left
+    exact collatzDiagonalGapOrder_antisymm left_right right_left
 
 /--
-The Collatz-facing diagonal-gap order is the comparison induced by the
-fibrewise structural peak.
+The diagonal-gap order is the comparison induced by the fibrewise structural
+peak, not a primitive comparison of visible index values.
 -/
 theorem collatzDiagonalGapOrder_iff_peak_le
     (left right : Nat) :
     CollatzDiagonalGapOrder left right <->
       natEnrichedParityFibrewiseStructuralPeak left <=
         natEnrichedParityFibrewiseStructuralPeak right :=
-  natEnrichedDiagonalGapOrder_iff_peak_le left right
+  Iff.rfl
 
 /--
-On bare Nat indices, the Collatz-facing diagonal-gap order calibrates to the
-usual Nat order.
+On bare Nat indices, the diagonal-gap order is extensionally the usual Nat
+order.  The important point is that the order is introduced through the
+positive diagonal gap; this theorem calibrates that index-level order against
+the ordinary visible order.
 -/
 theorem collatzDiagonalGapOrder_iff_nat_le
     (left right : Nat) :
-    CollatzDiagonalGapOrder left right <-> left <= right :=
-  natEnrichedDiagonalGapOrder_iff_nat_le left right
+    CollatzDiagonalGapOrder left right <-> left <= right := by
+  apply Iff.intro
+  · intro diagonalLe
+    unfold CollatzDiagonalGapOrder at diagonalLe
+    unfold collatzDiagonalGap at diagonalLe
+    unfold natEnrichedParityFibrewiseStructuralPeak at diagonalLe
+    unfold natEnrichedParityMaximalRelaxedDivergence at diagonalLe
+    exact
+      nat_add_succ_self_le_cancel
+        left
+        right
+        (Nat.le_of_succ_le_succ diagonalLe)
+  · intro visibleLe
+    unfold CollatzDiagonalGapOrder
+    unfold collatzDiagonalGap
+    unfold natEnrichedParityFibrewiseStructuralPeak
+    unfold natEnrichedParityMaximalRelaxedDivergence
+    exact
+      Nat.succ_le_succ
+        (Nat.add_le_add visibleLe (Nat.succ_le_succ visibleLe))
 
-/-- Equality of Collatz-facing diagonal gaps is exactly equality of indices. -/
+/-- Equality of diagonal gaps on bare indices is exactly equality of indices. -/
 theorem collatzDiagonalGap_eq_iff
     (left right : Nat) :
-    collatzDiagonalGap left = collatzDiagonalGap right <-> left = right :=
-  natEnrichedDiagonalGap_eq_iff left right
+    collatzDiagonalGap left = collatzDiagonalGap right <-> left = right := by
+  apply Iff.intro
+  · intro sameGap
+    exact
+      collatzDiagonalGapOrder_antisymm
+        (by
+          unfold CollatzDiagonalGapOrder
+          rw [sameGap]
+          exact Nat.le_refl (collatzDiagonalGap right))
+        (by
+          unfold CollatzDiagonalGapOrder
+          rw [sameGap]
+          exact Nat.le_refl (collatzDiagonalGap right))
+  · intro sameIndex
+    rw [sameIndex]
 
-/-- The Collatz-facing diagonal gap map is injective on bare indices. -/
+/-- The diagonal gap map is injective on bare indices. -/
 theorem collatzDiagonalGap_injective
     {left right : Nat}
     (sameGap : collatzDiagonalGap left = collatzDiagonalGap right) :
     left = right :=
-  natEnrichedDiagonalGap_injective sameGap
+  (collatzDiagonalGap_eq_iff left right).mp sameGap
 
-/-- The Collatz-facing diagonal-gap order is total on bare indices. -/
+/-- The diagonal-gap order is total on bare indices. -/
 theorem collatzDiagonalGapOrder_total
     (left right : Nat) :
     Or
       (CollatzDiagonalGapOrder left right)
-      (CollatzDiagonalGapOrder right left) :=
-  natEnrichedDiagonalGapOrder_total left right
+      (CollatzDiagonalGapOrder right left) := by
+  cases Nat.le_total left right with
+  | inl left_le_right =>
+      exact Or.inl
+        ((collatzDiagonalGapOrder_iff_nat_le left right).mpr
+          left_le_right)
+  | inr right_le_left =>
+      exact Or.inr
+        ((collatzDiagonalGapOrder_iff_nat_le right left).mpr
+          right_le_left)
 
-/-- The Collatz-facing diagonal-gap order as visible total order data. -/
+/-- The diagonal-gap order as visible total order data on bare indices. -/
 def collatzDiagonalGapTotalOrder :
-    VisibleTotalOrder Nat :=
-  natEnrichedDiagonalGapTotalOrder
+    VisibleTotalOrder Nat where
+  le := CollatzDiagonalGapOrder
+  refl := collatzDiagonalGapOrder_refl
+  trans := by
+    intro left middle right left_middle middle_right
+    exact collatzDiagonalGapOrder_trans left_middle middle_right
+  antisymm := by
+    intro left right left_right right_left
+    exact collatzDiagonalGapOrder_antisymm left_right right_left
+  total := collatzDiagonalGapOrder_total
 
-/-- Collatz-facing name for the strict enriched Nat diagonal-gap order. -/
-abbrev CollatzDiagonalGapStrictOrder
+/-! ## Strict index order induced by the diagonal gap -/
+
+/-- Strict diagonal-gap order on bare indices. -/
+def CollatzDiagonalGapStrictOrder
     (left right : Nat) :
     Prop :=
-  NatEnrichedDiagonalGapStrictOrder left right
+  collatzDiagonalGap left < collatzDiagonalGap right
 
 /--
-On bare Nat indices, strict Collatz-facing diagonal-gap comparison calibrates
-to the usual strict Nat order.
+On bare Nat indices, strict diagonal-gap comparison calibrates to the usual
+strict Nat order.
 -/
 theorem collatzDiagonalGapStrictOrder_iff_nat_lt
     (left right : Nat) :
-    CollatzDiagonalGapStrictOrder left right <-> left < right :=
-  natEnrichedDiagonalGapStrictOrder_iff_nat_lt left right
+    CollatzDiagonalGapStrictOrder left right <-> left < right := by
+  apply Iff.intro
+  · intro strictGap
+    have left_le_right :
+        left <= right :=
+      (collatzDiagonalGapOrder_iff_nat_le left right).mp
+        (Nat.le_of_lt strictGap)
+    have left_ne_right :
+        left ≠ right := by
+      intro sameIndex
+      rw [sameIndex] at strictGap
+      exact Nat.lt_irrefl (collatzDiagonalGap right) strictGap
+    exact Nat.lt_of_le_of_ne left_le_right left_ne_right
+  · intro strictIndex
+    unfold CollatzDiagonalGapStrictOrder
+    unfold collatzDiagonalGap
+    unfold natEnrichedParityFibrewiseStructuralPeak
+    unfold natEnrichedParityMaximalRelaxedDivergence
+    exact
+      Nat.succ_lt_succ
+        (Nat.add_lt_add strictIndex (Nat.succ_lt_succ strictIndex))
 
 /-! ## Intersection order induced by the activated Collatz peak -/
 
@@ -200,8 +342,8 @@ theorem collatzIntersectionDiagonalGapOrder_trans
   Nat.le_trans left_middle middle_right
 
 /--
-The intersection diagonal gap is the enriched Nat diagonal gap of the formed
-index activated by the intersection.
+The intersection diagonal gap is the Nat diagonal gap of the formed index
+activated by the intersection.
 -/
 theorem collatzIntersectionDiagonalGap_eq_indexGap
     {branch : MemoryBranch}
@@ -438,6 +580,8 @@ end Meta
 #print axioms Meta.EnrichedNatClosedStabilityInstance.CollatzDiagonalGapOrder
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDiagonalGapOrder_refl
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDiagonalGapOrder_trans
+#print axioms Meta.EnrichedNatClosedStabilityInstance.nat_add_self_eq_add_self_cancel
+#print axioms Meta.EnrichedNatClosedStabilityInstance.nat_add_succ_self_le_cancel
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDiagonalGapOrder_antisymm
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDiagonalGapPreorder
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDiagonalGapPartialOrder
