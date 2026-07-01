@@ -427,3 +427,59 @@ project(formed)
 ```
 
 Le cadre enrichi conserve la cellule opératoire complète.
+
+---
+
+## 18. Lecture standard associée
+
+La notation suivante donne une lecture standard de la cellule sans remplacer la
+notation opératoire.
+
+### Dictionnaire
+
+```text
+formed(phi)              ↦ f
+shadow(phi)              ↦ s
+project                  ↦ π
+sameProjection(phi)      ↦ hπ
+separatedInterface(phi)  ↦ hsep
+repair(phi)              ↦ ρ
+recovered(phi)           ↦ f_rec
+recovered_eq_formed(phi) ↦ hrec
+outcome(phi)             ↦ O(f)
+```
+
+### Contraintes
+
+```text
+hπ   : π(f) = π(s)
+hsep : f ≠ s
+ρ    : RepairOf(f)
+f_rec : Interface
+hrec : f_rec = f
+O(f) : OutcomeOf(f)
+```
+
+### Cellule standard complète
+
+```text
+C_phi :=
+(f, s, π, hπ, hsep, ρ, f_rec, hrec, O(f))
+```
+
+### Projection contractée
+
+```text
+contract(C_phi) = π(f)
+```
+
+La projection contractée conserve le visible.
+
+Elle ne reconstruit pas la cellule opératoire complète :
+
+```text
+π(f) ne détermine pas C_phi
+```
+
+au sens structurel : `π(f)` ne porte ni le shadow, ni la séparation, ni la
+réparation, ni la valeur récupérée, ni le résultat dépendant du formé.
