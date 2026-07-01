@@ -167,7 +167,8 @@ Delta(phi).separatedInterface
 
 Le témoin diagonal ne constate pas seulement le gap.
 
-Il porte la séparation qui rend la contraction impossible.
+Il porte la séparation qui rend impossible la reconstruction uniforme de
+l’interface enrichie à partir de la seule projection visible.
 
 ---
 
@@ -453,24 +454,24 @@ outcome(phi)             ↦ O(f)
 
 ```text
 hπ   : π(f) = π(s)
-hsep : f ≠ s
+hsep : f = s -> False
 ρ    : RepairOf(f)
 f_rec : Interface
 hrec : f_rec = f
 O(f) : OutcomeOf(f)
 ```
 
-### Cellule standard complète
+### Cellule standard complète relative à `π`
 
 ```text
-C_phi :=
-(f, s, π, hπ, hsep, ρ, f_rec, hrec, O(f))
+C_phi[π] :=
+(f, s, hπ, hsep, ρ, f_rec, hrec, O(f))
 ```
 
 ### Projection contractée
 
 ```text
-contract(C_phi) = π(f)
+contract(C_phi[π]) = π(f)
 ```
 
 La projection contractée conserve le visible.
@@ -478,7 +479,7 @@ La projection contractée conserve le visible.
 Elle ne reconstruit pas la cellule opératoire complète :
 
 ```text
-π(f) ne détermine pas C_phi
+π(f) ne détermine pas C_phi[π]
 ```
 
 au sens structurel : `π(f)` ne porte ni le shadow, ni la séparation, ni la
