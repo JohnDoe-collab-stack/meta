@@ -29,6 +29,7 @@ import Meta.Collatz.RelaxedOddActionBridge
 import Meta.Collatz.Countdown
 import Meta.Collatz.CountdownConsumptionBridge
 import Meta.Collatz.DynamicClosureLoop
+import Meta.Collatz.InternalTerminality
 import Meta.Collatz.DiagonalOrder
 import Meta.Dynamics.ObservedDiscrete
 import Meta.Dynamics.ObservedWindow
@@ -59,6 +60,9 @@ import Meta.Synthesis.TarskiBethBellGap
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzFibrewiseStructuralPeakPackage
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDynamicClosureLoop
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDynamicClosureLoop_reenters_as_closing
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzNextInternalIntersection
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzInternalTerminality
+#print axioms Meta.EnrichedNatClosedStabilityInstance.noCollatzBareNonTerminalActivation
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDiagonalGapPreorder
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDiagonalGapPartialOrder
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzDiagonalGapTotalOrder
