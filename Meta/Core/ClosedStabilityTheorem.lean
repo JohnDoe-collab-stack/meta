@@ -307,60 +307,45 @@ def witnessOf
     WitnessOf formed.interface :=
   formed.witness
 
-/-- A formed interface carries an outcome indexed by that interface. -/
+/--
+A non-trivial formed referential closure.
+
+It does not merely package an interface with an outcome.  It carries the formed
+interface, its projected shadow, the projective gap between them, a local repair
+indexed by the formed interface, the recovered formed interface, and the
+outcome indexed by that same formed interface.
+-/
 structure FormedReferentialClosure
     (Interface : Type x)
-    (OutcomeOf : Interface -> Type y) :
-    Type (max x y) where
+    (Visible : Type y)
+    (project : Interface -> Visible)
+    (RepairOf : Interface -> Type s)
+    (OutcomeOf : Interface -> Type z) :
+    Type (max x y s z) where
   formedInterface : Interface
+  shadowInterface : Interface
+  sameProjection :
+    project formedInterface = project shadowInterface
+  separatedInterface :
+    formedInterface = shadowInterface -> False
+  repair : RepairOf formedInterface
+  recoveredInterface : Interface
+  recovered_eq_formed :
+    recoveredInterface = formedInterface
   outcome : OutcomeOf formedInterface
 
-/-- The interface-witness presentation of a formed referential closure. -/
-abbrev FormedInterfaceWitness
-    (Interface : Type x)
-    (OutcomeOf : Interface -> Type y) :
-    Type (max x y) :=
-  InterfaceWitness Interface OutcomeOf
-
-/-- A formed referential closure is an interface carrying its witness. -/
-def formedInterfaceWitnessOfClosure
+/-- A formed referential closure exposes its outcome as an interface witness. -/
+def outcomeWitnessOfFormedReferentialClosure
     {Interface : Type x}
-    {OutcomeOf : Interface -> Type y}
-    (closure : FormedReferentialClosure Interface OutcomeOf) :
-    FormedInterfaceWitness Interface OutcomeOf where
+    {Visible : Type y}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    {OutcomeOf : Interface -> Type z}
+    (closure :
+      FormedReferentialClosure Interface Visible project RepairOf OutcomeOf) :
+    InterfaceWitness Interface OutcomeOf where
   interface := closure.formedInterface
   witness := closure.outcome
-
-/-- An interface-witness package reconstructs the formed closure. -/
-def closureOfFormedInterfaceWitness
-    {Interface : Type x}
-    {OutcomeOf : Interface -> Type y}
-    (formed : FormedInterfaceWitness Interface OutcomeOf) :
-    FormedReferentialClosure Interface OutcomeOf where
-  formedInterface := formed.interface
-  outcome := formed.witness
-
-/-- Round-trip from closure to interface-witness and back. -/
-theorem closure_roundtrip
-    {Interface : Type x}
-    {OutcomeOf : Interface -> Type y}
-    (closure : FormedReferentialClosure Interface OutcomeOf) :
-    closureOfFormedInterfaceWitness
-      (formedInterfaceWitnessOfClosure closure) =
-        closure := by
-  cases closure
-  rfl
-
-/-- Round-trip from interface-witness to closure and back. -/
-theorem formedInterfaceWitness_roundtrip
-    {Interface : Type x}
-    {OutcomeOf : Interface -> Type y}
-    (formed : FormedInterfaceWitness Interface OutcomeOf) :
-    formedInterfaceWitnessOfClosure
-      (closureOfFormedInterfaceWitness formed) =
-        formed := by
-  cases formed
-  rfl
 
 /-! ## Cycle/interface realization -/
 
@@ -724,6 +709,101 @@ theorem localProjectiveRecovery_notInformationConserving
     False :=
   projectionObstruction_notInformationConserving
     (localProjectiveRecovery_obstruction localRecovery)
+    conserving
+
+/-! ## Non-trivial formed referential closure consequences -/
+
+/-- A formed referential closure carries its diagonal certificate. -/
+def FormedReferentialClosure.diagonalCertificate
+    {Interface : Type x}
+    {Visible : Type y}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    {OutcomeOf : Interface -> Type z}
+    (closure :
+      FormedReferentialClosure Interface Visible project RepairOf OutcomeOf) :
+    DiagonalCertificate Interface Visible project where
+  left := closure.formedInterface
+  right := closure.shadowInterface
+  sameProjection := closure.sameProjection
+  separatedInterface := closure.separatedInterface
+
+/-- A formed referential closure carries its projection obstruction. -/
+def FormedReferentialClosure.projectionObstruction
+    {Interface : Type x}
+    {Visible : Type y}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    {OutcomeOf : Interface -> Type z}
+    (closure :
+      FormedReferentialClosure Interface Visible project RepairOf OutcomeOf) :
+    ProjectionObstruction Interface Visible project :=
+  projectionObstructionOfDiagonalCertificate
+    closure.diagonalCertificate
+
+/-- A formed referential closure carries its local projective recovery. -/
+def FormedReferentialClosure.localProjectiveRecovery
+    {Interface : Type x}
+    {Visible : Type y}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    {OutcomeOf : Interface -> Type z}
+    (closure :
+      FormedReferentialClosure Interface Visible project RepairOf OutcomeOf) :
+    LocalProjectiveRecovery Interface Visible project RepairOf where
+  formed := closure.formedInterface
+  shadow := closure.shadowInterface
+  sameProjection := closure.sameProjection
+  separated := closure.separatedInterface
+  repair := closure.repair
+  recovered := closure.recoveredInterface
+  recovered_eq_formed := closure.recovered_eq_formed
+
+/-- A formed referential closure rules out a uniform visible reconstruction. -/
+def noProjectiveReconstructionOfFormedReferentialClosure
+    {Interface : Type x}
+    {Visible : Type y}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    {OutcomeOf : Interface -> Type z}
+    (closure :
+      FormedReferentialClosure Interface Visible project RepairOf OutcomeOf) :
+    ((recover : Visible -> Interface) ->
+      ((interface : Interface) ->
+        recover (project interface) = interface) ->
+          False) :=
+  noProjectiveReconstructionOfLocalProjectiveRecovery
+    closure.localProjectiveRecovery
+
+/-- A formed referential closure refutes projection fiber faithfulness. -/
+theorem formedReferentialClosure_notFiberFaithful
+    {Interface : Type x}
+    {Visible : Type y}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    {OutcomeOf : Interface -> Type z}
+    (closure :
+      FormedReferentialClosure Interface Visible project RepairOf OutcomeOf)
+    (faithful : ProjectionFiberFaithful Interface Visible project) :
+    False :=
+  projectionObstruction_notFiberFaithful
+    closure.projectionObstruction
+    faithful
+
+/-- A formed referential closure refutes global projection information conservation. -/
+theorem formedReferentialClosure_notInformationConserving
+    {Interface : Type x}
+    {Visible : Type y}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    {OutcomeOf : Interface -> Type z}
+    (closure :
+      FormedReferentialClosure Interface Visible project RepairOf OutcomeOf)
+    (conserving :
+      ProjectionInformationConserving Interface Visible project) :
+    False :=
+  projectionObstruction_notInformationConserving
+    closure.projectionObstruction
     conserving
 
 /-! ## Local formation / projected-truth separation over a gap -/
@@ -1504,11 +1584,7 @@ end Meta
 #print axioms Meta.ClosedStabilityTheorem.strongTerminalCycleFromIntersection
 #print axioms Meta.ClosedStabilityTheorem.InterfaceWitness
 #print axioms Meta.ClosedStabilityTheorem.FormedReferentialClosure
-#print axioms Meta.ClosedStabilityTheorem.FormedInterfaceWitness
-#print axioms Meta.ClosedStabilityTheorem.formedInterfaceWitnessOfClosure
-#print axioms Meta.ClosedStabilityTheorem.closureOfFormedInterfaceWitness
-#print axioms Meta.ClosedStabilityTheorem.closure_roundtrip
-#print axioms Meta.ClosedStabilityTheorem.formedInterfaceWitness_roundtrip
+#print axioms Meta.ClosedStabilityTheorem.outcomeWitnessOfFormedReferentialClosure
 #print axioms Meta.ClosedStabilityTheorem.WeakClosedStability
 #print axioms Meta.ClosedStabilityTheorem.StrongClosedStability
 #print axioms Meta.ClosedStabilityTheorem.StrongClosedStabilityFromIntersection
@@ -1528,6 +1604,12 @@ end Meta
 #print axioms Meta.ClosedStabilityTheorem.noProjectiveReconstructionOfLocalProjectiveRecovery
 #print axioms Meta.ClosedStabilityTheorem.localProjectiveRecovery_notFiberFaithful
 #print axioms Meta.ClosedStabilityTheorem.localProjectiveRecovery_notInformationConserving
+#print axioms Meta.ClosedStabilityTheorem.FormedReferentialClosure.diagonalCertificate
+#print axioms Meta.ClosedStabilityTheorem.FormedReferentialClosure.projectionObstruction
+#print axioms Meta.ClosedStabilityTheorem.FormedReferentialClosure.localProjectiveRecovery
+#print axioms Meta.ClosedStabilityTheorem.noProjectiveReconstructionOfFormedReferentialClosure
+#print axioms Meta.ClosedStabilityTheorem.formedReferentialClosure_notFiberFaithful
+#print axioms Meta.ClosedStabilityTheorem.formedReferentialClosure_notInformationConserving
 #print axioms Meta.ClosedStabilityTheorem.ReferentialScene
 #print axioms Meta.ClosedStabilityTheorem.GeometricFormation
 #print axioms Meta.ClosedStabilityTheorem.ProjectedLocalTruth
