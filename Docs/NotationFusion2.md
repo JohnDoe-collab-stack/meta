@@ -2,24 +2,29 @@
 
 ## 1. Principe
 
-Le cadre ne prend pas le gap comme un simple écart.
+Une cellule diagonale est une structure locale de passage.
 
-Il le rend opératoire.
+Elle organise une interface formée, son shadow, leur projection visible commune,
+leur séparation enrichie, puis la réparation locale qui récupère le formé.
 
-La forme centrale n’est pas :
+Le gap opératoire désigne cette médiation complète :
 
 ```text
-code(phi) -> ass(phi)
+projection commune
++ séparation enrichie
++ témoin diagonal
++ réparation locale
++ récupération du formé
++ résultat porté par le formé
 ```
 
-mais :
+La forme centrale est donc :
 
 ```text
 formed -> shadow -> gap -> repair -> recovered -> outcome
 ```
 
-La cellule diagonale locale est donc une structure de passage, de séparation et
-de récupération.
+La lecture classique ne voit que la projection contractée de cette cellule.
 
 ---
 
