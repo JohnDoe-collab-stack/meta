@@ -30,6 +30,11 @@ import Meta.Collatz.CountdownConsumptionBridge
 import Meta.Collatz.DynamicClosureLoop
 import Meta.Collatz.DiagonalOrder
 import Meta.Collatz.FibrewiseFlightHeight
+import Meta.Collatz.InitialIndexedFibre
+import Meta.Collatz.OperationalRegimeEvidence
+import Meta.Collatz.OperationalTemporalRepresentation
+import Meta.Collatz.EnrichedTemporalState
+import Meta.Collatz.EnrichedTemporalFibrewiseConcordance
 import Meta.Dynamics.ObservedDiscrete
 import Meta.Dynamics.ObservedWindow
 import Meta.Dynamics.ObservedDynamicGap
@@ -77,4 +82,8 @@ import Meta.Synthesis.TarskiBethBellGap
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzInitialIndexFibreHeight
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzInitialIndexFibreHeightWitness
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzInitialIndexFibreHeight_eq_countdownTerminalExcess
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzInitialIndexedFibreHeightPackage
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzOperationalTemporalRepresentation
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzInitialTemporalFibreState
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzEnrichedTemporalHeightConcordance
 /- AXIOM_AUDIT_END -/
