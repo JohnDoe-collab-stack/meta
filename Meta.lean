@@ -35,6 +35,7 @@ import Meta.Collatz.OperationalRegimeEvidence
 import Meta.Collatz.OperationalTemporalRepresentation
 import Meta.Collatz.EnrichedTemporalState
 import Meta.Collatz.EnrichedTemporalFibrewiseConcordance
+import Meta.Collatz.FibrewisePeakObservation
 import Meta.Dynamics.ObservedDiscrete
 import Meta.Dynamics.ObservedWindow
 import Meta.Dynamics.ObservedDynamicGap
@@ -86,4 +87,8 @@ import Meta.Synthesis.TarskiBethBellGap
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzOperationalTemporalRepresentation
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzInitialTemporalFibreState
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzEnrichedTemporalHeightConcordance
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzFibrewisePeakOccursAsFinalExcess
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzInitialIndexPeakObservationValue_eq_height
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzFibrewisePeakReached
+#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzFibrewisePeakObservation
 /- AXIOM_AUDIT_END -/
