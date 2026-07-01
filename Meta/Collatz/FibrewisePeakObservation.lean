@@ -97,51 +97,6 @@ theorem collatzInitialIndexPeakObservationTrace_terminalPayload_eq_height
   rw [terminalPayload_formedTraceOfIntersection]
   rw [collatzInitialIndexPeakConsumer_terminalExcess_eq_height]
 
-/-! ## Classical visible peak reading -/
-
-/--
-Classical visible reading of the initial-index peak.
-
-This is definitionally the fibrewise height `H(n)`.
--/
-def collatzClassicalVisiblePeakOfIndex
-    (n : Nat) :
-    Nat :=
-  collatzInitialIndexFibreHeight n
-
-/-- The classical visible peak reading is definitionally the fibrewise height. -/
-theorem collatzClassicalVisiblePeakOfIndex_eq_height
-    (n : Nat) :
-    collatzClassicalVisiblePeakOfIndex n =
-      collatzInitialIndexFibreHeight n :=
-  rfl
-
-/-- The terminal payload of the enriched peak trace is the classical visible peak. -/
-theorem collatzInitialIndexPeakObservationTrace_terminalPayload_eq_classicalVisiblePeak
-    (n : Nat) :
-    terminalPayload
-        (tracePayloads (collatzInitialIndexPeakObservationTrace n)) =
-      collatzClassicalVisiblePeakOfIndex n :=
-  collatzInitialIndexPeakObservationTrace_terminalPayload_eq_height n
-
-/--
-The final enriched excess atom is indexed by the classical visible peak.
--/
-theorem collatzFibrewisePeakOccursAsFinalExcess_classicalVisiblePeak
-    (n : Nat) :
-    Exists (fun (pref : List NatTraceAtom) =>
-      collatzInitialIndexPeakObservationTrace n =
-        pref ++
-          [NatTraceAtom.excess
-            (collatzClassicalVisiblePeakOfIndex n)]) := by
-  change
-    Exists (fun (pref : List NatTraceAtom) =>
-      collatzInitialIndexPeakObservationTrace n =
-        pref ++
-          [NatTraceAtom.excess
-            (collatzInitialIndexFibreHeight n)])
-  exact collatzFibrewisePeakOccursAsFinalExcess n
-
 /--
 The operational role through which the initial-index fibrewise peak is observed.
 
@@ -232,16 +187,6 @@ structure CollatzFibrewisePeakObservation
       NatEnrichedParityRole.closingExcess peak
   observedTrace_terminalPayload_eq_peak :
     terminalPayload (tracePayloads observedTrace) = peak
-  classicalVisiblePeak : Nat
-  classicalVisiblePeak_eq :
-    classicalVisiblePeak = collatzClassicalVisiblePeakOfIndex n
-  classicalVisiblePeak_eq_peak :
-    classicalVisiblePeak = peak
-  observedTrace_terminalPayload_eq_classicalVisiblePeak :
-    terminalPayload (tracePayloads observedTrace) = classicalVisiblePeak
-  observedTrace_final_excess_classicalVisiblePeak :
-    observedTrace =
-      consumer.forward.trace ++ [NatTraceAtom.excess classicalVisiblePeak]
   observedRole : NatEnrichedParityRole
   observedRole_eq :
     observedRole = arithmeticClosingRoleOfIntersection consumer
@@ -275,13 +220,6 @@ def collatzFibrewisePeakObservation
     collatzInitialIndexPeakObservationTrace_role_eq_closingHeight n
   observedTrace_terminalPayload_eq_peak :=
     collatzInitialIndexPeakObservationTrace_terminalPayload_eq_height n
-  classicalVisiblePeak := collatzClassicalVisiblePeakOfIndex n
-  classicalVisiblePeak_eq := rfl
-  classicalVisiblePeak_eq_peak := rfl
-  observedTrace_terminalPayload_eq_classicalVisiblePeak :=
-    collatzInitialIndexPeakObservationTrace_terminalPayload_eq_classicalVisiblePeak n
-  observedTrace_final_excess_classicalVisiblePeak :=
-    collatzInitialIndexPeakObservationTrace_eq_prefix_append_excessHeight n
   observedRole := collatzInitialIndexPeakObservationRole n
   observedRole_eq := rfl
   observedRole_eq_closingPeak :=
@@ -318,10 +256,6 @@ end Meta
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzFibrewisePeakOccursAsFinalExcess
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzInitialIndexPeakObservationTrace_role_eq_closingHeight
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzInitialIndexPeakObservationTrace_terminalPayload_eq_height
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzClassicalVisiblePeakOfIndex
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzClassicalVisiblePeakOfIndex_eq_height
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzInitialIndexPeakObservationTrace_terminalPayload_eq_classicalVisiblePeak
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzFibrewisePeakOccursAsFinalExcess_classicalVisiblePeak
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzInitialIndexPeakObservationRole
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzInitialIndexPeakObservationRole_eq_closingHeight
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzInitialIndexPeakObservationValue
