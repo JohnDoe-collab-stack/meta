@@ -114,6 +114,16 @@ Dans ce document, le mot `OOD` ne désigne donc pas seulement une baisse de
 performance hors distribution. Il désigne une situation où la lecture visible
 change, et où il faut décider si la structure interne survit à ce changement.
 
+Deux niveaux doivent rester séparés :
+
+```text
+projection : ce qui contracte l'interface ;
+lecture    : ce qui expose un résultat visible à partir de la projection.
+```
+
+La non-reconstruction formelle porte d'abord sur la projection. La lecture sert
+à manifester le shift.
+
 ## 4. Ce que le cadre doit prouver
 
 Le cadre doit prouver :
@@ -149,7 +159,7 @@ la séparation visible est dérivée d'une source structurelle du cadre.
 et que :
 
 ```text
-la lecture visible seule ne reconstruit pas la cellule.
+la projection visible seule ne reconstruit pas la cellule.
 ```
 
 ## 5. Contrat de non-trivialité
@@ -224,6 +234,26 @@ visibleShift := visibleShiftOfSource shiftSource
 ```
 
 Cette provenance est obligatoire.
+
+Elle ne garantit pas, à elle seule, que la source est riche.
+
+La couche abstraite rend la provenance inspectable. L'instance concrète doit
+ensuite prouver que cette provenance n'est pas ad hoc.
+
+Sera donc refusée dans une instance concrète une source du type :
+
+```text
+ShiftSource := read_in (project_in formed) = read_out (project_out formed)
+  -> False
+```
+
+avec :
+
+```text
+visibleShiftOfSource := fun h => h
+```
+
+Ce serait seulement déplacer la preuve flottante dans `ShiftSource`.
 
 Elle empêche le faux résultat suivant :
 
@@ -324,6 +354,24 @@ witness_out est le transport du même witness interne
 
 Le témoin ne doit pas être reconstruit depuis `read_in` ou `read_out`.
 
+Il ne doit pas non plus être fourni comme un champ libre sans lien avec la
+cellule.
+
+Le témoin doit être attaché à la cellule ou extrait d'elle :
+
+```text
+cellule
+-> témoin interne
+-> lectures visibles
+```
+
+et non :
+
+```text
+témoin
+-> témoin
+```
+
 Il doit être porté avant la lecture visible :
 
 ```text
@@ -358,6 +406,29 @@ pas parce que la projection visible suffit.
 
 Ce point empêche de confondre généralisation structurelle et simple invariance
 visible.
+
+Formulation stricte :
+
+```text
+project_in ne reconstruit pas l'interface ;
+project_out ne reconstruit pas l'interface.
+```
+
+Les fonctions :
+
+```text
+read_in
+read_out
+```
+
+servent à exposer le shift visible. Elles ne sont pas directement la cible de
+`noProjectiveReconstruction`, sauf si l'on construit explicitement une
+projection composée :
+
+```text
+read_in ∘ project_in
+read_out ∘ project_out
+```
 
 ## 6. Forme Lean cible
 
@@ -480,18 +551,18 @@ La récupération doit être portée par la cellule.
 
 ### 6.3 Transport du témoin
 
-Structure candidate :
+Structure candidate abstraite :
 
 ```lean
 structure OODWitnessTransport
     ...
     (WitnessOf : Interface -> Type q) where
   cell : OODRecoveredCell ...
-  witness : WitnessOf cell.shift.formed
+  witnessOfCell : WitnessOf cell.shift.formed
   witnessIn : WitnessOf cell.shift.formed
   witnessOut : WitnessOf cell.shift.formed
-  witnessIn_eq : witnessIn = witness
-  witnessOut_eq : witnessOut = witness
+  witnessIn_eq : witnessIn = witnessOfCell
+  witnessOut_eq : witnessOut = witnessOfCell
 ```
 
 Dans une version positive Nat :
@@ -499,12 +570,12 @@ Dans une version positive Nat :
 ```lean
 structure OODPositiveWitnessTransport where
   cell : OODRecoveredCell ...
-  witness : Nat
-  witness_pos : 0 < witness
+  witnessOfCell : Nat
+  witness_pos : 0 < witnessOfCell
   witnessIn : Nat
   witnessOut : Nat
-  witnessIn_eq : witnessIn = witness
-  witnessOut_eq : witnessOut = witness
+  witnessIn_eq : witnessIn = witnessOfCell
+  witnessOut_eq : witnessOut = witnessOfCell
 ```
 
 Le point n'est pas seulement l'égalité.
@@ -527,6 +598,9 @@ Avec les deux, le témoin est bien ce qui traverse le shift là où le visible n
 suffit pas.
 
 Avec `shiftSource`, on sait aussi pourquoi ce shift appartient au cadre.
+
+Dans une instance concrète, `witnessOfCell` ne doit pas être choisi librement.
+Il doit être une projection directe d'un champ ou d'un théorème de la cellule.
 
 ## 7. Théorèmes à démontrer
 
@@ -565,7 +639,18 @@ oodNoProjectiveReconstructionIn
 oodNoProjectiveReconstructionOut
 ```
 
-doivent montrer que chaque lecture visible seule est insuffisante.
+doivent montrer que chaque projection visible seule est insuffisante.
+
+Forme stricte :
+
+```text
+projectIn  ne reconstruit pas l'interface ;
+projectOut ne reconstruit pas l'interface.
+```
+
+Les lectures `readIn` et `readOut` interviennent dans `visibleShift`, pas dans
+la non-reconstruction projective, sauf construction explicite de projections
+composées.
 
 ### 7.4 Survie du témoin sous shift
 
@@ -595,6 +680,16 @@ witnessOut est obtenu par transport du même témoin interne.
 
 Dans les deux cas, le théorème doit rester couplé au shift visible et aux deux
 non-reconstructions projectives.
+
+Le théorème doit aussi exhiber le chemin :
+
+```text
+cellule
+-> witnessOfCell
+-> witnessIn / witnessOut
+```
+
+Il ne doit pas se réduire à deux champs posés égaux par définition.
 
 ### 7.5 Résultat de synthèse
 
@@ -751,6 +846,52 @@ payload de retour.
 La séparation de rôles seule est insuffisante si elle ne produit pas les deux
 lectures visibles du shift.
 
+Le verrou technique de l'instance est le choix de :
+
+```text
+projectOut
+readOut
+```
+
+Il faut obtenir simultanément :
+
+```text
+sameOut : projectOut formed = projectOut shadow
+visibleShift :
+  readIn (projectIn formed) = readOut (projectOut formed) -> False
+```
+
+Donc :
+
+```text
+projectOut doit rester assez contractant pour préserver sameOut ;
+readOut doit rester assez structuré pour exposer le shift.
+```
+
+Si `projectOut` transporte trop d'information, `sameOut` risque d'échouer.
+
+Si `projectOut` transporte trop peu d'information, le shift risque de devenir
+artificiel.
+
+Le fait :
+
+```text
+rightPayload = k + positiveWitness
+```
+
+ne suffit donc pas seul.
+
+L'objectif arithmétique complet est :
+
+```text
+rightPayload = k + positiveWitness
++ 0 < positiveWitness
++ lecture source / lecture cible séparées
++ même cellule formed/shadow
++ sameIn
++ sameOut
+```
+
 ## 9. Ce qui serait refusé
 
 Sera refusé :
@@ -782,6 +923,12 @@ un visibleShift qui ne porte pas explicitement sa source structurelle.
 Sera refusé :
 
 ```text
+un ShiftSource qui est seulement le visibleShift rebaptisé.
+```
+
+Sera refusé :
+
+```text
 un résultat qui ne produit pas d'obstruction de reconstruction visible.
 ```
 
@@ -801,6 +948,12 @@ NatEnrichedRelaxedOddRole.positiveWitness.
 Sera refusé :
 
 ```text
+un témoin fourni librement au lieu d'être extrait de la cellule.
+```
+
+Sera refusé :
+
+```text
 une preuve qui ne sépare pas explicitement témoin, lecture source,
 lecture cible et payload de retour.
 ```
@@ -810,6 +963,13 @@ Sera refusé :
 ```text
 une instance qui prend la séparation de rôles comme résultat final sans
 démontrer le changement de lecture visible correspondant.
+```
+
+Sera refusé :
+
+```text
+une preuve qui prétend que readIn/readOut ne reconstruisent pas l'interface
+alors que seule la non-reconstruction de projectIn/projectOut a été démontrée.
 ```
 
 ## 10. Ce que le résultat prouverait
@@ -868,20 +1028,22 @@ La phase sera achevée uniquement si le code final prouve :
 4. deux DiagonalCertificate issus du même formé/shadow sous deux projections ;
 5. deux obstructions projectives ;
 6. deux non-reconstructions visibles ;
-7. un témoin interne conservé ;
-8. une instance arithmétique non triviale.
+7. non-reconstruction portée par projectIn/projectOut, pas par readIn/readOut ;
+8. un témoin interne extrait de la cellule ;
+9. une instance arithmétique non triviale.
 ```
 
-Sans ces huit points, la phase n'est pas complète.
+Sans ces neuf points, la phase n'est pas complète.
 
 Le banc d'essai arithmétique doit en plus vérifier :
 
 ```text
-9. le témoin utilisé est bien celui de NatEnrichedRelaxedOddRole ;
-10. le payload de retour reste distinct du témoin ;
-11. la concordance visible avec le pas relaxé est conservée ;
-12. le shift est dérivé de la divergence positive et/ou du payload de retour ;
-13. aucune condition externe ne remplace la cellule opératoire.
+10. le témoin utilisé est bien celui de NatEnrichedRelaxedOddRole ;
+11. le payload de retour reste distinct du témoin ;
+12. la concordance visible avec le pas relaxé est conservée ;
+13. le shift est dérivé de la divergence positive et/ou du payload de retour ;
+14. projectOut/readOut sont construits de façon à obtenir sameOut et visibleShift ;
+15. aucune condition externe ne remplace la cellule opératoire.
 ```
 
 ## 12. Ordre d'implémentation
@@ -919,6 +1081,9 @@ même cellule opératoire
 + non-reconstruction projective des deux côtés
 ```
 
+Cette couche ne prétend pas encore que `ShiftSource` est substantiel. Elle rend
+seulement la provenance formelle et inspectable.
+
 ### 12.2 Instance arithmétique
 
 Créer ensuite l'instance arithmétique, par exemple :
@@ -949,6 +1114,17 @@ rightPayload
 natEnrichedRelaxedOddRole_visibleOddStep_eq_two_mul_rightPayload
 natEnrichedRelaxedOddRole_visibleOddStep_div_two_eq_rightPayload
 projectionObstruction
+```
+
+Conditions particulières de l'instance :
+
+```text
+1. ShiftSource ne doit pas être le visibleShift rebaptisé ;
+2. witnessOfCell doit être NatEnrichedRelaxedOddRole.positiveWitness ;
+3. projectOut/readOut doivent produire à la fois sameOut et visibleShift ;
+4. noProjectiveReconstruction doit porter sur projectIn/projectOut ;
+5. rightPayload = k + positiveWitness doit être utilisé avec une séparation
+   effective des lectures.
 ```
 
 La réussite de cette instance dira exactement :
