@@ -416,6 +416,47 @@ structure OODPositiveWitnessTransport
   witnessIn_eq : witnessIn = witnessOfCell
   witnessOut_eq : witnessOut = witnessOfCell
 
+/--
+Positive invariant transported through an OOD cell.
+
+This names the invariant explicitly: the same positive witness is carried by
+the cell, read on the input side, and read on the output side.  The visible
+readings may shift; the positive witness itself is not re-created from that
+shift.
+-/
+structure OODPositiveInvariant
+    (Interface : Type u)
+    (VisibleIn : Type v)
+    (VisibleOut : Type w)
+    (Label : Type z)
+    (ShiftSource : Type r)
+    (projectIn : Interface -> VisibleIn)
+    (projectOut : Interface -> VisibleOut)
+    (readIn : VisibleIn -> Label)
+    (readOut : VisibleOut -> Label)
+    (RepairOf : Interface -> Type s) :
+    Type (max u v w z r s) where
+  positiveTransport :
+    OODPositiveWitnessTransport
+      Interface
+      VisibleIn
+      VisibleOut
+      Label
+      ShiftSource
+      projectIn
+      projectOut
+      readIn
+      readOut
+      RepairOf
+  invariant : Nat
+  invariant_eq_witnessOfCell :
+    invariant = positiveTransport.witnessOfCell
+  witnessIn_eq_invariant :
+    positiveTransport.witnessIn = invariant
+  witnessOut_eq_invariant :
+    positiveTransport.witnessOut = invariant
+  invariant_pos : 0 < invariant
+
 /-- Full OOD certificate assembled from the witness transport. -/
 structure OODStructuralCertificate
     (Interface : Type u)
@@ -518,6 +559,48 @@ structure OODPositiveStructuralCertificate
           False)
   witness_pos :
     0 < positiveTransport.witnessOfCell
+
+/-- Extract the explicit positive invariant from one positive transport. -/
+def oodPositiveInvariantOfPositiveWitnessTransport
+    {Interface : Type u}
+    {VisibleIn : Type v}
+    {VisibleOut : Type w}
+    {Label : Type z}
+    {ShiftSource : Type r}
+    {projectIn : Interface -> VisibleIn}
+    {projectOut : Interface -> VisibleOut}
+    {readIn : VisibleIn -> Label}
+    {readOut : VisibleOut -> Label}
+    {RepairOf : Interface -> Type s}
+    (transport :
+      OODPositiveWitnessTransport
+        Interface
+        VisibleIn
+        VisibleOut
+        Label
+        ShiftSource
+        projectIn
+        projectOut
+        readIn
+        readOut
+        RepairOf) :
+    OODPositiveInvariant
+      Interface
+      VisibleIn
+      VisibleOut
+      Label
+      ShiftSource
+      projectIn
+      projectOut
+      readIn
+      readOut
+      RepairOf where
+  positiveTransport := transport
+  invariant := transport.witnessOfCell
+  invariant_eq_witnessOfCell := rfl
+  witnessIn_eq_invariant := transport.witnessIn_eq
+  witnessOut_eq_invariant := transport.witnessOut_eq
+  invariant_pos := transport.witness_pos
 
 /-- Assemble the abstract OOD structural certificate. -/
 def oodStructuralCertificateOfWitnessTransport
@@ -630,8 +713,10 @@ end Meta
 #print axioms Meta.OOD.oodNoProjectiveReconstructionOut
 #print axioms Meta.OOD.OODWitnessTransport
 #print axioms Meta.OOD.OODPositiveWitnessTransport
+#print axioms Meta.OOD.OODPositiveInvariant
 #print axioms Meta.OOD.OODStructuralCertificate
 #print axioms Meta.OOD.oodStructuralCertificateOfWitnessTransport
 #print axioms Meta.OOD.OODPositiveStructuralCertificate
+#print axioms Meta.OOD.oodPositiveInvariantOfPositiveWitnessTransport
 #print axioms Meta.OOD.oodPositiveStructuralCertificateOfPositiveWitnessTransport
 /- AXIOM_AUDIT_END -/

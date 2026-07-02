@@ -359,6 +359,41 @@ theorem natEnrichedRelaxedOddOODPositiveStructuralCertificate_witness_eq
       (natEnrichedRelaxedOddRole k).positiveWitness :=
   rfl
 
+/--
+The explicit OOD invariant of the arithmetic lock.
+
+It is not the visible shift.  It is the positive witness carried by the
+relaxed odd role and transported unchanged across the input and output sides.
+-/
+def natEnrichedRelaxedOddOODPositiveInvariant
+    (k : Nat) :
+    OODPositiveInvariant
+      NatEnrichedParityRole
+      Nat
+      Nat
+      Nat
+      (NatEnrichedRelaxedOddRole k)
+      natEnrichedRelaxedOddOODProjectIn
+      natEnrichedRelaxedOddOODProjectOut
+      natEnrichedRelaxedOddOODReadIn
+      natEnrichedRelaxedOddOODReadOut
+      NatEnrichedParityRoleRepair :=
+  oodPositiveInvariantOfPositiveWitnessTransport
+    (natEnrichedRelaxedOddOODPositiveWitnessTransport k)
+
+/-- The arithmetic OOD invariant is exactly the relaxed odd positive witness. -/
+theorem natEnrichedRelaxedOddOODPositiveInvariant_eq_positiveWitness
+    (k : Nat) :
+    (natEnrichedRelaxedOddOODPositiveInvariant k).invariant =
+      (natEnrichedRelaxedOddRole k).positiveWitness :=
+  rfl
+
+/-- The arithmetic OOD invariant is positive. -/
+theorem natEnrichedRelaxedOddOODPositiveInvariant_pos
+    (k : Nat) :
+    0 < (natEnrichedRelaxedOddOODPositiveInvariant k).invariant :=
+  (natEnrichedRelaxedOddOODPositiveInvariant k).invariant_pos
+
 end EnrichedNatClosedStabilityInstance
 end Meta
 
@@ -376,4 +411,7 @@ end Meta
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedRelaxedOddOODStructuralCertificate
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedRelaxedOddOODPositiveStructuralCertificate
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedRelaxedOddOODPositiveStructuralCertificate_witness_eq
+#print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedRelaxedOddOODPositiveInvariant
+#print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedRelaxedOddOODPositiveInvariant_eq_positiveWitness
+#print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedRelaxedOddOODPositiveInvariant_pos
 /- AXIOM_AUDIT_END -/
