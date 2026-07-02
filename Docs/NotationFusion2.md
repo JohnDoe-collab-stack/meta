@@ -400,9 +400,64 @@ formed(phi)
 -> outcome(phi)
 ```
 
-Donc Tarski n’est pas le point de départ du cadre.
+Le théorème de Tarski apparaît comme un cas contracté limite de l’usage opératoire du gap.
 
-Il est un cas contracté de l’usage opératoire du gap.
+L’apport du cadre est de démontrer que le théorème de Tarski peut être lu
+comme une projection, et qu’une projection perd de l’information.
+
+Le cadre rend cette information traçable et le gap opérable.
+
+Le témoin diagonal est premier : il porte le fait que deux interfaces ont la
+même projection visible tout en restant séparées dans la cellule enrichie.
+
+La lecture classique arrive ensuite, comme contraction secondaire :
+
+```text
+cellule opératoire complète
+-> projection visible
+-> lecture contractée
+```
+
+Ce que la lecture classique traite comme instabilité, paradoxe ou impossibilité
+provient alors d’un écrasement du passage.
+
+Le cadre ne cherche pas à supprimer le gap.
+
+Il le rend opératoire :
+
+```text
+gap
++ témoin diagonal
++ réparation locale
++ récupération du formé
+```
+
+La stabilité obtenue n’est donc pas une stabilité par vérité globale.
+
+C’est une stabilité par conservation de la trace structurelle du gap.
+
+Une couche en aval reste stable lorsqu’elle ne transporte pas seulement :
+
+```text
+project(formed)
+```
+
+mais la cellule complète :
+
+```text
+formed
++ shadow
++ sameProjection
++ separatedInterface
++ repair
++ recovered
++ outcome
+```
+
+Ainsi, ce que les fondations classiques lisent comme une limite devient ici une
+structure positive de passage : le témoin de diagonalisation précède la
+projection, et la projection ne donne qu’une lecture contractée de ce qui est
+déjà porté par la cellule.
 
 ---
 
