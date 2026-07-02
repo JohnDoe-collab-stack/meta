@@ -24,6 +24,8 @@ import Meta.Arithmetic.Countdown
 import Meta.Arithmetic.CountdownDynamicGap
 import Meta.Arithmetic.CountdownGapContraction
 import Meta.Arithmetic.CountdownRelaxedParity
+import Meta.OOD.WitnessTransport
+import Meta.Arithmetic.RelaxedOddOOD
 import Meta.Collatz.OperationalParity
 import Meta.Collatz.RelaxedOddActionBridge
 import Meta.Collatz.Countdown
@@ -76,6 +78,8 @@ import Meta.Synthesis.TarskiBethBellGap
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedRelaxedOddRole
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedRelaxedOddRole_visibleOddStep_eq_two_mul_rightPayload
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedRelaxedOddRole_visibleOddStep_div_two_eq_rightPayload
+#print axioms Meta.OOD.oodStructuralCertificateOfWitnessTransport
+#print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedRelaxedOddOODStructuralCertificate
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzVisibleOddStep_eq_two_mul_relaxedRightPayload
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzVisibleOddStep_div_two_eq_relaxedRightPayload
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRelaxedOddVisibleStep_eq_two_mul_rightPayload
