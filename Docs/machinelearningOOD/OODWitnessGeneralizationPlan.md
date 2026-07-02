@@ -1144,6 +1144,134 @@ projectOut := projection cible contractante
 readOut    := lecture cible du retour relaxé
 ```
 
+Un candidat précis est le suivant.
+
+Interface :
+
+```text
+Interface := NatEnrichedParityRole
+```
+
+Cellule :
+
+```text
+formed := NatEnrichedParityRole.closingExcess k
+shadow := NatEnrichedParityRole.mediatingValue k
+```
+
+Projection et lecture source :
+
+```text
+projectIn(role) := natEnrichedParityRolePayload role
+readIn(payload) := 2 * payload + 1
+```
+
+Alors :
+
+```text
+projectIn formed = k
+projectIn shadow = k
+```
+
+donc :
+
+```text
+sameIn : projectIn formed = projectIn shadow
+```
+
+est immédiat.
+
+Important :
+
+```text
+2*k+1
+```
+
+n'est pas utilisé ici comme définition de l'impair relaxé. Il est seulement la
+lecture visible source du payload contracté.
+
+Projection et lecture cible :
+
+```text
+projectOut(role) :=
+  natEnrichedParityMaximallyRelaxedRightPayload
+    (natEnrichedParityRolePayload role)
+
+readOut(payload) := payload
+```
+
+Alors :
+
+```text
+projectOut formed = rightPayload(k)
+projectOut shadow = rightPayload(k)
+```
+
+donc :
+
+```text
+sameOut : projectOut formed = projectOut shadow
+```
+
+est immédiat.
+
+Le shift devient :
+
+```text
+readIn (projectIn formed)  = 2*k + 1
+readOut (projectOut formed) = rightPayload(k)
+```
+
+Or le code porte déjà :
+
+```text
+rightPayload(k) = k + positiveWitness
+positiveWitness = natEnrichedParityMaximalRelaxedDivergence k
+positiveWitness = (k + k) + 2
+```
+
+Donc :
+
+```text
+rightPayload(k) = 3*k + 2
+```
+
+et on peut prouver :
+
+```text
+2*k + 1 < 3*k + 2
+```
+
+d'où :
+
+```text
+readIn (projectIn formed) ≠ readOut (projectOut formed)
+```
+
+La source structurelle du shift peut être :
+
+```text
+ShiftSource := NatEnrichedRelaxedOddRole k
+```
+
+et non une preuve ad hoc.
+
+Lecture du candidat :
+
+```text
+projectOut est assez contractant :
+  il dépend seulement du payload, donc sameOut tient.
+
+readOut est assez structuré :
+  il expose le retour relaxé rightPayload.
+
+visibleShift est non artificiel :
+  il vient de positiveWitness/rightPayload.
+```
+
+Ce candidat devra être formalisé dans un fichier de verrou avant l'instance
+complète.
+
 Critères de résolution du verrou :
 
 ```text
