@@ -1084,7 +1084,82 @@ même cellule opératoire
 Cette couche ne prétend pas encore que `ShiftSource` est substantiel. Elle rend
 seulement la provenance formelle et inspectable.
 
-### 12.2 Instance arithmétique
+### 12.2 Verrou préalable de l'instance arithmétique
+
+Avant d'implémenter l'instance arithmétique, il faut résoudre le verrou :
+
+```text
+projectOut / readOut
+```
+
+Le problème exact est :
+
+```text
+sameOut :
+  projectOut formed = projectOut shadow
+
+visibleShift :
+  readIn (projectIn formed) = readOut (projectOut formed) -> False
+```
+
+Ces deux exigences tirent dans des directions opposées.
+
+`projectOut` doit rester assez contractant pour identifier `formed` et
+`shadow` :
+
+```text
+projectOut formed = projectOut shadow
+```
+
+mais `readOut` doit rester assez structuré pour exposer un vrai changement de
+lecture :
+
+```text
+readIn (projectIn formed) ≠ readOut (projectOut formed)
+```
+
+Le verrou n'est donc pas :
+
+```text
+trouver une valeur différente.
+```
+
+Le verrou est :
+
+```text
+trouver une projection cible qui conserve la contraction locale,
+et une lecture cible qui expose la divergence relaxée sans reconstruire
+l'interface.
+```
+
+Le candidat arithmétique devra être écrit et vérifié avant toute implémentation
+Lean de l'instance :
+
+```text
+formed  := rôle closing/excess enrichi
+shadow  := rôle mediating enrichi
+projectIn  := projection source contractée
+readIn     := lecture source
+projectOut := projection cible contractante
+readOut    := lecture cible du retour relaxé
+```
+
+Critères de résolution du verrou :
+
+```text
+1. sameIn est prouvé ;
+2. sameOut est prouvé ;
+3. visibleShift est prouvé ;
+4. visibleShift est dérivé de positiveWitness / rightPayload ;
+5. witnessOfCell = NatEnrichedRelaxedOddRole.positiveWitness ;
+6. noProjectiveReconstruction reste porté par projectIn/projectOut ;
+7. readOut n'est pas une reconstruction cachée de l'interface.
+```
+
+Si ces sept points ne sont pas disponibles, l'instance arithmétique ne doit pas
+être implémentée.
+
+### 12.3 Instance arithmétique
 
 Créer ensuite l'instance arithmétique, par exemple :
 
