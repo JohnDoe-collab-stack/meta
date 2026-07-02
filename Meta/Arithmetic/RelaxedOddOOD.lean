@@ -330,6 +330,35 @@ def natEnrichedRelaxedOddOODStructuralCertificate
   oodStructuralCertificateOfWitnessTransport
     (natEnrichedRelaxedOddOODWitnessTransport k)
 
+/--
+The compact positive structural certificate for the arithmetic OOD lock.
+
+This facade keeps the structural obstruction and the positive relaxed witness
+on the same recovered cell.
+-/
+def natEnrichedRelaxedOddOODPositiveStructuralCertificate
+    (k : Nat) :
+    OODPositiveStructuralCertificate
+      NatEnrichedParityRole
+      Nat
+      Nat
+      Nat
+      (NatEnrichedRelaxedOddRole k)
+      natEnrichedRelaxedOddOODProjectIn
+      natEnrichedRelaxedOddOODProjectOut
+      natEnrichedRelaxedOddOODReadIn
+      natEnrichedRelaxedOddOODReadOut
+      NatEnrichedParityRoleRepair :=
+  oodPositiveStructuralCertificateOfPositiveWitnessTransport
+    (natEnrichedRelaxedOddOODPositiveWitnessTransport k)
+
+/-- The facade carries the positive witness of the relaxed odd source. -/
+theorem natEnrichedRelaxedOddOODPositiveStructuralCertificate_witness_eq
+    (k : Nat) :
+    (natEnrichedRelaxedOddOODPositiveStructuralCertificate k).positiveTransport.witnessOfCell =
+      (natEnrichedRelaxedOddRole k).positiveWitness :=
+  rfl
+
 end EnrichedNatClosedStabilityInstance
 end Meta
 
@@ -345,4 +374,6 @@ end Meta
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedRelaxedOddOODWitnessTransport
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedRelaxedOddOODPositiveWitnessTransport
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedRelaxedOddOODStructuralCertificate
+#print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedRelaxedOddOODPositiveStructuralCertificate
+#print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedRelaxedOddOODPositiveStructuralCertificate_witness_eq
 /- AXIOM_AUDIT_END -/

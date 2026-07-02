@@ -465,6 +465,60 @@ structure OODStructuralCertificate
         recover (projectOut interface) = interface) ->
           False)
 
+/--
+Positive structural OOD certificate.
+
+This is the compact facade: the positive witness transport and the structural
+diagonal/obstruction data are read from the same recovered cell.
+-/
+structure OODPositiveStructuralCertificate
+    (Interface : Type u)
+    (VisibleIn : Type v)
+    (VisibleOut : Type w)
+    (Label : Type z)
+    (ShiftSource : Type r)
+    (projectIn : Interface -> VisibleIn)
+    (projectOut : Interface -> VisibleOut)
+    (readIn : VisibleIn -> Label)
+    (readOut : VisibleOut -> Label)
+    (RepairOf : Interface -> Type s) :
+    Type (max u v w z r s) where
+  positiveTransport :
+    OODPositiveWitnessTransport
+      Interface
+      VisibleIn
+      VisibleOut
+      Label
+      ShiftSource
+      projectIn
+      projectOut
+      readIn
+      readOut
+      RepairOf
+  visibleShift :
+    readIn (projectIn positiveTransport.cell.shift.formed) =
+      readOut (projectOut positiveTransport.cell.shift.formed) -> False
+  diagonalIn :
+    DiagonalCertificate Interface VisibleIn projectIn
+  diagonalOut :
+    DiagonalCertificate Interface VisibleOut projectOut
+  projectionObstructionIn :
+    ProjectionObstruction Interface VisibleIn projectIn
+  projectionObstructionOut :
+    ProjectionObstruction Interface VisibleOut projectOut
+  noProjectiveReconstructionIn :
+    ((recover : VisibleIn -> Interface) ->
+      ((interface : Interface) ->
+        recover (projectIn interface) = interface) ->
+          False)
+  noProjectiveReconstructionOut :
+    ((recover : VisibleOut -> Interface) ->
+      ((interface : Interface) ->
+        recover (projectOut interface) = interface) ->
+          False)
+  witness_pos :
+    0 < positiveTransport.witnessOfCell
+
 /-- Assemble the abstract OOD structural certificate. -/
 def oodStructuralCertificateOfWitnessTransport
     {Interface : Type u}
@@ -514,6 +568,53 @@ def oodStructuralCertificateOfWitnessTransport
   noProjectiveReconstructionOut :=
     oodNoProjectiveReconstructionOut transport.cell
 
+/-- Assemble the positive structural certificate from one positive transport. -/
+def oodPositiveStructuralCertificateOfPositiveWitnessTransport
+    {Interface : Type u}
+    {VisibleIn : Type v}
+    {VisibleOut : Type w}
+    {Label : Type z}
+    {ShiftSource : Type r}
+    {projectIn : Interface -> VisibleIn}
+    {projectOut : Interface -> VisibleOut}
+    {readIn : VisibleIn -> Label}
+    {readOut : VisibleOut -> Label}
+    {RepairOf : Interface -> Type s}
+    (transport :
+      OODPositiveWitnessTransport
+        Interface
+        VisibleIn
+        VisibleOut
+        Label
+        ShiftSource
+        projectIn
+        projectOut
+        readIn
+        readOut
+        RepairOf) :
+    OODPositiveStructuralCertificate
+      Interface
+      VisibleIn
+      VisibleOut
+      Label
+      ShiftSource
+      projectIn
+      projectOut
+      readIn
+      readOut
+      RepairOf where
+  positiveTransport := transport
+  visibleShift := transport.cell.shift.visibleShift
+  diagonalIn := oodDiagonalIn transport.cell
+  diagonalOut := oodDiagonalOut transport.cell
+  projectionObstructionIn := oodProjectionObstructionIn transport.cell
+  projectionObstructionOut := oodProjectionObstructionOut transport.cell
+  noProjectiveReconstructionIn :=
+    oodNoProjectiveReconstructionIn transport.cell
+  noProjectiveReconstructionOut :=
+    oodNoProjectiveReconstructionOut transport.cell
+  witness_pos := transport.witness_pos
+
 end OOD
 end Meta
 
@@ -531,4 +632,6 @@ end Meta
 #print axioms Meta.OOD.OODPositiveWitnessTransport
 #print axioms Meta.OOD.OODStructuralCertificate
 #print axioms Meta.OOD.oodStructuralCertificateOfWitnessTransport
+#print axioms Meta.OOD.OODPositiveStructuralCertificate
+#print axioms Meta.OOD.oodPositiveStructuralCertificateOfPositiveWitnessTransport
 /- AXIOM_AUDIT_END -/
