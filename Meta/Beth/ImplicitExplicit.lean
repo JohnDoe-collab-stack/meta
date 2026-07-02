@@ -5,217 +5,214 @@ import Meta.Core.ClosedStabilityTheorem
 
 This file gives the internal Beth layer for the standalone meta package.
 
-The constructive content is deliberately image-indexed.  From the fact that a
-visible value determines at most one enriched interface in its fiber, one gets
-an explicit recovery on every visible value that is already realized by an
-interface witness.  Conversely, such a unique explicit recovery on realized
-visible values implies fiber faithfulness.
+The Beth question is not fiber equality.  It is whether an enriched property is
+already determined by the visible projection, and whether it can therefore be
+read by a visible predicate.
 
-Thus this file proves the internal Beth equivalence:
+The constructive content is:
 
 ```text
-implicit determination by visible
-↔
-explicit definition on realized visible fibers
-↔
-fiber contractibility
+explicit visible definition of Property
+-> Property is invariant on projection fibers
 ```
 
-No global choice of an interface for an arbitrary visible value is used.
+and a genuine Beth obstruction is:
+
+```text
+same visible projection
++ Property holds on the formed side
++ Property fails on the shadow side
+```
+
+Such a separation refutes both implicit visible determination and explicit
+visible definition of the enriched property.
 -/
 
 namespace Meta
 namespace ClosedStabilityTheorem
 
-universe u v s
+universe u v
 
-/-! ## Implicit determination and realized visible fibers -/
+/-! ## Implicit determination and explicit visible definition -/
 
 /--
-Implicit determination by the visible projection.
+Implicit determination of an enriched property by the visible projection.
 
 This is the Beth-style implicit side: if two enriched interfaces have the same
-visible projection, they are already the same interface.
+visible projection, then the property cannot distinguish them.
 -/
-abbrev ImplicitlyDeterminedByVisible
+structure ImplicitlyDeterminedByVisible
     (Interface : Type u)
     (Visible : Type v)
-    (project : Interface -> Visible) :
-    Prop :=
-  ProjectionFiberFaithful Interface Visible project
-
-/-- A visible value together with an enriched interface that realizes it. -/
-structure VisibleRealization
-    {Interface : Type u}
-    {Visible : Type v}
     (project : Interface -> Visible)
-    (visible : Visible) :
-    Type (max u v) where
-  interface : Interface
-  projected : project interface = visible
-
-/-- The realized visible value carried by an interface. -/
-def visibleRealizationOfInterface
-    {Interface : Type u}
-    {Visible : Type v}
-    (project : Interface -> Visible)
-    (interface : Interface) :
-    VisibleRealization project (project interface) where
-  interface := interface
-  projected := rfl
-
-/-! ## Explicit definition on the realized image -/
+    (Property : Interface -> Prop) :
+    Prop where
+  invariant :
+    (left right : Interface) ->
+      project left = project right ->
+        (Property left ↔ Property right)
 
 /--
-Explicit definition on realized visible fibers.
+Explicit definition of an enriched property on the visible projection.
 
-The recovery is not a choice over all visible values.  It receives a realization
-witness for the visible value and returns the unique enriched interface in that
-realized fiber.
+The predicate lives on the visible side, and its pullback along `project`
+recovers the enriched property.
 -/
-structure ExplicitDefinitionOnRealizedVisible
+structure ExplicitDefinitionOnVisible
     (Interface : Type u)
     (Visible : Type v)
-    (project : Interface -> Visible) :
+    (project : Interface -> Visible)
+    (Property : Interface -> Prop) :
     Type (max u v) where
-  recover :
-    (visible : Visible) ->
-      VisibleRealization project visible ->
-        Interface
-  recovers_projection :
-    (visible : Visible) ->
-      (realization : VisibleRealization project visible) ->
-        project (recover visible realization) = visible
-  unique_in_fiber :
-    (visible : Visible) ->
-      (realization : VisibleRealization project visible) ->
-        (interface : Interface) ->
-          project interface = visible ->
-            recover visible realization = interface
+  visiblePredicate : Visible -> Prop
+  correct :
+    (interface : Interface) ->
+      visiblePredicate (project interface) ↔ Property interface
 
 /--
-Implicit determination gives explicit recovery on each realized visible fiber.
+An explicit visible definition implies implicit visible determination.
 -/
-def explicitDefinitionOnRealizedVisible_of_implicitDetermination
+theorem implicitDetermination_of_explicitDefinitionOnVisible
     {Interface : Type u}
     {Visible : Type v}
     {project : Interface -> Visible}
-    (implicit :
-      ImplicitlyDeterminedByVisible Interface Visible project) :
-    ExplicitDefinitionOnRealizedVisible Interface Visible project where
-  recover := fun _visible realization =>
-    realization.interface
-  recovers_projection := fun _visible realization =>
-    realization.projected
-  unique_in_fiber := by
-    intro _visible realization interface hProject
-    exact
-      implicit.preserves
-        realization.interface
-        interface
-        (Eq.trans realization.projected hProject.symm)
-
-/--
-An explicit unique recovery on realized visible fibers implies implicit
-determination by visible projection.
--/
-theorem implicitDetermination_of_explicitDefinitionOnRealizedVisible
-    {Interface : Type u}
-    {Visible : Type v}
-    {project : Interface -> Visible}
+    {Property : Interface -> Prop}
     (explicit :
-      ExplicitDefinitionOnRealizedVisible Interface Visible project) :
-    ImplicitlyDeterminedByVisible Interface Visible project := by
+      ExplicitDefinitionOnVisible Interface Visible project Property) :
+    ImplicitlyDeterminedByVisible Interface Visible project Property := by
   refine ⟨?_⟩
   intro left right sameProjection
-  let realization := visibleRealizationOfInterface project left
-  have hLeft :
-      explicit.recover (project left) realization = left :=
-    explicit.unique_in_fiber
-      (project left)
-      realization
-      left
-      rfl
-  have hRight :
-      explicit.recover (project left) realization = right :=
-    explicit.unique_in_fiber
-      (project left)
-      realization
-      right
-      sameProjection.symm
-  exact Eq.trans hLeft.symm hRight
-
-/--
-Internal Beth equivalence: implicit determination is equivalent to the
-existence of an explicit unique recovery on realized visible fibers.
--/
-theorem implicitDetermination_iff_explicitDefinitionOnRealizedVisible
-    {Interface : Type u}
-    {Visible : Type v}
-    {project : Interface -> Visible} :
-    ImplicitlyDeterminedByVisible Interface Visible project ↔
-      Nonempty
-        (ExplicitDefinitionOnRealizedVisible Interface Visible project) := by
   constructor
-  · intro implicit
-    exact
-      ⟨explicitDefinitionOnRealizedVisible_of_implicitDetermination
-        implicit⟩
-  · intro hExplicit
-    cases hExplicit with
-    | intro explicit =>
-        exact
-          implicitDetermination_of_explicitDefinitionOnRealizedVisible
-            explicit
+  · intro hLeft
+    have hVisibleLeft :
+        explicit.visiblePredicate (project left) :=
+      (explicit.correct left).mpr hLeft
+    have hVisibleRight :
+        explicit.visiblePredicate (project right) := by
+      rw [← sameProjection]
+      exact hVisibleLeft
+    exact (explicit.correct right).mp hVisibleRight
+  · intro hRight
+    have hVisibleRight :
+        explicit.visiblePredicate (project right) :=
+      (explicit.correct right).mpr hRight
+    have hVisibleLeft :
+        explicit.visiblePredicate (project left) := by
+      rw [sameProjection]
+      exact hVisibleRight
+    exact (explicit.correct left).mp hVisibleLeft
 
-/-! ## Obstructions as anti-Beth data -/
+/-! ## Beth separation -/
 
 /--
-A structural projection gap refutes explicit definition on realized visible
-fibers.
+A Beth separation is a property-level projection gap.
+
+The two enriched interfaces have the same visible projection, but the enriched
+property holds on the formed side and fails on the shadow side.
 -/
-theorem structuralGap_refutes_explicitDefinitionOnRealizedVisible
+structure BethSeparation
+    (Interface : Type u)
+    (Visible : Type v)
+    (project : Interface -> Visible)
+    (Property : Interface -> Prop) :
+    Type (max u v) where
+  formed : Interface
+  shadow : Interface
+  sameProjection :
+    project formed = project shadow
+  property_formed :
+    Property formed
+  shadow_not_property :
+    Property shadow -> False
+
+namespace BethSeparation
+
+/-- A Beth separation carries the underlying diagonal certificate. -/
+def diagonalCertificate
     {Interface : Type u}
     {Visible : Type v}
     {project : Interface -> Visible}
-    (gap :
-      ProjectionObstruction Interface Visible project)
-    (explicit :
-      ExplicitDefinitionOnRealizedVisible Interface Visible project) :
-    False :=
-  projectionObstruction_notFiberFaithful
-    gap
-    (implicitDetermination_of_explicitDefinitionOnRealizedVisible explicit)
+    {Property : Interface -> Prop}
+    (separation :
+      BethSeparation Interface Visible project Property) :
+    DiagonalCertificate Interface Visible project where
+  left := separation.formed
+  right := separation.shadow
+  sameProjection := separation.sameProjection
+  separatedInterface := by
+    intro hEq
+    have hShadow :
+        Property separation.shadow := by
+      rw [← hEq]
+      exact separation.property_formed
+    exact separation.shadow_not_property hShadow
 
-/--
-A local operational recovery gap refutes explicit definition on realized
-visible fibers.
--/
-theorem localRecoveryGap_refutes_explicitDefinitionOnRealizedVisible
+/-- A Beth separation carries the underlying projection obstruction. -/
+def projectionObstruction
     {Interface : Type u}
     {Visible : Type v}
     {project : Interface -> Visible}
-    {RepairOf : Interface -> Type s}
-    (gap :
-      LocalProjectiveRecovery Interface Visible project RepairOf)
+    {Property : Interface -> Prop}
+    (separation :
+      BethSeparation Interface Visible project Property) :
+    ProjectionObstruction Interface Visible project :=
+  projectionObstructionOfDiagonalCertificate
+    separation.diagonalCertificate
+
+end BethSeparation
+
+/-! ## Refutations -/
+
+/--
+A Beth separation refutes implicit visible determination of the enriched
+property.
+-/
+theorem bethSeparation_refutes_implicitDetermination
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    {Property : Interface -> Prop}
+    (separation :
+      BethSeparation Interface Visible project Property)
+    (implicit :
+      ImplicitlyDeterminedByVisible Interface Visible project Property) :
+    False := by
+  have hShadow :
+      Property separation.shadow :=
+    (implicit.invariant
+      separation.formed
+      separation.shadow
+      separation.sameProjection).mp
+      separation.property_formed
+  exact separation.shadow_not_property hShadow
+
+/--
+A Beth separation refutes explicit visible definition of the enriched property.
+-/
+theorem bethSeparation_refutes_explicitDefinition
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    {Property : Interface -> Prop}
+    (separation :
+      BethSeparation Interface Visible project Property)
     (explicit :
-      ExplicitDefinitionOnRealizedVisible Interface Visible project) :
+      ExplicitDefinitionOnVisible Interface Visible project Property) :
     False :=
-  structuralGap_refutes_explicitDefinitionOnRealizedVisible
-    (localProjectiveRecovery_obstruction gap)
-    explicit
+  bethSeparation_refutes_implicitDetermination
+    separation
+    (implicitDetermination_of_explicitDefinitionOnVisible explicit)
 
 end ClosedStabilityTheorem
 end Meta
 
 /- AXIOM_AUDIT_BEGIN -/
 #print axioms Meta.ClosedStabilityTheorem.ImplicitlyDeterminedByVisible
-#print axioms Meta.ClosedStabilityTheorem.VisibleRealization
-#print axioms Meta.ClosedStabilityTheorem.visibleRealizationOfInterface
-#print axioms Meta.ClosedStabilityTheorem.ExplicitDefinitionOnRealizedVisible
-#print axioms Meta.ClosedStabilityTheorem.explicitDefinitionOnRealizedVisible_of_implicitDetermination
-#print axioms Meta.ClosedStabilityTheorem.implicitDetermination_of_explicitDefinitionOnRealizedVisible
-#print axioms Meta.ClosedStabilityTheorem.implicitDetermination_iff_explicitDefinitionOnRealizedVisible
-#print axioms Meta.ClosedStabilityTheorem.structuralGap_refutes_explicitDefinitionOnRealizedVisible
-#print axioms Meta.ClosedStabilityTheorem.localRecoveryGap_refutes_explicitDefinitionOnRealizedVisible
+#print axioms Meta.ClosedStabilityTheorem.ExplicitDefinitionOnVisible
+#print axioms Meta.ClosedStabilityTheorem.implicitDetermination_of_explicitDefinitionOnVisible
+#print axioms Meta.ClosedStabilityTheorem.BethSeparation
+#print axioms Meta.ClosedStabilityTheorem.BethSeparation.diagonalCertificate
+#print axioms Meta.ClosedStabilityTheorem.BethSeparation.projectionObstruction
+#print axioms Meta.ClosedStabilityTheorem.bethSeparation_refutes_implicitDetermination
+#print axioms Meta.ClosedStabilityTheorem.bethSeparation_refutes_explicitDefinition
 /- AXIOM_AUDIT_END -/

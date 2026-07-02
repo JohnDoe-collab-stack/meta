@@ -8,7 +8,8 @@ import Meta.Tarski.ReferentialOrder
 This file assembles the established layers into their common comparison table:
 
 * Tarski supplies an operational referential gap;
-* Beth tests contractibility of that gap as a short presentation;
+* Beth tests whether an enriched property is explicitly readable from the
+  visible projection;
 * Bell reads the classical CHSH bound as the result of short co-indexation,
   while an amalgamation obstruction is the corresponding pre-probabilistic gap.
 
@@ -60,11 +61,11 @@ theorem tarskiBethBell_tarskiRefutesBethCollapse
     (gap :
       TarskiDiagonalObstruction Syntax Meaning project Truth)
     (beth :
-      BethContractibleGap Meaning Syntax project) :
+      BethContractibleGap Meaning Syntax project Truth) :
     False :=
   gap.refutesBethCollapse beth
 
-/-- The Tarski operational row refutes explicit recovery on realized fibers. -/
+/-- The Tarski operational row refutes explicit visible definition of truth. -/
 theorem tarskiBethBell_tarskiRefutesBethExplicitDefinition
     {Syntax : Type u}
     {Meaning : Type v}
@@ -73,37 +74,38 @@ theorem tarskiBethBell_tarskiRefutesBethExplicitDefinition
     (gap :
       TarskiDiagonalObstruction Syntax Meaning project Truth)
     (explicit :
-      ExplicitDefinitionOnRealizedVisible Meaning Syntax project) :
+      ExplicitDefinitionOnVisible Meaning Syntax project Truth) :
     False :=
   gap.refutesBethExplicitDefinition explicit
 
-/-! ## Beth row: contractibility test -/
+/-! ## Beth row: property-level definability test -/
 
 /--
-The Beth-collapse row is exactly the short referential presentation of the same
-projection.
+An explicit visible definition gives the Beth collapse of the corresponding
+enriched property.
 -/
-theorem tarskiBethBell_bethCollapse_iff_shortPresentation
+def tarskiBethBell_bethCollapseOfExplicitDefinition
     {Interface : Type u}
     {Visible : Type v}
-    {project : Interface -> Visible} :
-    BethContractibleGap Interface Visible project ↔
-      ShortReferentialPresentation Interface Visible project := by
-  constructor
-  · intro beth
-    exact beth
-  · intro short
-    exact short
+    {project : Interface -> Visible}
+    {Property : Interface -> Prop}
+    (explicit :
+      ExplicitDefinitionOnVisible Interface Visible project Property) :
+    BethContractibleGap Interface Visible project Property :=
+  bethCollapse_of_explicitDefinitionOnVisible explicit
 
-/-- The Beth row is also the explicit-recovery test on realized visible fibers. -/
-theorem tarskiBethBell_bethCollapse_iff_explicitRecovery
+/-- A Beth separation refutes the Beth collapse of its enriched property. -/
+theorem tarskiBethBell_bethSeparationRefutesCollapse
     {Interface : Type u}
     {Visible : Type v}
-    {project : Interface -> Visible} :
-    BethContractibleGap Interface Visible project ↔
-      Nonempty
-        (ExplicitDefinitionOnRealizedVisible Interface Visible project) :=
-  bethCollapse_iff_explicitDefinitionOnRealizedVisible
+    {project : Interface -> Visible}
+    {Property : Interface -> Prop}
+    (separation :
+      BethSeparation Interface Visible project Property)
+    (beth :
+      BethContractibleGap Interface Visible project Property) :
+    False :=
+  bethSeparation_refutes_bethCollapse separation beth
 
 /-! ## Bell row: short co-indexation and amalgamation gap -/
 
@@ -166,8 +168,8 @@ end Meta
 #print axioms Meta.ClosedStabilityTheorem.tarskiBethBell_tarskiRefutesShortPresentation
 #print axioms Meta.ClosedStabilityTheorem.tarskiBethBell_tarskiRefutesBethCollapse
 #print axioms Meta.ClosedStabilityTheorem.tarskiBethBell_tarskiRefutesBethExplicitDefinition
-#print axioms Meta.ClosedStabilityTheorem.tarskiBethBell_bethCollapse_iff_shortPresentation
-#print axioms Meta.ClosedStabilityTheorem.tarskiBethBell_bethCollapse_iff_explicitRecovery
+#print axioms Meta.ClosedStabilityTheorem.tarskiBethBell_bethCollapseOfExplicitDefinition
+#print axioms Meta.ClosedStabilityTheorem.tarskiBethBell_bethSeparationRefutesCollapse
 #print axioms Meta.ClosedStabilityTheorem.TarskiBethBellBellShortRow
 #print axioms Meta.ClosedStabilityTheorem.TarskiBethBellBellGapRow
 #print axioms Meta.ClosedStabilityTheorem.tarskiBethBell_bellShort_iff_compatibility

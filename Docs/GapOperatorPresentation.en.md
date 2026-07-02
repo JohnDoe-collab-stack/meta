@@ -608,33 +608,36 @@ gap operator
 
 ## Beth
 
-Beth gives the contractibility test for the gap.
+Beth gives the property-level readability test for the gap.
 
 In the short reading:
 
 ```text
-the visible object implicitly determines the enriched object
+the visible projection explicitly reads the enriched property
 ```
 
 In the enriched reading:
 
 ```text
-gap = 0
-<-> visible fiber faithful
-<-> explicit definition on realized visible fibers
+same visible projection
++ enriched property on the formed side
++ failure of that property on the shadow side
+-> no visible predicate can define that enriched property
 ```
 
 In the code:
 
 ```lean
 ImplicitlyDeterminedByVisible
-ExplicitDefinitionOnRealizedVisible
+ExplicitDefinitionOnVisible
+BethSeparation
 BethContractibleGap
-bethCollapse_iff_implicitDetermination
-bethCollapse_iff_explicitDefinitionOnRealizedVisible
+bethSeparation_refutes_implicitDetermination
+bethSeparation_refutes_bethCollapse
 ```
 
-Structural and operational gaps refute the Beth collapse:
+Structural and operational gaps refute the Beth collapse only when their two
+poles are separated by the enriched property:
 
 ```lean
 structuralGap_refutes_bethCollapse
@@ -644,7 +647,7 @@ operationalGap_refutes_bethCollapse
 Reading:
 
 ```text
-Beth measures whether the gap operator contracts.
+Beth measures whether an enriched property survives contraction to the visible.
 ```
 
 ## Bell
@@ -1003,7 +1006,7 @@ Tarski:
 code + diagonal gap + assertion + formed diagonal return
 
 Beth:
-visible + contractibility test + explicit definition
+visible predicate + enriched property + Beth separation
 
 Bell:
 contexts + amalgamation gap + co-indexation
@@ -1027,13 +1030,22 @@ return has an additional force: its temporal index becomes internal arithmetic
 content of the intersection.
 
 The Lean development does not reduce these cases to an analogy. For Tarski,
-Beth, Bell, Nat, and Nat dynamics, it gives them directly a projective or
-operational form in the current Lean tree:
+Bell, Nat, and Nat dynamics, it gives them directly a projective or operational
+form in the current Lean tree:
 
 ```text
 projection
 + fiber obstruction
 + local recovery
+```
+
+For Beth, the current Lean layer has a property-level status:
+
+```text
+same visible projection
++ enriched property on the formed side
++ failure of that property on the shadow side
++ refutation of visible explicit definition
 ```
 
 For Tsirelson, the current formal connection has a different precise status:

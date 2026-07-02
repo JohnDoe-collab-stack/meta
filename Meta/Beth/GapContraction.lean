@@ -6,16 +6,11 @@ import Meta.Core.Gap
 
 This file is the gap-reading layer over the internal Beth core.
 
-`BethImplicitExplicit` proves the constructive content:
-
-```text
-implicit determination by visible
-↔
-explicit definition on realized visible fibers
-```
-
-This file names that equivalence as the Beth collapse of a referential gap, and
-records that structural and operational gaps survive that collapse.
+The Beth collapse is now property-level, not merely fiber-level.  It says that
+an enriched property is both invariant on visible fibers and explicitly read by
+a visible predicate.  A Beth separation refutes that collapse by exhibiting two
+separated enriched interfaces with the same visible projection but different
+property status.
 -/
 
 namespace Meta
@@ -26,197 +21,214 @@ universe u v s
 /-! ## Beth collapse -/
 
 /--
-Beth-contractible gap.
+Beth-contractible gap for an enriched property.
 
-This is the gap-contraction reading of implicit determination by visible
-projection.
+The visible projection carries the enriched property exactly when:
+
+* the property is invariant on projection fibers;
+* the property is explicitly readable on the visible side.
 -/
-abbrev BethContractibleGap
+structure BethContractibleGap
     (Interface : Type u)
     (Visible : Type v)
-    (project : Interface -> Visible) :
-    Prop :=
-  ContractibleReferentialGap Interface Visible project
+    (project : Interface -> Visible)
+    (Property : Interface -> Prop) :
+    Type (max u v) where
+  implicitDetermination :
+    ImplicitlyDeterminedByVisible Interface Visible project Property
+  explicitDefinition :
+    ExplicitDefinitionOnVisible Interface Visible project Property
 
-/-- Implicit determination gives the Beth collapse of the gap. -/
-theorem bethCollapse_of_implicitDetermination
+/-- An explicit visible definition gives the Beth collapse it determines. -/
+def bethCollapse_of_explicitDefinitionOnVisible
     {Interface : Type u}
     {Visible : Type v}
     {project : Interface -> Visible}
-    (implicit :
-      ImplicitlyDeterminedByVisible Interface Visible project) :
-    BethContractibleGap Interface Visible project :=
-  implicit
-
-/-- A Beth-collapsed gap is exactly implicit determination by visible. -/
-theorem implicitDetermination_of_bethCollapse
-    {Interface : Type u}
-    {Visible : Type v}
-    {project : Interface -> Visible}
-    (beth :
-      BethContractibleGap Interface Visible project) :
-    ImplicitlyDeterminedByVisible Interface Visible project :=
-  beth
-
-/-- Beth collapse is equivalent to implicit determination by visible. -/
-theorem bethCollapse_iff_implicitDetermination
-    {Interface : Type u}
-    {Visible : Type v}
-    {project : Interface -> Visible} :
-    BethContractibleGap Interface Visible project ↔
-      ImplicitlyDeterminedByVisible Interface Visible project := by
-  constructor
-  · exact implicitDetermination_of_bethCollapse
-  · exact bethCollapse_of_implicitDetermination
-
-/--
-Beth collapse gives explicit recovery on every already realized visible fiber.
--/
-def explicitDefinitionOnRealizedVisible_of_bethCollapse
-    {Interface : Type u}
-    {Visible : Type v}
-    {project : Interface -> Visible}
-    (beth :
-      BethContractibleGap Interface Visible project) :
-    ExplicitDefinitionOnRealizedVisible Interface Visible project :=
-  explicitDefinitionOnRealizedVisible_of_implicitDetermination
-    (implicitDetermination_of_bethCollapse beth)
-
-/--
-Explicit unique recovery on realized visible fibers gives the Beth collapse of
-the gap.
--/
-theorem bethCollapse_of_explicitDefinitionOnRealizedVisible
-    {Interface : Type u}
-    {Visible : Type v}
-    {project : Interface -> Visible}
+    {Property : Interface -> Prop}
     (explicit :
-      ExplicitDefinitionOnRealizedVisible Interface Visible project) :
-    BethContractibleGap Interface Visible project :=
-  bethCollapse_of_implicitDetermination
-    (implicitDetermination_of_explicitDefinitionOnRealizedVisible explicit)
-
-/--
-Beth collapse is equivalent to the existence of explicit unique recovery on
-realized visible fibers.
--/
-theorem bethCollapse_iff_explicitDefinitionOnRealizedVisible
-    {Interface : Type u}
-    {Visible : Type v}
-    {project : Interface -> Visible} :
-    BethContractibleGap Interface Visible project ↔
-      Nonempty
-        (ExplicitDefinitionOnRealizedVisible Interface Visible project) := by
-  constructor
-  · intro beth
-    exact
-      ⟨explicitDefinitionOnRealizedVisible_of_bethCollapse beth⟩
-  · intro hExplicit
-    cases hExplicit with
-    | intro explicit =>
-        exact bethCollapse_of_explicitDefinitionOnRealizedVisible explicit
+      ExplicitDefinitionOnVisible Interface Visible project Property) :
+    BethContractibleGap Interface Visible project Property where
+  implicitDetermination :=
+    implicitDetermination_of_explicitDefinitionOnVisible explicit
+  explicitDefinition := explicit
 
 /-! ## Anti-collapse gaps -/
 
-/-- A structural referential gap refutes Beth collapse. -/
+/-- A Beth separation refutes Beth collapse. -/
+theorem bethSeparation_refutes_bethCollapse
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    {Property : Interface -> Prop}
+    (separation :
+      BethSeparation Interface Visible project Property)
+    (beth :
+      BethContractibleGap Interface Visible project Property) :
+    False :=
+  bethSeparation_refutes_implicitDetermination
+    separation
+    beth.implicitDetermination
+
+/--
+A structural referential gap refutes Beth collapse when its two poles are also
+separated by the enriched property.
+-/
 theorem structuralGap_refutes_bethCollapse
     {Interface : Type u}
     {Visible : Type v}
     {project : Interface -> Visible}
+    {Property : Interface -> Prop}
     (gap :
       StructuralReferentialGap Interface Visible project)
+    (property_left :
+      Property gap.left)
+    (property_right_not :
+      Property gap.right -> False)
     (beth :
-      BethContractibleGap Interface Visible project) :
+      BethContractibleGap Interface Visible project Property) :
     False :=
-  structuralGap_not_contractible gap beth
+  bethSeparation_refutes_bethCollapse
+    { formed := gap.left
+      shadow := gap.right
+      sameProjection := gap.sameProjection
+      property_formed := property_left
+      shadow_not_property := property_right_not }
+    beth
 
-/-- An operational referential gap refutes Beth collapse. -/
+/--
+An operational referential gap refutes Beth collapse when its formed side and
+shadow are separated by the enriched property.
+-/
 theorem operationalGap_refutes_bethCollapse
     {Interface : Type u}
     {Visible : Type v}
     {project : Interface -> Visible}
     {RepairOf : Interface -> Type s}
+    {Property : Interface -> Prop}
     (gap :
       OperationalReferentialGap Interface Visible project RepairOf)
+    (property_formed :
+      Property gap.formed)
+    (shadow_not_property :
+      Property gap.shadow -> False)
     (beth :
-      BethContractibleGap Interface Visible project) :
+      BethContractibleGap Interface Visible project Property) :
     False :=
-  operationalGap_not_contractible gap beth
+  structuralGap_refutes_bethCollapse
+    (structuralGapOfOperationalGap gap)
+    property_formed
+    shadow_not_property
+    beth
 
 /--
-A structural referential gap refutes the explicit-definition side of the Beth
-equivalence.
+A structural referential gap refutes the explicit-definition side of Beth when
+its two poles are separated by the enriched property.
 -/
 theorem structuralGap_refutes_bethExplicitDefinition
     {Interface : Type u}
     {Visible : Type v}
     {project : Interface -> Visible}
+    {Property : Interface -> Prop}
     (gap :
       StructuralReferentialGap Interface Visible project)
+    (property_left :
+      Property gap.left)
+    (property_right_not :
+      Property gap.right -> False)
     (explicit :
-      ExplicitDefinitionOnRealizedVisible Interface Visible project) :
+      ExplicitDefinitionOnVisible Interface Visible project Property) :
     False :=
-  structuralGap_refutes_explicitDefinitionOnRealizedVisible gap explicit
+  bethSeparation_refutes_explicitDefinition
+    { formed := gap.left
+      shadow := gap.right
+      sameProjection := gap.sameProjection
+      property_formed := property_left
+      shadow_not_property := property_right_not }
+    explicit
 
 /--
-An operational referential gap refutes the explicit-definition side of the Beth
-equivalence.
+An operational referential gap refutes the explicit-definition side of Beth when
+its formed side and shadow are separated by the enriched property.
 -/
 theorem operationalGap_refutes_bethExplicitDefinition
     {Interface : Type u}
     {Visible : Type v}
     {project : Interface -> Visible}
     {RepairOf : Interface -> Type s}
+    {Property : Interface -> Prop}
     (gap :
       OperationalReferentialGap Interface Visible project RepairOf)
+    (property_formed :
+      Property gap.formed)
+    (shadow_not_property :
+      Property gap.shadow -> False)
     (explicit :
-      ExplicitDefinitionOnRealizedVisible Interface Visible project) :
+      ExplicitDefinitionOnVisible Interface Visible project Property) :
     False :=
-  localRecoveryGap_refutes_explicitDefinitionOnRealizedVisible gap explicit
+  structuralGap_refutes_bethExplicitDefinition
+    (structuralGapOfOperationalGap gap)
+    property_formed
+    shadow_not_property
+    explicit
 
 /--
-Operational gaps survive the Beth test while still carrying local repair of the
+Operational gaps survive the Beth test when their formed side and shadow are
+separated by the enriched property while still carrying local repair of the
 formed interface.
 -/
 structure BethSurvivingOperationalGap
     (Interface : Type u)
     (Visible : Type v)
     (project : Interface -> Visible)
-    (RepairOf : Interface -> Type s) :
+    (RepairOf : Interface -> Type s)
+    (Property : Interface -> Prop) :
     Type (max u v s) where
   operationalGap :
     OperationalReferentialGap Interface Visible project RepairOf
+  property_formed :
+    Property operationalGap.formed
+  shadow_not_property :
+    Property operationalGap.shadow -> False
   refutes_beth :
-    BethContractibleGap Interface Visible project -> False
+    BethContractibleGap Interface Visible project Property -> False
   refutes_explicit :
-    ExplicitDefinitionOnRealizedVisible Interface Visible project -> False
+    ExplicitDefinitionOnVisible Interface Visible project Property -> False
 
-/-- Every operational gap gives a Beth-surviving operational gap. -/
+/-- Every property-separated operational gap gives a Beth-surviving gap. -/
 def bethSurvivingOperationalGap
     {Interface : Type u}
     {Visible : Type v}
     {project : Interface -> Visible}
     {RepairOf : Interface -> Type s}
+    {Property : Interface -> Prop}
     (gap :
-      OperationalReferentialGap Interface Visible project RepairOf) :
-    BethSurvivingOperationalGap Interface Visible project RepairOf where
+      OperationalReferentialGap Interface Visible project RepairOf)
+    (property_formed :
+      Property gap.formed)
+    (shadow_not_property :
+      Property gap.shadow -> False) :
+    BethSurvivingOperationalGap Interface Visible project RepairOf Property where
   operationalGap := gap
+  property_formed := property_formed
+  shadow_not_property := shadow_not_property
   refutes_beth :=
-    operationalGap_refutes_bethCollapse gap
+    operationalGap_refutes_bethCollapse
+      gap
+      property_formed
+      shadow_not_property
   refutes_explicit :=
-    operationalGap_refutes_bethExplicitDefinition gap
+    operationalGap_refutes_bethExplicitDefinition
+      gap
+      property_formed
+      shadow_not_property
 
 end ClosedStabilityTheorem
 end Meta
 
 /- AXIOM_AUDIT_BEGIN -/
 #print axioms Meta.ClosedStabilityTheorem.BethContractibleGap
-#print axioms Meta.ClosedStabilityTheorem.bethCollapse_of_implicitDetermination
-#print axioms Meta.ClosedStabilityTheorem.implicitDetermination_of_bethCollapse
-#print axioms Meta.ClosedStabilityTheorem.bethCollapse_iff_implicitDetermination
-#print axioms Meta.ClosedStabilityTheorem.explicitDefinitionOnRealizedVisible_of_bethCollapse
-#print axioms Meta.ClosedStabilityTheorem.bethCollapse_of_explicitDefinitionOnRealizedVisible
-#print axioms Meta.ClosedStabilityTheorem.bethCollapse_iff_explicitDefinitionOnRealizedVisible
+#print axioms Meta.ClosedStabilityTheorem.bethCollapse_of_explicitDefinitionOnVisible
+#print axioms Meta.ClosedStabilityTheorem.bethSeparation_refutes_bethCollapse
 #print axioms Meta.ClosedStabilityTheorem.structuralGap_refutes_bethCollapse
 #print axioms Meta.ClosedStabilityTheorem.operationalGap_refutes_bethCollapse
 #print axioms Meta.ClosedStabilityTheorem.structuralGap_refutes_bethExplicitDefinition

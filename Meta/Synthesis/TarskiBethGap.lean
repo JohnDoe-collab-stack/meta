@@ -7,10 +7,9 @@ import Meta.Tarski.GapContraction
 This file closes the internal Tarski/Beth interface.
 
 Tarski supplies a diagonal operational gap over a visible projection.  Beth
-tests whether that projection collapses the gap by determining the enriched
-interface from the visible value.  The diagonal operational gap survives the
-Beth test: it refutes both Beth collapse and explicit recovery on realized
-visible fibers.
+tests whether the enriched truth property is determined and explicitly readable
+from the visible value.  The diagonal operational gap survives the Beth test:
+it refutes both Beth collapse and explicit visible definition of truth.
 -/
 
 namespace Meta
@@ -27,13 +26,17 @@ theorem TarskiDiagonalObstruction.refutesBethCollapse
     (gap :
       TarskiDiagonalObstruction Syntax Meaning project Truth)
     (beth :
-      BethContractibleGap Meaning Syntax project) :
+      BethContractibleGap Meaning Syntax project Truth) :
     False :=
-  operationalGap_refutes_bethCollapse gap.operationalGap beth
+  operationalGap_refutes_bethCollapse
+    gap.operationalGap
+    gap.truth_formed
+    gap.shadow_not_truth
+    beth
 
 /--
-A Tarski diagonal obstruction refutes explicit recovery on realized visible
-fibers for the same projection.
+A Tarski diagonal obstruction refutes explicit visible definition of truth for
+the same projection.
 -/
 theorem TarskiDiagonalObstruction.refutesBethExplicitDefinition
     {Syntax : Type u}
@@ -43,9 +46,13 @@ theorem TarskiDiagonalObstruction.refutesBethExplicitDefinition
     (gap :
       TarskiDiagonalObstruction Syntax Meaning project Truth)
     (explicit :
-      ExplicitDefinitionOnRealizedVisible Meaning Syntax project) :
+      ExplicitDefinitionOnVisible Meaning Syntax project Truth) :
     False :=
-  operationalGap_refutes_bethExplicitDefinition gap.operationalGap explicit
+  operationalGap_refutes_bethExplicitDefinition
+    gap.operationalGap
+    gap.truth_formed
+    gap.shadow_not_truth
+    explicit
 
 end ClosedStabilityTheorem
 end Meta

@@ -377,7 +377,7 @@ Les consequences dynamiques recuperees dependent de `propext` via
 | Tarski instancie une longueur referentielle enrichie. | Certifie dans la couche Tarski | Le code donne `TarskiDiagonalObstruction.operationalLength` et `refutesShortPresentation`. |
 | Tarski instancie les consequences d'ordre visible du Core. | Certifie dans la couche Tarski | Le code donne `visibleOrderEquivalent`, `partialOrder_visible_eq_not_interface_eq` et `notOrderContractive`. |
 | Tarski instancie le retour dynamique forme. | Certifie dans la couche Tarski | Le code donne `tarskiFormedDynamicReturn`, `tarskiLocallyRecoveredDynamicReturn` et les consequences dynamiques d'ordre et de presentation courte. |
-| Beth mesure une contractibilite du gap. | Soutenu | Le code relie collapse Beth et recuperation explicite sur fibres visibles. |
+| Beth mesure la lisibilite visible d'une propriete enrichie. | Certifie dans la couche Beth | Le code donne `BethSeparation`, `ExplicitDefinitionOnVisible` et la refutation du collapse par separation de propriete. |
 | Bell fournit une instance pre-probabiliste. | Soutenu | Le code traite co-indexation, compatibilite et obstruction d'amalgamation. |
 | Un ordre visible ne suffit pas a contracter une interface formee. | Certifie au niveau abstrait | Le Core refute `OrderContractiveProjection` en presence d'un gap structurel ou operationnel. |
 | Un ordre partiel visible identifie les projections, pas les interfaces formees. | Certifie au niveau abstrait | Le Core donne `structuralGap_partialOrder_visible_eq_not_interface_eq` et `operationalGap_partialOrder_visible_eq_not_interface_eq`. |

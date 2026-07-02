@@ -607,33 +607,36 @@ operateur de gap
 
 ## Beth
 
-Beth donne le test de contractibilite du gap.
+Beth donne le test de lisibilite visible d'une propriete enrichie.
 
 Dans la lecture courte :
 
 ```text
-le visible determine implicitement l'enrichi
+la projection visible lit explicitement la propriete enrichie
 ```
 
 Dans la lecture enrichie :
 
 ```text
-gap = 0
-<-> fibre visible fidele
-<-> definition explicite sur fibres visibles realisees
+meme projection visible
++ propriete enrichie sur le cote forme
++ echec de cette propriete sur le shadow
+-> aucun predicat visible ne peut definir cette propriete enrichie
 ```
 
 Dans le code :
 
 ```lean
 ImplicitlyDeterminedByVisible
-ExplicitDefinitionOnRealizedVisible
+ExplicitDefinitionOnVisible
+BethSeparation
 BethContractibleGap
-bethCollapse_iff_implicitDetermination
-bethCollapse_iff_explicitDefinitionOnRealizedVisible
+bethSeparation_refutes_implicitDetermination
+bethSeparation_refutes_bethCollapse
 ```
 
-Les gaps structurels et operationnels refutent le collapse Beth :
+Les gaps structurels et operationnels refutent le collapse Beth seulement
+lorsque leurs deux poles sont separes par la propriete enrichie :
 
 ```lean
 structuralGap_refutes_bethCollapse
@@ -643,7 +646,7 @@ operationalGap_refutes_bethCollapse
 Lecture :
 
 ```text
-Beth mesure si l'operateur de gap se contracte.
+Beth mesure si une propriete enrichie survit a la contraction visible.
 ```
 
 ## Bell
@@ -1002,7 +1005,7 @@ Tarski :
 code + gap diagonal + assertion + retour diagonal forme
 
 Beth :
-visible + test de contractibilite + definition explicite
+predicat visible + propriete enrichie + separation Beth
 
 Bell :
 contextes + gap d'amalgamation + co-indexation
@@ -1026,14 +1029,23 @@ est forme, separe de son ombre, puis recupere localement. Dans Nat dynamique,
 ce retour a une force supplementaire : son index temporel devient un contenu
 arithmetique interne de l'intersection.
 
-Le developpement Lean ne reduit pas ces cas a une analogie. Pour Tarski, Beth,
-Bell, Nat et Nat dynamique, il leur donne directement une forme projective ou
+Le developpement Lean ne reduit pas ces cas a une analogie. Pour Tarski, Bell,
+Nat et Nat dynamique, il leur donne directement une forme projective ou
 operationnelle dans l'arbre Lean courant :
 
 ```text
 projection
 + obstruction de fibre
 + recuperation locale
+```
+
+Pour Beth, la couche Lean courante a un statut au niveau des proprietes :
+
+```text
+meme projection visible
++ propriete enrichie sur le cote forme
++ echec de cette propriete sur le shadow
++ refutation de la definition explicite visible
 ```
 
 Pour Tsirelson, le raccord formel courant a un statut precis different :
