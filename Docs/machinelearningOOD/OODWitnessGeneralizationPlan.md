@@ -23,6 +23,7 @@ La cible formelle est donc :
 
 ```text
 shift visible réel
++ source structurelle du shift
 + témoin interne conservé
 + visible seul insuffisant
 ```
@@ -136,6 +137,15 @@ Il faut aussi prouver que :
 la lecture visible a réellement changé.
 ```
 
+Mais ce changement visible ne doit pas être fabriqué par le choix libre de
+deux fonctions de lecture.
+
+Il faut prouver que :
+
+```text
+la séparation visible est dérivée d'une source structurelle du cadre.
+```
+
 et que :
 
 ```text
@@ -144,9 +154,9 @@ la lecture visible seule ne reconstruit pas la cellule.
 
 ## 5. Contrat de non-trivialité
 
-Un résultat OOD acceptable doit porter quatre données.
+Un résultat OOD acceptable doit porter cinq données.
 
-Ces quatre données doivent être présentes ensemble. Si l'une manque, le
+Ces cinq données doivent être présentes ensemble. Si l'une manque, le
 résultat ne démontre pas encore une stabilité OOD structurelle.
 
 ### 5.1 Shift visible réel
@@ -188,7 +198,66 @@ visibleShift :
 
 ou une formulation équivalente.
 
-### 5.2 Cellule opératoire conservée
+Mais cette donnée seule ne suffit pas.
+
+Elle doit être accompagnée de sa provenance structurelle.
+
+### 5.2 Source structurelle du shift
+
+Le `visibleShift` doit être dérivé d'une source déjà portée par la cellule ou
+par l'instance considérée.
+
+Forme abstraite :
+
+```text
+ShiftSource : Type
+shiftSource : ShiftSource
+visibleShiftOfSource :
+  ShiftSource ->
+    read_in (project_in formed) = read_out (project_out formed) -> False
+```
+
+Le shift effectif est alors :
+
+```text
+visibleShift := visibleShiftOfSource shiftSource
+```
+
+Cette provenance est obligatoire.
+
+Elle empêche le faux résultat suivant :
+
+```text
+Label := Bool
+read_in  := fun _ => true
+read_out := fun _ => false
+```
+
+Un tel choix prouve une séparation visible, mais ne prouve rien sur la
+structure.
+
+Un shift acceptable doit venir d'une source comme :
+
+```text
+séparation de rôles déjà formalisée ;
+écart de payload porté par un témoin positif ;
+obstruction diagonale déjà portée par la cellule ;
+théorème structurel existant de l'instance.
+```
+
+Dans l'instance arithmétique, une séparation de rôles seule peut être une
+source, mais elle n'est pas automatiquement un shift OOD complet.
+
+Elle doit encore produire :
+
+```text
+deux lectures visibles distinctes
++ même formed/shadow
++ same_in
++ same_out
+```
+
+### 5.3 Cellule opératoire conservée
 
 La cellule interne doit rester portée :
 
@@ -221,7 +290,7 @@ même formed/shadow interne
 
 Sinon on ne prouve pas que la même structure survit au shift.
 
-### 5.3 Témoin interne conservé
+### 5.4 Témoin interne conservé
 
 Le témoin doit être interne.
 
@@ -270,7 +339,7 @@ projection visible
 -> reconstruction du témoin
 ```
 
-### 5.4 Visible seul insuffisant
+### 5.5 Visible seul insuffisant
 
 Le théorème doit aussi réutiliser l'obstruction projective :
 
@@ -302,6 +371,7 @@ structure OODProjectionShift
     (VisibleIn : Type v)
     (VisibleOut : Type w)
     (Label : Type z)
+    (ShiftSource : Type r)
     (projectIn : Interface -> VisibleIn)
     (projectOut : Interface -> VisibleOut)
     (readIn : VisibleIn -> Label)
@@ -311,8 +381,23 @@ structure OODProjectionShift
   sameIn : projectIn formed = projectIn shadow
   sameOut : projectOut formed = projectOut shadow
   separated : formed = shadow -> False
-  visibleShift :
-    readIn (projectIn formed) = readOut (projectOut formed) -> False
+  shiftSource : ShiftSource
+  visibleShiftOfSource :
+    ShiftSource ->
+      readIn (projectIn formed) = readOut (projectOut formed) -> False
+```
+
+Le shift visible effectif doit ensuite être défini, pas stocké une seconde
+fois :
+
+```lean
+def OODProjectionShift.visibleShift
+    (shift : OODProjectionShift
+      Interface VisibleIn VisibleOut Label ShiftSource
+      projectIn projectOut readIn readOut) :
+    readIn (projectIn shift.formed) =
+      readOut (projectOut shift.formed) -> False :=
+  shift.visibleShiftOfSource shift.shiftSource
 ```
 
 Point important :
@@ -321,7 +406,14 @@ Point important :
 visibleShift
 ```
 
-est la donnée qui empêche la trivialité.
+est donc le résultat dérivé du shift, mais :
+
+```text
+shiftSource
+visibleShiftOfSource
+```
+
+sont les données qui empêchent le shift d'être seulement décoratif.
 
 Cette structure ne contient pas encore la réparation. Elle isole seulement la
 situation OOD minimale :
@@ -330,8 +422,17 @@ situation OOD minimale :
 même paire opératoire formed/shadow,
 deux projections,
 deux lectures,
+source structurelle du shift,
 shift visible prouvé.
 ```
+
+Le shift visible ne doit pas être un champ indépendant. Il doit être obtenu par
+application de `visibleShiftOfSource` à `shiftSource`. Si l'implémentation
+laisse ces données sans lien, elle est refusée.
+
+La couche abstraite ne peut pas décider seule qu'une source est
+conceptuellement riche. Elle doit rendre la provenance inspectable. La charge
+de non-artificialité est ensuite vérifiée dans chaque instance concrète.
 
 ### 6.2 Cellule récupérée sous shift
 
@@ -413,6 +514,7 @@ Le point est :
 ```text
 égalité du témoin
 + visibleShift
++ shiftSource
 + noProjectiveReconstruction
 ```
 
@@ -423,6 +525,8 @@ simple reconstruction visible.
 
 Avec les deux, le témoin est bien ce qui traverse le shift là où le visible ne
 suffit pas.
+
+Avec `shiftSource`, on sait aussi pourquoi ce shift appartient au cadre.
 
 ## 7. Théorèmes à démontrer
 
@@ -498,6 +602,7 @@ Le résultat final doit avoir la forme :
 
 ```text
 visibleShift
++ source structurelle du shift
 + diagonal certificate in
 + diagonal certificate out
 + noProjectiveReconstruction in
@@ -511,6 +616,7 @@ Il doit se lire ainsi :
 
 ```text
 le visible change,
+ce changement vient d'une source structurelle,
 la reconstruction visible échoue des deux côtés,
 mais le témoin interne reste porté par la cellule.
 ```
@@ -620,6 +726,31 @@ Le payload de retour est :
 rightPayload = k + positiveWitness
 ```
 
+La source structurelle du shift arithmétique doit donc être construite à partir
+du rôle enrichi, pas à partir d'une lecture constante.
+
+Sources admissibles pour l'instance :
+
+```text
+1. la divergence positive :
+   positiveWitness = natEnrichedParityMaximalRelaxedDivergence k
+   0 < positiveWitness ;
+
+2. le payload de retour :
+   rightPayload = k + positiveWitness ;
+
+3. la concordance visible du pas relaxé :
+   3 * natEnrichedParityRoleCode mediatingRole + 1 = 2 * rightPayload ;
+
+4. l'obstruction diagonale portée par NatEnrichedRelaxedOddRole.
+```
+
+La meilleure instance doit utiliser au moins la divergence positive et le
+payload de retour.
+
+La séparation de rôles seule est insuffisante si elle ne produit pas les deux
+lectures visibles du shift.
+
 ## 9. Ce qui serait refusé
 
 Sera refusé :
@@ -633,6 +764,19 @@ Sera refusé :
 
 ```text
 une simple égalité de champs sans preuve de shift visible réel.
+```
+
+Sera refusé :
+
+```text
+un visibleShift obtenu par des fonctions readIn/readOut constantes ou
+arbitraires.
+```
+
+Sera refusé :
+
+```text
+un visibleShift qui ne porte pas explicitement sa source structurelle.
 ```
 
 Sera refusé :
@@ -659,6 +803,13 @@ Sera refusé :
 ```text
 une preuve qui ne sépare pas explicitement témoin, lecture source,
 lecture cible et payload de retour.
+```
+
+Sera refusé :
+
+```text
+une instance qui prend la séparation de rôles comme résultat final sans
+démontrer le changement de lecture visible correspondant.
 ```
 
 ## 10. Ce que le résultat prouverait
@@ -698,7 +849,8 @@ Il prouverait quelque chose de plus structurel :
 
 ```text
 le cadre sait formuler et certifier une stabilité interne qui n'est pas
-réductible à la stabilité de la projection visible.
+réductible à la stabilité de la projection visible, parce que le shift visible
+est lui-même relié à une source structurelle inspectable.
 ```
 
 C'est exactement le type de certificat qui manque dans les situations OOD :
@@ -711,20 +863,98 @@ La phase sera achevée uniquement si le code final prouve :
 
 ```text
 1. OODProjectionShift avec visibleShift non trivial ;
-2. deux DiagonalCertificate issus du même formé/shadow sous deux projections ;
-3. deux obstructions projectives ;
-4. deux non-reconstructions visibles ;
-5. un témoin interne conservé ;
-6. une instance arithmétique non triviale.
+2. source structurelle explicite du visibleShift ;
+3. visibleShift dérivé de cette source, non stocké indépendamment ;
+4. deux DiagonalCertificate issus du même formé/shadow sous deux projections ;
+5. deux obstructions projectives ;
+6. deux non-reconstructions visibles ;
+7. un témoin interne conservé ;
+8. une instance arithmétique non triviale.
 ```
 
-Sans ces six points, la phase n'est pas complète.
+Sans ces huit points, la phase n'est pas complète.
 
 Le banc d'essai arithmétique doit en plus vérifier :
 
 ```text
-7. le témoin utilisé est bien celui de NatEnrichedRelaxedOddRole ;
-8. le payload de retour reste distinct du témoin ;
-9. la concordance visible avec le pas relaxé est conservée ;
-10. aucune condition externe ne remplace la cellule opératoire.
+9. le témoin utilisé est bien celui de NatEnrichedRelaxedOddRole ;
+10. le payload de retour reste distinct du témoin ;
+11. la concordance visible avec le pas relaxé est conservée ;
+12. le shift est dérivé de la divergence positive et/ou du payload de retour ;
+13. aucune condition externe ne remplace la cellule opératoire.
+```
+
+## 12. Ordre d'implémentation
+
+La phase doit être découpée en deux niveaux.
+
+### 12.1 Couche OOD abstraite
+
+Créer une couche abstraite, par exemple :
+
+```text
+Meta/OOD/WitnessTransport.lean
+```
+
+Cette couche doit contenir le certificat OOD général :
+
+```text
+OODProjectionShift
+OODRecoveredCell
+OODWitnessTransport
+OODStructuralCertificate
+```
+
+Elle ne doit pas dépendre de l'arithmétique.
+
+Son rôle est de verrouiller :
+
+```text
+même cellule opératoire
++ deux projections
++ deux lectures
++ source structurelle du shift
++ shift visible dérivé de cette source
++ témoin transporté
++ non-reconstruction projective des deux côtés
+```
+
+### 12.2 Instance arithmétique
+
+Créer ensuite l'instance arithmétique, par exemple :
+
+```text
+Meta/Arithmetic/RelaxedOddOOD.lean
+```
+
+Cette instance doit partir de :
+
+```text
+NatEnrichedRelaxedOddRole k
+```
+
+et produire :
+
+```text
+OODStructuralCertificate
+```
+
+Le shift ne doit pas être choisi.
+
+Il doit être dérivé des théorèmes déjà présents autour de :
+
+```text
+positiveWitness
+rightPayload
+natEnrichedRelaxedOddRole_visibleOddStep_eq_two_mul_rightPayload
+natEnrichedRelaxedOddRole_visibleOddStep_div_two_eq_rightPayload
+projectionObstruction
+```
+
+La réussite de cette instance dira exactement :
+
+```text
+la lecture visible change,
+le changement est produit par la divergence relaxée,
+le témoin positif interne reste conservé.
 ```
