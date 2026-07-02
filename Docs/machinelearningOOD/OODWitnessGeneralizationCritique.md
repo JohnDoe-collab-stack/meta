@@ -2,207 +2,52 @@
 
 ## Verdict court
 
-Le plan `OODWitnessGeneralizationPlan.md` est une direction solide.
-
-Il ne propose pas seulement une analogie avec l'apprentissage automatique. Il
-propose un critere formel testable :
+Le plan corrige le risque principal de la premiere version :
 
 ```text
-shift visible reel
-+ meme cellule operatoire
-+ temoin interne conserve
-+ obstruction de reconstruction visible
+visibleShift
 ```
 
-Cette combinaison est bien alignee avec le cadre `meta`.
+n'est plus une preuve flottante.
 
-La difficulte principale n'est pas la couche abstraite. La couche abstraite est
-implementable.
-
-La difficulte est l'instance arithmetique : il faut produire un `visibleShift`
-non artificiel, c'est-a-dire un changement de lecture qui vient vraiment des
-roles enrichis et non d'un choix arbitraire de `readIn/readOut`.
-
-## Ce qui est fort
-
-### 1. Le plan refuse la trivialite
-
-Le document impose :
+Il est maintenant derive de :
 
 ```text
-readIn (projectIn formed) != readOut (projectOut formed)
+shiftSource
+visibleShiftOfSource
 ```
 
-ou une separation equivalente.
+C'est une vraie amelioration.
 
-C'est le bon verrou.
+Le plan abstrait est donc pret a etre implemente comme couche de provenance
+inspectable.
 
-Sans cette preuve, le resultat serait seulement :
+Mais le plan n'est pas encore blinde. Il reste des points a surveiller, surtout
+pour l'instance arithmetique.
 
-```text
-la meme cellule garde son temoin
+## Point positif principal
+
+La nouvelle forme :
+
+```lean
+shiftSource : ShiftSource
+visibleShiftOfSource :
+  ShiftSource ->
+    readIn (projectIn formed) = readOut (projectOut formed) -> False
 ```
 
-ce qui est vrai mais insuffisant pour parler d'OOD.
+puis :
 
-Le plan exige donc un vrai changement de lecture visible.
-
-### 2. Le plan garde une seule cellule operatoire
-
-Le document refuse deux cellules independantes.
-
-Il impose :
-
-```text
-meme formed
-meme shadow
-meme separation
-deux projections visibles
-deux lectures visibles
+```lean
+visibleShift := visibleShiftOfSource shiftSource
 ```
 
-C'est essentiel.
+est bonne.
 
-Si on utilisait deux cellules, on ne prouverait pas que la meme structure
-survit au shift. On comparerait seulement deux constructions separees.
+Elle force la provenance du shift a etre inspectable.
 
-### 3. Le temoin reste interne
-
-Le plan dit explicitement que le temoin ne doit pas etre reconstruit depuis :
-
-```text
-readIn
-readOut
-projectIn
-projectOut
-```
-
-Il doit etre porte avant la projection :
-
-```text
-cellule interne
--> temoin
--> projections visibles
-```
-
-Cette orientation est correcte.
-
-Elle evite l'erreur qui consisterait a faire du temoin une simple valeur lue
-dans le visible.
-
-### 4. L'obstruction projective est indispensable
-
-Le plan demande :
-
-```text
-ProjectionObstruction
-LocalProjectiveRecovery
-noProjectiveReconstruction
-```
-
-C'est le bon niveau.
-
-L'OOD structurel n'est pas :
-
-```text
-le visible est invariant
-```
-
-mais :
-
-```text
-le visible change ou devient insuffisant,
-et pourtant le temoin interne reste porte par la cellule.
-```
-
-## Ce qui est deja compatible avec le code
-
-La partie arithmetique citee par le document existe deja dans le code.
-
-Dans `Meta/Arithmetic/RelaxedOdd.lean`, `NatEnrichedRelaxedOddRole k` porte :
-
-```text
-mediatingRole
-relaxedGap
-rightPayload
-diagonalCertificate
-projectionObstruction
-positiveWitness
-positiveWitness_pos
-positiveWitness_eq_maximalDivergence
-```
-
-Le code separe bien :
-
-```text
-temoin positif
-```
-
-et :
-
-```text
-payload de retour
-```
-
-On a notamment :
-
-```text
-positiveWitness = natEnrichedParityMaximalRelaxedDivergence k
-rightPayload = k + positiveWitness
-```
-
-Cette separation est importante.
-
-L'instance OOD ne devra pas identifier le temoin au payload.
-
-## Point dur principal
-
-Le verrou est le choix de :
-
-```text
-projectIn
-projectOut
-readIn
-readOut
-```
-
-Il faut obtenir simultanement :
-
-```text
-sameIn  : projectIn formed = projectIn shadow
-sameOut : projectOut formed = projectOut shadow
-visibleShift :
-  readIn (projectIn formed) = readOut (projectOut formed) -> False
-```
-
-Ce triplet est non trivial.
-
-Pourquoi ?
-
-Parce que `sameIn` et `sameOut` demandent que formed/shadow soient confondus
-par chaque projection, tandis que `visibleShift` demande que les lectures
-obtenues par les deux regimes soient reellement separees.
-
-Donc l'instance doit etre construite avec precision.
-
-Si les projections sont trop grossieres, on obtient `sameIn/sameOut`, mais le
-shift devient artificiel.
-
-Si les projections sont trop riches, on perd `sameIn/sameOut`.
-
-Le bon choix doit donc exposer :
-
-```text
-une meme cellule diagonale
-confondue localement par chaque projection
-mais lue differemment par les deux regimes de lecture
-```
-
-## Risque principal
-
-Le risque est de fabriquer le shift.
-
-Exemple de mauvaise implementation :
+Cela evite que le faux resultat suivant suffise comme preuve sans provenance
+inspectable :
 
 ```text
 Label := Bool
@@ -210,193 +55,317 @@ readIn  := fun _ => true
 readOut := fun _ => false
 ```
 
-Cela prouverait un shift visible, mais il serait sans contenu.
+pris seul comme preuve de shift.
 
-Ce serait formellement facile et conceptuellement mauvais.
-
-Le shift doit venir d'une difference deja portee par la structure :
+Le plan impose maintenant :
 
 ```text
-role source
-role cible
-payload source
-payload cible
-temoin positif
-retour relaxe
+shift visible reel
++ source structurelle du shift
++ meme cellule operatoire
++ temoin interne conserve
++ visible seul insuffisant
 ```
 
-Il faut donc imposer une regle de qualite :
+C'est le bon contrat de non-trivialite.
+
+## Critique 1 : ShiftSource peut encore etre pauvre
+
+`ShiftSource` empeche le shift totalement flottant.
+
+Mais abstraitement, il peut encore etre pauvre.
+
+Par exemple, on pourrait choisir :
 
 ```text
-visibleShift doit etre derive d'un theoreme structurel existant,
-pas d'une lecture constante choisie pour separer artificiellement les labels.
+ShiftSource := readIn (...) = readOut (...) -> False
 ```
 
-## Critere de shift acceptable
+et poser :
 
-Un `visibleShift` acceptable doit verifier au moins une des conditions
-suivantes.
+```text
+shiftSource := preuve_ad_hoc
+visibleShiftOfSource := fun h => h
+```
 
-### Option A : separation par role
+Une telle implementation serait formellement conforme a la couche abstraite,
+mais conceptuellement faible.
 
-Le shift est acceptable s'il derive d'une separation de roles deja formalisee,
-par exemple :
+Donc il faut distinguer deux niveaux :
+
+```text
+couche abstraite :
+  rend la provenance du shift inspectable ;
+
+instance concrete :
+  prouve que cette provenance est substantielle.
+```
+
+La couche abstraite ne peut pas garantir seule la richesse du shift.
+
+Cette richesse doit etre verifiee dans l'instance.
+
+## Critique 2 : le transport du temoin peut etre trop facile
+
+Le plan propose :
+
+```text
+witnessIn = witness
+witnessOut = witness
+```
+
+C'est correct comme forme minimale.
+
+Mais cette egalite peut etre trop facile si l'implementation fait seulement :
+
+```lean
+witnessIn  := witness
+witnessOut := witness
+```
+
+Dans ce cas, on aura bien une egalite, mais pas encore une demonstration forte
+que le temoin est transporte par la structure.
+
+Le certificat final doit donc garder explicitement le chemin :
+
+```text
+cellule
+-> temoin interne
+-> lectures visibles
+```
+
+et non seulement :
+
+```text
+temoin
+-> temoin
+```
+
+Recommandation :
+
+```text
+le temoin doit etre attache a la cellule ou extrait d'elle,
+pas seulement fourni comme un champ independant.
+```
+
+Dans l'instance arithmetique, cela signifie :
+
+```text
+le temoin doit etre exactement
+NatEnrichedRelaxedOddRole.positiveWitness
+```
+
+ou une projection directe de ce champ.
+
+## Critique 3 : noProjectiveReconstruction porte sur la projection, pas sur read
+
+Le plan parle parfois de :
+
+```text
+lecture visible seule insuffisante
+```
+
+La preuve Lean disponible porte plus precisement sur :
+
+```text
+projection visible insuffisante pour reconstruire l'interface
+```
+
+via :
+
+```text
+ProjectionObstruction
+noProjectiveReconstruction
+```
+
+C'est correct dans le cadre.
+
+Mais il faut eviter de glisser vers une formulation trop forte :
+
+```text
+readIn/readOut ne reconstruisent pas
+```
+
+La preuve stricte sera plutot :
+
+```text
+projectIn ne reconstruit pas l'interface
+projectOut ne reconstruit pas l'interface
+```
+
+Les fonctions :
+
+```text
+readIn
+readOut
+```
+
+servent a exposer le shift visible.
+
+Elles ne sont pas directement l'objet de `noProjectiveReconstruction`, sauf si
+on construit une projection composee :
+
+```text
+readIn ∘ projectIn
+readOut ∘ projectOut
+```
+
+Ce point doit rester clair dans l'implementation et dans la presentation.
+
+## Critique 4 : projectOut/readOut est le vrai verrou technique
+
+Dans l'instance arithmetique, le choix de :
+
+```text
+projectOut
+readOut
+```
+
+sera delicat.
+
+Il faut simultanement obtenir :
+
+```text
+sameOut : projectOut formed = projectOut shadow
+visibleShift :
+  readIn (projectIn formed) = readOut (projectOut formed) -> False
+```
+
+Si `projectOut` encode trop d'information, on risque de perdre :
+
+```text
+sameOut
+```
+
+Si `projectOut` encode trop peu d'information, le shift devient faible ou
+artificiel.
+
+Le bon choix doit donc etre :
+
+```text
+projectOut assez contractant pour garder sameOut,
+readOut assez structurel pour exposer le shift.
+```
+
+C'est probablement le verrou principal de l'instance.
+
+## Critique 5 : rightPayload = k + positiveWitness ne suffit pas seul
+
+Le plan dit que l'instance doit utiliser :
+
+```text
+positiveWitness
+rightPayload = k + positiveWitness
+```
+
+C'est la bonne direction.
+
+Mais cette egalite ne suffit pas a elle seule pour produire un OOD shift.
+
+Elle montre :
+
+```text
+le payload de retour porte le temoin positif
+```
+
+mais il faut encore construire une separation effective entre :
+
+```text
+lecture source
+lecture cible
+```
+
+Donc le vrai objectif arithmetique est :
+
+```text
+rightPayload = k + positiveWitness
++ 0 < positiveWitness
++ lecture source / lecture cible separees
++ meme cellule formed/shadow
++ sameIn/sameOut
+```
+
+Sans la separation effective des lectures, on n'a qu'un fait de payload, pas
+encore un certificat OOD.
+
+## Critique 6 : la separation de roles seule n'est pas suffisante
+
+Une separation comme :
 
 ```text
 closingExcess k != mediatingValue k
 ```
 
-ou d'une separation equivalente.
+est importante.
 
-### Option B : separation par payload structurel
+Mais elle ne suffit pas seule comme instance OOD complete.
 
-Le shift est acceptable s'il derive d'un ecart de payload deja porte par le
-temoin :
+Elle donne une obstruction interne.
 
-```text
-rightPayload = k + positiveWitness
-0 < positiveWitness
-```
-
-Dans ce cas, le shift vient du fait que le retour relaxe porte un excedent
-positif interne.
-
-### Option C : separation par obstruction diagonale
-
-Le shift est acceptable s'il est derive d'un `DiagonalCertificate` ou d'une
-`ProjectionObstruction` deja presente dans la cellule.
-
-Cette option est la plus proche du cadre.
-
-## Critere de shift refuse
-
-Un shift doit etre refuse s'il vient seulement :
+Pour obtenir le resultat OOD, elle doit encore etre raccordee a :
 
 ```text
-d'un type Label choisi trop librement
-d'une fonction readIn/readOut constante
-d'une distinction sans lien avec formed/shadow
-d'une egalite numerique ajoutee apres coup
-d'une reconstruction visible du temoin
+projectIn
+projectOut
+readIn
+readOut
+visibleShift
 ```
 
-Dans ces cas, on aurait une preuve Lean, mais pas un resultat OOD structurel.
+Autrement dit :
 
-## Couche abstraite recommandee
+```text
+separation de roles
+```
 
-Il faut commencer par une couche abstraite :
+peut etre une source de shift, mais pas le certificat OOD complet.
+
+## Ce qui est maintenant bien cadre
+
+Le plan corrige plusieurs erreurs possibles :
+
+```text
+1. visibleShift n'est plus une preuve libre ;
+2. le shift doit porter une source ;
+3. la couche abstraite est separee de l'instance arithmetique ;
+4. le temoin ne doit pas etre confondu avec rightPayload ;
+5. la separation de roles seule est declaree insuffisante.
+```
+
+C'est un vrai progres.
+
+## Ce qui reste a faire avant d'implementer l'instance
+
+Avant l'instance arithmetique, il faut implementer la couche abstraite :
 
 ```text
 Meta/OOD/WitnessTransport.lean
 ```
 
-ou :
+Cette couche doit prouver :
 
 ```text
-Meta/MachineLearning/OODWitness.lean
-```
-
-La couche abstraite doit contenir :
-
-```lean
-structure OODProjectionShift
-structure OODRecoveredCell
-structure OODWitnessTransport
-structure OODStructuralCertificate
-```
-
-Elle doit produire :
-
-```text
+OODProjectionShift.visibleShift
 oodDiagonalIn
 oodDiagonalOut
 oodProjectionObstructionIn
 oodProjectionObstructionOut
 oodNoProjectiveReconstructionIn
 oodNoProjectiveReconstructionOut
+OODStructuralCertificate
 ```
 
-Cette couche est implementable directement a partir de :
+Elle doit rester :
 
 ```text
-DiagonalCertificate
-ProjectionObstruction
-LocalProjectiveRecovery
-noProjectiveReconstruction
+sans arithmetique
+sans instance concrete
+sans choix de read artificiel
 ```
 
-Elle ne devrait pas utiliser l'arithmetique.
+## Condition d'acceptation pour l'instance arithmetique
 
-## Pourquoi abstrait d'abord
-
-Il faut eviter de melanger deux problemes :
-
-```text
-1. formuler le certificat OOD du cadre ;
-2. trouver la bonne instance arithmetique non artificielle.
-```
-
-La couche abstraite verrouille le sens exact de :
-
-```text
-le temoin traverse le shift
-```
-
-L'instance arithmetique vient ensuite comme banc d'essai.
-
-Si on commence directement par l'arithmetique, on risque de confondre :
-
-```text
-temoin
-payload
-code visible
-retour relaxe
-label
-```
-
-## Critique de l'instance arithmetique proposee
-
-L'idee :
-
-```text
-lecture source : role mediateur lu par son code visible
-lecture cible  : payload de retour relaxe porte par rightPayload
-```
-
-est prometteuse.
-
-Elle est prometteuse parce que le code a deja :
-
-```text
-3 * code(mediatingRole) + 1 = 2 * rightPayload
-(3 * code(mediatingRole) + 1) / 2 = rightPayload
-rightPayload = k + positiveWitness
-```
-
-Mais elle doit etre maniee avec prudence.
-
-Le code visible du mediateur ne doit pas redevenir la definition de l'impair
-relaxe.
-
-La bonne lecture est :
-
-```text
-le code visible fournit une concordance de projection,
-mais le role relaxe est porte par la structure enrichie.
-```
-
-Donc l'instance arithmetique devra dire :
-
-```text
-le visible source raccorde le role mediateur ;
-le visible cible raccorde le payload de retour ;
-le temoin positif reste celui de NatEnrichedRelaxedOddRole ;
-le payload de retour est distinct du temoin.
-```
-
-## Ce qui serait un vrai resultat
-
-Un vrai resultat serait :
+L'instance arithmetique ne sera acceptable que si elle produit :
 
 ```text
 NatEnrichedRelaxedOddRole k
@@ -406,119 +375,38 @@ NatEnrichedRelaxedOddRole k
 avec :
 
 ```text
-visibleShift non artificiel
-diagonalCertificate in
-diagonalCertificate out
-projectionObstruction in
-projectionObstruction out
-noProjectiveReconstruction in
-noProjectiveReconstruction out
-positiveWitness conserve
-rightPayload = k + positiveWitness
+1. temoin = NatEnrichedRelaxedOddRole.positiveWitness ;
+2. temoin positif ;
+3. rightPayload = k + temoin ;
+4. visibleShift derive d'une source structurelle ;
+5. source structurelle non ad hoc ;
+6. sameIn et sameOut prouves ;
+7. obstruction projective des deux cotes ;
+8. noProjectiveReconstruction des deux cotes ;
+9. concordance visible avec le pas relaxe conservee ;
+10. aucune reconstruction du temoin depuis le visible.
 ```
 
-Cette forme serait forte.
+## Verdict final
 
-Elle dirait que la relaxation impaire donne une instance concrete de
-stabilite OOD structurelle :
+Le plan corrige est bon pour lancer la couche abstraite.
+
+Il reste fragile sur l'instance, mais cette fragilite est maintenant identifiee
+au bon endroit.
+
+La phrase la plus exacte est :
 
 ```text
-la lecture visible change,
-mais le temoin positif interne reste la structure stable.
+Le plan abstrait est pret.
+Le vrai verrou est l'instance arithmetique :
+construire projectOut/readOut de maniere assez contractante pour sameOut,
+mais assez structurelle pour produire un shift non artificiel.
 ```
 
-## Ce qui resterait limite
-
-Meme avec cette preuve, il ne faudrait pas dire :
+Si ce verrou est resolu, le resultat sera substantiel :
 
 ```text
-le cadre resout la generalisation OOD pour les modeles ML.
+le visible change,
+la reconstruction projective echoue,
+mais le temoin interne reste transporte par la cellule.
 ```
-
-Il faudrait dire :
-
-```text
-le cadre formalise un certificat structurel de stabilite sous shift visible.
-```
-
-Ce certificat peut ensuite inspirer des criteres ML, mais il ne donne pas
-directement un algorithme d'apprentissage robuste.
-
-## Recommandation
-
-La suite doit se faire en deux phases.
-
-### Phase 1 : OOD abstrait
-
-Implementer :
-
-```text
-Meta/OOD/WitnessTransport.lean
-```
-
-avec le certificat abstrait complet.
-
-Critere de succes :
-
-```text
-aucune instance concrete
-aucune arithmetique
-aucun choix artificiel de lecture
-certificats diagonaux et noProjectiveReconstruction produits des deux cotes
-```
-
-### Phase 2 : instance arithmetique
-
-Implementer :
-
-```text
-Meta/Arithmetic/RelaxedOddOOD.lean
-```
-
-ou :
-
-```text
-Meta/OOD/ArithmeticRelaxedOdd.lean
-```
-
-Critere de succes :
-
-```text
-le temoin est exactement NatEnrichedRelaxedOddRole.positiveWitness
-le shift est derive d'une separation structurelle
-rightPayload reste distingue du temoin
-la concordance visible avec le pas relaxe est conservee
-```
-
-## Conclusion
-
-Le plan est bon.
-
-Il peut produire une vraie avance du cadre si l'implementation respecte deux
-regles :
-
-```text
-1. abstraire d'abord le certificat OOD ;
-2. refuser tout visibleShift artificiel dans l'instance arithmetique.
-```
-
-Le resultat attendu n'est pas :
-
-```text
-une analogie ML
-```
-
-mais :
-
-```text
-un certificat formel de stabilite structurelle sous changement de lecture
-visible.
-```
-
-C'est exactement dans la ligne du cadre :
-
-```text
-la projection peut changer,
-le temoin interne reste l'objet stable.
-```
-
