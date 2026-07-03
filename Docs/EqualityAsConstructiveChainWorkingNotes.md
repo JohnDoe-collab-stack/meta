@@ -4,6 +4,21 @@
 
 Ce document fixe la lecture dynamique de l'egalite d'interface.
 
+Nom conceptuel utile :
+
+```text
+interface-induced observational equivalence
+```
+
+En francais :
+
+```text
+equivalence observationnelle induite par l'interface
+```
+
+Dans le code Lean, cette notion est portee par le nom technique
+`ProjectedIdentity`. On ne renomme pas le noyau Lean : on clarifie sa lecture.
+
 Le cadre part d'une projection :
 
 ```text
@@ -63,6 +78,12 @@ Id_q(x, y) := (q(x) = q(y))
 
 Elle identifie les deux poles par leur image visible.
 
+Elle est l'equivalence observationnelle induite par l'interface :
+
+```text
+x =_q y
+```
+
 Elle fournit le mediateur :
 
 ```text
@@ -78,7 +99,8 @@ Id_use := Id_q
 ```
 
 L'identite utilisee dans la chaine est donc l'identite produite par
-l'interface :
+l'interface. Autrement dit, l'equivalence observationnelle induite par
+l'interface devient l'identite operatoire de la chaine :
 
 ```text
 Id_use(x, y) := q(x) = q(y)
@@ -233,6 +255,14 @@ Transport_q  = meme egalite vue comme principe d'action
 
 Il deploie la puissance operatoire de `Id_q`.
 
+Donc :
+
+```text
+interface-induced observational equivalence
+=
+Id_q vu comme regime d'egalite utilisable et transportable par lecture.
+```
+
 ## Schema
 
 ```text
@@ -255,6 +285,11 @@ Ce schema montre le point central :
 l'egalite projective transporte les lectures ;
 la separation interne reste portee par la cellule.
 ```
+
+Dans cette lecture, l'interdependance n'est pas une relation ajoutee apres
+coup. Elle est produite par l'equivalence observationnelle induite par
+l'interface : les poles restent separes, mais toute lecture factorisee par
+l'interface les coordonne.
 
 ## Interdependance
 
@@ -301,6 +336,8 @@ Elle encode :
 separation interne
 +
 egalite projective
++
+equivalence observationnelle induite par l'interface
 ```
 
 La structure :
@@ -408,9 +445,24 @@ l'egalite visible est un mediateur operatoire ;
 elle coordonne sans contracter.
 ```
 
-## Point eventuel a formaliser plus tard
+## Facades Lean explicites
 
-Le noyau est deja code par :
+Le nom conceptuel :
+
+```text
+interface-induced observational equivalence
+```
+
+correspond dans Lean a :
+
+```text
+ProjectedIdentity
+ProjectedIdentityCell
+InterfaceIdentityOfUse
+InterfaceTransport
+```
+
+Le noyau est code par :
 
 ```text
 ProjectedIdentityCell
@@ -419,17 +471,49 @@ ReadIdentityCell
 readIdentityCellOfProjectedIdentityCell
 ```
 
-Une facade nommee peut rendre le transport plus explicite :
-
-```lean
-projectedIdentityCell_readTransport
-```
-
-Elle exposerait directement :
+Le transport d'interface est expose par :
 
 ```text
-project formed = project shadow
--> read(project formed) = read(project shadow)
+InterfaceReadTransport
+InterfaceTransport
+interfaceReadTransportOfProjectedIdentity
+interfaceReadTransportOfIdentityOfUse
+interfaceReadTransport_id_iff_projectedIdentity
+interfaceTransportOfProjectedIdentity
+projectedIdentityOfInterfaceTransport
+interfaceTransport_iff_projectedIdentity
+interfaceTransportOfIdentityOfUse
 ```
 
-Le contenu est deja present via `readIdentityCellOfProjectedIdentityCell`.
+La chaine constructive est exposee par :
+
+```text
+projectedIdentityCell_readTransport
+identityOfUseCell_readTransport
+ConstructiveInterfaceChain
+projectedIdentityCell_constructiveChain
+identityOfUseCell_constructiveChain
+projectedIdentityCell_interfaceTransport
+identityOfUseCell_interfaceTransport
+```
+
+La dynamique de changement de regime pour une relaxation contrainte est exposee
+par :
+
+```text
+constructiveChainInOfConstrainedRelaxation
+constructiveChainOutOfConstrainedRelaxation
+constrainedProjectionRelaxation_constructiveRegimeChange
+```
+
+Ainsi, la dynamique n'est pas seulement decrite dans le document :
+
+```text
+egalite projective
+-> identite d'usage
+-> transport
+-> chaine constructive
+-> changement de regime
+```
+
+Elle est exposee par des declarations nommees dans `ProjectedIdentity.lean`.
