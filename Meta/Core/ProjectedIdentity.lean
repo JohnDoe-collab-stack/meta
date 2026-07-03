@@ -1,28 +1,29 @@
 import Meta.Core.ClosedStabilityTheorem
 
 /-!
-# Projected identity and constrained relaxation
+# Projected identity, identity of use, and non-contractive transport
 
-This file extracts the abstract core behind quotient-like identities, or
-interface-induced observational equivalences.
+This file formalizes a non-contractive regime of equality.
 
 The theory stays constructive and projective: there is no Lean quotient object.
 An interface is represented by a projection `project : Interface -> Visible`
 and, when needed, a reading `read : Visible -> Label`.
 
-The central pattern is:
+A projected equality `project formed = project shadow` is not used to merge
+the internal poles.  The cell keeps their internal separation as data, while
+the projected equality is named as the identity of use and deployed as
+transport through readings of the visible interface.
 
-* two internal interfaces can be separated while the interface induces the
-  same observation for both;
-* the projected equality is then named as the identity actually used by the
-  interface;
-* this identity of use transports every reading that factors through the
-  projection;
-* this yields a diagonal certificate and a reconstruction obstruction;
-* a positive witness must be carried by the diagonal cell itself;
-* a constrained relaxation preserves that witness across the input/output
-  sides of a visible regime change, while both sides still carry their own
-  constructive interface chain.
+The central constructive chain is:
+
+* internal separation is preserved;
+* projected equality becomes `Id_use`;
+* `Id_use` acts as read transport;
+* polymorphic transport is equivalent to projected identity;
+* reconstruction from the visible side is obstructed;
+* a positive witness is carried by the diagonal cell itself;
+* constrained relaxation preserves the witness and the chain across a visible
+  regime change.
 -/
 
 namespace Meta
@@ -36,9 +37,10 @@ universe u v w z a
 A projected identity cell.
 
 The projection gives the two internal poles the same visible value, while the
-cell keeps their internal separation as data.  This is the raw Lean form of an
-interface-induced observational equivalence before it is named as an identity
-of use.
+cell keeps their internal separation as data.
+
+This is the raw Lean form of an interface-induced observational equivalence:
+the interface coordinates two poles without contracting them internally.
 -/
 structure ProjectedIdentityCell
     (Interface : Type u)
@@ -83,7 +85,10 @@ structure ReadIdentityCell
 /--
 A projected identity cell induces a read identity cell for any reading.
 
-This is the first transport step from projected equality to read equality.
+The proof term is ordinary equality congruence (`congrArg read`).  The point of
+the structure is that this congruence is packaged inside a non-contractive
+cell: the internal poles remain separated while the interface equality acts on
+the reading.
 -/
 def readIdentityCellOfProjectedIdentityCell
     {Interface : Type u}
@@ -179,8 +184,10 @@ abbrev InterfaceReadTransport
 /--
 A projected identity transports through every fixed reading.
 
-This is the action direction: projected equality is not only a static equality
-of visible values; it can be pushed through any reading of those values.
+The proof term is the local engine `congrArg read`.  Conceptually, this theorem
+exposes the action direction: projected equality is not only a static equality
+of visible values; inside the non-contractive cell it can be deployed through a
+reading while internal separation remains available elsewhere in the chain.
 -/
 theorem interfaceReadTransportOfProjectedIdentity
     {Interface : Type u}
@@ -422,6 +429,10 @@ It packages exactly:
 * internal separation;
 * identity of use;
 * read transport induced by that identity of use.
+
+This is the compact object that prevents the equality from being read as a
+contraction of the poles.  Equality is used as a mediator for readings while
+the internal distinction remains part of the same chain.
 -/
 abbrev ConstructiveInterfaceChain
     {Interface : Type u}
@@ -643,8 +654,12 @@ projection carries the same two internal poles with a new projected identity,
 the reading can shift, and the witness is explicitly conserved as input and
 output witness data.
 
-This is the regime-change object used later to expose:
-input constructive chain, output constructive chain, and visible shift.
+The relaxation does not erase the original diagonal structure.  It duplicates
+the constructive chain across two visible regimes while preserving the same
+internal poles and the positive witness carried by the source cell.
+
+This is the regime-change object used later to expose: input constructive
+chain, output constructive chain, and visible shift.
 -/
 structure ConstrainedProjectionRelaxation
     (Interface : Type u)
