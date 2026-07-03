@@ -2,62 +2,72 @@
 
 ## Objet
 
-Ce document fixe la theorie generale qui se degage du cadre Meta.
-
-L'objectif n'est pas de renommer la couche `OOD`. L'objectif est plus
-fondamental :
+Ce document fixe le noyau theorique abstrait suivant :
 
 ```text
 interface
 -> projection
 -> lecture
 -> identite quotientee
--> diagonalisation
+-> diagonalisation projective
 -> obstruction de reconstruction
 -> temoin positif interne
 -> relaxation contrainte
 ```
 
-La couche `OOD` devient alors une instance particuliere de cette theorie :
-elle decrit un changement de regime visible. La theorie elle-meme porte sur la
-maniere dont une interface produit une identite observable par quotient.
+Le point central est le suivant :
 
-## Noyau theorique
+```text
+une interface produit une identite observable par quotient ;
+une relaxation admissible relache ce quotient sous la contrainte
+d'un temoin positif interne porte par la cellule diagonale.
+```
 
-Le cadre repose sur quelques primitives minimales.
+La couche `OOD` n'est donc pas la theorie generale. Elle devient une instance
+ou une facade specialisee de cette theorie.
 
-### 1. Espace de phenomenes
+## Noyau mathematique
+
+### Phenomenes
+
+On fixe un espace interne de phenomenes :
 
 ```text
 X
 ```
 
-`X` est l'espace interne du phenomene.
+Un element :
 
-### 2. Projection
+```text
+x : X
+```
 
-Une interface contient d'abord une projection :
+est un etat interne du phenomene.
+
+### Projection
+
+Une interface contient une projection :
 
 ```text
 q : X -> V
 ```
 
-Elle envoie un phenomene interne vers une representation visible.
+Elle envoie un etat interne vers une representation visible.
 
-La projection ne lit pas encore le phenomene. Elle expose seulement une forme
-visible du phenomene.
+La projection n'interprete pas encore ce qu'elle expose. Elle donne seulement
+une forme visible.
 
-### 3. Lecture
+### Lecture
 
-Une interface contient aussi une lecture :
+Une interface peut aussi contenir une lecture :
 
 ```text
 read : V -> L
 ```
 
-La lecture interprete la representation visible produite par la projection.
+La lecture interprete la representation visible.
 
-On distingue donc :
+On distingue donc strictement :
 
 ```text
 q : X -> V
@@ -66,402 +76,202 @@ q : X -> V
 et :
 
 ```text
-read ∘ q : X -> L
+read o q : X -> L
 ```
 
-La projection produit une representation visible.
+La projection expose une representation visible.
 
-La lecture produit une valeur, une mesure, une etiquette, un score ou une
+La lecture produit une valeur, une etiquette, une mesure, un score ou une
 interpretation a partir de cette representation.
 
-Cette distinction est centrale : le quotient peut etre pose au niveau de la
-projection `q`, ou a un niveau plus pauvre, au niveau de la lecture
-`read ∘ q`.
-
-### 4. Identite quotientee
-
-Deux etats :
-
-```text
-x, y : X
-```
-
-peuvent etre identifies par projection lorsque :
-
-```text
-q(x) = q(y)
-```
-
-Cette egalite est une identite relative au quotient projectif, pas forcement
-une identite interne.
-
-On peut aussi avoir une identite plus faible au niveau de la lecture :
-
-```text
-read(q(x)) = read(q(y))
-```
-
-Dans ce cas, deux etats peuvent produire la meme lecture, meme si leurs
-representations visibles ne sont pas entierement identiques.
-
-### 5. Separation interne
-
-On peut avoir :
-
-```text
-x != y
-```
-
-meme si l'interface les identifie.
-
-Autrement dit, deux etats peuvent etre structurellement differents tout en
-etant traites comme identiques par le quotient.
-
-### 6. Diagonalisation projective
-
-La situation diagonale minimale est :
-
-```text
-x != y
-```
-
-mais :
-
-```text
-q(x) = q(y)
-```
-
-L'interface impose une identite visible entre deux etats structurellement
-distincts.
-
-La diagonalisation montre alors que l'identite produite par l'interface
-n'epuise pas l'identite interne du phenomene.
-
-### 7. Obstruction de reconstruction
-
-Il n'existe pas de reconstruction parfaite :
-
-```text
-r : V -> X
-```
-
-telle que, pour tout :
-
-```text
-x : X
-```
-
-on ait :
-
-```text
-r(q(x)) = x
-```
-
-Autrement dit, l'interface a detruit de l'information structurelle.
-
-Ce qui a ete quotiente ne peut pas etre reconstruit depuis la seule
-representation visible.
-
-### 8. Temoin positif interne
-
-Pour la cellule diagonale :
-
-```text
-c := (formed, shadow, q(formed) = q(shadow), formed != shadow)
-```
-
-il existe un temoin interne porte par cette cellule :
-
-```text
-w in W(c)
-```
-
-verifiant une propriete positive dependante de la cellule :
-
-```text
-P_c(w)
-```
-
-ou, dans un cas arithmetique :
-
-```text
-W(c) = Nat
-P_c(w) := 0 < w
-```
-
-Ce temoin certifie que la cellule diagonale porte une difference structurelle
-non nulle que le quotient visible ne capture pas.
-
-Il ne vient pas de la lecture exterieure. Il n'est pas ajoute apres coup. Il
-est une donnee structurelle attachee a la cellule diagonale et portee par la
-structure interne du phenomene.
-
-### 9. Relaxation contrainte
-
-Relaxer consiste a modifier la projection, la lecture, ou l'interface afin de
-reveler davantage de structure.
-
-Mais cette relaxation n'est pas arbitraire : elle doit conserver ou exposer le
-temoin positif interne `w`.
-
-La relaxation admissible est donc un changement de quotient sous contrainte
-d'un invariant positif interne.
-
-On ne relaxe pas pour produire n'importe quelle nouvelle representation. On
-relaxe parce qu'un temoin positif interne indique que le quotient initial etait
-trop contracte.
-
-Dans le vocabulaire Lean du projet, on ne doit pas utiliser les quotients Lean
-`Quot`. La theorie doit rester constructive et projective :
-
-```lean
-project : Interface -> Visible
-read : Visible -> Label
-```
-
-L'identite quotientee projective est portee par :
-
-```lean
-project formed = project shadow
-```
-
-L'identite quotientee lue est portee par :
-
-```lean
-read (project formed) = read (project shadow)
-```
-
-et non par un objet `Quot`.
+Cette distinction est essentielle : l'identite peut etre imposee au niveau de
+la projection, ou a un niveau plus pauvre, au niveau de la lecture.
 
 ## Identite quotientee
 
-Une projection fixe une relation d'indiscernabilite projective :
+La projection induit une relation d'indiscernabilite :
 
 ```text
 x ~q y  iff  q x = q y
 ```
 
-Une lecture fixe une relation d'indiscernabilite interpretee :
+La lecture induit une relation plus pauvre :
 
 ```text
 x ~read,q y  iff  read(q x) = read(q y)
 ```
 
-Donc l'identite observable peut etre relative a la projection, ou relative a la
-lecture de cette projection.
+Donc une identite observable n'est pas forcement une identite interne.
 
-Elle dit :
+Elle signifie :
 
 ```text
 ces deux etats sont identiques pour cette interface
 ```
 
-Elle ne dit pas :
+Elle ne signifie pas :
 
 ```text
 ces deux etats sont identiques dans la structure
 ```
 
-Le point central est donc :
+Le principe fondamental est :
 
 ```text
-identite visible
-!=
-identite interne
+identite visible != identite interne
 ```
 
-## Diagonalisation
+## Cellule diagonale
 
-La diagonalisation projective apparait lorsqu'une meme projection identifie
-deux roles internes separes.
+La situation diagonale minimale est donnee par deux etats :
 
-Forme abstraite :
+```text
+formed, shadow : X
+```
+
+tels que :
 
 ```text
 formed != shadow
 q formed = q shadow
 ```
 
-Dans le code existant, ce noyau est deja porte par :
+La projection les identifie.
 
-```lean
-DiagonalCertificate Interface Visible project
-```
+La structure interne les separe.
 
-dans :
+Cette cellule diagonale dit que l'interface impose une identite visible qui
+n'epuise pas l'identite interne.
 
-```text
-Meta/Core/ClosedStabilityTheorem.lean
-```
+## Obstruction de reconstruction
 
-La projection visible identifie :
+Une cellule diagonale interdit une reconstruction projective parfaite.
 
-```lean
-sameProjection : project formed = project shadow
-```
-
-mais la structure separe :
-
-```lean
-separatedInterface : formed = shadow -> False
-```
-
-Cette situation produit une obstruction :
-
-```lean
-ProjectionObstruction Interface Visible project
-```
-
-et donc l'echec d'une reconstruction projective globale :
-
-```lean
-noProjectiveReconstruction
-```
-
-Il existe aussi une diagonalisation plus pauvre au niveau de la lecture :
+Il n'existe pas de reconstruction :
 
 ```text
+r : V -> X
+```
+
+telle que :
+
+```text
+forall x : X, r(q x) = x
+```
+
+La raison est directe : si `formed` et `shadow` ont la meme projection, une
+reconstruction depuis `V` devrait produire le meme resultat pour les deux, alors
+que la structure les separe.
+
+Donc :
+
+```text
+q formed = q shadow
 formed != shadow
-read(q formed) = read(q shadow)
-```
-
-Cette version expose une indiscernabilite de lecture. Elle ne donne pas
-necessairement une indiscernabilite projective `q formed = q shadow`.
-
-## Probleme du quotient trop precoce
-
-Quotienter trop tot signifie traiter l'identite visible comme si elle etait une
-identite interne.
-
-Le probleme n'est pas seulement une perte d'information. Le probleme est plus
-precis :
-
-```text
-une interface impose une identite
-qui peut effacer une difference structurelle encore active
-```
-
-Une interface pauvre peut donc produire une identite vraie dans la
-representation, mais fausse comme identite interne.
-
-La black box commence ici :
-
-```text
-une interface rend identiques des etats que la structure distingue
+--------------------------------
+pas de reconstruction parfaite depuis V
 ```
 
 ## Temoin positif interne
 
-Une diagonalisation negative dit :
+Le cadre ne se contente pas d'une obstruction negative.
+
+Pour une cellule diagonale :
 
 ```text
-on ne peut pas reconstruire toute la structure depuis la projection
+c := (formed, shadow, q formed = q shadow, formed != shadow)
 ```
 
-Le cadre Meta ajoute une exigence plus forte :
+on demande un type de temoins porte par la cellule :
 
 ```text
-il existe un temoin positif interne conserve par la structure
+W(c)
 ```
 
-Ce temoin ne vient pas de la projection visible. Il est porte par la cellule
-interne, attache a la diagonalisation elle-meme, et survit au passage par
-l'interface.
-
-Dans le code actuel, la forme abstraite la plus proche est :
-
-```lean
-OODPositiveWitnessTransport
-OODPositiveInvariant
-```
-
-dans :
+et une propriete positive dependante de la cellule :
 
 ```text
-Meta/OOD/WitnessTransport.lean
+P_c : W(c) -> Prop
 ```
 
-Le dernier point est crucial :
+Un temoin positif interne est alors :
 
-```lean
-invariant = witnessOfCell
-witnessIn = invariant
-witnessOut = invariant
-0 < invariant
+```text
+w : W(c)
+P_c(w)
 ```
 
-Donc le visible peut changer, mais le temoin positif de la cellule reste
-transporte. Il n'est pas fabrique depuis le shift visible.
+Ce temoin n'est pas externe. Il n'est pas ajoute apres coup. Il est porte par la
+cellule diagonale elle-meme.
+
+La forme arithmetique :
+
+```text
+0 < w
+```
+
+n'est qu'une specialisation possible. Le noyau abstrait ne depend pas de cette
+specialisation.
 
 ## Relaxation contrainte
 
 Relaxer ne signifie pas inventer une autre representation.
 
-Relaxer signifie relacher une projection ou une lecture trop contractee sous la
-contrainte d'un temoin positif interne.
+Relaxer signifie changer le regime projectif ou le regime de lecture afin de
+laisser apparaitre une structure que le quotient precedent contractait.
 
-Forme conceptuelle :
+Cette relaxation doit conserver un temoin positif interne.
+
+Forme abstraite :
 
 ```text
-projection ou lecture initiale trop contractee
--> diagonalisation
--> obstruction de reconstruction
--> temoin positif interne
--> relaxation admissible
+cellule diagonale source c
+temoin interne w : W(c)
+P_c(w)
+regime visible d'entree
+regime visible de sortie
+conservation explicite de w
 ```
 
-La relaxation admissible n'est pas libre. Elle doit respecter ou exposer le
-temoin positif.
+La relaxation admissible est donc :
 
-Dans la couche OOD actuelle, cette idee est portee par :
+```text
+un changement de quotient sous contrainte d'un temoin positif interne.
+```
+
+Elle n'est pas libre. Elle est justifiee par le fait que le quotient initial
+contractait une difference structurelle deja certifiee par la cellule.
+
+## Formalisation Lean actuelle
+
+La formalisation actuelle est :
+
+```text
+Meta/Core/ProjectedIdentity.lean
+```
+
+Elle reste constructive et projective.
+
+Elle n'utilise pas de quotient Lean `Quot`.
+
+Elle formalise l'effet quotientant d'une projection par des egalites de
+projection :
 
 ```lean
-OODProjectionShift
-OODRecoveredCell
-OODPositiveWitnessTransport
-OODPositiveInvariant
-OODPositiveStructuralCertificate
+project formed = project shadow
 ```
 
-Mais ces noms sont encore applicatifs. La theorie generale devrait extraire
-ces notions sous des noms plus fondamentaux.
+et non par un objet quotient.
 
-## Traduction Lean visee
+### Dependance architecturale
 
-La theorie devrait etre extraite dans un fichier nouveau, par exemple :
-
-```text
-Meta/Core/QuotientedIdentity.lean
-```
-
-ou, pour eviter toute confusion avec `Quot` :
-
-```text
-Meta/Core/ProjectedIdentity.lean
-```
-
-Le nom recommande est :
-
-```text
-Meta/Core/ProjectedIdentity.lean
-```
-
-Precision architecturale :
-
-```text
-ProjectedIdentity.lean
-```
-
-peut etre implemente de deux manieres.
-
-La version non invasive, actuellement visee, est une extraction/facade core
-appuyee sur :
+Le fichier `ProjectedIdentity.lean` est une extraction/facade core appuyee sur :
 
 ```text
 Meta/Core/ClosedStabilityTheorem.lean
 ```
 
-Elle reutilise les briques deja formalisees :
+Il reutilise les briques deja formalisees :
 
 ```text
 DiagonalCertificate
@@ -469,38 +279,47 @@ ProjectionObstruction
 noProjectiveReconstruction
 ```
 
-Donc l'ordre architectural effectif est :
+L'ordre architectural effectif est donc :
 
 ```text
 ClosedStabilityTheorem
 -> ProjectedIdentity
--> OOD / Arithmetic / autres instances
+-> OOD / Arithmetic / Collatz / autres instances
 ```
 
-Ce choix ne cree pas de decalage conceptuel : `ProjectedIdentity` exprime bien
-la theorie de l'identite quotientee. Il cree seulement un decalage
-architectural leger, car la couche est extraite au-dessus d'un noyau core deja
-existant.
+Ce choix ne change pas le contenu conceptuel. Il signifie seulement que la
+theorie de l'identite quotientee est extraite au-dessus d'un noyau core deja
+present.
 
-La version plus pure, mais plus invasive, consisterait a deplacer
-`DiagonalCertificate`, `ProjectionObstruction` et `noProjectiveReconstruction`
-dans `ProjectedIdentity.lean`, puis a faire dependre `ClosedStabilityTheorem`
-de cette couche. Ce refactor n'est pas requis pour stabiliser la theorie.
+Une version plus invasive pourrait deplacer `DiagonalCertificate`,
+`ProjectionObstruction` et `noProjectiveReconstruction` dans
+`ProjectedIdentity.lean`, puis faire dependre `ClosedStabilityTheorem` de cette
+couche. Ce refactor n'est pas requis pour stabiliser la theorie.
 
-Le noyau formel attendu :
+## Structures Lean principales
+
+### Cellule projective
 
 ```lean
 structure ProjectedIdentityCell
     (Interface : Type u)
     (Visible : Type v)
-    (project : Interface -> Visible) where
+    (project : Interface -> Visible) :
+    Type (max u v) where
   formed : Interface
   shadow : Interface
   sameVisible : project formed = project shadow
   separated : formed = shadow -> False
 ```
 
-La version lue doit etre separee :
+Cette structure est la cellule diagonale projective :
+
+```text
+meme projection visible
+separation interne
+```
+
+### Cellule lue
 
 ```lean
 structure ReadIdentityCell
@@ -508,7 +327,8 @@ structure ReadIdentityCell
     (Visible : Type v)
     (Label : Type w)
     (project : Interface -> Visible)
-    (read : Visible -> Label) where
+    (read : Visible -> Label) :
+    Type (max u v w) where
   formed : Interface
   shadow : Interface
   sameRead :
@@ -516,44 +336,58 @@ structure ReadIdentityCell
   separated : formed = shadow -> False
 ```
 
-Puis :
+Cette structure est plus pauvre :
 
-```lean
-def diagonalCertificateOfProjectedIdentityCell :
-  DiagonalCertificate Interface Visible project
+```text
+meme lecture
+separation interne
 ```
 
-et :
+Une cellule projective donne toujours une cellule lue, par composition avec
+`read`.
+
+La reciproque n'est pas posee.
+
+### Obstruction
+
+Le fichier fournit les raccords :
 
 ```lean
-def projectionObstructionOfProjectedIdentityCell :
-  ProjectionObstruction Interface Visible project
+diagonalCertificateOfProjectedIdentityCell
+projectionObstructionOfProjectedIdentityCell
+noProjectiveReconstructionOfProjectedIdentityCell
 ```
 
-Ensuite la couche positive :
+et leurs variantes au niveau lecture :
+
+```lean
+diagonalCertificateOfReadIdentityCell
+projectionObstructionOfReadIdentityCell
+noProjectiveReconstructionOfReadIdentityCell
+```
+
+### Invariant positif
 
 ```lean
 structure PositiveProjectedInvariant
     (Interface : Type u)
     (Visible : Type v)
     (project : Interface -> Visible)
-    (WitnessOf : ProjectedIdentityCell Interface Visible project -> Type w)
+    (WitnessOf : ProjectedIdentityCell Interface Visible project -> Type a)
     (Positive :
       (cell : ProjectedIdentityCell Interface Visible project) ->
-        WitnessOf cell -> Prop) where
+        WitnessOf cell -> Prop) :
+    Type (max u v (a + 1)) where
   cell : ProjectedIdentityCell Interface Visible project
   witness : WitnessOf cell
   witness_pos : Positive cell witness
 ```
 
-Pour le cas `Nat`, on pourra specialiser :
+Le temoin depend de la cellule.
 
-```lean
-WitnessOf _ := Nat
-Positive _ witness := 0 < witness
-```
+Il n'est pas un parametre externe independant de la diagonalisation.
 
-Enfin la relaxation contrainte :
+### Relaxation contrainte
 
 ```lean
 structure ConstrainedProjectionRelaxation
@@ -569,18 +403,14 @@ structure ConstrainedProjectionRelaxation
       ProjectedIdentityCell Interface VisibleIn projectIn -> Type a)
     (Positive :
       (cell : ProjectedIdentityCell Interface VisibleIn projectIn) ->
-        WitnessOf cell -> Prop) where
-  formed : Interface
-  shadow : Interface
-  sameIn : projectIn formed = projectIn shadow
-  sameOut : projectOut formed = projectOut shadow
-  visibleShift :
-    readIn (projectIn formed) = readOut (projectOut formed) -> False
-  separated : formed = shadow -> False
+        WitnessOf cell -> Prop) :
+    Type (max u v w z (a + 1)) where
   sourceCell :
     ProjectedIdentityCell Interface VisibleIn projectIn
-  sourceCell_formed_eq : sourceCell.formed = formed
-  sourceCell_shadow_eq : sourceCell.shadow = shadow
+  sameOut : projectOut sourceCell.formed = projectOut sourceCell.shadow
+  visibleShift :
+    readIn (projectIn sourceCell.formed) =
+      readOut (projectOut sourceCell.formed) -> False
   invariant : WitnessOf sourceCell
   invariant_pos : Positive sourceCell invariant
   witnessIn : WitnessOf sourceCell
@@ -589,627 +419,110 @@ structure ConstrainedProjectionRelaxation
   witnessOut_eq : witnessOut = invariant
 ```
 
-Cette structure dira :
+Cette structure dit exactement :
 
 ```text
-la relaxation change le regime projectif,
+la relaxation change le regime visible,
 elle peut produire un shift de lecture,
-mais conserve explicitement un temoin positif interne
+mais elle conserve le temoin positif interne porte par la cellule source.
 ```
 
-## Raccord avec la couche OOD existante
+## Facades deja exposees
 
-La couche actuelle :
+Le fichier `ProjectedIdentity.lean` expose les projections utiles d'une
+relaxation contrainte :
+
+```lean
+projectedIdentityCellInOfConstrainedRelaxation
+projectedIdentityCellOutOfConstrainedRelaxation
+readIdentityCellInOfConstrainedRelaxation
+readIdentityCellOutOfConstrainedRelaxation
+positiveProjectedInvariantOfConstrainedRelaxation
+projectionObstructionInOfConstrainedRelaxation
+projectionObstructionOutOfConstrainedRelaxation
+noProjectiveReconstructionInOfConstrainedRelaxation
+noProjectiveReconstructionOutOfConstrainedRelaxation
+constrainedProjectionRelaxation_witnessIn_eq_invariant
+constrainedProjectionRelaxation_witnessOut_eq_invariant
+```
+
+Donc la relaxation donne immediatement :
 
 ```text
-Meta/OOD/WitnessTransport.lean
+cellule projective entree
+cellule projective sortie
+cellule lue entree
+cellule lue sortie
+invariant positif porte par la cellule
+obstruction entree
+obstruction sortie
+non-reconstruction entree
+non-reconstruction sortie
+conservation explicite du temoin
 ```
 
-devrait devenir une instance ou une facade specialisee de la theorie generale.
+## Discipline formelle
 
-Correspondance :
+La couche doit rester :
+
+```text
+constructive
+projective
+sans axiome
+sans Classical
+sans propext
+sans Quot.sound
+sans Quot
+```
+
+Le fichier Lean actuel respecte cette discipline.
+
+Il contient un unique bloc :
+
+```lean
+/- AXIOM_AUDIT_BEGIN -/
+...
+/- AXIOM_AUDIT_END -/
+```
+
+place a la fin du fichier.
+
+## Raccord avec OOD
+
+Le raccord aval naturel est :
 
 ```text
 OODProjectionShift
-  -> relaxation entre deux projections visibles
+  -> changement de regime visible
 
 OODRecoveredCell
-  -> cellule projetee avec recuperation locale
+  -> cellule projective specialisee
 
 OODPositiveWitnessTransport
   -> transport du temoin positif
 
 OODPositiveInvariant
-  -> invariant positif interne
+  -> invariant positif specialise
 
 OODPositiveStructuralCertificate
-  -> paquet complet : obstruction + invariant positif
+  -> certificat structurel positif specialise
 ```
 
-La theorie generale doit donc etre en amont de `OOD`.
+Le travail a faire dans une couche aval n'est pas de modifier le noyau. Il est
+de montrer que ces objets OOD sont des instances ou facades de
+`ConstrainedProjectionRelaxation`.
 
-## Raccord avec l'arithmetique enrichie
-
-L'instance :
-
-```text
-Meta/Arithmetic/RelaxedOddOOD.lean
-```
-
-montre deja un cas concret :
-
-```text
-formed = closingExcess k
-shadow = mediatingValue k
-same projection
-separation interne
-shift visible
-temoin positif relaxe
-invariant positif transporte
-```
-
-Point important :
-
-```text
-2*k + 1
-```
-
-n'est pas la definition de l'impair relaxe. C'est une lecture visible source
-contractee. L'impair relaxe est porte par la structure enrichie et par son
-temoin positif.
-
-## These centrale
-
-Formule longue :
+## Formule finale
 
 ```text
 Une interface produit une identite quotientee.
-Cette identite peut etre projective ou lue.
-Elle peut identifier visiblement deux etats que la structure distingue.
-La diagonalisation expose cette difference comme obstruction projective.
-Une relaxation admissible relache alors le quotient, non arbitrairement,
-mais sous la contrainte d'un temoin positif interne conserve.
-```
 
-Formule courte :
+Une cellule diagonale expose une separation interne que cette identite
+quotientee contracte.
 
-```text
-Une interface produit une identite quotientee.
-Cette identite peut etre posee au niveau de la projection ou de la lecture.
-Une relaxation admissible relache ce quotient sous la contrainte
-d'un temoin positif interne de diagonalisation.
-```
+Cette cellule produit une obstruction de reconstruction.
 
-## Notation mathematique
-
-Cette section donne la theorie sous forme mathematique, independamment des
-noms Lean.
-
-### 1. Interface projective et lecture
-
-On fixe trois types ou ensembles :
-
-```text
-X = espace interne du phenomene
-V = espace visible de representation
-L = espace de lecture
-```
-
-Une interface contient une projection :
-
-```text
-q : X -> V
-```
-
-et une lecture :
-
-```text
-read : V -> L
-```
-
-On distingue donc :
-
-```text
-q : X -> V
-```
-
-et :
-
-```text
-read ∘ q : X -> L
-```
-
-La projection expose une representation visible. La lecture interprete cette
-representation.
-
-La projection induit une relation d'indiscernabilite projective :
-
-```text
-x ~_q y  <=>  q(x) = q(y)
-```
-
-La lecture induit une relation d'indiscernabilite lue :
-
-```text
-x ~_{read,q} y  <=>  read(q(x)) = read(q(y))
-```
-
-Ces relations ne sont pas l'identite interne sur `X`. Elles sont des identites
-produites par l'interface.
-
-### 2. Identite quotientee
-
-Une identite quotientee projective est une paire :
-
-```text
-(x, y) in X x X
-```
-
-telle que :
-
-```text
-q(x) = q(y)
-```
-
-On peut donc ecrire :
-
-```text
-Id_q(x, y) := q(x) = q(y)
-```
-
-Cette identite est relative a `q`.
-
-Une identite quotientee lue est plus faible :
-
-```text
-Id_read,q(x, y) := read(q(x)) = read(q(y))
-```
-
-On peut avoir :
-
-```text
-Id_read,q(x, y)
-```
-
-sans avoir necessairement :
-
-```text
-Id_q(x, y)
-```
-
-Donc une lecture peut contracter davantage que la projection.
-
-### 3. Identite quotientee separee
-
-Le cas diagonal apparait lorsque l'identite quotientee coexiste avec une
-separation interne :
-
-```text
-x != y
-q(x) = q(y)
-```
-
-On note :
-
-```text
-Diag_q(x, y) :=
-  (q(x) = q(y)) and (x != y)
-```
-
-Au niveau de la lecture, on note :
-
-```text
-Diag_read,q(x, y) :=
-  (read(q(x)) = read(q(y))) and (x != y)
-```
-
-La diagonalisation projective implique une diagonalisation de lecture si les
-lectures sont appliquees a la meme projection :
-
-```text
-Diag_q(x, y) -> Diag_read,q(x, y)
-```
-
-mais la reciproque n'est pas garantie.
-
-Dans le vocabulaire du cadre :
-
-```text
-x = formed
-y = shadow
-```
-
-Donc :
-
-```text
-Diag_q(formed, shadow)
-```
-
-signifie :
-
-```text
-q(formed) = q(shadow)
-formed != shadow
-```
-
-La forme lue :
-
-```text
-Diag_read,q(formed, shadow)
-```
-
-signifie :
-
-```text
-read(q(formed)) = read(q(shadow))
-formed != shadow
-```
-
-### 4. Obstruction de reconstruction
-
-Une reconstruction projective globale serait une application :
-
-```text
-r : V -> X
-```
-
-telle que :
-
-```text
-forall z in X, r(q(z)) = z
-```
-
-Une diagonalisation separee interdit une telle reconstruction.
-
-En effet, si :
-
-```text
-q(x) = q(y)
-```
-
-alors une reconstruction globale donnerait :
-
-```text
-r(q(x)) = x
-r(q(y)) = y
-```
-
-mais comme :
-
-```text
-q(x) = q(y)
-```
-
-on obtient :
-
-```text
-r(q(x)) = r(q(y))
-```
-
-donc :
-
-```text
-x = y
-```
-
-ce qui contredit :
-
-```text
-x != y
-```
-
-Ainsi :
-
-```text
-Diag_q(x, y) -> not exists r : V -> X,
-  forall z in X, r(q(z)) = z
-```
-
-Au niveau de la lecture, une reconstruction globale depuis la lecture serait :
-
-```text
-s : L -> X
-```
-
-telle que :
-
-```text
-forall z in X, s(read(q(z))) = z
-```
-
-Une diagonalisation lue separee interdit cette reconstruction depuis `L` :
-
-```text
-Diag_read,q(x, y) -> not exists s : L -> X,
-  forall z in X, s(read(q(z))) = z
-```
-
-Donc il y a deux niveaux possibles d'obstruction :
-
-```text
-obstruction projective : depuis V
-obstruction lue        : depuis L
-```
-
-Dans le code, c'est exactement le contenu de :
-
-```text
-DiagonalCertificate -> ProjectionObstruction -> noProjectiveReconstruction
-```
-
-### 5. Temoin positif interne
-
-Pour une cellule diagonale :
-
-```text
-c := (x, y, q(x) = q(y), x != y)
-```
-
-on introduit un espace de temoins dependant de cette cellule :
-
-```text
-W(c)
-```
-
-et une notion de positivite :
-
-```text
-P_c : W(c) -> Prop
-```
-
-Un temoin positif interne associe a une diagonalisation est une donnee portee
-par cette cellule :
-
-```text
-w in W(c)
-```
-
-telle que :
-
-```text
-P_c(w)
-```
-
-Ce point est essentiel : `w` n'est pas un temoin positif exterieur choisi apres
-coup. Il est attache a la cellule diagonale `c`, et non reconstruit depuis la
-projection visible.
-
-On note :
-
-```text
-PosDiag_q(c, w) :=
-  Diag_q(x, y)
-  and w in W(c)
-  and P_c(w)
-```
-
-Dans le cas numerique du cadre :
-
-```text
-W(c) = Nat
-P_c(w) := 0 < w
-```
-
-### 6. Relaxation contrainte
-
-Une relaxation compare deux regimes projectifs :
-
-```text
-q_in  : X -> V_in
-q_out : X -> V_out
-```
-
-Le meme couple interne peut etre contracte par les deux projections :
-
-```text
-q_in(x)  = q_in(y)
-q_out(x) = q_out(y)
-```
-
-tout en restant separe dans `X` :
-
-```text
-x != y
-```
-
-La relaxation n'est admissible que si elle transporte un temoin positif
-interne porte par la cellule diagonale :
-
-```text
-w in W(c)
-P_c(w)
-```
-
-On note :
-
-```text
-Relax(q_in, q_out, c, w) :=
-  q_in(x) = q_in(y)
-  and q_out(x) = q_out(y)
-  and x != y
-  and w in W(c)
-  and P_c(w)
-```
-
-Ce n'est pas encore suffisant : il faut aussi que le meme temoin soit conserve
-entre les deux lectures.
-
-On introduit donc deux lectures internes du temoin :
-
-```text
-w_in  : W(c)
-w_out : W(c)
-```
-
-et l'invariant positif est :
-
-```text
-w_in = w
-w_out = w
-P_c(w)
-```
-
-On note :
-
-```text
-InvRelax(q_in, q_out, c, w, w_in, w_out) :=
-  Relax(q_in, q_out, c, w)
-  and w_in = w
-  and w_out = w
-```
-
-Le point central est :
-
-```text
-q_in et q_out peuvent donner des lectures visibles differentes,
-mais le temoin positif interne reste invariant.
-```
-
-### 7. Shift visible
-
-Dans les applications OOD, on ajoute des lectures visibles :
-
-```text
-read_in  : V_in -> L
-read_out : V_out -> L
-```
-
-Le shift visible est l'ecart :
-
-```text
-read_in(q_in(x)) != read_out(q_out(x))
-```
-
-Mais le shift visible ne produit pas l'invariant. Il expose seulement que la
-lecture visible a change de regime.
-
-La forme complete est donc :
-
-```text
-q_in(x) = q_in(y)
-q_out(x) = q_out(y)
-x != y
-read_in(q_in(x)) != read_out(q_out(x))
-w in W(c)
-w_in = w
-w_out = w
-P_c(w)
-```
-
-Autrement dit :
-
-```text
-shift visible
-+ invariant positif interne
-```
-
-### 8. Enonce synthetique
-
-Theorie de l'identite quotientee :
-
-```text
-Une interface (q, read) produit des identites observables :
-  ~_q
-  ~_{read,q}
-Ces identites peuvent identifier des etats internes separes.
-Une telle separation produit une obstruction de reconstruction depuis V ou L.
-Si un temoin positif interne w, porte par la cellule diagonale, est transporte
-a travers une relaxation
-de projection et de lecture, alors la relaxation est contrainte par w.
-```
-
-Forme compacte :
-
-```text
-q(x) = q(y), x != y
-=> obstruction(q)
-
-read(q(x)) = read(q(y)), x != y
-=> obstruction(read ∘ q)
-
-q_in(x) = q_in(y),
-q_out(x) = q_out(y),
-read_in(q_in(x)) != read_out(q_out(x)),
-x != y,
-w in W(c),
-P_c(w),
-w_in = w = w_out
-=> relaxation contrainte par invariant positif
-```
-
-## Ce qui est deja prouve
-
-Dans `Meta/Core/ClosedStabilityTheorem.lean` :
-
-```text
-DiagonalCertificate
-ProjectionObstruction
-noProjectiveReconstruction
-LocalProjectiveRecovery
-```
-
-Dans `Meta/OOD/WitnessTransport.lean` :
-
-```text
-OODProjectionShift
-OODRecoveredCell
-OODWitnessTransport
-OODPositiveWitnessTransport
-OODPositiveInvariant
-OODStructuralCertificate
-OODPositiveStructuralCertificate
-```
-
-Dans `Meta/Arithmetic/RelaxedOddOOD.lean` :
-
-```text
-natEnrichedRelaxedOddOODStructuralCertificate
-natEnrichedRelaxedOddOODPositiveStructuralCertificate
-natEnrichedRelaxedOddOODPositiveInvariant
-```
-
-Ces fichiers prouvent deja que :
-
-```text
-une cellule peut porter deux roles internes separes,
-identifies par projection,
-avec obstruction de reconstruction,
-et avec un invariant positif transporte.
-```
-
-## Ce qui reste a extraire
-
-Il reste a creer ou stabiliser une couche Lean plus fondamentale :
-
-```text
-Meta/Core/ProjectedIdentity.lean
-```
-
-Dans l'implementation non invasive, cette couche est une facade core appuyee
-sur `ClosedStabilityTheorem`. Dans un refactor ulterieur, elle pourrait devenir
-une dependance amont de `ClosedStabilityTheorem`.
-
-Cette couche doit :
-
-1. nommer l'identite projetee ;
-2. montrer que la diagonalisation est une identite projetee separee ;
-3. extraire l'obstruction de reconstruction ;
-4. nommer le temoin positif interne ;
-5. nommer la relaxation contrainte ;
-6. montrer que `OODPositiveInvariant` est une instance de cette relaxation.
-
-La regle de discipline :
-
-```text
-pas de Quot
-pas de quotient Lean
-pas de propext
-pas de Classical
-pas d'axiome
-```
-
-Tout doit rester sous forme projective constructive :
-
-```lean
-project : Interface -> Visible
+Une relaxation admissible relache le quotient sous la contrainte d'un temoin
+positif interne porte par la cellule et conserve a travers le changement de
+regime visible.
 ```

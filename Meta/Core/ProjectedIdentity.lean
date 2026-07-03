@@ -371,6 +371,107 @@ def projectedIdentityCellOutOfConstrainedRelaxation
   sameVisible := relaxation.sameOut
   separated := relaxation.sourceCell.separated
 
+/-- The input-side read identity cell carried by a relaxation. -/
+def readIdentityCellInOfConstrainedRelaxation
+    {Interface : Type u}
+    {VisibleIn : Type v}
+    {VisibleOut : Type w}
+    {Label : Type z}
+    {projectIn : Interface -> VisibleIn}
+    {projectOut : Interface -> VisibleOut}
+    {readIn : VisibleIn -> Label}
+    {readOut : VisibleOut -> Label}
+    {WitnessOf :
+      ProjectedIdentityCell Interface VisibleIn projectIn -> Type a}
+    {Positive :
+      (cell : ProjectedIdentityCell Interface VisibleIn projectIn) ->
+        WitnessOf cell -> Prop}
+    (relaxation :
+      ConstrainedProjectionRelaxation
+        Interface
+        VisibleIn
+        VisibleOut
+        Label
+        projectIn
+        projectOut
+        readIn
+        readOut
+        WitnessOf
+        Positive) :
+    ReadIdentityCell Interface VisibleIn Label projectIn readIn :=
+  readIdentityCellOfProjectedIdentityCell
+    readIn
+    (projectedIdentityCellInOfConstrainedRelaxation relaxation)
+
+/-- The output-side read identity cell carried by a relaxation. -/
+def readIdentityCellOutOfConstrainedRelaxation
+    {Interface : Type u}
+    {VisibleIn : Type v}
+    {VisibleOut : Type w}
+    {Label : Type z}
+    {projectIn : Interface -> VisibleIn}
+    {projectOut : Interface -> VisibleOut}
+    {readIn : VisibleIn -> Label}
+    {readOut : VisibleOut -> Label}
+    {WitnessOf :
+      ProjectedIdentityCell Interface VisibleIn projectIn -> Type a}
+    {Positive :
+      (cell : ProjectedIdentityCell Interface VisibleIn projectIn) ->
+        WitnessOf cell -> Prop}
+    (relaxation :
+      ConstrainedProjectionRelaxation
+        Interface
+        VisibleIn
+        VisibleOut
+        Label
+        projectIn
+        projectOut
+        readIn
+        readOut
+        WitnessOf
+        Positive) :
+    ReadIdentityCell Interface VisibleOut Label projectOut readOut :=
+  readIdentityCellOfProjectedIdentityCell
+    readOut
+    (projectedIdentityCellOutOfConstrainedRelaxation relaxation)
+
+/-- The positive projected invariant carried by a constrained relaxation. -/
+def positiveProjectedInvariantOfConstrainedRelaxation
+    {Interface : Type u}
+    {VisibleIn : Type v}
+    {VisibleOut : Type w}
+    {Label : Type z}
+    {projectIn : Interface -> VisibleIn}
+    {projectOut : Interface -> VisibleOut}
+    {readIn : VisibleIn -> Label}
+    {readOut : VisibleOut -> Label}
+    {WitnessOf :
+      ProjectedIdentityCell Interface VisibleIn projectIn -> Type a}
+    {Positive :
+      (cell : ProjectedIdentityCell Interface VisibleIn projectIn) ->
+        WitnessOf cell -> Prop}
+    (relaxation :
+      ConstrainedProjectionRelaxation
+        Interface
+        VisibleIn
+        VisibleOut
+        Label
+        projectIn
+        projectOut
+        readIn
+        readOut
+        WitnessOf
+        Positive) :
+    PositiveProjectedInvariant
+      Interface
+      VisibleIn
+      projectIn
+      WitnessOf
+      Positive where
+  cell := relaxation.sourceCell
+  witness := relaxation.invariant
+  witness_pos := relaxation.invariant_pos
+
 /-- The input-side obstruction carried by a constrained relaxation. -/
 def projectionObstructionInOfConstrainedRelaxation
     {Interface : Type u}
@@ -432,6 +533,74 @@ def projectionObstructionOutOfConstrainedRelaxation
     ProjectionObstruction Interface VisibleOut projectOut :=
   projectionObstructionOfProjectedIdentityCell
     (projectedIdentityCellOutOfConstrainedRelaxation relaxation)
+
+/-- Input-side non-reconstruction carried by a constrained relaxation. -/
+def noProjectiveReconstructionInOfConstrainedRelaxation
+    {Interface : Type u}
+    {VisibleIn : Type v}
+    {VisibleOut : Type w}
+    {Label : Type z}
+    {projectIn : Interface -> VisibleIn}
+    {projectOut : Interface -> VisibleOut}
+    {readIn : VisibleIn -> Label}
+    {readOut : VisibleOut -> Label}
+    {WitnessOf :
+      ProjectedIdentityCell Interface VisibleIn projectIn -> Type a}
+    {Positive :
+      (cell : ProjectedIdentityCell Interface VisibleIn projectIn) ->
+        WitnessOf cell -> Prop}
+    (relaxation :
+      ConstrainedProjectionRelaxation
+        Interface
+        VisibleIn
+        VisibleOut
+        Label
+        projectIn
+        projectOut
+        readIn
+        readOut
+        WitnessOf
+        Positive) :
+    ((recover : VisibleIn -> Interface) ->
+      ((interface : Interface) ->
+        recover (projectIn interface) = interface) ->
+          False) :=
+  noProjectiveReconstruction
+    (projectionObstructionInOfConstrainedRelaxation relaxation)
+
+/-- Output-side non-reconstruction carried by a constrained relaxation. -/
+def noProjectiveReconstructionOutOfConstrainedRelaxation
+    {Interface : Type u}
+    {VisibleIn : Type v}
+    {VisibleOut : Type w}
+    {Label : Type z}
+    {projectIn : Interface -> VisibleIn}
+    {projectOut : Interface -> VisibleOut}
+    {readIn : VisibleIn -> Label}
+    {readOut : VisibleOut -> Label}
+    {WitnessOf :
+      ProjectedIdentityCell Interface VisibleIn projectIn -> Type a}
+    {Positive :
+      (cell : ProjectedIdentityCell Interface VisibleIn projectIn) ->
+        WitnessOf cell -> Prop}
+    (relaxation :
+      ConstrainedProjectionRelaxation
+        Interface
+        VisibleIn
+        VisibleOut
+        Label
+        projectIn
+        projectOut
+        readIn
+        readOut
+        WitnessOf
+        Positive) :
+    ((recover : VisibleOut -> Interface) ->
+      ((interface : Interface) ->
+        recover (projectOut interface) = interface) ->
+          False) :=
+  noProjectiveReconstruction
+    (projectionObstructionOutOfConstrainedRelaxation relaxation)
 
 /-- The invariant is conserved on the input side. -/
 theorem constrainedProjectionRelaxation_witnessIn_eq_invariant
@@ -514,8 +683,13 @@ end Meta
 #print axioms Meta.ClosedStabilityTheorem.ConstrainedProjectionRelaxation.shadow
 #print axioms Meta.ClosedStabilityTheorem.projectedIdentityCellInOfConstrainedRelaxation
 #print axioms Meta.ClosedStabilityTheorem.projectedIdentityCellOutOfConstrainedRelaxation
+#print axioms Meta.ClosedStabilityTheorem.readIdentityCellInOfConstrainedRelaxation
+#print axioms Meta.ClosedStabilityTheorem.readIdentityCellOutOfConstrainedRelaxation
+#print axioms Meta.ClosedStabilityTheorem.positiveProjectedInvariantOfConstrainedRelaxation
 #print axioms Meta.ClosedStabilityTheorem.projectionObstructionInOfConstrainedRelaxation
 #print axioms Meta.ClosedStabilityTheorem.projectionObstructionOutOfConstrainedRelaxation
+#print axioms Meta.ClosedStabilityTheorem.noProjectiveReconstructionInOfConstrainedRelaxation
+#print axioms Meta.ClosedStabilityTheorem.noProjectiveReconstructionOutOfConstrainedRelaxation
 #print axioms Meta.ClosedStabilityTheorem.constrainedProjectionRelaxation_witnessIn_eq_invariant
 #print axioms Meta.ClosedStabilityTheorem.constrainedProjectionRelaxation_witnessOut_eq_invariant
 /- AXIOM_AUDIT_END -/
