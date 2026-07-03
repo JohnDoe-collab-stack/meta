@@ -83,6 +83,125 @@ def readIdentityCellOfProjectedIdentityCell
   sameRead := congrArg read cell.sameVisible
   separated := cell.separated
 
+/-! ## Identity of use -/
+
+/-- Internal identity on an interface. -/
+abbrev InternalIdentity
+    {Interface : Type u}
+    {Visible : Type v}
+    (_project : Interface -> Visible)
+    (left right : Interface) :
+    Prop :=
+  left = right
+
+/--
+Identity produced by an interface projection.
+
+This is the relation `Id_q`: two internal interfaces are identified when their
+visible projections agree.
+-/
+abbrev ProjectedIdentity
+    {Interface : Type u}
+    {Visible : Type v}
+    (project : Interface -> Visible)
+    (left right : Interface) :
+    Prop :=
+  project left = project right
+
+/--
+Identity of use induced by an interface.
+
+This names the deliberate choice `Id_use := Id_q`.  It is an alias, not a new
+quotient object.
+-/
+abbrev InterfaceIdentityOfUse
+    {Interface : Type u}
+    {Visible : Type v}
+    (project : Interface -> Visible)
+    (left right : Interface) :
+    Prop :=
+  ProjectedIdentity project left right
+
+/-- The identity of use is exactly the projected identity. -/
+theorem interfaceIdentityOfUse_iff_projectedIdentity
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    (left right : Interface) :
+    InterfaceIdentityOfUse project left right <->
+      ProjectedIdentity project left right :=
+  Iff.rfl
+
+/--
+A projected identity cell is an identity-of-use cell.
+
+It keeps the internal separation while exposing the projected equality as the
+identity used by the interface.
+-/
+structure IdentityOfUseCell
+    (Interface : Type u)
+    (Visible : Type v)
+    (project : Interface -> Visible) :
+    Type (max u v) where
+  formed : Interface
+  shadow : Interface
+  usedIdentity : InterfaceIdentityOfUse project formed shadow
+  internalSeparation : InternalIdentity project formed shadow -> False
+
+/-- Extract the identity-of-use cell from a projected identity cell. -/
+def identityOfUseCellOfProjectedIdentityCell
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    (cell : ProjectedIdentityCell Interface Visible project) :
+    IdentityOfUseCell Interface Visible project where
+  formed := cell.formed
+  shadow := cell.shadow
+  usedIdentity := cell.sameVisible
+  internalSeparation := cell.separated
+
+/--
+The projected cell identifies its poles by the identity of use.
+
+This is the formal shape of `Id_use(formed, shadow)`.
+-/
+theorem projectedIdentityCell_identityOfUse
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    (cell : ProjectedIdentityCell Interface Visible project) :
+    InterfaceIdentityOfUse project cell.formed cell.shadow :=
+  cell.sameVisible
+
+/--
+The projected cell keeps its poles internally separated.
+
+This is the formal shape of `not Id_X(formed, shadow)`.
+-/
+theorem projectedIdentityCell_notInternalIdentity
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    (cell : ProjectedIdentityCell Interface Visible project) :
+    InternalIdentity project cell.formed cell.shadow -> False :=
+  cell.separated
+
+/--
+A projected identity cell proves that the identity used by the interface can
+hold while internal identity is refuted.
+-/
+theorem projectedIdentityCell_internalDifference_usedIdentity
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    (cell : ProjectedIdentityCell Interface Visible project) :
+    And
+      (InternalIdentity project cell.formed cell.shadow -> False)
+      (InterfaceIdentityOfUse project cell.formed cell.shadow) :=
+  And.intro
+    (projectedIdentityCell_notInternalIdentity cell)
+    (projectedIdentityCell_identityOfUse cell)
+
 /-! ## Diagonal certificates and obstructions -/
 
 /-- A projected identity cell is a diagonal certificate. -/
@@ -670,6 +789,15 @@ end Meta
 #print axioms Meta.ClosedStabilityTheorem.readProjection
 #print axioms Meta.ClosedStabilityTheorem.ReadIdentityCell
 #print axioms Meta.ClosedStabilityTheorem.readIdentityCellOfProjectedIdentityCell
+#print axioms Meta.ClosedStabilityTheorem.InternalIdentity
+#print axioms Meta.ClosedStabilityTheorem.ProjectedIdentity
+#print axioms Meta.ClosedStabilityTheorem.InterfaceIdentityOfUse
+#print axioms Meta.ClosedStabilityTheorem.interfaceIdentityOfUse_iff_projectedIdentity
+#print axioms Meta.ClosedStabilityTheorem.IdentityOfUseCell
+#print axioms Meta.ClosedStabilityTheorem.identityOfUseCellOfProjectedIdentityCell
+#print axioms Meta.ClosedStabilityTheorem.projectedIdentityCell_identityOfUse
+#print axioms Meta.ClosedStabilityTheorem.projectedIdentityCell_notInternalIdentity
+#print axioms Meta.ClosedStabilityTheorem.projectedIdentityCell_internalDifference_usedIdentity
 #print axioms Meta.ClosedStabilityTheorem.diagonalCertificateOfProjectedIdentityCell
 #print axioms Meta.ClosedStabilityTheorem.projectionObstructionOfProjectedIdentityCell
 #print axioms Meta.ClosedStabilityTheorem.noProjectiveReconstructionOfProjectedIdentityCell

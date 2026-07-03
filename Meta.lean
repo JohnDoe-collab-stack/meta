@@ -8,6 +8,7 @@ import Meta.Core.DynamicTwoPole
 import Meta.Core.DynamicRoleCarrier
 import Meta.Core.DynamicParitySeparation
 import Meta.Core.OrderGap
+import Meta.Core.ProjectedIdentity
 import Meta.Arithmetic.Core
 import Meta.Arithmetic.Canonical
 import Meta.Arithmetic.RepeatedIndex
@@ -57,6 +58,8 @@ import Meta.Synthesis.TarskiBethGap
 import Meta.Synthesis.TarskiBethBellGap
 
 /- AXIOM_AUDIT_BEGIN -/
+#print axioms Meta.ClosedStabilityTheorem.IdentityOfUseCell
+#print axioms Meta.ClosedStabilityTheorem.projectedIdentityCell_internalDifference_usedIdentity
 #print axioms Meta.EnrichedNatClosedStabilityInstance.countdownRelaxedPositiveInternalDiagonalWitness
 #print axioms Meta.EnrichedNatClosedStabilityInstance.countdownRelaxedPositiveDiagonalValue_eq_maximalDivergence_n_plus_two
 #print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityFibrewiseStructuralPeakWitness
