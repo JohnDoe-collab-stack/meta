@@ -383,6 +383,53 @@ Id_use(x, y)
 r(q(x)) = r(q(y))
 ```
 
+On peut nommer ce transport :
+
+```text
+Transport_q(x, y)
+```
+
+avec, a type de lecture `L` fixe :
+
+```text
+Transport_q^L(x, y) :=
+  forall r : V -> L,
+    r(q(x)) = r(q(y))
+```
+
+ou, si l'on quantifie aussi sur les types de lecture :
+
+```text
+Transport_q(x, y) :=
+  forall {L} (r : V -> L),
+    r(q(x)) = r(q(y))
+```
+
+Dans les deux cas, ce transport est derive de :
+
+```text
+Id_use(x, y)
+```
+
+et donc de :
+
+```text
+q(x) = q(y)
+```
+
+La restriction essentielle reste :
+
+```text
+Id_q(x, y) n'implique pas Id_X(x, y)
+```
+
+Autrement dit :
+
+```text
+l'egalite projective transporte les lectures,
+mais ne contracte pas les poles internes.
+```
+
 La chaine constructive devient :
 
 ```text
@@ -401,6 +448,22 @@ avec toujours :
 
 ```text
 x != y
+```
+
+Schema :
+
+```text
+x          y
+|          |
+q          q
+|          |
+q(x) = q(y)
+     |
+  Id_use
+     |
+r(q(x)) = r(q(y))
+
+avec x != y
 ```
 
 ## Interdependance
