@@ -2,219 +2,42 @@
 
 ## Objet
 
-Ce document precise ce qui est encode lorsque le cadre remplace l'egalite
-interne par une identite d'usage produite par une interface.
+Ce document fixe la lecture dynamique de l'egalite d'interface.
 
-Le point n'est pas seulement :
-
-```text
-q n'est pas injective
-```
-
-ni seulement :
+Le cadre part d'une projection :
 
 ```text
-x =_q y  :=  q(x) = q(y)
-```
-
-Le point est plus fort :
-
-```text
-une egalite projective devient une identite d'usage
-dans une chaine qui conserve la separation interne des poles.
-```
-
-## Idee a ne pas perdre
-
-Le cadre ne nie pas l'egalite.
-
-Il deplace le lieu ou l'egalite agit.
-
-Dans la lecture contractee, on voudrait utiliser :
-
-```text
-x = y
-```
-
-Dans la lecture longue, on utilise :
-
-```text
-q(x) = q(y)
-```
-
-comme identite operative entre deux poles qui restent separes :
-
-```text
-x != y
-```
-
-Donc l'egalite n'est pas placee entre les poles internes.
-
-Elle est placee dans l'interface, puis elle agit sur tout ce qui passe par cette
-interface.
-
-Formule directrice :
-
-```text
-le cadre ne contracte pas les poles ;
-il fait travailler l'egalite au niveau du mediateur.
-```
-
-## Statique et dynamique
-
-La cellule minimale peut s'ecrire de facon statique :
-
-```text
-x != y
-q(x) = q(y)
-```
-
-Mais cette ecriture ne donne pas encore le coeur du cadre.
-
-Le coeur est dynamique au sens structurel : l'egalite d'interface agit dans une
-chaine.
-
-Elle ne reste pas seulement une propriete constatee.
-
-Elle devient :
-
-```text
-Id_use(x, y)
-```
-
-puis elle autorise des transports :
-
-```text
-r(q(x)) = r(q(y))
-```
-
-pour les lectures qui factorisent par l'interface.
-
-La difference est donc :
-
-```text
-forme statique :
-  x != y
-  q(x) = q(y)
-
-forme dynamique :
-  q(x) = q(y)
-  -> Id_use(x, y)
-  -> transport par lecture
-  -> coordination de la chaine longue
-```
-
-Si l'on garde seulement la forme statique, on retombe dans la lecture pauvre :
-
-```text
-q n'est pas injective
-```
-
-La lecture dynamique dit au contraire :
-
-```text
-l'egalite visible devient une operation de coordination.
-```
-
-## Signe egal dynamique et changement de regime
-
-Le signe egal dynamique n'est pas un nouveau signe qui prouverait :
-
-```text
-x = y
-```
-
-Il est le signe egal projectif considere dans son action de changement de
-regime.
-
-Il encode le passage entre deux regimes d'identite :
-
-```text
-regime interne :
-  Id_X(x, y) := (x = y)
-
-regime d'interface :
-  Id_q(x, y) := (q(x) = q(y))
-```
-
-La cellule diagonale porte :
-
-```text
-not Id_X(x, y)
-Id_q(x, y)
-```
-
-Le deplacement consiste a faire de `Id_q` l'identite utilisee :
-
-```text
-Id_use := Id_q
-```
-
-Donc le signe egal dynamique encode la variation de statut suivante :
-
-```text
-dans le regime interne :
-  x et y restent separes
-
-dans le regime d'interface :
-  x et y sont traites comme une meme identite d'usage
-```
-
-Forme compacte :
-
-```text
-not Id_X(x, y)
-and
-Id_use(x, y)
-```
-
-avec :
-
-```text
-Id_use := Id_q.
-```
-
-La variation ne porte donc pas sur les poles eux-memes.
-
-Elle porte sur le regime d'identite par lequel la chaine les relie.
-
-Le signe egal dynamique est ce qui rend cette variation operatoire :
-
-```text
-Id_X refuse la contraction interne ;
-Id_q fournit la coordination projective ;
-Id_use active cette coordination dans la chaine.
-```
-
-## Donnees minimales
-
-On fixe :
-
-```text
-X
 q : X -> V
 ```
 
-avec deux poles internes :
+et d'une cellule avec deux poles internes :
 
 ```text
 x, y : X
 ```
 
-La cellule porte simultanement :
+La cellule porte deux donnees simultanees :
 
 ```text
-x != y
-q(x) = q(y)
+separation interne : x != y
+egalite projective : q(x) = q(y)
 ```
 
-Pris seul, ce fait peut seulement dire que l'interface confond deux poles.
-Dans le cadre, il devient plus precis parce qu'il est utilise comme identite
-d'usage.
+Le contenu important n'est pas seulement que `q` identifie deux poles.
 
-## Trois niveaux d'identite
+Le contenu important est que l'egalite projective devient une identite d'usage
+qui agit dans une chaine constructive.
 
-### Identite interne
+Formule directrice :
+
+```text
+l'egalite quitte le niveau interne des poles ;
+elle agit au niveau du mediateur projectif.
+```
+
+## Trois regimes d'identite
+
+### Regime interne
 
 L'identite interne est :
 
@@ -222,23 +45,15 @@ L'identite interne est :
 Id_X(x, y) := (x = y)
 ```
 
-Elle identifie les poles dans `X`.
-
-La cellule diagonale porte au contraire :
+Dans la cellule diagonale, les poles sont distincts :
 
 ```text
-not Id_X(x, y)
+x != y
 ```
 
-Donc la contraction interne :
+La structure interne conserve donc deux poles.
 
-```text
-x = y
-```
-
-est exclue.
-
-### Identite projective
+### Regime projectif
 
 L'identite projective est :
 
@@ -246,11 +61,15 @@ L'identite projective est :
 Id_q(x, y) := (q(x) = q(y))
 ```
 
-Elle ne dit pas que `x` et `y` sont identiques dans `X`.
+Elle identifie les deux poles par leur image visible.
 
-Elle dit que les deux poles ont la meme image par l'interface.
+Elle fournit le mediateur :
 
-### Identite d'usage
+```text
+q(x) = q(y)
+```
+
+### Regime d'usage
 
 Le deplacement central est :
 
@@ -258,64 +77,37 @@ Le deplacement central est :
 Id_use := Id_q
 ```
 
-Le systeme n'utilise pas :
-
-```text
-Id_X
-```
-
-comme identite operative de la cellule.
-
-Il utilise :
-
-```text
-Id_q
-```
-
-Donc la forme exacte est :
-
-```text
-not Id_X(x, y)
-and
-Id_use(x, y)
-```
-
-avec :
+L'identite utilisee dans la chaine est donc l'identite produite par
+l'interface :
 
 ```text
 Id_use(x, y) := q(x) = q(y)
 ```
 
-Il n'y a pas contradiction : l'identite interne est refusee, l'identite
-projective est utilisee.
+La cellule complete porte :
+
+```text
+x != y
+Id_use(x, y)
+```
+
+Elle conserve la separation interne tout en activant une identite d'usage.
 
 ## Chaine longue
 
-La presentation courte voudrait contracter :
+La lecture contractee chercherait :
 
 ```text
 x = y
 ```
 
-La presentation longue conserve :
+La lecture longue garde la chaine :
 
 ```text
 x  --q-->  q(x) = q(y)  <--q--  y
 ```
 
-Le signe egal actif est donc :
-
-```text
-q(x) = q(y)
-```
-
-et non :
-
-```text
-x = y
-```
-
-La chaine complete garde ensemble :
+La structure portee est :
 
 ```text
 pole gauche       : x
@@ -331,65 +123,63 @@ Dans la notation du cadre :
 1 + gap + 1
 ```
 
-les deux `1` sont les deux poles internes, et le `gap` est organise par
-l'egalite projective utilisee comme mediateur.
+les deux `1` sont les deux poles internes.
 
-## Le second signe egal
+Le `gap` est organise par l'egalite projective utilisee comme mediateur.
 
-L'egalite projective n'autorise pas la substitution interne :
+## Dynamique de l'egalite
 
-```text
-x = y
-```
-
-Elle autorise un transport seulement dans les contextes qui passent par
-l'interface.
-
-C'est en ce sens precis qu'elle impose un autre signe egal.
-
-Elle n'impose pas :
+La forme statique de la cellule est :
 
 ```text
-x = y
+x != y
+q(x) = q(y)
 ```
 
-Elle impose des egalites derivees dans les lectures admissibles.
+La forme dynamique est :
 
-Pour toute lecture :
+```text
+q(x) = q(y)
+-> Id_use(x, y)
+-> transport par lecture
+-> coordination de la chaine longue
+```
+
+Le signe egal dynamique encode donc une variation de regime :
+
+```text
+Id_X : regime interne des poles
+Id_q : regime projectif de l'interface
+Id_use := Id_q : regime effectivement utilise par la chaine
+```
+
+La variation porte sur le regime d'identite.
+
+Elle garde les poles comme poles internes distincts.
+
+Elle active leur coordination projective.
+
+## Transport d'interface
+
+Une lecture est une application :
 
 ```text
 r : V -> L
 ```
 
-la preuve :
-
-```text
-q(x) = q(y)
-```
-
-produit :
-
-```text
-r(q(x)) = r(q(y))
-```
-
-Le second signe egal n'est donc pas une egalite interne entre `x` et `y`.
-
-Il est une egalite de lecture imposee par l'egalite projective :
+A partir de :
 
 ```text
 Id_use(x, y)
--------------------------
+```
+
+on obtient :
+
+```text
 r(q(x)) = r(q(y))
 ```
 
-On peut nommer ce transport :
-
-```text
-Transport_q(x, y)
-```
-
-avec, a type de lecture `L` fixe :
+Le transport a type de lecture `L` fixe est :
 
 ```text
 Transport_q^L(x, y) :=
@@ -397,7 +187,7 @@ Transport_q^L(x, y) :=
     r(q(x)) = r(q(y))
 ```
 
-ou, si l'on quantifie aussi sur les types de lecture :
+Le transport pleinement polymorphe est :
 
 ```text
 Transport_q(x, y) :=
@@ -405,52 +195,45 @@ Transport_q(x, y) :=
     r(q(x)) = r(q(y))
 ```
 
-Dans les deux cas, ce transport est derive de :
+Dans cette forme polymorphe :
 
 ```text
-Id_use(x, y)
+Transport_q(x, y) <-> Id_q(x, y)
 ```
 
-et donc de :
+La direction :
 
 ```text
-q(x) = q(y)
+Id_q(x, y) -> Transport_q(x, y)
 ```
 
-La restriction essentielle reste :
+vient de l'application de toute lecture `r`.
+
+La direction :
 
 ```text
-Id_q(x, y) n'implique pas Id_X(x, y)
+Transport_q(x, y) -> Id_q(x, y)
 ```
 
-Autrement dit :
+s'obtient avec :
 
 ```text
-l'egalite projective transporte les lectures,
-mais ne contracte pas les poles internes.
+L := V
+r := id
 ```
 
-La chaine constructive devient :
+Ainsi :
 
 ```text
-x
---q-->
-q(x) = q(y)
---r-->
-r(q(x)) = r(q(y))
-<--r--
-q(y)
-<--q--
-y
+Id_q          = egalite projective
+Transport_q  = meme egalite vue comme principe d'action
 ```
 
-avec toujours :
+`Transport_q` n'ajoute pas une hypothese supplementaire.
 
-```text
-x != y
-```
+Il deploie la puissance operatoire de `Id_q`.
 
-Schema :
+## Schema
 
 ```text
 x          y
@@ -466,30 +249,23 @@ r(q(x)) = r(q(y))
 avec x != y
 ```
 
+Ce schema montre le point central :
+
+```text
+l'egalite projective transporte les lectures ;
+la separation interne reste portee par la cellule.
+```
+
 ## Interdependance
 
-Le mot `interdependance` doit etre lu de facon precise.
-
-Il ne signifie pas une relation vague entre `x` et `y`.
-
-Il signifie :
+L'interdependance a une signification precise :
 
 ```text
 les poles restent separes dans X,
-mais toute operation qui passe par l'interface doit respecter leur identite
-d'usage commune.
+mais toute operation qui passe par l'interface respecte leur identite d'usage.
 ```
 
-Autrement dit :
-
-```text
-X separe les poles.
-q les co-indexe.
-Id_use utilise cette co-indexation.
-Les lectures factorisees par q transportent cette identite.
-```
-
-Donc l'interdependance est :
+Elle combine :
 
 ```text
 separation interne
@@ -498,8 +274,6 @@ co-indexation projective
 +
 transport par lecture
 ```
-
-Elle ne remplace pas la difference interne par une identite interne.
 
 Elle transforme l'egalite visible en regle de coordination pour les lectures
 admissibles.
@@ -524,9 +298,9 @@ separated   : formed = shadow -> False
 Elle encode :
 
 ```text
-not Id_X(formed, shadow)
-and
-Id_q(formed, shadow)
+separation interne
++
+egalite projective
 ```
 
 La structure :
@@ -562,10 +336,10 @@ and
 InterfaceIdentityOfUse project formed shadow
 ```
 
-Il formalise donc :
+Il formalise :
 
 ```text
-difference interne
+separation interne conservee
 +
 identite d'usage projective
 ```
@@ -584,91 +358,54 @@ project formed = project shadow
 read(project formed) = read(project shadow)
 ```
 
-C'est la formalisation du second signe egal : l'egalite visible produit une
-egalite lue, mais seulement dans un contexte qui factorise par l'interface.
+Le transport est donc deja present dans le noyau Lean.
 
-## Ce que ce n'est pas
+## Contraintes de lecture
 
-Le cadre ne dit pas :
+Le document doit conserver trois contraintes.
 
-```text
-x = y
-```
-
-Il ne dit pas :
-
-```text
-la difference interne disparait
-```
-
-Il ne dit pas seulement :
-
-```text
-q est non injective
-```
-
-Il dit :
-
-```text
-x != y
-mais
-Id_use(x, y)
-```
-
-avec :
+Premiere contrainte :
 
 ```text
 Id_use := Id_q
 ```
 
-## Formule stabilisee
+Deuxieme contrainte :
+
+```text
+les poles internes restent distincts
+```
+
+Troisieme contrainte :
+
+```text
+les transports autorises passent par l'interface
+```
+
+La formule stabilisee est :
 
 ```text
 Une egalite d'interface devient constructive lorsqu'elle est utilisee comme
-identite d'usage entre deux poles que la structure interne continue de separer.
+identite d'usage entre deux poles internes distincts.
 ```
 
-Cette formule signifie :
-
-```text
-l'egalite visible n'est pas un effacement ;
-elle est un mediateur operatoire.
-```
-
-Elle conserve simultanement :
-
-```text
-la difference interne
-et
-la coordination projective.
-```
-
-Forme longue :
-
-```text
-Le cadre ne contracte pas x et y.
-Il remplace l'identite operative :
-
-Id_X
-
-par :
-
-Id_q
-
-et conserve la preuve que ces deux regimes d'identite ne coincident pas sur la
-cellule diagonale.
-```
-
-Forme courte :
+Forme compacte :
 
 ```text
 x != y
-mais
 Id_use(x, y)
+Transport_q(x, y)
 
 avec
 
 Id_use := Id_q.
+```
+
+Forme conceptuelle :
+
+```text
+l'egalite visible est un mediateur operatoire ;
+elle coordonne sans contracter.
 ```
 
 ## Point eventuel a formaliser plus tard
@@ -682,18 +419,17 @@ ReadIdentityCell
 readIdentityCellOfProjectedIdentityCell
 ```
 
-Si l'on veut rendre la lecture encore plus explicite, on peut ajouter une
-facade nommee du type :
+Une facade nommee peut rendre le transport plus explicite :
 
 ```lean
 projectedIdentityCell_readTransport
 ```
 
-qui exposerait directement :
+Elle exposerait directement :
 
 ```text
 project formed = project shadow
 -> read(project formed) = read(project shadow)
 ```
 
-Mais le contenu est deja present via `readIdentityCellOfProjectedIdentityCell`.
+Le contenu est deja present via `readIdentityCellOfProjectedIdentityCell`.
