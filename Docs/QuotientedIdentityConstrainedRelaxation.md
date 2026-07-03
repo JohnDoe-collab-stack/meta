@@ -542,6 +542,10 @@ structure ConstrainedProjectionRelaxation
   sourceCell_shadow_eq : sourceCell.shadow = shadow
   invariant : WitnessOf sourceCell
   invariant_pos : Positive sourceCell invariant
+  witnessIn : WitnessOf sourceCell
+  witnessOut : WitnessOf sourceCell
+  witnessIn_eq : witnessIn = invariant
+  witnessOut_eq : witnessOut = invariant
 ```
 
 Cette structure dira :
@@ -549,7 +553,7 @@ Cette structure dira :
 ```text
 la relaxation change le regime projectif,
 elle peut produire un shift de lecture,
-mais conserve un temoin positif interne
+mais conserve explicitement un temoin positif interne
 ```
 
 ## Raccord avec la couche OOD existante
