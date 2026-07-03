@@ -164,29 +164,37 @@ representation visible.
 
 ### 8. Temoin positif interne
 
-Il existe un temoin interne :
+Pour la cellule diagonale :
 
 ```text
-w
+c := (formed, shadow, q(formed) = q(shadow), formed != shadow)
 ```
 
-verifiant une propriete positive :
+il existe un temoin interne porte par cette cellule :
 
 ```text
-P(w)
+w in W(c)
+```
+
+verifiant une propriete positive dependante de la cellule :
+
+```text
+P_c(w)
 ```
 
 ou, dans un cas arithmetique :
 
 ```text
-0 < w
+W(c) = Nat
+P_c(w) := 0 < w
 ```
 
-Ce temoin certifie qu'il reste une difference structurelle non nulle que le
-quotient visible ne capture pas.
+Ce temoin certifie que la cellule diagonale porte une difference structurelle
+non nulle que le quotient visible ne capture pas.
 
-Il ne vient pas de la lecture exterieure. Il est porte par la structure interne
-du phenomene.
+Il ne vient pas de la lecture exterieure. Il n'est pas ajoute apres coup. Il
+est une donnee structurelle attachee a la cellule diagonale et portee par la
+structure interne du phenomene.
 
 ### 9. Relaxation contrainte
 
@@ -357,7 +365,8 @@ il existe un temoin positif interne conserve par la structure
 ```
 
 Ce temoin ne vient pas de la projection visible. Il est porte par la cellule
-interne et survit au passage par l'interface.
+interne, attache a la diagonalisation elle-meme, et survit au passage par
+l'interface.
 
 Dans le code actuel, la forme abstraite la plus proche est :
 
@@ -381,7 +390,8 @@ witnessOut = invariant
 0 < invariant
 ```
 
-Donc le visible peut changer, mais le temoin positif reste transporte.
+Donc le visible peut changer, mais le temoin positif de la cellule reste
+transporte. Il n'est pas fabrique depuis le shift visible.
 
 ## Relaxation contrainte
 
@@ -486,18 +496,20 @@ structure PositiveProjectedInvariant
     (Interface : Type u)
     (Visible : Type v)
     (project : Interface -> Visible)
-    (Witness : Type w)
-    (Positive : Witness -> Prop) where
+    (WitnessOf : ProjectedIdentityCell Interface Visible project -> Type w)
+    (Positive :
+      (cell : ProjectedIdentityCell Interface Visible project) ->
+        WitnessOf cell -> Prop) where
   cell : ProjectedIdentityCell Interface Visible project
-  witness : Witness
-  witness_pos : Positive witness
+  witness : WitnessOf cell
+  witness_pos : Positive cell witness
 ```
 
 Pour le cas `Nat`, on pourra specialiser :
 
 ```lean
-Witness := Nat
-Positive witness := 0 < witness
+WitnessOf _ := Nat
+Positive _ witness := 0 < witness
 ```
 
 Enfin la relaxation contrainte :
@@ -512,8 +524,11 @@ structure ConstrainedProjectionRelaxation
     (projectOut : Interface -> VisibleOut)
     (readIn : VisibleIn -> Label)
     (readOut : VisibleOut -> Label)
-    (Witness : Type a)
-    (Positive : Witness -> Prop) where
+    (WitnessOf :
+      ProjectedIdentityCell Interface VisibleIn projectIn -> Type a)
+    (Positive :
+      (cell : ProjectedIdentityCell Interface VisibleIn projectIn) ->
+        WitnessOf cell -> Prop) where
   formed : Interface
   shadow : Interface
   sameIn : projectIn formed = projectIn shadow
@@ -521,8 +536,12 @@ structure ConstrainedProjectionRelaxation
   visibleShift :
     readIn (projectIn formed) = readOut (projectOut formed) -> False
   separated : formed = shadow -> False
-  invariant : Witness
-  invariant_pos : Positive invariant
+  sourceCell :
+    ProjectedIdentityCell Interface VisibleIn projectIn
+  sourceCell_formed_eq : sourceCell.formed = formed
+  sourceCell_shadow_eq : sourceCell.shadow = shadow
+  invariant : WitnessOf sourceCell
+  invariant_pos : Positive sourceCell invariant
 ```
 
 Cette structure dira :
@@ -875,45 +894,55 @@ DiagonalCertificate -> ProjectionObstruction -> noProjectiveReconstruction
 
 ### 5. Temoin positif interne
 
-On introduit un espace de temoins :
+Pour une cellule diagonale :
 
 ```text
-W
+c := (x, y, q(x) = q(y), x != y)
+```
+
+on introduit un espace de temoins dependant de cette cellule :
+
+```text
+W(c)
 ```
 
 et une notion de positivite :
 
 ```text
-P : W -> Prop
+P_c : W(c) -> Prop
 ```
 
-Un temoin positif interne associe a une diagonalisation est une donnee :
+Un temoin positif interne associe a une diagonalisation est une donnee portee
+par cette cellule :
 
 ```text
-w in W
+w in W(c)
 ```
 
 telle que :
 
 ```text
-P(w)
+P_c(w)
 ```
 
-et telle que `w` est porte par la structure interne, non reconstruit depuis la
+Ce point est essentiel : `w` n'est pas un temoin positif exterieur choisi apres
+coup. Il est attache a la cellule diagonale `c`, et non reconstruit depuis la
 projection visible.
 
 On note :
 
 ```text
-PosDiag_q(x, y, w) :=
-  Diag_q(x, y) and P(w)
+PosDiag_q(c, w) :=
+  Diag_q(x, y)
+  and w in W(c)
+  and P_c(w)
 ```
 
 Dans le cas numerique du cadre :
 
 ```text
-W = Nat
-P(w) := 0 < w
+W(c) = Nat
+P_c(w) := 0 < w
 ```
 
 ### 6. Relaxation contrainte
@@ -939,21 +968,22 @@ x != y
 ```
 
 La relaxation n'est admissible que si elle transporte un temoin positif
-interne :
+interne porte par la cellule diagonale :
 
 ```text
-w in W
-P(w)
+w in W(c)
+P_c(w)
 ```
 
 On note :
 
 ```text
-Relax(q_in, q_out, x, y, w) :=
+Relax(q_in, q_out, c, w) :=
   q_in(x) = q_in(y)
   and q_out(x) = q_out(y)
   and x != y
-  and P(w)
+  and w in W(c)
+  and P_c(w)
 ```
 
 Ce n'est pas encore suffisant : il faut aussi que le meme temoin soit conserve
@@ -962,8 +992,8 @@ entre les deux lectures.
 On introduit donc deux lectures internes du temoin :
 
 ```text
-w_in  : W
-w_out : W
+w_in  : W(c)
+w_out : W(c)
 ```
 
 et l'invariant positif est :
@@ -971,14 +1001,14 @@ et l'invariant positif est :
 ```text
 w_in = w
 w_out = w
-P(w)
+P_c(w)
 ```
 
 On note :
 
 ```text
-InvRelax(q_in, q_out, x, y, w, w_in, w_out) :=
-  Relax(q_in, q_out, x, y, w)
+InvRelax(q_in, q_out, c, w, w_in, w_out) :=
+  Relax(q_in, q_out, c, w)
   and w_in = w
   and w_out = w
 ```
@@ -1015,9 +1045,10 @@ q_in(x) = q_in(y)
 q_out(x) = q_out(y)
 x != y
 read_in(q_in(x)) != read_out(q_out(x))
+w in W(c)
 w_in = w
 w_out = w
-P(w)
+P_c(w)
 ```
 
 Autrement dit :
@@ -1037,7 +1068,8 @@ Une interface (q, read) produit des identites observables :
   ~_{read,q}
 Ces identites peuvent identifier des etats internes separes.
 Une telle separation produit une obstruction de reconstruction depuis V ou L.
-Si un temoin positif interne w est transporte a travers une relaxation
+Si un temoin positif interne w, porte par la cellule diagonale, est transporte
+a travers une relaxation
 de projection et de lecture, alors la relaxation est contrainte par w.
 ```
 
@@ -1054,7 +1086,8 @@ q_in(x) = q_in(y),
 q_out(x) = q_out(y),
 read_in(q_in(x)) != read_out(q_out(x)),
 x != y,
-P(w),
+w in W(c),
+P_c(w),
 w_in = w = w_out
 => relaxation contrainte par invariant positif
 ```
