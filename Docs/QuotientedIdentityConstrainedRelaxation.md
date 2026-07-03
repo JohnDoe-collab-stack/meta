@@ -446,6 +446,47 @@ Le nom recommande est :
 Meta/Core/ProjectedIdentity.lean
 ```
 
+Precision architecturale :
+
+```text
+ProjectedIdentity.lean
+```
+
+peut etre implemente de deux manieres.
+
+La version non invasive, actuellement visee, est une extraction/facade core
+appuyee sur :
+
+```text
+Meta/Core/ClosedStabilityTheorem.lean
+```
+
+Elle reutilise les briques deja formalisees :
+
+```text
+DiagonalCertificate
+ProjectionObstruction
+noProjectiveReconstruction
+```
+
+Donc l'ordre architectural effectif est :
+
+```text
+ClosedStabilityTheorem
+-> ProjectedIdentity
+-> OOD / Arithmetic / autres instances
+```
+
+Ce choix ne cree pas de decalage conceptuel : `ProjectedIdentity` exprime bien
+la theorie de l'identite quotientee. Il cree seulement un decalage
+architectural leger, car la couche est extraite au-dessus d'un noyau core deja
+existant.
+
+La version plus pure, mais plus invasive, consisterait a deplacer
+`DiagonalCertificate`, `ProjectionObstruction` et `noProjectiveReconstruction`
+dans `ProjectedIdentity.lean`, puis a faire dependre `ClosedStabilityTheorem`
+de cette couche. Ce refactor n'est pas requis pour stabiliser la theorie.
+
 Le noyau formel attendu :
 
 ```lean
@@ -1138,11 +1179,15 @@ et avec un invariant positif transporte.
 
 ## Ce qui reste a extraire
 
-Il reste a creer une couche Lean plus fondamentale :
+Il reste a creer ou stabiliser une couche Lean plus fondamentale :
 
 ```text
 Meta/Core/ProjectedIdentity.lean
 ```
+
+Dans l'implementation non invasive, cette couche est une facade core appuyee
+sur `ClosedStabilityTheorem`. Dans un refactor ulterieur, elle pourrait devenir
+une dependance amont de `ClosedStabilityTheorem`.
 
 Cette couche doit :
 
