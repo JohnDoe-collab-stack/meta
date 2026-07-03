@@ -238,9 +238,10 @@ theorem interfaceReadTransport_id_iff_projectedIdentity
 /--
 Polymorphic interface transport.
 
-This is `Id_q` seen as its full action on readings at the visible universe.
-It packages the operational reading of projected equality: every admissible
-reading must respect the same interface-induced observational equivalence.
+This is `Id_q` seen as its full action on readings at the visible universe
+level.  It packages the operational reading of projected equality: every
+admissible reading at that universe level must respect the same
+interface-induced observational equivalence.
 -/
 abbrev InterfaceTransport
     {Interface : Type u}
@@ -530,7 +531,14 @@ def diagonalCertificateOfProjectedIdentityCell
   sameProjection := cell.sameVisible
   separatedInterface := cell.separated
 
-/-- A projected identity cell yields a projection obstruction. -/
+/--
+A projected identity cell yields a projection obstruction.
+
+The obstruction is not an external failure of the interface.  It is the
+reconstruction-side consequence of the non-contractive diagonal: two internally
+separated poles share one visible projection, so no global inverse recovery
+from `Visible` can exist.
+-/
 def projectionObstructionOfProjectedIdentityCell
     {Interface : Type u}
     {Visible : Type v}
