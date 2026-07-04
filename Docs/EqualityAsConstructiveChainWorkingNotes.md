@@ -213,9 +213,18 @@ Le transport pleinement polymorphe est :
 
 ```text
 Transport_q(x, y) :=
-  forall {L} (r : V -> L),
+  forall (L : Type_v), forall (r : V -> L),
     r(q(x)) = r(q(y))
 ```
+
+Cette restriction d'univers correspond au code Lean :
+
+```lean
+(Label : Type v) -> (read : Visible -> Label) -> ...
+```
+
+Donc `Transport_q` est pleinement polymorphe au niveau de l'univers visible
+utilise par `V`.
 
 Dans cette forme polymorphe :
 
@@ -262,6 +271,86 @@ interface-induced observational equivalence
 =
 Id_q vu comme regime d'egalite utilisable et transportable par lecture.
 ```
+
+## Notation typee corrigee
+
+Notation abstraite :
+
+```text
+X : Type_u
+V : Type_v
+L : Type_w
+
+q : X -> V
+r : V -> L
+
+x y : X
+```
+
+Identites :
+
+```text
+Id_X(x,y) := x = y
+Id_q(x,y) := q(x) = q(y)
+Id_use := Id_q
+```
+
+Cellule non contractive :
+
+```text
+Cell_q(x,y) :=
+  (x = y -> False)
+  *
+  Id_q(x,y)
+```
+
+Transport pour une lecture fixee :
+
+```text
+ReadTransport_q^r(x,y) :=
+  r(q(x)) = r(q(y))
+```
+
+Transport d'interface au niveau d'univers visible :
+
+```text
+InterfaceTransport_q(x,y) :=
+  forall (L : Type_v), forall (r : V -> L),
+    r(q(x)) = r(q(y))
+```
+
+Chaine constructive pour une lecture fixee :
+
+```text
+ConstructiveChain_q^r(x,y) :=
+  (x = y -> False)
+  *
+  Id_use(x,y)
+  *
+  ReadTransport_q^r(x,y)
+```
+
+Equivalence centrale :
+
+```text
+InterfaceTransport_q(x,y) <-> Id_q(x,y)
+```
+
+La cellule ne dit pas globalement :
+
+```text
+Id_q(x,y) -> Id_X(x,y)
+```
+
+Elle porte au contraire, pour la configuration consideree :
+
+```text
+x = y -> False
+Id_q(x,y)
+```
+
+Donc l'egalite projective est utilisee comme coordination de lecture, pas
+comme contraction interne des poles.
 
 ## Schema
 
