@@ -291,6 +291,86 @@ coup. Elle est produite par l'equivalence observationnelle induite par
 l'interface : les poles restent separes, mais toute lecture factorisee par
 l'interface les coordonne.
 
+## Diagramme principal
+
+```mermaid
+flowchart TD
+    X["Structure interne X"]
+    x["pole interne x"]
+    y["pole interne y"]
+    sep["separation interne<br/>x != y"]
+
+    qx["q(x)"]
+    qy["q(y)"]
+    idq["Id_q(x,y)<br/>q(x) = q(y)"]
+    iduse["Id_use := Id_q"]
+
+    read["lecture r : V -> L"]
+    transport["transport par lecture<br/>r(q(x)) = r(q(y))"]
+    chain["chaine constructive<br/>separation + Id_use + transport"]
+
+    X --> x
+    X --> y
+    x --> sep
+    y --> sep
+    x --> qx
+    y --> qy
+    qx --> idq
+    qy --> idq
+    idq --> iduse
+    iduse --> transport
+    read --> transport
+    sep --> chain
+    iduse --> chain
+    transport --> chain
+```
+
+Lecture du diagramme :
+
+```text
+x et y restent distincts dans X.
+q(x) = q(y) produit l'equivalence observationnelle induite par l'interface.
+Cette equivalence devient Id_use.
+Id_use transporte toute lecture admissible.
+La chaine constructive garde ensemble separation interne, identite d'usage et transport.
+```
+
+Le point a ne pas perdre :
+
+```text
+le signe egal n'est pas utilise pour contracter x et y ;
+il est utilise pour coordonner les lectures qui passent par q.
+```
+
+## Diagramme d'instance arithmetique
+
+Le noyau abstrait n'est pas seulement une grammaire vide. Dans le projet, il
+est habite par l'instance arithmetique enrichie.
+
+```mermaid
+flowchart TD
+    core["Core<br/>ProjectedIdentity / ConstrainedProjectionRelaxation"]
+    parity["Arithmetic/Parity.lean<br/>gap relaxe + DiagonalCertificate"]
+    odd["Arithmetic/RelaxedOdd.lean<br/>role impair relaxe + temoin positif"]
+    ood["Arithmetic/RelaxedOddOOD.lean<br/>visibleShift constructif + transport du temoin"]
+    bridge["Arithmetic/RelaxedOddProjectedIdentity.lean<br/>ConstrainedProjectionRelaxation habitee"]
+    collatz["Collatz/RelaxedOddProjectedIdentityBridge.lean<br/>activation a l'index formedPositiveExcess"]
+
+    core --> parity
+    parity --> odd
+    odd --> ood
+    ood --> bridge
+    bridge --> collatz
+```
+
+Ce deuxieme diagramme fixe le statut du core :
+
+```text
+ProjectedIdentity.lean donne le contrat type.
+L'arithmetique enrichie construit une instance effective de ce contrat.
+Collatz active cette instance au bon index.
+```
+
 ## Interdependance
 
 L'interdependance a une signification precise :
