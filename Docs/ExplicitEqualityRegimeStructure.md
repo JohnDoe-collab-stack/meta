@@ -285,13 +285,13 @@ I : regime d'interface
 Ctx_I : type des contextes d'usage
 
 Sep_I :
-  Ctx_I -> X -> X -> Prop
+  Ctx_I -> X -> X -> Type s
 
 Coord_I :
-  Ctx_I -> X -> X -> Prop
+  Ctx_I -> X -> X -> Type k
 
 Use_I :
-  Ctx_I -> X -> X -> Prop
+  Ctx_I -> X -> X -> Type l
 
 Read_I :
   Ctx_I -> Type
@@ -308,8 +308,24 @@ read_I :
 OutRel_I :
   forall gamma : Ctx_I,
   forall rho : Read_I(gamma),
-  Out_I(gamma,rho) -> Out_I(gamma,rho) -> Prop
+  Out_I(gamma,rho) -> Out_I(gamma,rho) -> Type m
 ```
+
+Les quatre lignes `Sep_I`, `Coord_I`, `Use_I` et `OutRel_I` sont volontairement
+en `Type`.
+
+Cela permet de conserver les temoins :
+
+```text
+modes de separation
+modes de coordination
+protocoles d'usage
+preuves ou instruments de compatibilite en sortie
+```
+
+La version en `Prop` est seulement une specialisation plus contractee, dans
+laquelle on ne garde que le fait qu'une separation, coordination, usage ou
+compatibilite existe.
 
 Lois operatoires portees par le regime :
 
@@ -344,7 +360,7 @@ NonContractive_I(gamma,x,y) :=
 Cette esquisse est le noyau totalement relaxe.
 
 ```lean
-universe u c r o
+universe u c r o s k l m
 
 structure RelaxedInterfaceRegime (X : Type u) where
   Ctx : Type c
@@ -359,18 +375,18 @@ structure RelaxedInterfaceRegime (X : Type u) where
     forall gamma : Ctx, forall rho : Read gamma, X -> Out gamma rho
 
   Sep :
-    Ctx -> X -> X -> Prop
+    Ctx -> X -> X -> Type s
 
   Coord :
-    Ctx -> X -> X -> Prop
+    Ctx -> X -> X -> Type k
 
   Use :
-    Ctx -> X -> X -> Prop
+    Ctx -> X -> X -> Type l
 
   OutRel :
     forall gamma : Ctx,
     forall rho : Read gamma,
-      Out gamma rho -> Out gamma rho -> Prop
+      Out gamma rho -> Out gamma rho -> Type m
 
   use_of_coord :
     forall {gamma : Ctx} {x y : X},
@@ -389,7 +405,7 @@ structure NonContractiveUse
     {X : Type u}
     (I : RelaxedInterfaceRegime X)
     (gamma : I.Ctx)
-    (x y : X) : Prop where
+    (x y : X) where
   separation :
     I.Sep gamma x y
 
@@ -539,72 +555,7 @@ une coordination d'usage
 un eliminateur local limite aux lectures autorisees.
 ```
 
-## 11. Cas strict comme cas limite
-
-Le cas strict projectif n'est pas le point de depart.
-
-Il peut etre recupere comme cas limite en ajoutant :
-
-```text
-V : Type
-q : X -> V
-
-Read gamma := Sigma (fun L : Type v => V -> L)
-Out gamma rho := rho.1
-read gamma rho x := rho.2(q(x))
-OutRel := egalite stricte
-```
-
-La lecture identite est alors disponible comme :
-
-```text
-rho_id := (V, id_V)
-```
-
-Si, dans ce cas limite, `Use` est defini comme le transport total sur toutes
-ces lectures, alors :
-
-```text
-Use_I(gamma,x,y)
-->
-q(x) = q(y)
-```
-
-par la lecture `rho_id`.
-
-Et inversement :
-
-```text
-q(x) = q(y)
-->
-Use_I(gamma,x,y)
-```
-
-par transport de l'egalite dans toute lecture.
-
-Donc, pour ce regime particulier :
-
-```text
-Use_I(gamma,x,y) <-> q(x) = q(y)
-```
-
-Mais ce n'est plus le modele general.
-
-## 12. Cas classique comme cas plus contracte
-
-Le cas classique est encore plus contracte.
-
-Il correspond au regime ou l'usage recupere l'identite interne :
-
-```text
-Id_use := Id_X
-```
-
-Dans ce cas, le regime autorise la substitution globale.
-
-Le cadre totalement relaxe ne suppose pas cela.
-
-## 13. Lecture finale
+## 11. Lecture finale
 
 La version totalement relaxee dit :
 
@@ -645,8 +596,75 @@ Formule finale :
 
 ```text
 Meme coordination.
-Pas meme etre.
-Pas meme projection.
-Pas meme sortie.
 Seulement transport autorise.
+Aucun collapse.
 ```
+
+## Annexe A. Specialisation contractive : cas strict projectif
+
+Cette annexe ne fait pas partie du noyau totalement relaxe.
+
+Elle sert seulement a montrer comment une forme plus contractee peut etre
+recuperee comme specialisation.
+
+Le cas strict projectif ajoute :
+
+```text
+V : Type
+q : X -> V
+
+Read gamma := Sigma (fun L : Type v => V -> L)
+Out gamma rho := rho.1
+read gamma rho x := rho.2(q(x))
+OutRel := egalite stricte
+```
+
+La lecture identite est alors disponible comme :
+
+```text
+rho_id := (V, id_V)
+```
+
+Si, dans cette specialisation, `Use` est defini comme le transport total sur
+toutes ces lectures, alors :
+
+```text
+Use_I(gamma,x,y)
+->
+q(x) = q(y)
+```
+
+par la lecture `rho_id`.
+
+Et inversement :
+
+```text
+q(x) = q(y)
+->
+Use_I(gamma,x,y)
+```
+
+par transport de l'egalite dans toute lecture.
+
+Donc, pour cette specialisation contractive :
+
+```text
+Use_I(gamma,x,y) <-> q(x) = q(y)
+```
+
+Ce n'est pas le modele general. C'est une contraction du regime totalement
+relaxe.
+
+## Annexe B. Specialisation plus contractive : cas classique
+
+Le cas classique est encore plus contracte.
+
+Il correspond au regime ou l'usage recupere l'identite interne :
+
+```text
+Id_use := Id_X
+```
+
+Dans ce cas, le regime autorise la substitution globale.
+
+Le cadre totalement relaxe ne suppose pas cela.
