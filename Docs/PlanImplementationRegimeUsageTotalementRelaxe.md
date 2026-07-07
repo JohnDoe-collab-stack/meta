@@ -65,6 +65,7 @@ Il porte :
 
 ```text
 Ctx      : contextes d'usage
+defaultCtx : contexte disponible
 Read     : lectures autorisees par contexte
 defaultRead : lecture autorisee disponible dans chaque contexte
 Out      : sorties dependantes des lectures
@@ -97,10 +98,12 @@ instruments ou temoins de compatibilite en sortie
 La non-trivialite minimale doit etre portee par le noyau :
 
 ```text
+le regime possede au moins un contexte ;
 chaque contexte possede au moins une lecture autorisee.
 ```
 
-Sans cela, le transport serait vide dans un contexte sans lecture.
+Sans cela, le transport pourrait etre globalement vide si `Ctx` etait vide,
+ou localement vide dans un contexte sans lecture.
 
 Cette non-trivialite ne force pas une egalite, ne force pas une projection, et
 ne force pas une relation de sortie particuliere. Elle garantit seulement que
@@ -112,6 +115,7 @@ Portee exacte :
 ```text
 non-trivialite partout dans le noyau
 =
+un contexte par defaut existe ;
 pour tout contexte gamma, une lecture autorisee existe ;
 pour toute non-contraction, un transport concret existe via cette lecture.
 ```
@@ -121,6 +125,7 @@ sans ajouter une semantique de domaine. Elle doit donc rester portee par les
 instances concretes. Le noyau interdit seulement la vacuite structurelle :
 
 ```text
+pas de regime sans contexte ;
 pas de contexte sans lecture ;
 pas de non-contraction sans transport concret.
 ```
@@ -137,6 +142,9 @@ namespace RelaxedUsageRegime
 
 structure RelaxedInterfaceRegime (X : Type u) where
   Ctx : Type c
+
+  defaultCtx :
+    Ctx
 
   Read :
     Ctx -> Type r
@@ -164,8 +172,9 @@ structure RelaxedInterfaceRegime (X : Type u) where
     forall rho : Read gamma,
       Out gamma rho -> Out gamma rho -> Type m
 
-  use_of_coord :
+  use_of_noncontractive :
     forall {gamma : Ctx} {x y : X},
+      Sep gamma x y ->
       Coord gamma x y ->
       Use gamma x y
 
@@ -249,7 +258,7 @@ def NonContractiveUse.use
     {x y : X}
     (h : NonContractiveUse I gamma x y) :
     I.Use gamma x y :=
-  I.use_of_coord h.coordination
+  I.use_of_noncontractive h.separation h.coordination
 
 def NonContractiveUse.transport
     {X : Type u}
@@ -267,6 +276,23 @@ def NonContractiveUse.transport
 Ce sont les deux declarations principales du fichier.
 
 ## Non-trivialite locale obligatoire
+
+Le fichier doit exposer le contexte par defaut et la lecture par defaut de ce
+contexte.
+
+```lean
+def RelaxedInterfaceRegime.defaultContext
+    {X : Type u}
+    (I : RelaxedInterfaceRegime X) :
+    I.Ctx :=
+  I.defaultCtx
+
+def RelaxedInterfaceRegime.defaultContextRead
+    {X : Type u}
+    (I : RelaxedInterfaceRegime X) :
+    I.Read I.defaultCtx :=
+  I.defaultRead I.defaultCtx
+```
 
 Le fichier doit exposer le transport obtenu par la lecture canonique du contexte.
 
@@ -315,25 +341,6 @@ def NonContractiveUse.coordinationWitness
     (h : NonContractiveUse I gamma x y) :
     I.Coord gamma x y :=
   h.coordination
-```
-
-### Transport depuis la coordination seule
-
-Cette facade rend explicite que la coordination suffit a produire l'usage puis
-le transport autorise.
-
-```lean
-def transportOfCoord
-    {X : Type u}
-    {I : RelaxedInterfaceRegime X}
-    {gamma : I.Ctx}
-    {x y : X}
-    (coord : I.Coord gamma x y)
-    (rho : I.Read gamma) :
-    I.OutRel gamma rho
-      (I.read gamma rho x)
-      (I.read gamma rho y) :=
-  I.transport (I.use_of_coord coord) rho
 ```
 
 ### Transport depuis l'usage
@@ -528,7 +535,8 @@ Le fichier cible etant un fichier Lean, il doit finir par un bloc unique :
 #print axioms NonContractiveUse.use
 #print axioms NonContractiveUse.transport
 #print axioms NonContractiveUse.defaultTransport
-#print axioms transportOfCoord
+#print axioms RelaxedInterfaceRegime.defaultContext
+#print axioms RelaxedInterfaceRegime.defaultContextRead
 #print axioms transportOfUse
 #print axioms localTransportChain
 #print axioms defaultLocalTransportChain

@@ -11,11 +11,15 @@ substitution. It carries its own contexts, authorized readings, output types,
 separation witnesses, coordination witnesses, use witnesses, and output
 relations.
 
-The `defaultRead` field makes the regime locally non-vacuous at every context:
-there is always at least one authorized reading on which transport can act.
+The `defaultCtx` and `defaultRead` fields make the regime non-vacuous:
+there is at least one context, and every context has at least one authorized
+reading on which transport can act.
 -/
 structure RelaxedInterfaceRegime (X : Type u) where
   Ctx : Type c
+
+  defaultCtx :
+    Ctx
 
   Read :
     Ctx -> Type r
@@ -43,8 +47,9 @@ structure RelaxedInterfaceRegime (X : Type u) where
     forall rho : Read gamma,
       Out gamma rho -> Out gamma rho -> Type m
 
-  use_of_coord :
+  use_of_noncontractive :
     forall {gamma : Ctx} {x y : X},
+      Sep gamma x y ->
       Coord gamma x y ->
       Use gamma x y
 
@@ -55,6 +60,24 @@ structure RelaxedInterfaceRegime (X : Type u) where
         OutRel gamma rho
           (read gamma rho x)
           (read gamma rho y)
+
+/--
+The globally available default context of a regime.
+-/
+def RelaxedInterfaceRegime.defaultContext
+    {X : Type u}
+    (I : RelaxedInterfaceRegime X) :
+    I.Ctx :=
+  I.defaultCtx
+
+/--
+The default reading at the globally available default context.
+-/
+def RelaxedInterfaceRegime.defaultContextRead
+    {X : Type u}
+    (I : RelaxedInterfaceRegime X) :
+    I.Read I.defaultCtx :=
+  I.defaultRead I.defaultCtx
 
 /--
 Non-contractive use is not defined by `x != y`.
@@ -83,7 +106,7 @@ def NonContractiveUse.use
     {x y : X}
     (h : NonContractiveUse I gamma x y) :
     I.Use gamma x y :=
-  I.use_of_coord h.coordination
+  I.use_of_noncontractive h.separation h.coordination
 
 /--
 The only eliminator exposed by a non-contractive use: transport through an
@@ -138,21 +161,6 @@ def NonContractiveUse.coordinationWitness
     (h : NonContractiveUse I gamma x y) :
     I.Coord gamma x y :=
   h.coordination
-
-/--
-Transport obtained directly from a coordination witness.
--/
-def transportOfCoord
-    {X : Type u}
-    {I : RelaxedInterfaceRegime X}
-    {gamma : I.Ctx}
-    {x y : X}
-    (coord : I.Coord gamma x y)
-    (rho : I.Read gamma) :
-    I.OutRel gamma rho
-      (I.read gamma rho x)
-      (I.read gamma rho y) :=
-  I.transport (I.use_of_coord coord) rho
 
 /--
 Transport obtained directly from a use witness.
@@ -270,7 +278,8 @@ end Meta
 #print axioms Meta.RelaxedUsageRegime.NonContractiveUse.use
 #print axioms Meta.RelaxedUsageRegime.NonContractiveUse.transport
 #print axioms Meta.RelaxedUsageRegime.NonContractiveUse.defaultTransport
-#print axioms Meta.RelaxedUsageRegime.transportOfCoord
+#print axioms Meta.RelaxedUsageRegime.RelaxedInterfaceRegime.defaultContext
+#print axioms Meta.RelaxedUsageRegime.RelaxedInterfaceRegime.defaultContextRead
 #print axioms Meta.RelaxedUsageRegime.transportOfUse
 #print axioms Meta.RelaxedUsageRegime.localTransportChain
 #print axioms Meta.RelaxedUsageRegime.defaultLocalTransportChain
