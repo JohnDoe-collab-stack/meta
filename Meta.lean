@@ -37,9 +37,6 @@ import Meta.Collatz.CountdownConsumptionBridge
 import Meta.Collatz.DynamicClosureLoop
 import Meta.Collatz.InternalTerminality
 import Meta.Collatz.DiagonalOrder
-import Meta.Collatz.VisibleRoleDynamics
-import Meta.Collatz.InternalStateTrajectory
-import Meta.Collatz.VisibleClosure
 import Meta.Dynamics.ObservedDiscrete
 import Meta.Dynamics.ObservedWindow
 import Meta.Dynamics.ObservedDynamicGap
@@ -107,10 +104,4 @@ import Meta.Synthesis.TarskiBethBellGap
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRelaxedOddRoleOfIntersection_visibleStep_div_two_eq_rightPayload
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRelaxedOddConstrainedProjectionRelaxationOfIntersection
 #print axioms Meta.EnrichedNatClosedStabilityInstance.collatzRelaxedOddPositiveProjectedInvariant_eq_positiveDiagonalValue
-#print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityRoleOfVisible
-#print axioms Meta.EnrichedNatClosedStabilityInstance.natEnrichedParityRoleOfVisible_code
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzVisibleInternalActivation
-#print axioms Meta.EnrichedNatClosedStabilityInstance.collatzNextInternalStateRole_eq_closing
-#print axioms Meta.EnrichedNatClosedStabilityInstance.noCollatzVisibleMediatingGrowthAt
-#print axioms Meta.EnrichedNatClosedStabilityInstance.noCollatzVisibleInfiniteMediatingGrowth
 /- AXIOM_AUDIT_END -/
