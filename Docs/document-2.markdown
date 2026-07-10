@@ -21,42 +21,46 @@ Les formules sont écrites en Unicode ordinaire, sans LaTeX.
 La présente version s’appuie directement sur les modules suivants :
 
 ```text
+ClosedStabilityTheorem.lean
 Gap.lean
 ReferentialLength.lean
+TwoPole.lean
 ProjectedIdentity.lean
 ParitySeparation.lean
 DynamicStability.lean
 DynamicTwoPole.lean
 DynamicRoleCarrier.lean
+DynamicParitySeparation.lean
 OrderGap.lean
 RelaxedUsageRegime.lean
 ```
 
-Elle reprend aussi le document symbolique antérieur afin de restituer les structures fondamentales importées par ces modules.
+Elle couvre donc les douze fichiers présents dans `Meta/Core` dans le checkout actuel.
 
-### 0.2 Socle importé mais non fourni comme fichier Lean
+### 0.2 Socle de base directement fourni
 
-Plusieurs fichiers relus importent notamment :
+Plusieurs modules utilisent comme socle :
 
 ```text
 Meta.Core.ClosedStabilityTheorem
 Meta.Core.TwoPole
 ```
 
-Leurs définitions sont visibles indirectement par leurs usages et par le document symbolique initial, mais leurs fichiers sources complets ne figurent pas dans le lot relu.
+Dans le checkout actuel, ces deux fichiers sources sont présents et relus directement :
+
+```text
+Meta/Core/ClosedStabilityTheorem.lean
+Meta/Core/TwoPole.lean
+```
 
 Dans ce document :
 
 ```text
 socle directement vérifié
-  := définition ou théorème présent dans un fichier Lean fourni
-
-socle importé
-  := définition reconstruite depuis les signatures utilisées
-     et le document symbolique antérieur
+  := définition ou théorème présent dans un fichier Lean de Meta/Core
 ```
 
-Cette distinction est importante pour la section finale sur l’audit constructif.
+Les anciennes formulations prudentes parlant de socle seulement reconstruit ne s’appliquent donc pas à ce checkout.
 
 ### 0.3 Convention négative constructive
 
@@ -108,22 +112,25 @@ Il ne faut pas identifier ces deux formes.
 La structure générale des modules relus est la suivante :
 
 ```text
-ClosedStabilityTheorem                  [socle importé]
+ClosedStabilityTheorem
 ├── Gap
 │   ├── ReferentialLength
+│   │   └── TwoPole
+│   │       └── ParitySeparation
 │   └── DynamicStability
-├── ProjectedIdentity
-└── TwoPole                             [socle importé]
-    └── ParitySeparation
+└── ProjectedIdentity
 
 TwoPole + DynamicStability
 └── DynamicTwoPole
     └── DynamicRoleCarrier
 
+DynamicRoleCarrier + ParitySeparation
+└── DynamicParitySeparation
+
 ReferentialLength + DynamicTwoPole
 └── OrderGap
 
-RelaxedUsageRegime                      [branche autonome]
+RelaxedUsageRegime                      [branche autonome sans import]
 ```
 
 Le noyau combine donc plusieurs niveaux qui doivent rester distincts :
@@ -154,7 +161,7 @@ et sans inverse global de la projection
 
 ## 2. Complétude bidirectionnelle
 
-Le socle importé porte une structure :
+Le module `ClosedStabilityTheorem.lean` porte une structure :
 
 ```text
 BidirectionalCompleteness Branch
@@ -471,7 +478,7 @@ pour un type global indépendant de l’interface.
 
 ## 8. Fermeture référentielle formée
 
-Le socle importé décrit une fermeture formée portant notamment :
+Le module `ClosedStabilityTheorem.lean` décrit une fermeture formée portant notamment :
 
 ```text
 formedInterface    : Interface
@@ -917,7 +924,7 @@ EnrichedOperationalReferentialLength
 
 ## 16. Deux pôles
 
-Le module importé `TwoPole` expose le même contenu sous un vocabulaire polaire.
+Le module `TwoPole.lean` expose le même contenu sous un vocabulaire polaire.
 
 La lecture reconstruite est :
 
@@ -1224,7 +1231,7 @@ Le module fournit :
 locallyRecoveredClosedStabilityOfDynamicReturn
 ```
 
-qui applique un théorème déjà présent dans le socle importé :
+qui applique un théorème déjà présent dans `ClosedStabilityTheorem.lean` :
 
 ```text
 locallyRecoveredNonProjectiveClosedStabilityFromIntersectionTheorem
@@ -1480,21 +1487,11 @@ La forme obtenue est exactement un gap structurel au niveau des rôles, enrichi 
 
 ## 24. Statut de la spécialisation dynamique de parité
 
-Le document symbolique antérieur mentionnait une structure de raccord dynamique de parité.
+Le fichier `DynamicParitySeparation.lean` est présent dans le checkout actuel.
 
-Aucun fichier Lean spécifique à ce raccord n’est présent dans le lot relu.
+Il formalise directement le raccord entre un retour dynamique localement récupéré et la séparation minimale de parité.
 
-Ce qui est directement établi par les fichiers fournis est :
-
-```text
-ParitySeparation
-  fournit un OperationalTwoPole de parité
-
-DynamicRoleCarrier
-  accepte n’importe quel OperationalTwoPole de rôles
-```
-
-Une spécialisation est donc conceptuellement disponible en prenant :
+La spécialisation fixe :
 
 ```text
 Role         := ParityRegime
@@ -1503,13 +1500,27 @@ roleProject  := parityProjection
 RoleRepairOf := ParityRegimeRepair
 ```
 
-mais l’existence d’un `DynamicRoleCarrier` ainsi spécialisé exige encore les champs :
+et introduit une structure qui porte explicitement :
 
 ```text
-roleOf
-visibleRoleOf
-formed_role
-shadow_role
+regimeOf
+visibleOf
+parityTwoPole
+formed_regime
+shadow_regime
+formed_visible
+shadow_visible
+```
+
+Le fichier construit ensuite le `DynamicRoleCarrier` correspondant et les rôles opérationnels de parité.
+
+L’existence d’une telle séparation exige toujours les champs :
+
+```text
+regimeOf
+visibleOf
+formed_regime
+shadow_regime
 formed_visible
 shadow_visible
 ```
@@ -1519,8 +1530,8 @@ Elle n’est pas automatique pour tout retour dynamique.
 La conclusion exacte est :
 
 ```text
-si ces lectures de parité sont fournies,
-alors les théorèmes génériques du porteur de rôles s’appliquent
+si ces lectures de parité sont fournies comme données de raccord,
+alors DynamicParitySeparation produit les conséquences opérationnelles
 ```
 
 et non :
@@ -2817,7 +2828,7 @@ Le régime relaxé garantit un contexte et des lectures par défaut, mais un `No
 
 ## 50. Nature des preuves
 
-Dans les fichiers fournis, les constructions visibles utilisent principalement :
+Dans les fichiers de `Meta/Core`, les constructions visibles utilisent principalement :
 
 ```text
 projection de champs
@@ -2850,15 +2861,15 @@ Une partie importante de l’architecture consiste donc à rendre explicites et 
 
 ---
 
-## 51. Statut de l’audit axiomatique
+## 51. Statut de l’audit axiomatique dans le checkout actuel
 
-Les fichiers Lean fournis se terminent par des commandes telles que :
+Les douze fichiers Lean de `Meta/Core` se terminent par des commandes telles que :
 
 ```text
 #print axioms ...
 ```
 
-Une inspection textuelle des fichiers fournis ne montre pas d’usage explicite de :
+Une inspection textuelle des fichiers de `Meta/Core` ne montre pas d’usage explicite de :
 
 ```text
 Classical
@@ -2870,33 +2881,29 @@ axiom
 noncomputable
 ```
 
-Cependant, deux limites doivent être conservées.
+Dans ce checkout, les sources du socle `ClosedStabilityTheorem` et `TwoPole` sont présentes. Il n’est donc pas nécessaire de les reconstruire indirectement depuis leurs usages.
 
-### 51.1 Les sorties de `#print axioms` ne sont pas incluses
+### 51.1 Commandes d’audit et sorties
 
-Les fichiers contiennent les commandes d’audit, pas leur résultat d’exécution.
-
-### 51.2 Certains modules importés ne sont pas fournis
-
-En particulier :
+Les fichiers contiennent les commandes d’audit. Leur résultat est obtenu en exécutant Lean, par exemple :
 
 ```text
-Meta.Core.ClosedStabilityTheorem
-Meta.Core.TwoPole
+lake env lean Meta/Core/ClosedStabilityTheorem.lean
 ```
 
-ne peuvent pas être inspectés intégralement depuis le lot actuel.
-
-La conclusion rigoureuse est donc :
+La conclusion vérifiable pour le checkout actuel est :
 
 ```text
-les modules fournis suivent une discipline constructive apparente
-et demandent explicitement un audit d’axiomes ;
-la certification globale du projet exige la compilation complète
-et les sorties de #print axioms pour toutes les dépendances
+les sources de Meta/Core sont présentes ;
+chaque fichier porte un bloc AXIOM_AUDIT final ;
+la certification sans axiome exige l’exécution de ces audits par Lean.
 ```
 
-Il serait excessif d’affirmer, depuis les seuls fichiers textuels relus, que l’ensemble transitif des imports est déjà certifié sans axiome.
+### 51.2 Portée de la certification
+
+Ce document Markdown n’est pas lui-même une preuve Lean. La certification constructive appartient aux fichiers `.lean` et à leurs sorties `#print axioms`.
+
+Il serait donc excessif d’utiliser ce document seul comme certificat. Dans le checkout actuel, en revanche, les modules de base mentionnés sont bien inspectables directement.
 
 ---
 
