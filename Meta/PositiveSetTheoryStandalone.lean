@@ -643,27 +643,32 @@ theorem unionProjectionLawOfReflection
                 rw [lift.projected] at hx
                 exact hx))
       (fun h => by
-        rcases h with ⟨V, hVA, hXV⟩
-        exact
-          (reflection.reflected hVA).elim
-            (fun liftMiddle => by
-              have hXV' : S.VisibleMem X (S.project liftMiddle.formed) := by
-                have hXVCopy := hXV
-                rw [← liftMiddle.projected] at hXVCopy
-                exact hXVCopy
-              exact
-                (reflection.reflected hXV').elim
-                  (fun liftMember => by
-                    have memberUnion :
-                        S.Mem liftMember.formed U.set :=
-                      (U.membership liftMember.formed).invFun
-                        { middle := liftMiddle.formed
-                          middle_mem := liftMiddle.membership
-                          member_mem := liftMember.membership }
-                    have visibleMember :=
-                      projection.visibleMemOfMem memberUnion
-                    rw [liftMember.projected] at visibleMember
-                    exact visibleMember)))
+        cases h with
+        | intro V hRest =>
+            cases hRest with
+            | intro hVA hXV =>
+                exact
+                  (reflection.reflected hVA).elim
+                    (fun liftMiddle => by
+                      have hXV' :
+                          S.VisibleMem X
+                            (S.project liftMiddle.formed) := by
+                        have hXVCopy := hXV
+                        rw [← liftMiddle.projected] at hXVCopy
+                        exact hXVCopy
+                      exact
+                        (reflection.reflected hXV').elim
+                          (fun liftMember => by
+                            have memberUnion :
+                                S.Mem liftMember.formed U.set :=
+                              (U.membership liftMember.formed).invFun
+                                { middle := liftMiddle.formed
+                                  middle_mem := liftMiddle.membership
+                                  member_mem := liftMember.membership }
+                            have visibleMember :=
+                              projection.visibleMemOfMem memberUnion
+                            rw [liftMember.projected] at visibleMember
+                            exact visibleMember)))
 
 structure SeparatedMembership
     (S : RawPositiveSetSignature.{u, v, m})
@@ -724,24 +729,26 @@ theorem separationProjectionLawOfReflection
                 rw [lift.projected] at hProperty
                 exact hProperty))
       (fun h => by
-        rcases h with ⟨hXA, hPX⟩
-        exact
-          (reflection.reflected hXA).elim
-            (fun lift => by
-              have hPProject : PVisible (S.project lift.formed) := by
-                rw [lift.projected]
-                exact hPX
-              have hP : P lift.formed :=
-                (factor lift.formed lift.membership).mpr hPProject
-              have memberSep :
-                  S.Mem lift.formed Sep.set :=
-                (Sep.membership lift.formed).invFun
-                  { base := lift.membership
-                    property := hP }
-              have visibleMember :=
-                projection.visibleMemOfMem memberSep
-              rw [lift.projected] at visibleMember
-              exact visibleMember))
+        cases h with
+        | intro hXA hPX =>
+            exact
+              (reflection.reflected hXA).elim
+                (fun lift => by
+                  have hPProject :
+                      PVisible (S.project lift.formed) := by
+                    rw [lift.projected]
+                    exact hPX
+                  have hP : P lift.formed :=
+                    (factor lift.formed lift.membership).mpr hPProject
+                  have memberSep :
+                      S.Mem lift.formed Sep.set :=
+                    (Sep.membership lift.formed).invFun
+                      { base := lift.membership
+                        property := hP }
+                  have visibleMember :=
+                    projection.visibleMemOfMem memberSep
+                  rw [lift.projected] at visibleMember
+                  exact visibleMember))
 
 structure BoundedSeparationData
     (S : RawPositiveSetSignature.{u, v, m}) where
@@ -879,6 +886,45 @@ structure InfinityFormation
           P n -> P (succ n)) ->
         (n : S.FormedSet) ->
           S.Mem n omega -> P n
+
+def singletonFormation
+    {S : RawPositiveSetSignature.{u, v, m}}
+    (pair :
+      (A B : S.FormedSet) ->
+        PairEquivFormation S A B)
+    (n : S.FormedSet) :
+    S.FormedSet :=
+  (pair n n).set
+
+def setTheoreticSuccessorFormation
+    {S : RawPositiveSetSignature.{u, v, m}}
+    (pair :
+      (A B : S.FormedSet) ->
+        PairEquivFormation S A B)
+    (union :
+      (A : S.FormedSet) ->
+        UnionFormation S A)
+    (n : S.FormedSet) :
+    S.FormedSet :=
+  (union
+    (pair n (singletonFormation pair n)).set).set
+
+structure SetTheoreticInfinityFormation
+    (S : RawPositiveSetSignature.{u, v, m}) where
+  empty : EmptyFormation S
+  pair :
+    (A B : S.FormedSet) ->
+      PairEquivFormation S A B
+  union :
+    (A : S.FormedSet) ->
+      UnionFormation S A
+  infinity : InfinityFormation S
+  zero_is_empty :
+    infinity.zero = empty.set
+  succ_is_union_singleton :
+    (n : S.FormedSet) ->
+      infinity.succ n =
+        setTheoreticSuccessorFormation pair union n
 
 structure Subformation
     (S : RawPositiveSetSignature.{u, v, m})
@@ -1266,6 +1312,16 @@ def projectedRegimeCellOfChange
         change.commutes cell.shadow
   separated := cell.separated
 
+structure ProjectedCellPersistence
+    (S : RawPositiveSetSignature.{u, v, m})
+    (cell : ProjectedSetCell S)
+    (R : ProjectionRegime.{u, v} S.FormedSet) where
+  change : ProjectionChange S R
+  targetCell : ProjectedRegimeCell S.FormedSet R
+  target_matches_change :
+    targetCell =
+      projectedRegimeCellOfChange change cell
+
 structure PositiveDiagonalPersistence
     (S : RawPositiveSetSignature.{u, v, m})
     (WitnessOf : ProjectedSetCell S -> Type w)
@@ -1274,11 +1330,50 @@ structure PositiveDiagonalPersistence
         WitnessOf cell -> Prop)
     (diag : PositiveSetDiagonalization S WitnessOf Positive)
     (R : ProjectionRegime.{u, v} S.FormedSet) where
-  change : ProjectionChange S R
-  targetCell : ProjectedRegimeCell S.FormedSet R
-  target_matches_change :
-    targetCell =
-      projectedRegimeCellOfChange change diag.cell
+  cellPersistence :
+    ProjectedCellPersistence S diag.cell R
+  TargetWitnessOf :
+    ProjectedRegimeCell S.FormedSet R -> Type l
+  TargetPositive :
+    (cell : ProjectedRegimeCell S.FormedSet R) ->
+      TargetWitnessOf cell -> Prop
+  witnessTransport :
+    (witness : WitnessOf diag.cell) ->
+      TargetWitnessOf cellPersistence.targetCell
+  positiveTransport :
+    (witness : WitnessOf diag.cell) ->
+      Positive diag.cell witness ->
+        TargetPositive
+          cellPersistence.targetCell
+          (witnessTransport witness)
+
+def positiveDiagonalPersistentWitness
+    {S : RawPositiveSetSignature.{u, v, m}}
+    {WitnessOf : ProjectedSetCell S -> Type w}
+    {Positive :
+      (cell : ProjectedSetCell S) ->
+        WitnessOf cell -> Prop}
+    {diag : PositiveSetDiagonalization S WitnessOf Positive}
+    {R : ProjectionRegime.{u, v} S.FormedSet}
+    (p :
+      PositiveDiagonalPersistence S WitnessOf Positive diag R) :
+    p.TargetWitnessOf p.cellPersistence.targetCell :=
+  p.witnessTransport diag.witness
+
+theorem positiveDiagonalPersistentWitness_pos
+    {S : RawPositiveSetSignature.{u, v, m}}
+    {WitnessOf : ProjectedSetCell S -> Type w}
+    {Positive :
+      (cell : ProjectedSetCell S) ->
+        WitnessOf cell -> Prop}
+    {diag : PositiveSetDiagonalization S WitnessOf Positive}
+    {R : ProjectionRegime.{u, v} S.FormedSet}
+    (p :
+      PositiveDiagonalPersistence S WitnessOf Positive diag R) :
+    p.TargetPositive
+      p.cellPersistence.targetCell
+      (positiveDiagonalPersistentWitness p) :=
+  p.positiveTransport diag.witness diag.witness_pos
 
 structure PFSD where
   S : RawPositiveSetSignature.{u, v, m}
@@ -1321,6 +1416,8 @@ structure PFS0Reflected where
   rigidity : PairRigidity S pair
   union : UnionPrinciple S
   bounded : BoundedSeparationData.{u, v, m, w} S
+  boundedVisible :
+    BoundedPredicateVisibleSemantics S bounded
 
 def PFS0Reflected.pairProjection
     (T : PFS0Reflected.{u, v, m, w})
@@ -1341,13 +1438,27 @@ def PFS0Reflected.toPFSD
   rigidity := T.rigidity
   pairProjection := T.pairProjection
 
+def PFS0Reflected.boundedSeparationProjection
+    (T : PFS0Reflected.{u, v, m, w})
+    {A : T.S.FormedSet}
+    (code : T.bounded.BoundedPredicateCode A) :
+    SeparationProjectionLaw
+      (T.bounded.separateBounded A code)
+      (T.boundedVisible.VisibleSatisfies code) :=
+  separationProjectionLawOfReflection
+    T.projection
+    T.reflection
+    (T.bounded.separateBounded A code)
+    (T.boundedVisible.VisibleSatisfies code)
+    (T.boundedVisible.factors code)
+
 structure PFS0Realized where
   base : PFS0Reflected.{u, v, m, w}
   realization : MembershipRealization base.S
 
 structure PFSCollectionCore where
   base : PFS0Reflected.{u, v, m, w}
-  infinity : InfinityFormation base.S
+  infinity : SetTheoreticInfinityFormation base.S
   collection : StrongCollectionPrinciple.{u, v, m, l} base.S
   induction : FormedInductionPrinciple base.S
 
@@ -1422,6 +1533,131 @@ def degenerateEmptyFormation :
   set := true
   elim _ h := nomatch h
 
+/-! ## Explicit syntax model of `PFSD` -/
+
+inductive SyntaxFormed : Type where
+  | empty : SyntaxFormed
+  | pair : SyntaxFormed -> SyntaxFormed -> SyntaxFormed
+
+inductive SyntaxOccurrence
+    (x A B : SyntaxFormed) : Type where
+  | left : x = A -> SyntaxOccurrence x A B
+  | right : x = B -> SyntaxOccurrence x A B
+
+def syntaxMem :
+    SyntaxFormed -> SyntaxFormed -> Type
+  | _, SyntaxFormed.empty => Empty
+  | x, SyntaxFormed.pair A B => SyntaxOccurrence x A B
+
+def syntaxRaw :
+    RawPositiveSetSignature.{0, 0, 0} where
+  FormedSet := SyntaxFormed
+  VisibleSet := Unit
+  project := fun _ => ()
+  Mem := syntaxMem
+  VisibleMem := fun _ _ => True
+
+def syntaxOccurrenceToPairOccurrence
+    {x A B : SyntaxFormed} :
+    SyntaxOccurrence x A B ->
+      PairOccurrence syntaxRaw x A B
+  | SyntaxOccurrence.left h =>
+      PairOccurrence.left
+        (S := syntaxRaw)
+        (x := x)
+        (A := A)
+        (B := B)
+        h
+  | SyntaxOccurrence.right h =>
+      PairOccurrence.right
+        (S := syntaxRaw)
+        (x := x)
+        (A := A)
+        (B := B)
+        h
+
+def pairOccurrenceToSyntaxOccurrence
+    {x A B : SyntaxFormed} :
+    PairOccurrence syntaxRaw x A B ->
+      SyntaxOccurrence x A B
+  | PairOccurrence.left h =>
+      SyntaxOccurrence.left h
+  | PairOccurrence.right h =>
+      SyntaxOccurrence.right h
+
+def syntaxOccurrenceEquiv
+    (x A B : SyntaxFormed) :
+    TypeEquiv
+      (syntaxMem x (SyntaxFormed.pair A B))
+      (PairOccurrence syntaxRaw x A B) where
+  toFun := syntaxOccurrenceToPairOccurrence
+  invFun := pairOccurrenceToSyntaxOccurrence
+  left_inv := by
+    intro occurrence
+    cases occurrence with
+    | left h => rfl
+    | right h => rfl
+  right_inv := by
+    intro occurrence
+    cases occurrence with
+    | left h => rfl
+    | right h => rfl
+
+def syntaxEmptyFormation :
+    EmptyFormation syntaxRaw where
+  set := SyntaxFormed.empty
+  elim _ h := nomatch h
+
+def syntaxPairFormation
+    (A B : SyntaxFormed) :
+    PairEquivFormation syntaxRaw A B where
+  set := SyntaxFormed.pair A B
+  membership x := syntaxOccurrenceEquiv x A B
+
+def syntaxPairRigidity :
+    PairRigidity syntaxRaw syntaxPairFormation where
+  parameters := by
+    intro A B C D h
+    cases h
+    exact And.intro rfl rfl
+
+def syntaxPairProjection
+    (A B : SyntaxFormed) :
+    PairProjectionLaw (syntaxPairFormation A B) :=
+  fun U =>
+    Iff.intro
+      (fun _ => by
+        cases U
+        exact Or.inl rfl)
+      (fun _ => True.intro)
+
+def syntaxVisibleExtensionality :
+    VisibleExtensionalStructure syntaxRaw where
+  visibleExtensionality V W _ := by
+    cases V
+    cases W
+    rfl
+
+def syntaxPFSD :
+    PFSD.{0, 0, 0} where
+  S := syntaxRaw
+  visible := syntaxVisibleExtensionality
+  empty := syntaxEmptyFormation
+  pair := syntaxPairFormation
+  rigidity := syntaxPairRigidity
+  pairProjection := syntaxPairProjection
+
+def syntaxPFSDCanonicalDiagonal :
+    PositiveSetDiagonalization syntaxPFSD.S
+      (PairSwapWitness syntaxPFSD.S syntaxPFSD.pair
+        (canonicalLeft syntaxPFSD.empty)
+        (canonicalRight syntaxPFSD.empty syntaxPFSD.pair))
+      (PairSwapPositive
+        (pair := syntaxPFSD.pair)
+        (canonicalLeft syntaxPFSD.empty)
+        (canonicalRight syntaxPFSD.empty syntaxPFSD.pair)) :=
+  PFSD.canonicalDiagonal syntaxPFSD
+
 end PositiveSetTheoryStandalone
 
 /- AXIOM_AUDIT_BEGIN -/
@@ -1493,6 +1729,9 @@ end PositiveSetTheoryStandalone
 #print axioms PositiveSetTheoryStandalone.ReplacementFormation
 #print axioms PositiveSetTheoryStandalone.CollectionFormation
 #print axioms PositiveSetTheoryStandalone.InfinityFormation
+#print axioms PositiveSetTheoryStandalone.singletonFormation
+#print axioms PositiveSetTheoryStandalone.setTheoreticSuccessorFormation
+#print axioms PositiveSetTheoryStandalone.SetTheoreticInfinityFormation
 #print axioms PositiveSetTheoryStandalone.Subformation
 #print axioms PositiveSetTheoryStandalone.SubformationRepresentation
 #print axioms PositiveSetTheoryStandalone.PowerFormation
@@ -1533,12 +1772,16 @@ end PositiveSetTheoryStandalone
 #print axioms PositiveSetTheoryStandalone.ProjectionChange
 #print axioms PositiveSetTheoryStandalone.ProjectedRegimeCell
 #print axioms PositiveSetTheoryStandalone.projectedRegimeCellOfChange
+#print axioms PositiveSetTheoryStandalone.ProjectedCellPersistence
 #print axioms PositiveSetTheoryStandalone.PositiveDiagonalPersistence
+#print axioms PositiveSetTheoryStandalone.positiveDiagonalPersistentWitness
+#print axioms PositiveSetTheoryStandalone.positiveDiagonalPersistentWitness_pos
 #print axioms PositiveSetTheoryStandalone.PFSD
 #print axioms PositiveSetTheoryStandalone.PFSD.canonicalDiagonal
 #print axioms PositiveSetTheoryStandalone.PFS0Reflected
 #print axioms PositiveSetTheoryStandalone.PFS0Reflected.pairProjection
 #print axioms PositiveSetTheoryStandalone.PFS0Reflected.toPFSD
+#print axioms PositiveSetTheoryStandalone.PFS0Reflected.boundedSeparationProjection
 #print axioms PositiveSetTheoryStandalone.PFS0Realized
 #print axioms PositiveSetTheoryStandalone.PFSCollectionCore
 #print axioms PositiveSetTheoryStandalone.PFSCollectionCoreRealized
@@ -1552,4 +1795,18 @@ end PositiveSetTheoryStandalone
 #print axioms PositiveSetTheoryStandalone.degenerateVisibleExtensionality
 #print axioms PositiveSetTheoryStandalone.degenerateCell
 #print axioms PositiveSetTheoryStandalone.degenerateEmptyFormation
+#print axioms PositiveSetTheoryStandalone.SyntaxFormed
+#print axioms PositiveSetTheoryStandalone.SyntaxOccurrence
+#print axioms PositiveSetTheoryStandalone.syntaxMem
+#print axioms PositiveSetTheoryStandalone.syntaxRaw
+#print axioms PositiveSetTheoryStandalone.syntaxOccurrenceToPairOccurrence
+#print axioms PositiveSetTheoryStandalone.pairOccurrenceToSyntaxOccurrence
+#print axioms PositiveSetTheoryStandalone.syntaxOccurrenceEquiv
+#print axioms PositiveSetTheoryStandalone.syntaxEmptyFormation
+#print axioms PositiveSetTheoryStandalone.syntaxPairFormation
+#print axioms PositiveSetTheoryStandalone.syntaxPairRigidity
+#print axioms PositiveSetTheoryStandalone.syntaxPairProjection
+#print axioms PositiveSetTheoryStandalone.syntaxVisibleExtensionality
+#print axioms PositiveSetTheoryStandalone.syntaxPFSD
+#print axioms PositiveSetTheoryStandalone.syntaxPFSDCanonicalDiagonal
 /- AXIOM_AUDIT_END -/
