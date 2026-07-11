@@ -1229,13 +1229,46 @@ structure RelationalImagePrinciple
     (R : S.FormedSet -> S.FormedSet -> Type w) ->
       RelationalImageFormation S A R
 
-structure StrongCollectionPrinciple
+structure CollectionFromDataPrinciple
     (S : RawPositiveSetSignature.{u, v, m}) where
   collect :
     (A : S.FormedSet) ->
     (R : S.FormedSet -> S.FormedSet -> Type w) ->
       TotalOnOccurrences S A R ->
         CollectionFormation S A R
+
+abbrev StrongCollectionPrinciple
+    (S : RawPositiveSetSignature.{u, v, m}) :=
+  CollectionFromDataPrinciple.{u, v, m, w} S
+
+def TotalOnMembersProp
+    (S : RawPositiveSetSignature.{u, v, m})
+    (A : S.FormedSet)
+    (R : S.FormedSet -> S.FormedSet -> Type w) :
+    Prop :=
+  (x : S.FormedSet) ->
+    MemRel S x A ->
+      Exists (fun y : S.FormedSet => Nonempty (R x y))
+
+structure PropositionalStrongCollectionPrinciple
+    (S : RawPositiveSetSignature.{u, v, m}) where
+  collect :
+    (A : S.FormedSet) ->
+    (R : S.FormedSet -> S.FormedSet -> Type w) ->
+      TotalOnMembersProp S A R ->
+        Exists
+          (fun C : S.FormedSet =>
+            ((x : S.FormedSet) ->
+              MemRel S x A ->
+                Exists
+                  (fun y : S.FormedSet =>
+                    MemRel S y C /\ Nonempty (R x y)))
+            /\
+            ((y : S.FormedSet) ->
+              MemRel S y C ->
+                Exists
+                  (fun x : S.FormedSet =>
+                    MemRel S x A /\ Nonempty (R x y))))
 
 structure PowerPrinciple
     (S : RawPositiveSetSignature.{u, v, m}) where
@@ -1462,7 +1495,9 @@ structure PFSCollectionCore where
       base.empty
       base.pair
       base.union
-  collection : StrongCollectionPrinciple.{u, v, m, l} base.S
+  collection : CollectionFromDataPrinciple.{u, v, m, l} base.S
+  propositionalCollection :
+    PropositionalStrongCollectionPrinciple.{u, v, m, l} base.S
   induction : FormedInductionPrinciple base.S
 
 structure PFSCollectionCoreRealized where
@@ -1661,6 +1696,17 @@ def syntaxPFSDCanonicalDiagonal :
         (canonicalRight syntaxPFSD.empty syntaxPFSD.pair)) :=
   PFSD.canonicalDiagonal syntaxPFSD
 
+/-! ## Nonconstant model obligation -/
+
+structure NonconstantPFSDModelObligation where
+  model : PFSD.{u, v, m}
+  visibleLeft : model.S.FormedSet
+  visibleRight : model.S.FormedSet
+  visible_separated :
+    model.S.project visibleLeft =
+      model.S.project visibleRight ->
+        False
+
 end PositiveSetTheoryStandalone
 
 /- AXIOM_AUDIT_BEGIN -/
@@ -1766,7 +1812,10 @@ end PositiveSetTheoryStandalone
 #print axioms PositiveSetTheoryStandalone.UnionPrinciple
 #print axioms PositiveSetTheoryStandalone.ImagePrinciple
 #print axioms PositiveSetTheoryStandalone.RelationalImagePrinciple
+#print axioms PositiveSetTheoryStandalone.CollectionFromDataPrinciple
 #print axioms PositiveSetTheoryStandalone.StrongCollectionPrinciple
+#print axioms PositiveSetTheoryStandalone.TotalOnMembersProp
+#print axioms PositiveSetTheoryStandalone.PropositionalStrongCollectionPrinciple
 #print axioms PositiveSetTheoryStandalone.PowerPrinciple
 #print axioms PositiveSetTheoryStandalone.FormedInductionPrinciple
 #print axioms PositiveSetTheoryStandalone.Normalization
@@ -1812,4 +1861,5 @@ end PositiveSetTheoryStandalone
 #print axioms PositiveSetTheoryStandalone.syntaxVisibleExtensionality
 #print axioms PositiveSetTheoryStandalone.syntaxPFSD
 #print axioms PositiveSetTheoryStandalone.syntaxPFSDCanonicalDiagonal
+#print axioms PositiveSetTheoryStandalone.NonconstantPFSDModelObligation
 /- AXIOM_AUDIT_END -/
