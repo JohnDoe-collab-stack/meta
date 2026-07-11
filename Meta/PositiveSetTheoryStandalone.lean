@@ -608,6 +608,12 @@ structure UnionFormation
     (x : S.FormedSet) ->
       TypeEquiv (S.Mem x set) (UnionMembership S A x)
 
+structure UnionPrinciple
+    (S : RawPositiveSetSignature.{u, v, m}) where
+  union :
+    (A : S.FormedSet) ->
+      UnionFormation S A
+
 def UnionProjectionLaw
     {S : RawPositiveSetSignature.{u, v, m}}
     {A : S.FormedSet}
@@ -910,21 +916,19 @@ def setTheoreticSuccessorFormation
     (pair n (singletonFormation pair n)).set).set
 
 structure SetTheoreticInfinityFormation
-    (S : RawPositiveSetSignature.{u, v, m}) where
-  empty : EmptyFormation S
-  pair :
-    (A B : S.FormedSet) ->
-      PairEquivFormation S A B
-  union :
-    (A : S.FormedSet) ->
-      UnionFormation S A
+    (S : RawPositiveSetSignature.{u, v, m})
+    (empty : EmptyFormation S)
+    (pair :
+      (A B : S.FormedSet) ->
+        PairEquivFormation S A B)
+    (union : UnionPrinciple S) where
   infinity : InfinityFormation S
   zero_is_empty :
     infinity.zero = empty.set
   succ_is_union_singleton :
     (n : S.FormedSet) ->
       infinity.succ n =
-        setTheoreticSuccessorFormation pair union n
+        setTheoreticSuccessorFormation pair union.union n
 
 structure Subformation
     (S : RawPositiveSetSignature.{u, v, m})
@@ -1211,12 +1215,6 @@ def choiceFromData
 
 /-! ## Global optional principles and hierarchy packages -/
 
-structure UnionPrinciple
-    (S : RawPositiveSetSignature.{u, v, m}) where
-  union :
-    (A : S.FormedSet) ->
-      UnionFormation S A
-
 structure ImagePrinciple
     (S : RawPositiveSetSignature.{u, v, m}) where
   image :
@@ -1458,7 +1456,12 @@ structure PFS0Realized where
 
 structure PFSCollectionCore where
   base : PFS0Reflected.{u, v, m, w}
-  infinity : SetTheoreticInfinityFormation base.S
+  infinity :
+    SetTheoreticInfinityFormation
+      base.S
+      base.empty
+      base.pair
+      base.union
   collection : StrongCollectionPrinciple.{u, v, m, l} base.S
   induction : FormedInductionPrinciple base.S
 
