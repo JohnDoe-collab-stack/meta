@@ -36,11 +36,22 @@ ParitySeparation.lean
 DynamicStability.lean
 DynamicTwoPole.lean
 DynamicRoleCarrier.lean
+DynamicParitySeparation.lean
 OrderGap.lean
 RelaxedUsageRegime.lean
 ```
 
 Le fichier `ClosedStabilityTheorem.lean` est le socle autonome. Il contient notamment les cycles terminaux, les paquets de stabilité, les certificats diagonaux, les récupérations locales et la séparation entre formation géométrique et vérité projetée.
+
+`DynamicParitySeparation.lean` raccorde les deux branches déjà présentes :
+le porteur dynamique de rôles et la réalisation minimale de parité. Il
+spécialise le référentiel de rôles à `ParityRegime`, `ParityVisible`,
+`parityProjection` et `ParityRegimeRepair`, sans affirmer que tout retour
+dynamique possède automatiquement une telle lecture.
+
+Le module importe effectivement `DynamicRoleCarrier` et `ParitySeparation`,
+puis construit un `DynamicRoleCarrier` spécialisé à partir de son raccord de
+parité.
 
 ### 0.2 Types dépendants
 
@@ -1189,6 +1200,22 @@ Les réalisations gauche-droite et droite-gauche fournissent deux orientations d
 
 La parité n’est pas arithmétique. Elle montre que la diagonalisation positive et la récupération locale possèdent un modèle fini minimal.
 
+Cette section décrit la réalisation minimale indépendamment de toute dynamique.
+Son raccord positif à un retour dynamique est porté séparément par
+`DynamicParitySeparation`. Le raccord ne dérive pas une parité à partir du
+retour seul : il fournit les lectures `regimeOf` et `visibleOf`, un deux-pôles
+opérationnel de parité et les compatibilités avec les pôles formé et ombre.
+
+Cela distingue nettement :
+
+```text
+ParitySeparation
+  := modèle minimal autonome
+
+DynamicParitySeparation
+  := lecture positive d’un retour dynamique dans ce modèle
+```
+
 ---
 
 # Partie VI — Médiations dynamiques
@@ -1298,9 +1325,245 @@ Ce paquet n’introduit pas une nouvelle couche mathématique ; il donne une lec
 
 ---
 
+## 29. Raccord dynamique de parité
+
+`DynamicParitySeparation.lean` spécialise le porteur dynamique de rôles au
+référentiel minimal de parité :
+
+```text
+Role         := ParityRegime
+RoleVisible  := ParityVisible
+roleProject  := parityProjection
+RoleRepairOf := ParityRegimeRepair
+```
+
+Pour un retour dynamique localement récupéré fixé :
+
+```text
+dynamicReturn :
+  LocallyRecoveredDynamicReturn ...
+```
+
+le raccord porte positivement :
+
+```text
+regimeOf :
+  Interface → ParityRegime
+
+visibleOf :
+  Visible → ParityVisible
+
+parityTwoPole :
+  OperationalTwoPole
+    ParityRegime
+    ParityVisible
+    parityProjection
+    ParityRegimeRepair
+```
+
+avec les compatibilités ponctuelles :
+
+```text
+regimeOf dynamicReturn.localRecovery.formed
+=
+leftPole parityTwoPole
+
+regimeOf dynamicReturn.localRecovery.shadow
+=
+rightPole parityTwoPole
+
+visibleOf (project dynamicReturn.localRecovery.formed)
+=
+parityProjection
+  (regimeOf dynamicReturn.localRecovery.formed)
+
+visibleOf (project dynamicReturn.localRecovery.shadow)
+=
+parityProjection
+  (regimeOf dynamicReturn.localRecovery.shadow)
+```
+
+Le raccord conserve simultanément deux deux-pôles :
+
+```text
+le deux-pôles opérationnel des interfaces dynamiques
+le deux-pôles opérationnel des régimes de parité
+```
+
+Il ne remplace pas le premier par le second. Il fournit une lecture du premier
+dans le second.
+
+### 29.1 Spécialisation du porteur dynamique de rôles
+
+Le constructeur :
+
+```text
+dynamicParitySeparation_roleCarrier
+```
+
+transforme tout raccord de parité en :
+
+```text
+DynamicRoleCarrier
+  dynamicReturn
+  ParityRegime
+  ParityVisible
+  parityProjection
+  ParityRegimeRepair
+```
+
+La séparation dynamique de parité n’est donc pas une théorie parallèle au
+porteur de rôles. Elle en est la spécialisation au deux-pôles minimal de
+parité.
+
+### 29.2 Conséquences positives
+
+Le raccord expose les régimes lus sur les deux pôles :
+
+```text
+formedRegime :=
+  regimeOf dynamicReturn.localRecovery.formed
+
+shadowRegime :=
+  regimeOf dynamicReturn.localRecovery.shadow
+```
+
+et leurs visibles :
+
+```text
+formedVisible :=
+  visibleOf (project dynamicReturn.localRecovery.formed)
+
+shadowVisible :=
+  visibleOf (project dynamicReturn.localRecovery.shadow)
+```
+
+Il prouve :
+
+```text
+formedVisible = shadowVisible
+```
+
+tout en conservant :
+
+```text
+formedRegime = shadowRegime → False
+```
+
+La contraction visible de parité ne contracte donc pas les régimes lus sur les
+pôles dynamiques.
+
+Comme le raccord porte un deux-pôles opérationnel de parité, il fournit aussi :
+
+```text
+réparation locale du régime formé
+réfutation de la présentation courte de parité
+réfutation de la contractibilité de la fibre de parité
+impossibilité de reconstruire globalement
+  ParityRegime depuis ParityVisible
+```
+
+### 29.3 Orientations
+
+Deux constructeurs canoniques sont disponibles :
+
+```text
+dynamicParitySeparation_leftRight
+dynamicParitySeparation_rightLeft
+```
+
+Le premier lit :
+
+```text
+formed ↦ left
+shadow ↦ right
+```
+
+Le second lit :
+
+```text
+formed ↦ right
+shadow ↦ left
+```
+
+Ils demandent explicitement :
+
+```text
+regimeOf
+visibleOf
+les égalités de régime des deux pôles
+les compatibilités visibles des deux pôles
+```
+
+Ainsi, le noyau ne prouve pas :
+
+```text
+∀ dynamicReturn,
+  DynamicParitySeparation dynamicReturn
+```
+
+Il prouve que, lorsque ces données positives de lecture sont fournies, elles
+forment un raccord opérationnel de parité.
+
+### 29.4 Rôles opérationnels de parité
+
+Le paquet :
+
+```text
+OperationalParityRoles raccord
+```
+
+nomme :
+
+```text
+closingRegime
+mediatingRegime
+```
+
+avec :
+
+```text
+closingRegime = formedRegime
+mediatingRegime = shadowRegime
+```
+
+Il conserve :
+
+```text
+même visible de parité
+séparation des régimes
+réparation dynamique du pôle formé
+impossibilité de reconstruction globale de la parité
+```
+
+L’orientation gauche-droite ou droite-gauche ne modifie pas les rôles
+dynamiques :
+
+```text
+closing  := côté dynamique formé
+mediating := côté dynamique ombre
+```
+
+Elle modifie seulement le régime de parité attribué à chacun.
+
+Enfin :
+
+```text
+operationalParityRoles_mediatedDynamicRoles
+```
+
+replace ces rôles opérationnels dans le paquet générique
+`MediatedDynamicRoles`. La réparation de rôle y est alors la
+`ParityRegimeRepair` portée par le deux-pôles de parité.
+
+Cette section reprend toutes les structures significatives du fichier sans en
+faire une nouvelle couche indépendante.
+
+---
+
 # Partie VII — Test de contraction par l’ordre visible
 
-## 29. Ordre visible
+## 30. Ordre visible
 
 Le noyau définit :
 
@@ -1327,7 +1590,7 @@ OrderContractiveProjection :=
     left = right
 ```
 
-## 30. Équivalence avec la présentation courte
+## 31. Équivalence avec la présentation courte
 
 Pour tout préordre :
 
@@ -1353,7 +1616,7 @@ OrderContractiveProjection
 
 Le test ordonné mesure exactement une tentative de contraction de la diagonale visible vers l’égalité interne.
 
-## 31. Réfutation par la diagonalisation
+## 32. Réfutation par la diagonalisation
 
 Une diagonale structurelle ou opérationnelle donne les deux comparaisons visibles par réécriture et réflexivité.
 
@@ -1373,7 +1636,7 @@ L’ordre n’est pas un second fondement du cadre. Il est un test externe préc
 
 # Partie VIII — Conservation sous relaxation
 
-## 32. Relaxation de projection contrainte
+## 33. Relaxation de projection contrainte
 
 La structure :
 
@@ -1408,7 +1671,7 @@ sameOut :
 
 La diagonale demeure donc disponible dans les deux régimes visibles.
 
-## 33. Invariant positif conservé
+## 34. Invariant positif conservé
 
 Le paquet contient :
 
@@ -1448,7 +1711,7 @@ l’invariant positif.
 
 Le type exact de `witnessOut` reste `WitnessOf sourceCell`. Le noyau exprime ainsi la conservation du même invariant, et non la construction d’un nouveau témoin indexé par une cellule de sortie distincte.
 
-## 34. Changement visible
+## 35. Changement visible
 
 Le champ :
 
@@ -1468,7 +1731,7 @@ Le cadre conserve donc l’invariant à travers un changement visible réel, san
 
 # Partie IX — Usage totalement relaxé
 
-## 35. Régime autonome
+## 36. Régime autonome
 
 `RelaxedUsageRegime.lean` abstrait le mécanisme d’usage sans partir d’une projection ou d’une égalité.
 
@@ -1505,7 +1768,7 @@ transport :
       (read γ ρ y)
 ```
 
-## 36. Usage non contractif
+## 37. Usage non contractif
 
 Un :
 
@@ -1546,7 +1809,7 @@ la coordination autorise un usage ;
 l’usage produit un transport.
 ```
 
-## 37. Chaîne locale
+## 38. Chaîne locale
 
 ```text
 LocalTransportChain
@@ -1576,7 +1839,7 @@ garantissent l’habitation du niveau contexte/lecture. Ils ne produisent pas à
 
 # Partie X — Lecture unifiée
 
-## 38. Forme centrale
+## 39. Forme centrale
 
 Le motif complet est :
 
@@ -1606,7 +1869,7 @@ pas de contraction ordonnée.
 
 La conséquence négative ne définit pas la diagonalisation positive. Elle montre seulement que son contenu ne peut pas être absorbé par le visible.
 
-## 39. Diagramme principal
+## 40. Diagramme principal
 
 ```text
 intersection typée
@@ -1645,6 +1908,33 @@ lectures communes          Truth shadow impossible
         v
 coordination sans contraction
 
+retour dynamique localement récupéré
+        |
+        v
+DynamicRoleCarrier
+        |
+        | spécialisation
+        v
+DynamicParitySeparation
+        |
+        +-------------------------------+
+        |                               |
+        v                               v
+régime formé                        régime ombre
+        |                               |
+        +---------------+---------------+
+                        |
+                        v
+              même visible de parité
+                        |
+                        v
+              régimes encore séparés
+                        |
+                        v
+        rôles opérationnels de parité
+        closing = formé
+        mediating = ombre
+
 Après oubli du contenu positif :
 
 diagonale séparée
@@ -1656,7 +1946,12 @@ obstruction projective
 pas de reconstruction globale
 ```
 
-## 40. Résultat métamathématique interne le plus net
+Le raccord de parité n’est pas obtenu en oubliant la dynamique. Il conserve le
+deux-pôles dynamique et lui ajoute une lecture positive dans le deux-pôles
+minimal de parité. L’orientation des régimes ne change pas l’orientation
+opérationnelle formé/ombre.
+
+## 41. Résultat métamathématique interne le plus net
 
 Le résultat le plus directement métamathématique du socle est la séparation constructive entre :
 
@@ -1691,7 +1986,7 @@ l’ombre de même projection ne la porte pas.
 
 Le visible ne décide donc ni la formation ni la vérité interne du pôle formé.
 
-## 41. Ce que le cadre établit
+## 42. Ce que le cadre établit
 
 Il établit constructivement que :
 
@@ -1713,11 +2008,20 @@ Il établit constructivement que :
 7. la formation géométrique et la vérité locale projetée
    sont constructivement indépendantes ;
 
-8. le même motif se conserve dans les retours dynamiques,
-   les rôles, la parité, l’ordre visible et les relaxations.
+8. le même motif se conserve dans les retours dynamiques et les rôles ;
+
+9. un retour dynamique muni d’une lecture de parité devient un
+   DynamicRoleCarrier spécialisé, avec même visible de parité,
+   régimes séparés, réparations locales et non-reconstruction globale ;
+
+10. les deux orientations de parité ne changent pas les rôles opérationnels :
+    le closing reste le pôle formé et le mediating reste le pôle ombre ;
+
+11. le motif est également testé par l’ordre visible et conservé
+    dans les relaxations contraintes.
 ```
 
-## 42. Ce que le cadre ne confond pas
+## 43. Ce que le cadre ne confond pas
 
 Il maintient les distinctions suivantes :
 
@@ -1757,7 +2061,7 @@ certificat d’obstruction
 contenu positif complet de la diagonale
 ```
 
-## 43. Portée exacte de certaines données
+## 44. Portée exacte de certaines données
 
 Le noyau ne postule pas :
 
@@ -1773,7 +2077,15 @@ repair ↦ recovered
 
 dans toutes les familles `RepairOf`.
 
-Un rôle dynamique, une lecture de parité ou un invariant particulier sont des données positives à fournir dans leurs structures respectives.
+Un porteur dynamique de rôles, un raccord dynamique de parité ou un invariant
+particulier sont des données positives à fournir dans leurs structures
+respectives.
+
+En particulier, `DynamicParitySeparation dynamicReturn` n’est pas dérivé du
+seul type de `dynamicReturn`. Il exige `regimeOf`, `visibleOf`, un
+`parityTwoPole` opérationnel et quatre compatibilités sur les pôles formé et
+ombre. Les constructeurs gauche-droite et droite-gauche organisent ces données ;
+ils ne les produisent pas sans hypothèses.
 
 Ces précisions ne diminuent pas le cadre. Elles indiquent exactement où se trouve son contenu :
 
@@ -1786,7 +2098,7 @@ et non dans des principes externes ajoutés après coup.
 
 # Partie XI — Discipline constructive et audit
 
-## 44. Forme des preuves
+## 45. Forme des preuves
 
 Les preuves relues utilisent principalement :
 
@@ -1809,13 +2121,18 @@ application de formed_truth
 application de shadow_not_truth
 ```
 
-## 45. Audit textuel et audit Lean
+## 46. Audit textuel et audit Lean
 
 Les fichiers contiennent des blocs :
 
 ```text
 #print axioms ...
 ```
+
+`DynamicParitySeparation.lean` contient également un bloc `AXIOM_AUDIT`
+couvrant la structure du raccord, sa spécialisation en porteur de rôles, ses
+deux orientations, les rôles opérationnels et les conséquences de
+non-contractibilité et de non-reconstruction.
 
 Une inspection textuelle des sources fournies ne montre pas d’usage explicite de :
 
@@ -1846,6 +2163,31 @@ deux pôles restent séparés,
 coïncident dans un visible commun,
 et la configuration porte un contenu positif
 qui peut être formé, témoigné, réparé, transporté et conservé.
+```
+
+Il peut aussi être médié dans une lecture minimale de parité : les pôles
+dynamiques reçoivent des régimes séparés, leurs visibles de parité coïncident,
+et les rôles opérationnels formé/ombre sont conservés indépendamment de
+l’orientation gauche-droite choisie.
+
+La correction de fond est donc :
+
+```text
+parité minimale
+≠
+raccord dynamique de parité
+
+mais :
+
+DynamicParitySeparation
+=
+DynamicRoleCarrier spécialisé
++
+deux-pôles minimal de parité
++
+compatibilités positives sur les pôles dynamiques
++
+rôles opérationnels formé / ombre
 ```
 
 L’obstruction globale apparaît parce que ce contenu positif ne peut pas être réduit au visible seul.
