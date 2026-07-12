@@ -497,6 +497,17 @@ def PairSwapPositive
     Prop :=
   A = B -> False
 
+theorem pairSwapWitness_positive
+    {S : RawPositiveSetSignature.{u, v, m}}
+    {pair :
+      (A B : S.FormedSet) ->
+        PairEquivFormation S A B}
+    {A B : S.FormedSet}
+    {cell : ProjectedSetCell S}
+    (witness : PairSwapWitness S pair A B cell) :
+    PairSwapPositive A B cell witness :=
+  witness.parameters_separated
+
 def canonicalPairSwapWitness
     {S : RawPositiveSetSignature.{u, v, m}}
     (visible : VisibleExtensionalStructure S)
@@ -603,7 +614,9 @@ def canonicalPositiveConstructiveDiagonalization
     canonicalConstructivePairSwapWitness
       visible empty pair rigidity pairProjection
   witness_pos :=
-    canonicalParameters_separated empty pair
+    pairSwapWitness_positive
+      (canonicalConstructivePairSwapWitness
+        visible empty pair rigidity pairProjection)
 
 def canonicalPositiveDiagonal
     {S : RawPositiveSetSignature.{u, v, m}}
@@ -1267,6 +1280,26 @@ structure LocalSetTruthGap
   formed_truth : TruthData recovery.formed
   shadow_not_truth : TruthData recovery.shadow -> False
 
+structure LocalCoordinatedSetTruthGap
+    (S : RawPositiveSetSignature.{u, v, m})
+    (TruthData : S.FormedSet -> Type w)
+    (RepairOf : S.FormedSet -> Type l) where
+  recovery : LocalCoordinatedRecovery S RepairOf
+  formed_truth : TruthData recovery.diagonal.left
+  shadow_not_truth : TruthData recovery.diagonal.right -> False
+
+def localCoordinatedSetTruthGap_toLocalSetTruthGap
+    {S : RawPositiveSetSignature.{u, v, m}}
+    {TruthData : S.FormedSet -> Type w}
+    {RepairOf : S.FormedSet -> Type l}
+    (gap : LocalCoordinatedSetTruthGap S TruthData RepairOf) :
+    LocalSetTruthGap S TruthData RepairOf where
+  recovery :=
+    localCoordinatedRecovery_toLocalProjectiveRecovery
+      gap.recovery
+  formed_truth := gap.formed_truth
+  shadow_not_truth := gap.shadow_not_truth
+
 theorem localSetTruthGap_noVisibleTruthClassifier
     {S : RawPositiveSetSignature.{u, v, m}}
     {TruthData : S.FormedSet -> Type w}
@@ -1900,13 +1933,26 @@ structure PFSPower where
 structure PFSOperational where
   base : PFS0Reflected.{u, v, m, w}
   RepairOf : base.S.FormedSet -> Type l
-  recovery : LocalProjectiveRecovery base.S RepairOf
+  recovery : LocalCoordinatedRecovery base.S RepairOf
+
+def PFSOperational.localProjectiveRecovery
+    (T : PFSOperational.{u, v, m, w, l}) :
+    LocalProjectiveRecovery T.base.S T.RepairOf :=
+  localCoordinatedRecovery_toLocalProjectiveRecovery
+    T.recovery
 
 structure PFSTruth where
   base : PFS0Reflected.{u, v, m, w}
   TruthData : base.S.FormedSet -> Type l
   RepairOf : base.S.FormedSet -> Type w
-  truthGap : LocalSetTruthGap base.S TruthData RepairOf
+  truthGap :
+    LocalCoordinatedSetTruthGap base.S TruthData RepairOf
+
+def PFSTruth.localSetTruthGap
+    (T : PFSTruth.{u, v, m, w, l}) :
+    LocalSetTruthGap T.base.S T.TruthData T.RepairOf :=
+  localCoordinatedSetTruthGap_toLocalSetTruthGap
+    T.truthGap
 
 structure ModelObligations
     (S : RawPositiveSetSignature.{u, v, m}) where
@@ -2171,7 +2217,8 @@ def syntaxNatPositiveConstructiveDiagonalization :
           witness) where
   diagonal := syntaxNatDiagonalCoordination
   witness := syntaxNatPairSwapWitness
-  witness_pos := syntaxNatE_ne_S
+  witness_pos :=
+    pairSwapWitness_positive syntaxNatPairSwapWitness
 
 theorem syntaxNatDiagonal_not_fiberFaithful
     (faithful : ProjectionFiberFaithful syntaxNatRaw) :
@@ -2255,6 +2302,7 @@ end PositiveSetTheoryStandalone
 #print axioms PositiveSetTheoryStandalone.pairOccurrenceWitnessOfOccurrence
 #print axioms PositiveSetTheoryStandalone.PairSwapWitness
 #print axioms PositiveSetTheoryStandalone.PairSwapPositive
+#print axioms PositiveSetTheoryStandalone.pairSwapWitness_positive
 #print axioms PositiveSetTheoryStandalone.canonicalPairSwapWitness
 #print axioms PositiveSetTheoryStandalone.canonicalConstructivePairSwapWitness
 #print axioms PositiveSetTheoryStandalone.canonicalPositiveDiagonal
@@ -2302,6 +2350,8 @@ end PositiveSetTheoryStandalone
 #print axioms PositiveSetTheoryStandalone.RepairRelation
 #print axioms PositiveSetTheoryStandalone.RelationalLocalProjectiveRecovery
 #print axioms PositiveSetTheoryStandalone.LocalSetTruthGap
+#print axioms PositiveSetTheoryStandalone.LocalCoordinatedSetTruthGap
+#print axioms PositiveSetTheoryStandalone.localCoordinatedSetTruthGap_toLocalSetTruthGap
 #print axioms PositiveSetTheoryStandalone.localSetTruthGap_noVisibleTruthClassifier
 #print axioms PositiveSetTheoryStandalone.Scene
 #print axioms PositiveSetTheoryStandalone.GeometricFormationData
@@ -2356,7 +2406,9 @@ end PositiveSetTheoryStandalone
 #print axioms PositiveSetTheoryStandalone.PFSCollectionCoreRealized
 #print axioms PositiveSetTheoryStandalone.PFSPower
 #print axioms PositiveSetTheoryStandalone.PFSOperational
+#print axioms PositiveSetTheoryStandalone.PFSOperational.localProjectiveRecovery
 #print axioms PositiveSetTheoryStandalone.PFSTruth
+#print axioms PositiveSetTheoryStandalone.PFSTruth.localSetTruthGap
 #print axioms PositiveSetTheoryStandalone.ModelObligations
 #print axioms PositiveSetTheoryStandalone.SyntaxFormed
 #print axioms PositiveSetTheoryStandalone.SyntaxOccurrence
