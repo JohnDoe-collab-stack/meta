@@ -1434,10 +1434,6 @@ structure CollectionFromDataPrinciple
       TotalOnOccurrences S A R ->
         CollectionFormation S A R
 
-abbrev StrongCollectionPrinciple
-    (S : RawPositiveSetSignature.{u, v, m}) :=
-  CollectionFromDataPrinciple.{u, v, m, w} S
-
 def TotalOnMembersProp
     (S : RawPositiveSetSignature.{u, v, m})
     (A : S.FormedSet)
@@ -1567,10 +1563,16 @@ def projectedRegimeCoordinationOfChange
     (change : ProjectionChange S R)
     (diagonal : DiagonalCoordination S) :
     ProjectedRegimeCoordination S.FormedSet R where
-  index := R.project diagonal.left
+  index := change.mapVisible diagonal.index
   left := diagonal.left
   right := diagonal.right
-  left_projects := rfl
+  left_projects :=
+    calc
+      R.project diagonal.left =
+          change.mapVisible (S.project diagonal.left) :=
+        Eq.symm (change.commutes diagonal.left)
+      _ = change.mapVisible diagonal.index :=
+        congrArg change.mapVisible diagonal.left_projects
   right_projects :=
     calc
       R.project diagonal.right =
@@ -1578,10 +1580,6 @@ def projectedRegimeCoordinationOfChange
         Eq.symm (change.commutes diagonal.right)
       _ = change.mapVisible diagonal.index :=
         congrArg change.mapVisible diagonal.right_projects
-      _ = change.mapVisible (S.project diagonal.left) :=
-        congrArg change.mapVisible diagonal.left_projects.symm
-      _ = R.project diagonal.left :=
-        change.commutes diagonal.left
   separated := diagonal.separated
 
 structure ProjectedCellPersistence
@@ -2288,7 +2286,6 @@ end PositiveSetTheoryStandalone
 #print axioms PositiveSetTheoryStandalone.ImagePrinciple
 #print axioms PositiveSetTheoryStandalone.RelationalImagePrinciple
 #print axioms PositiveSetTheoryStandalone.CollectionFromDataPrinciple
-#print axioms PositiveSetTheoryStandalone.StrongCollectionPrinciple
 #print axioms PositiveSetTheoryStandalone.TotalOnMembersProp
 #print axioms PositiveSetTheoryStandalone.PropositionalStrongCollectionPrinciple
 #print axioms PositiveSetTheoryStandalone.PowerPrinciple
