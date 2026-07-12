@@ -226,6 +226,38 @@ structure PositiveConstructiveDiagonalization
   witness : WitnessOf diagonal
   witness_pos : Positive diagonal witness
 
+structure PositiveConstructiveWitnessView
+    {S : RawPositiveSetSignature.{u, v, m}}
+    (WitnessOf : DiagonalCoordination S -> Type w)
+    (cell : ProjectedSetCell S) :
+    Type (max u v m w) where
+  diagonal : DiagonalCoordination S
+  cell_eq :
+    DiagonalCoordination.toProjectedSetCell diagonal = cell
+  witness : WitnessOf diagonal
+
+def PositiveConstructiveDiagonalization.toPositiveSetDiagonalization
+    {S : RawPositiveSetSignature.{u, v, m}}
+    {WitnessOf : DiagonalCoordination S -> Type w}
+    {Positive :
+      (diagonal : DiagonalCoordination S) ->
+        WitnessOf diagonal -> Prop}
+    (diagonalization :
+      PositiveConstructiveDiagonalization S WitnessOf Positive) :
+    PositiveSetDiagonalization S
+      (PositiveConstructiveWitnessView WitnessOf)
+      (fun _cell witness =>
+        Positive witness.diagonal witness.witness) where
+  cell :=
+    DiagonalCoordination.toProjectedSetCell
+      diagonalization.diagonal
+  witness :=
+    { diagonal := diagonalization.diagonal
+      cell_eq := rfl
+      witness := diagonalization.witness }
+  witness_pos :=
+    diagonalization.witness_pos
+
 /-! ## Empty and pair formations -/
 
 structure EmptyFormation
@@ -348,6 +380,48 @@ theorem canonicalParameters_separated
     exact memberEInReflexivePair
   exact empty.elim E memberEInEmpty
 
+def canonicalDiagonalCoordination
+    {S : RawPositiveSetSignature.{u, v, m}}
+    (visible : VisibleExtensionalStructure S)
+    (empty : EmptyFormation S)
+    (pair :
+      (A B : S.FormedSet) ->
+        PairEquivFormation S A B)
+    (rigidity : PairRigidity S pair)
+    (pairProjection :
+      (A B : S.FormedSet) ->
+        PairProjectionLaw (pair A B)) :
+    DiagonalCoordination S where
+  index :=
+    S.project
+      (pair
+        (canonicalLeft empty)
+        (canonicalRight empty pair)).set
+  left :=
+    (pair
+      (canonicalLeft empty)
+      (canonicalRight empty pair)).set
+  right :=
+    (pair
+      (canonicalRight empty pair)
+      (canonicalLeft empty)).set
+  left_projects := rfl
+  right_projects :=
+    Eq.symm
+      (pairSwap_sameVisible visible pair pairProjection
+        (canonicalLeft empty)
+        (canonicalRight empty pair))
+  separated := by
+    intro h
+    have parameters :=
+      rigidity.parameters
+        (canonicalLeft empty)
+        (canonicalRight empty pair)
+        (canonicalRight empty pair)
+        (canonicalLeft empty)
+        h
+    exact canonicalParameters_separated empty pair parameters.left
+
 def canonicalPairCell
     {S : RawPositiveSetSignature.{u, v, m}}
     (visible : VisibleExtensionalStructure S)
@@ -359,25 +433,10 @@ def canonicalPairCell
     (pairProjection :
       (A B : S.FormedSet) ->
         PairProjectionLaw (pair A B)) :
-    ProjectedSetCell S where
-  formed :=
-    (pair (canonicalLeft empty) (canonicalRight empty pair)).set
-  shadow :=
-    (pair (canonicalRight empty pair) (canonicalLeft empty)).set
-  sameVisible :=
-    pairSwap_sameVisible visible pair pairProjection
-      (canonicalLeft empty)
-      (canonicalRight empty pair)
-  separated := by
-    intro h
-    have parameters :=
-      rigidity.parameters
-        (canonicalLeft empty)
-        (canonicalRight empty pair)
-        (canonicalRight empty pair)
-        (canonicalLeft empty)
-        h
-    exact canonicalParameters_separated empty pair parameters.left
+    ProjectedSetCell S :=
+  DiagonalCoordination.toProjectedSetCell
+    (canonicalDiagonalCoordination
+      visible empty pair rigidity pairProjection)
 
 structure PairOccurrenceWitness
     {S : RawPositiveSetSignature.{u, v, m}}
@@ -494,6 +553,58 @@ def canonicalPairSwapWitness
         (B := canonicalLeft empty)
         rfl)
 
+def canonicalConstructivePairSwapWitness
+    {S : RawPositiveSetSignature.{u, v, m}}
+    (visible : VisibleExtensionalStructure S)
+    (empty : EmptyFormation S)
+    (pair :
+      (A B : S.FormedSet) ->
+        PairEquivFormation S A B)
+    (rigidity : PairRigidity S pair)
+    (pairProjection :
+      (A B : S.FormedSet) ->
+        PairProjectionLaw (pair A B)) :
+    PairSwapWitness S pair
+      (canonicalLeft empty)
+      (canonicalRight empty pair)
+      (DiagonalCoordination.toProjectedSetCell
+        (canonicalDiagonalCoordination
+          visible empty pair rigidity pairProjection)) :=
+  canonicalPairSwapWitness visible empty pair rigidity pairProjection
+
+def canonicalPositiveConstructiveDiagonalization
+    {S : RawPositiveSetSignature.{u, v, m}}
+    (visible : VisibleExtensionalStructure S)
+    (empty : EmptyFormation S)
+    (pair :
+      (A B : S.FormedSet) ->
+        PairEquivFormation S A B)
+    (rigidity : PairRigidity S pair)
+    (pairProjection :
+      (A B : S.FormedSet) ->
+        PairProjectionLaw (pair A B)) :
+    PositiveConstructiveDiagonalization S
+      (fun diagonal =>
+        PairSwapWitness S pair
+          (canonicalLeft empty)
+          (canonicalRight empty pair)
+          (DiagonalCoordination.toProjectedSetCell diagonal))
+      (fun diagonal witness =>
+        PairSwapPositive
+          (pair := pair)
+          (canonicalLeft empty)
+          (canonicalRight empty pair)
+          (DiagonalCoordination.toProjectedSetCell diagonal)
+          witness) where
+  diagonal :=
+    canonicalDiagonalCoordination
+      visible empty pair rigidity pairProjection
+  witness :=
+    canonicalConstructivePairSwapWitness
+      visible empty pair rigidity pairProjection
+  witness_pos :=
+    canonicalParameters_separated empty pair
+
 def canonicalPositiveDiagonal
     {S : RawPositiveSetSignature.{u, v, m}}
     (visible : VisibleExtensionalStructure S)
@@ -512,13 +623,17 @@ def canonicalPositiveDiagonal
       (PairSwapPositive
         (pair := pair)
         (canonicalLeft empty)
-        (canonicalRight empty pair)) where
-  cell :=
-    canonicalPairCell visible empty pair rigidity pairProjection
-  witness :=
-    canonicalPairSwapWitness visible empty pair rigidity pairProjection
-  witness_pos :=
-    canonicalParameters_separated empty pair
+        (canonicalRight empty pair)) :=
+  let constructive :=
+    canonicalPositiveConstructiveDiagonalization
+      visible empty pair rigidity pairProjection
+  { cell :=
+      DiagonalCoordination.toProjectedSetCell
+        constructive.diagonal
+    witness :=
+      constructive.witness
+    witness_pos :=
+      constructive.witness_pos }
 
 /-! ## Visible representation and exact membership adequacy -/
 
@@ -1068,6 +1183,48 @@ theorem localProjectiveRecovery_not_informationConserving
     (localProjectiveRecovery_cell recovery)
     conserving
 
+structure LocalCoordinatedRecovery
+    (S : RawPositiveSetSignature.{u, v, m})
+    (RepairOf : S.FormedSet -> Type w) where
+  diagonal : DiagonalCoordination S
+  repair : RepairOf diagonal.left
+  recovered : S.FormedSet
+  recovered_eq_left : recovered = diagonal.left
+
+def localCoordinatedRecovery_toLocalProjectiveRecovery
+    {S : RawPositiveSetSignature.{u, v, m}}
+    {RepairOf : S.FormedSet -> Type w}
+    (recovery : LocalCoordinatedRecovery S RepairOf) :
+    LocalProjectiveRecovery S RepairOf where
+  formed := recovery.diagonal.left
+  shadow := recovery.diagonal.right
+  sameProjection :=
+    (DiagonalCoordination.toProjectedSetCell recovery.diagonal).sameVisible
+  separated := recovery.diagonal.separated
+  repair := recovery.repair
+  recovered := recovery.recovered
+  recovered_eq_formed := recovery.recovered_eq_left
+
+theorem localCoordinatedRecovery_not_fiberFaithful
+    {S : RawPositiveSetSignature.{u, v, m}}
+    {RepairOf : S.FormedSet -> Type w}
+    (recovery : LocalCoordinatedRecovery S RepairOf)
+    (faithful : ProjectionFiberFaithful S) :
+    False :=
+  localProjectiveRecovery_not_fiberFaithful
+    (localCoordinatedRecovery_toLocalProjectiveRecovery recovery)
+    faithful
+
+theorem localCoordinatedRecovery_not_informationConserving
+    {S : RawPositiveSetSignature.{u, v, m}}
+    {RepairOf : S.FormedSet -> Type w}
+    (recovery : LocalCoordinatedRecovery S RepairOf)
+    (conserving : ProjectionInformationConserving S) :
+    False :=
+  localProjectiveRecovery_not_informationConserving
+    (localCoordinatedRecovery_toLocalProjectiveRecovery recovery)
+    conserving
+
 structure RepairAction
     (S : RawPositiveSetSignature.{u, v, m})
     (RepairOf : S.FormedSet -> Type w) where
@@ -1383,6 +1540,50 @@ def projectedRegimeCellOfChange
         change.commutes cell.shadow
   separated := cell.separated
 
+structure ProjectedRegimeCoordination
+    (FormedSet : Type u)
+    (R : ProjectionRegime.{u, v} FormedSet) where
+  index : R.VisibleSet
+  left : FormedSet
+  right : FormedSet
+  left_projects : R.project left = index
+  right_projects : R.project right = index
+  separated : left = right -> False
+
+def ProjectedRegimeCoordination.toProjectedRegimeCell
+    {FormedSet : Type u}
+    {R : ProjectionRegime.{u, v} FormedSet}
+    (coordination : ProjectedRegimeCoordination FormedSet R) :
+    ProjectedRegimeCell FormedSet R where
+  formed := coordination.left
+  shadow := coordination.right
+  sameVisible :=
+    coordination.left_projects.trans coordination.right_projects.symm
+  separated := coordination.separated
+
+def projectedRegimeCoordinationOfChange
+    {S : RawPositiveSetSignature.{u, v, m}}
+    {R : ProjectionRegime.{u, v} S.FormedSet}
+    (change : ProjectionChange S R)
+    (diagonal : DiagonalCoordination S) :
+    ProjectedRegimeCoordination S.FormedSet R where
+  index := R.project diagonal.left
+  left := diagonal.left
+  right := diagonal.right
+  left_projects := rfl
+  right_projects :=
+    calc
+      R.project diagonal.right =
+          change.mapVisible (S.project diagonal.right) :=
+        Eq.symm (change.commutes diagonal.right)
+      _ = change.mapVisible diagonal.index :=
+        congrArg change.mapVisible diagonal.right_projects
+      _ = change.mapVisible (S.project diagonal.left) :=
+        congrArg change.mapVisible diagonal.left_projects.symm
+      _ = R.project diagonal.left :=
+        change.commutes diagonal.left
+  separated := diagonal.separated
+
 structure ProjectedCellPersistence
     (S : RawPositiveSetSignature.{u, v, m})
     (cell : ProjectedSetCell S)
@@ -1392,6 +1593,16 @@ structure ProjectedCellPersistence
   target_matches_change :
     targetCell =
       projectedRegimeCellOfChange change cell
+
+structure DiagonalCoordinationPersistence
+    (S : RawPositiveSetSignature.{u, v, m})
+    (diagonal : DiagonalCoordination S)
+    (R : ProjectionRegime.{u, v} S.FormedSet) where
+  change : ProjectionChange S R
+  targetCoordination : ProjectedRegimeCoordination S.FormedSet R
+  target_matches_change :
+    targetCoordination =
+      projectedRegimeCoordinationOfChange change diagonal
 
 structure PositiveDiagonalPersistence
     (S : RawPositiveSetSignature.{u, v, m})
@@ -1416,6 +1627,33 @@ structure PositiveDiagonalPersistence
       Positive diag.cell witness ->
         TargetPositive
           cellPersistence.targetCell
+          (witnessTransport witness)
+
+structure PositiveConstructiveDiagonalPersistence
+    (S : RawPositiveSetSignature.{u, v, m})
+    (WitnessOf : DiagonalCoordination S -> Type w)
+    (Positive :
+      (diagonal : DiagonalCoordination S) ->
+        WitnessOf diagonal -> Prop)
+    (diag :
+      PositiveConstructiveDiagonalization S WitnessOf Positive)
+    (R : ProjectionRegime.{u, v} S.FormedSet) where
+  coordinationPersistence :
+    DiagonalCoordinationPersistence S diag.diagonal R
+  TargetWitnessOf :
+    ProjectedRegimeCoordination S.FormedSet R -> Type l
+  TargetPositive :
+    (coordination : ProjectedRegimeCoordination S.FormedSet R) ->
+      TargetWitnessOf coordination -> Prop
+  witnessTransport :
+    (witness : WitnessOf diag.diagonal) ->
+      TargetWitnessOf
+        coordinationPersistence.targetCoordination
+  positiveTransport :
+    (witness : WitnessOf diag.diagonal) ->
+      Positive diag.diagonal witness ->
+        TargetPositive
+          coordinationPersistence.targetCoordination
           (witnessTransport witness)
 
 def positiveDiagonalPersistentWitness
@@ -1446,6 +1684,39 @@ theorem positiveDiagonalPersistentWitness_pos
       (positiveDiagonalPersistentWitness p) :=
   p.positiveTransport diag.witness diag.witness_pos
 
+def positiveConstructiveDiagonalPersistentWitness
+    {S : RawPositiveSetSignature.{u, v, m}}
+    {WitnessOf : DiagonalCoordination S -> Type w}
+    {Positive :
+      (diagonal : DiagonalCoordination S) ->
+        WitnessOf diagonal -> Prop}
+    {diag :
+      PositiveConstructiveDiagonalization S WitnessOf Positive}
+    {R : ProjectionRegime.{u, v} S.FormedSet}
+    (p :
+      PositiveConstructiveDiagonalPersistence
+        S WitnessOf Positive diag R) :
+    p.TargetWitnessOf
+      p.coordinationPersistence.targetCoordination :=
+  p.witnessTransport diag.witness
+
+theorem positiveConstructiveDiagonalPersistentWitness_pos
+    {S : RawPositiveSetSignature.{u, v, m}}
+    {WitnessOf : DiagonalCoordination S -> Type w}
+    {Positive :
+      (diagonal : DiagonalCoordination S) ->
+        WitnessOf diagonal -> Prop}
+    {diag :
+      PositiveConstructiveDiagonalization S WitnessOf Positive}
+    {R : ProjectionRegime.{u, v} S.FormedSet}
+    (p :
+      PositiveConstructiveDiagonalPersistence
+        S WitnessOf Positive diag R) :
+    p.TargetPositive
+      p.coordinationPersistence.targetCoordination
+      (positiveConstructiveDiagonalPersistentWitness p) :=
+  p.positiveTransport diag.witness diag.witness_pos
+
 structure PFSD where
   S : RawPositiveSetSignature.{u, v, m}
   visible : VisibleExtensionalStructure S
@@ -1469,6 +1740,28 @@ def PFSD.canonicalDiagonal
         (canonicalLeft T.empty)
         (canonicalRight T.empty T.pair)) :=
   canonicalPositiveDiagonal
+    T.visible
+    T.empty
+    T.pair
+    T.rigidity
+    T.pairProjection
+
+def PFSD.canonicalConstructiveDiagonal
+    (T : PFSD.{u, v, m}) :
+    PositiveConstructiveDiagonalization T.S
+      (fun diagonal =>
+        PairSwapWitness T.S T.pair
+          (canonicalLeft T.empty)
+          (canonicalRight T.empty T.pair)
+          (DiagonalCoordination.toProjectedSetCell diagonal))
+      (fun diagonal witness =>
+        PairSwapPositive
+          (pair := T.pair)
+          (canonicalLeft T.empty)
+          (canonicalRight T.empty T.pair)
+          (DiagonalCoordination.toProjectedSetCell diagonal)
+          witness) :=
+  canonicalPositiveConstructiveDiagonalization
     T.visible
     T.empty
     T.pair
@@ -1527,7 +1820,30 @@ structure PFS0Realized where
   base : PFS0Reflected.{u, v, m, w}
   realization : MembershipRealization base.S
 
-structure PFSCollectionCore where
+structure PFSCollectionFromDataCore where
+  base : PFS0Reflected.{u, v, m, w}
+  infinity :
+    SetTheoreticInfinityFormation
+      base.S
+      base.empty
+      base.pair
+      base.union
+  collection : CollectionFromDataPrinciple.{u, v, m, l} base.S
+  induction : FormedInductionPrinciple base.S
+
+structure PFSPropositionalCollectionCore where
+  base : PFS0Reflected.{u, v, m, w}
+  infinity :
+    SetTheoreticInfinityFormation
+      base.S
+      base.empty
+      base.pair
+      base.union
+  propositionalCollection :
+    PropositionalStrongCollectionPrinciple.{u, v, m, l} base.S
+  induction : FormedInductionPrinciple base.S
+
+structure PFSCombinedCollectionCore where
   base : PFS0Reflected.{u, v, m, w}
   infinity :
     SetTheoreticInfinityFormation
@@ -1539,6 +1855,9 @@ structure PFSCollectionCore where
   propositionalCollection :
     PropositionalStrongCollectionPrinciple.{u, v, m, l} base.S
   induction : FormedInductionPrinciple base.S
+
+abbrev PFSCollectionCore :=
+  PFSCombinedCollectionCore
 
 structure PFSCollectionCoreRealized where
   base : PFSCollectionCore.{u, v, m, w, l}
@@ -1885,6 +2204,8 @@ end PositiveSetTheoryStandalone
 #print axioms PositiveSetTheoryStandalone.projectedSetCell_not_informationConserving
 #print axioms PositiveSetTheoryStandalone.PositiveSetDiagonalization
 #print axioms PositiveSetTheoryStandalone.PositiveConstructiveDiagonalization
+#print axioms PositiveSetTheoryStandalone.PositiveConstructiveWitnessView
+#print axioms PositiveSetTheoryStandalone.PositiveConstructiveDiagonalization.toPositiveSetDiagonalization
 #print axioms PositiveSetTheoryStandalone.EmptyFormation
 #print axioms PositiveSetTheoryStandalone.EmptyProjectionLaw
 #print axioms PositiveSetTheoryStandalone.emptyProjectionLawOfReflection
@@ -1899,12 +2220,15 @@ end PositiveSetTheoryStandalone
 #print axioms PositiveSetTheoryStandalone.canonicalRight
 #print axioms PositiveSetTheoryStandalone.canonicalParameters_separated
 #print axioms PositiveSetTheoryStandalone.canonicalPairCell
+#print axioms PositiveSetTheoryStandalone.canonicalDiagonalCoordination
 #print axioms PositiveSetTheoryStandalone.PairOccurrenceWitness
 #print axioms PositiveSetTheoryStandalone.pairOccurrenceWitnessOfOccurrence
 #print axioms PositiveSetTheoryStandalone.PairSwapWitness
 #print axioms PositiveSetTheoryStandalone.PairSwapPositive
 #print axioms PositiveSetTheoryStandalone.canonicalPairSwapWitness
+#print axioms PositiveSetTheoryStandalone.canonicalConstructivePairSwapWitness
 #print axioms PositiveSetTheoryStandalone.canonicalPositiveDiagonal
+#print axioms PositiveSetTheoryStandalone.canonicalPositiveConstructiveDiagonalization
 #print axioms PositiveSetTheoryStandalone.UnionMembership
 #print axioms PositiveSetTheoryStandalone.UnionFormation
 #print axioms PositiveSetTheoryStandalone.UnionProjectionLaw
@@ -1939,6 +2263,10 @@ end PositiveSetTheoryStandalone
 #print axioms PositiveSetTheoryStandalone.localProjectiveRecovery_cell
 #print axioms PositiveSetTheoryStandalone.localProjectiveRecovery_not_fiberFaithful
 #print axioms PositiveSetTheoryStandalone.localProjectiveRecovery_not_informationConserving
+#print axioms PositiveSetTheoryStandalone.LocalCoordinatedRecovery
+#print axioms PositiveSetTheoryStandalone.localCoordinatedRecovery_toLocalProjectiveRecovery
+#print axioms PositiveSetTheoryStandalone.localCoordinatedRecovery_not_fiberFaithful
+#print axioms PositiveSetTheoryStandalone.localCoordinatedRecovery_not_informationConserving
 #print axioms PositiveSetTheoryStandalone.RepairAction
 #print axioms PositiveSetTheoryStandalone.CausalLocalProjectiveRecovery
 #print axioms PositiveSetTheoryStandalone.RepairRelation
@@ -1971,17 +2299,28 @@ end PositiveSetTheoryStandalone
 #print axioms PositiveSetTheoryStandalone.ProjectionChange
 #print axioms PositiveSetTheoryStandalone.ProjectedRegimeCell
 #print axioms PositiveSetTheoryStandalone.projectedRegimeCellOfChange
+#print axioms PositiveSetTheoryStandalone.ProjectedRegimeCoordination
+#print axioms PositiveSetTheoryStandalone.ProjectedRegimeCoordination.toProjectedRegimeCell
+#print axioms PositiveSetTheoryStandalone.projectedRegimeCoordinationOfChange
 #print axioms PositiveSetTheoryStandalone.ProjectedCellPersistence
+#print axioms PositiveSetTheoryStandalone.DiagonalCoordinationPersistence
 #print axioms PositiveSetTheoryStandalone.PositiveDiagonalPersistence
+#print axioms PositiveSetTheoryStandalone.PositiveConstructiveDiagonalPersistence
 #print axioms PositiveSetTheoryStandalone.positiveDiagonalPersistentWitness
 #print axioms PositiveSetTheoryStandalone.positiveDiagonalPersistentWitness_pos
+#print axioms PositiveSetTheoryStandalone.positiveConstructiveDiagonalPersistentWitness
+#print axioms PositiveSetTheoryStandalone.positiveConstructiveDiagonalPersistentWitness_pos
 #print axioms PositiveSetTheoryStandalone.PFSD
 #print axioms PositiveSetTheoryStandalone.PFSD.canonicalDiagonal
+#print axioms PositiveSetTheoryStandalone.PFSD.canonicalConstructiveDiagonal
 #print axioms PositiveSetTheoryStandalone.PFS0Reflected
 #print axioms PositiveSetTheoryStandalone.PFS0Reflected.pairProjection
 #print axioms PositiveSetTheoryStandalone.PFS0Reflected.toPFSD
 #print axioms PositiveSetTheoryStandalone.PFS0Reflected.boundedSeparationProjection
 #print axioms PositiveSetTheoryStandalone.PFS0Realized
+#print axioms PositiveSetTheoryStandalone.PFSCollectionFromDataCore
+#print axioms PositiveSetTheoryStandalone.PFSPropositionalCollectionCore
+#print axioms PositiveSetTheoryStandalone.PFSCombinedCollectionCore
 #print axioms PositiveSetTheoryStandalone.PFSCollectionCore
 #print axioms PositiveSetTheoryStandalone.PFSCollectionCoreRealized
 #print axioms PositiveSetTheoryStandalone.PFSPower
