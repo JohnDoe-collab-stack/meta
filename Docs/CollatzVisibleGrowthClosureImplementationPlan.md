@@ -1,148 +1,587 @@
-# Plan d'implementation : fermeture de croissance visible Collatz
+# Plan d'implementation : cible stricte de croissance visible Collatz
 
 ## Objet
 
-Ce document prepare l'implementation du raccord manquant entre :
+Ce document fixe la cible stricte pour la partie "croissance visible Collatz".
+
+La cible n'est pas :
 
 ```text
-fermeture interne Collatz deja codee
+pas de chaine mediating infinie
 ```
 
-et :
+La cible n'est pas :
 
 ```text
-controle de la croissance visible Collatz.
+pas de deux croissances strictes consecutives
 ```
 
-La cible n'est pas une formulation conditionnelle. La cible est un producteur
-intrinseque :
+La cible n'est pas :
 
 ```text
-valeur visible Collatz
--> activation interne
--> intersection operationnelle
--> temoin positif diagonal
+une activation interne est consommee
+```
+
+La cible stricte est :
+
+```text
+pour chaque valeur initiale visible,
+la trajectoire visible Collatz produite par le cadre ne peut pas croitre
+sans borne.
+```
+
+Forme mathematique visee :
+
+```text
+pour tout start : Nat,
+il existe une borne B : Nat telle que
+pour tout temps t : Nat,
+visibleTrajectory start t <= B.
+```
+
+Forme Lean cible :
+
+```lean
+theorem noCollatzVisibleUnboundedGrowth
+    (start : Nat) :
+    Not (forall B : Nat,
+      Exists (fun t : Nat =>
+        B < collatzVisibleTrajectory start t))
+```
+
+ou, mieux si le cadre fournit directement la borne :
+
+```lean
+theorem collatzVisibleTrajectory_bounded
+    (start : Nat) :
+    Exists (fun B : Nat =>
+      forall t : Nat,
+        collatzVisibleTrajectory start t <= B)
+```
+
+Ces deux formulations sont equivalentes classiquement dans beaucoup de
+contextes, mais dans ce projet il faut privilegier la forme constructive avec
+producteur de borne :
+
+```text
+start -> B(start) -> preuve que B(start) borne toute la trajectoire visible.
+```
+
+## Regle de validation
+
+Tout autre resultat vaut echec de la tache.
+
+En particulier, les resultats suivants ne valident pas la cible :
+
+```text
+1. pas de croissance strictement monotone a chaque pas ;
+2. pas de deux croissances strictes consecutives ;
+3. pas de role mediating infini ;
+4. pas d'activation nue non consommee ;
+5. l'activation mediating produit un rightPayload ;
+6. le rightPayload est consommable ;
+7. la boucle interne reinscrit un closingExcess ;
+8. le prochain role interne est closing ;
+9. une trajectoire interne produite par le cadre ne reste pas mediating.
+```
+
+Ces enonces peuvent etre utiles comme lemmes intermediaires.
+Ils ne doivent jamais etre presentes comme la cible.
+
+Si l'implementation livre seulement l'un de ces resultats, la tache est
+echouee.
+
+## Distinction critique
+
+La propriete :
+
+```text
+Not (forall t, a_t < a_{t+1})
+```
+
+ne prouve pas :
+
+```text
+Exists B, forall t, a_t <= B.
+```
+
+Une suite peut ne pas croitre strictement a chaque pas et rester non bornee.
+Donc la cible "pas de croissance visible infinie" doit etre formalisee comme
+absence de fuite non bornee, pas comme absence de croissance stricte pas-a-pas.
+
+La propriete :
+
+```text
+pas de role mediating infini
+```
+
+ne prouve pas non plus :
+
+```text
+pas de croissance visible non bornee.
+```
+
+Il faut un theoreme de raccord explicite entre la dynamique des roles internes
+et la valeur visible numerique.
+
+## Definition stricte de croissance visible non bornee
+
+Il faut definir la trajectoire visible produite par le cadre :
+
+```lean
+def collatzVisibleTrajectory
+    (start : Nat) :
+    Nat -> Nat
+```
+
+Cette trajectoire ne doit pas etre une suite externe arbitraire.
+Elle doit etre produite par les definitions internes du cadre.
+
+Ensuite, la fuite visible non bornee doit etre definie par :
+
+```lean
+structure CollatzVisibleUnboundedGrowth
+    (start : Nat) where
+  escapes :
+    forall B : Nat,
+      Exists (fun t : Nat =>
+        B < collatzVisibleTrajectory start t)
+```
+
+La cible negative stricte est :
+
+```lean
+theorem noCollatzVisibleUnboundedGrowth
+    (start : Nat) :
+    CollatzVisibleUnboundedGrowth start -> False
+```
+
+La cible positive constructive est :
+
+```lean
+structure CollatzVisibleBound
+    (start : Nat) where
+  bound : Nat
+  bounds_all :
+    forall t : Nat,
+      collatzVisibleTrajectory start t <= bound
+```
+
+Theoreme public prefere :
+
+```lean
+def collatzVisibleBound
+    (start : Nat) :
+    CollatzVisibleBound start
+```
+
+Puis :
+
+```lean
+theorem noCollatzVisibleUnboundedGrowth_of_bound
+    (start : Nat) :
+    CollatzVisibleUnboundedGrowth start -> False
+```
+
+## Producteur obligatoire
+
+La preuve doit fournir un producteur interne, pas une hypothese.
+
+Interdit :
+
+```text
+si une borne existe alors...
+si une hauteur existe alors...
+si une fenetre existe alors...
+si un pont existe alors...
+si une trajectoire est deja fermee alors...
+```
+
+Obligatoire :
+
+```text
+start
+-> trajectoire visible produite par le cadre
+-> borne visible produite par le cadre
+-> preuve que tous les temps sont sous cette borne.
+```
+
+Le point dur est donc :
+
+```text
+trouver dans Meta la donnee interne qui fabrique une borne visible numerique
+depuis la valeur initiale visible elle-meme.
+```
+
+Tant que ce producteur n'est pas trouve, la cible n'est pas atteinte.
+
+## Audit du document
+
+Le document, dans sa forme actuelle, fixe correctement la cible mais ne garantit
+pas encore son obtention.
+
+Raison :
+
+```text
+il ne fournit pas encore le producteur de borne B(start).
+```
+
+Donc ce document ne doit pas etre lu comme une solution. Il doit etre lu comme
+un cahier de verification strict.
+
+Pour qu'il devienne un plan d'implementation complet, il faut ajouter un verrou
+positif qui transforme la structure interne deja codee en borne visible.
+
+Sans ce verrou, toute implementation restera inferieure a la cible.
+
+Verdict d'audit :
+
+```text
+le document n'est pas encore un plan de preuve complet.
+```
+
+Il devient utilisable seulement comme plan de preuve lorsque l'une des deux
+declarations suivantes est accompagnee d'une route constructive complete :
+
+```lean
+def collatzVisibleTrajectoryBound
+    (start : Nat) :
+    CollatzVisibleTrajectoryBound start
+```
+
+ou :
+
+```lean
+theorem noCollatzVisibleUnboundedGrowth
+    (start : Nat) :
+    CollatzVisibleUnboundedGrowth start -> False
+```
+
+Toute tentative consistant a nommer une grandeur interne :
+
+```text
+peak(start)
+height(start)
+bound(start)
+```
+
+sans prouver :
+
+```lean
+forall t : Nat,
+  collatzVisibleTrajectory start t <= peak start
+```
+
+est une triche conceptuelle et doit etre rejetee.
+
+La prochaine tache mathematique n'est donc pas de coder une facade. Elle est de
+trouver ou construire dans le cadre le producteur :
+
+```text
+start -> borne visible trajectorielle complete.
+```
+
+## Correction : l'enveloppe globale par pas est trop forte
+
+La route suivante est invalide si elle est lue comme une enveloppe stable pour
+tous les naturels sous une borne :
+
+```lean
+structure CollatzVisibleEnvelope
+    (start : Nat) where
+  bound : Nat
+  start_le_bound :
+    start <= bound
+  step_closed :
+    forall visible : Nat,
+      visible <= bound ->
+        collatzVisibleStep visible <= bound
+```
+
+Raison :
+
+```text
+visible <= bound
+```
+
+ne signifie pas :
+
+```text
+visible est un etat admissible de la trajectoire issue de start.
+```
+
+Une borne stable sur tous les naturels sous `bound` demanderait trop :
+
+```text
+pour tout visible <= bound,
+collatzVisibleStep visible <= bound.
+```
+
+Ce n'est pas la cible. La cible porte seulement sur :
+
+```text
+les valeurs effectivement produites par la trajectoire visible issue de start.
+```
+
+Donc cette enveloppe globale ne doit pas etre implementee. Elle serait une
+fausse route.
+
+## Verrou positif requis : enveloppe trajectorielle intrinsèque
+
+La route constructive correcte est une enveloppe trajectorielle, pas une
+enveloppe globale sur tous les visibles sous la borne.
+
+Forme Lean cible minimale :
+
+```lean
+structure CollatzVisibleTrajectoryBound
+    (start : Nat) where
+  bound : Nat
+  start_le_bound :
+    start <= bound
+  bounds_all :
+    forall t : Nat,
+      collatzVisibleTrajectory start t <= bound
+```
+
+Cette structure atteint directement la cible si elle est produite par le cadre :
+
+```lean
+def collatzVisibleTrajectoryBound
+    (start : Nat) :
+    CollatzVisibleTrajectoryBound start
+```
+
+Elle n'est pas acceptable comme hypothese :
+
+```lean
+(bound : CollatzVisibleTrajectoryBound start) -> ...
+```
+
+car cela serait exactement :
+
+```text
+si une borne existe alors...
+```
+
+Une fois `collatzVisibleTrajectoryBound start` construit, la cible suit
+immediatement :
+
+```lean
+def collatzVisibleBound
+    (start : Nat) :
+    CollatzVisibleBound start where
+  bound := (collatzVisibleTrajectoryBound start).bound
+  bounds_all :=
+    (collatzVisibleTrajectoryBound start).bounds_all
+```
+
+Cette route est valide parce qu'elle prouve directement :
+
+```text
+borne produite depuis start
++ preuve directe que tous les temps visibles sont sous cette borne.
+```
+
+Elle atteint la cible.
+
+Le verrou dur devient donc :
+
+```text
+produire `CollatzVisibleTrajectoryBound start` sans supposer une hauteur,
+une fenetre, une borne ou une terminaison externe.
+```
+
+Ce verrou n'est pas actuellement resolu par les fichiers Collatz existants.
+
+## Pourquoi les lemmes actuels ne suffisent pas
+
+Les lemmes actuels du dossier `Meta/Collatz` donnent :
+
+```text
+activation relaxee
+-> rightPayload
 -> consommation countdown
 -> reinsertion closing
--> contrainte visible
 ```
 
-Il ne doit y avoir aucun champ du type :
+Ils ne donnent pas encore :
 
 ```text
-si un pont existe
-si une fenetre existe
-si une hauteur existe
-si une borne existe
+forall t,
+collatzVisibleTrajectory start t <= B(start).
 ```
 
-Toute donnee doit etre produite par le cadre.
+Donc ils ne peuvent pas encore produire `CollatzVisibleTrajectoryBound`.
 
-## Etat actuel du code
-
-### 1. Dynamique visible generique
-
-Le fichier :
+Le verrou exact est :
 
 ```text
-Meta/Arithmetic/Trajectory.lean
+trouver la grandeur interne qui est :
+1. calculee depuis start ;
+2. assez grande pour contenir start ;
+3. prouvee superieure a toutes les valeurs visibles effectivement produites.
 ```
 
-definit deja :
+Toute grandeur qui ne satisfait pas ces trois points ne ferme pas la cible.
+
+Point important :
+
+```text
+une grandeur `peak(start)` definie par formule interne ne suffit pas.
+```
+
+Il faut aussi prouver :
 
 ```lean
-natTrajectory (step : Nat -> Nat) (start : Nat) : Nat -> Nat
+forall t : Nat,
+  collatzVisibleTrajectory start t <= peak start
 ```
 
-et le passage :
+Sinon le nom `peak` ou `height` serait seulement decoratif.
 
-```text
-collision de trajectoire
--> repeated-index collision
--> closed stability
-```
+## Route alternative : contradiction d'echappement
 
-Mais il ne definit pas encore la dynamique visible Collatz specialisee.
+Une seconde route est possible si l'enveloppe directe est trop forte.
 
-### 2. Hauteur visible generique
+Elle consiste a convertir une fuite visible non bornee en objet interne
+impossible.
 
-Le fichier :
-
-```text
-Meta/Arithmetic/HeightDiagonal.lean
-```
-
-definit :
+Forme stricte :
 
 ```lean
-NatTrajectoryFinitePrefixHeightCertificate step start
-NatTrajectoryPositiveDiagonalHeightWitness cert
-NatTrajectoryPostPeakWindow cert
+structure CollatzVisibleEscapeObstruction
+    (start : Nat) where
+  escape :
+    CollatzVisibleUnboundedGrowth start
+  internalContradictionCarrier :
+    Type
+  contradiction :
+    internalContradictionCarrier -> False
 ```
 
-Cette couche est generique. Elle part d'un certificat de hauteur de prefixe.
-Elle ne produit pas encore une hauteur Collatz depuis la dynamique Collatz.
-
-Donc elle ne doit pas etre utilisee comme producteur aval conditionnel.
-
-### 3. Activation Collatz interne
-
-Le fichier :
+Cette forme est encore trop abstraite si `internalContradictionCarrier` est
+choisi librement. La version acceptable doit nommer un objet deja porte par le
+cadre, par exemple :
 
 ```text
-Meta/Collatz/OperationalParity.lean
+une repetition impossible ;
+une collision incompatible ;
+une violation d'un ordre diagonal strictement decroissant ;
+une impossibilite de reinsertion ;
+une incompatibilite entre deux roles produits par le meme index.
 ```
 
-instancie deja la diagonale positive relaxee a une intersection Collatz :
+Forme acceptable :
 
 ```lean
-collatzRelaxedPositiveInternalDiagonalWitnessOfIntersection
-collatzRelaxedDiagonalCertificateOfIntersection
-collatzRelaxedProjectionObstructionOfIntersection
-collatzRelaxedPositiveDiagonalValueOfIntersection
+def obstructionOfVisibleUnboundedGrowth
+    {start : Nat}
+    (escape : CollatzVisibleUnboundedGrowth start) :
+    KnownInternalImpossibleObject start
 ```
 
-Il prouve notamment :
+avec :
 
 ```lean
-collatzRelaxedPositiveDiagonalValue_eq_maximalDivergence
+theorem noKnownInternalImpossibleObject
+    (start : Nat) :
+    KnownInternalImpossibleObject start -> False
 ```
 
-Donc, pour une intersection operationnelle Collatz, le temoin positif existe
-deja et il est le maximal relaxed divergence a l'index forme.
-
-### 4. Raccord impair relaxe / pas impair visible
-
-Le fichier :
+Cette route atteint la cible seulement si :
 
 ```text
+escape -> KnownInternalImpossibleObject
+```
+
+est construit sans hypothese supplementaire.
+
+## Choix d'implementation impose
+
+L'implementation doit choisir une de ces deux routes :
+
+```text
+Route A :
+  produire CollatzVisibleTrajectoryBound start
+  puis produire CollatzVisibleBound start.
+
+Route B :
+  produire une contradiction interne depuis CollatzVisibleUnboundedGrowth start
+  puis prouver noCollatzVisibleUnboundedGrowth.
+```
+
+Tout autre choix est hors cible.
+
+En particulier, il est interdit de remplacer ces routes par :
+
+```text
+pas de mediating infini ;
+pas de croissance stricte consecutive ;
+pas d'activation nue ;
+reinsertion closing ;
+rightPayload consommable.
+```
+
+Ces resultats peuvent etre des sous-lemmes seulement s'ils participent
+explicitement a la production de :
+
+```lean
+CollatzVisibleTrajectoryBound start
+```
+
+ou de :
+
+```lean
+noCollatzVisibleUnboundedGrowth start
+```
+
+## Test de non-triche
+
+Avant de valider une implementation, poser les questions suivantes :
+
+```text
+1. Existe-t-il dans le code une declaration publique nommee
+   `collatzVisibleBound` ou `noCollatzVisibleUnboundedGrowth` ?
+
+2. Cette declaration quantifie-t-elle sur `start : Nat` ?
+
+3. Porte-t-elle sur la trajectoire visible numerique, et pas seulement sur les
+   roles internes ?
+
+4. Produit-elle une borne ou refute-t-elle explicitement
+   `forall B, exists t, B < trajectory t` ?
+
+5. La preuve part-elle de donnees produites par le cadre, et non d'une borne,
+   hauteur, fenetre ou fermeture supposee ?
+
+6. L'audit Lean est-il sans axiome, sans `Classical`, sans `propext`, sans
+   `Quot.sound` ?
+```
+
+Si une seule reponse est negative, la cible n'est pas atteinte.
+
+## Lien avec les couches existantes
+
+Les couches existantes peuvent servir uniquement si elles sont raccordees a la
+borne visible finale.
+
+### Relaxed odd
+
+Les fichiers :
+
+```text
+Meta/Arithmetic/RelaxedOdd.lean
 Meta/Collatz/RelaxedOddActionBridge.lean
 ```
 
-prouve :
+prouvent que le pas mediating visible est raccorde au `rightPayload` relaxe.
 
-```lean
-collatzRelaxedOddVisibleStep_eq_two_mul_rightPayload
-collatzRelaxedOddVisibleStep_div_two_eq_rightPayload
-```
+Cela ne suffit pas.
 
-et, pour une intersection :
+Il faut encore prouver que l'iteration visible de ces sorties reste bornee.
 
-```lean
-collatzRelaxedOddRoleOfIntersection_visibleStep_eq_two_mul_rightPayload
-collatzRelaxedOddRoleOfIntersection_visibleStep_div_two_eq_rightPayload
-```
-
-Ce raccord dit :
-
-```text
-le pas impair visible active un rightPayload relaxe consommable apres /2.
-```
-
-Mais ce fichier ne prouve pas encore une contrainte sur une trajectoire visible
-complete.
-
-### 5. Consommation et reinsertion internes
+### Countdown consumption
 
 Le fichier :
 
@@ -150,49 +589,14 @@ Le fichier :
 Meta/Collatz/CountdownConsumptionBridge.lean
 ```
 
-prouve :
+prouve que la divergence positive activee est consommee comme terminal excess.
 
-```lean
-collatzRelaxedPositiveDiagonalValue_eq_countdownTerminalExcess
-collatzFibrewiseStructuralPeak_eq_countdownTerminalExcess
-collatzFibrewiseStructuralPeak_reenters_as_closing
-```
+Cela ne suffit pas.
 
-Donc le temoin positif diagonal active par Collatz est :
+Il faut encore montrer que cette consommation impose une borne sur les valeurs
+visibles de toute la trajectoire.
 
-```text
-consomme comme terminal excess
-```
-
-puis :
-
-```text
-reinscrit comme closingExcess.
-```
-
-### 6. Boucle interne
-
-Le fichier :
-
-```text
-Meta/Collatz/DynamicClosureLoop.lean
-```
-
-package :
-
-```lean
-CollatzDynamicClosureLoop
-```
-
-avec :
-
-```text
-positiveWitness
-peak
-consumer
-consumed_as_terminal_excess
-reenters_as_closing
-```
+### Internal terminality
 
 Le fichier :
 
@@ -200,1245 +604,377 @@ Le fichier :
 Meta/Collatz/InternalTerminality.lean
 ```
 
-ajoute :
+prouve qu'une activation interne nue est consommee et reinseree.
 
-```lean
-CollatzInternalTerminality
-noCollatzBareNonTerminalActivation
-```
+Cela ne suffit pas.
 
-Donc le code exclut deja :
+Il faut encore produire le passage :
 
 ```text
-une activation nue non consommee
+consommation interne
+-> contrainte numerique visible globale sur la trajectoire.
 ```
 
-dans le regime interne enrichi.
+### Diagonal order
 
-## Diagnostic exact
-
-Le code actuel prouve :
-
-```text
-activation Collatz interne
--> temoin positif
--> consommation countdown
--> reinsertion closing
--> prochaine intersection interne
-```
-
-Il ne prouve pas encore sous une forme visible-role :
+Le fichier :
 
 ```text
-impossibilite d'une croissance mediating nue infinie
-dans une trajectoire interne produite par le cadre.
+Meta/Collatz/DiagonalOrder.lean
 ```
 
-La raison est precise :
+calibre un ordre diagonal.
 
-```text
-il manque la donnee interne qui lit une valeur visible `Nat`
-comme role enrichi, puis fabrique l'activation mediating quand cette lecture
-est mediating.
-```
+Cela ne suffit pas.
 
-Sans cette facade, la boucle interne reste correcte, mais elle n'est pas encore
-exprimee comme impossibilite d'une croissance visible mediating nue.
+Il faut encore prouver que la trajectoire visible est controlee par une mesure
+qui donne une borne effective, pas seulement un ordre ou une calibration.
 
-## Producteur essentiel : visible Nat -> role enrichi
+## Theoreme de raccord obligatoire
 
-La tache essentielle est ici.
-
-Il faut partir de :
-
-```lean
-visible : Nat
-```
-
-et produire une lecture interne de role :
-
-```lean
-role : NatEnrichedParityRole
-```
-
-avec une preuve que le code du role reconstruit exactement la valeur visible :
-
-```lean
-natEnrichedParityRoleCode role = visible
-```
-
-Ce producteur doit etre total, constructif, et defini par recursion sur `Nat`.
-Il ne doit pas utiliser `if`, `Classical`, ni une decision externe de parite.
-
-Forme cible :
-
-```lean
-def natEnrichedParityRoleOfVisible :
-    Nat -> NatEnrichedParityRole
-  | 0 => NatEnrichedParityRole.closingExcess 0
-  | 1 => NatEnrichedParityRole.mediatingValue 0
-  | Nat.succ (Nat.succ n) =>
-      match natEnrichedParityRoleOfVisible n with
-      | NatEnrichedParityRole.closingExcess k =>
-          NatEnrichedParityRole.closingExcess (k + 1)
-      | NatEnrichedParityRole.mediatingValue k =>
-          NatEnrichedParityRole.mediatingValue (k + 1)
-```
-
-Theoreme cible :
-
-```lean
-theorem natEnrichedParityRoleOfVisible_code
-    (visible : Nat) :
-    natEnrichedParityRoleCode
-      (natEnrichedParityRoleOfVisible visible) = visible
-```
-
-Ce theoreme donne le producteur manquant :
+Le verrou central a prouver est :
 
 ```text
-valeur visible
--> role enrichi interne
--> code du role = valeur visible
+si la trajectoire visible etait non bornee,
+alors elle produirait une donnee interne impossible dans le cadre.
 ```
 
-Il est different de :
+Mais cette implication ne doit pas etre postulee.
+Elle doit etre construite.
+
+Forme cible possible :
+
+```lean
+def internalObstructionOfVisibleEscape
+    {start : Nat}
+    (escape : CollatzVisibleUnboundedGrowth start) :
+    InternalImpossibleObject start
+```
+
+puis :
+
+```lean
+theorem noInternalImpossibleObject
+    (start : Nat) :
+    InternalImpossibleObject start -> False
+```
+
+et enfin :
+
+```lean
+theorem noCollatzVisibleUnboundedGrowth
+    (start : Nat) :
+    CollatzVisibleUnboundedGrowth start -> False := by
+  intro escape
+  exact noInternalImpossibleObject start
+    (internalObstructionOfVisibleEscape escape)
+```
+
+Mais cette route est acceptable seulement si `InternalImpossibleObject` est
+intrinseque, deja porte par le cadre ou strictement necessaire comme nouvelle
+structure positive.
+
+Elle ne doit pas etre une hypothese aval.
+
+## Ce qui doit etre audite avant implementation
+
+Avant de coder, verifier explicitement :
 
 ```text
-IsMediatingCode visible
+1. quelle est la definition exacte de la trajectoire visible ;
+2. quelle valeur visible est lue a chaque temps ;
+3. quelle donnee interne correspond a cette valeur visible ;
+4. quelle grandeur interne pourrait produire une borne visible ;
+5. si cette grandeur est deja portee par Nat enrichi, countdown, diagonal order,
+   relaxed odd, OOD ou internal terminality ;
+6. si elle n'est pas portee, quelle structure positive intrinsèque est
+   mathematiquement legitime ;
+7. comment prouver que cette structure borne toutes les valeurs visibles ;
+8. comment deduire l'impossibilite de `CollatzVisibleUnboundedGrowth`.
 ```
 
-car `IsMediatingCode` est une propriete existentielle. Ici on veut une donnee
-calculee par le cadre.
+Si l'un de ces points manque, l'implementation ne doit pas etre presentee comme
+la cible.
 
-Remarque de forme Lean : le motif recursif doit etre ecrit comme
-`Nat.succ (Nat.succ n)`. La notation de papier `n + 2` ne doit pas etre
-utilisee comme motif dans le fichier final.
+## Audit des candidats actuels
 
-## Branche mediating produite depuis le visible
-
-Une fois le role visible produit, il faut isoler la branche mediating sans
-faire de l'impair classique le moteur.
-
-Forme cible :
-
-```lean
-structure CollatzVisibleMediatingSource
-    (visible : Nat) where
-  index : Nat
-  role_eq :
-    natEnrichedParityRoleOfVisible visible =
-      NatEnrichedParityRole.mediatingValue index
-  code_eq_visible :
-    natEnrichedParityRoleCode
-      (NatEnrichedParityRole.mediatingValue index) = visible
-```
-
-Constructeur cible depuis une lecture mediating deja produite par
-`natEnrichedParityRoleOfVisible` :
-
-```lean
-def collatzVisibleMediatingSourceOfRoleEq
-    {visible index : Nat}
-    (role_eq :
-      natEnrichedParityRoleOfVisible visible =
-        NatEnrichedParityRole.mediatingValue index) :
-    CollatzVisibleMediatingSource visible
-```
-
-Ce n'est pas un pont externe. La seule donnee est :
+Lecture du code existant :
 
 ```text
-la branche effective du producteur interne `natEnrichedParityRoleOfVisible`.
+Meta/Arithmetic/HeightDiagonal.lean
+Meta/Arithmetic/Window.lean
+Meta/Arithmetic/DynamicGap.lean
+Meta/Arithmetic/Parity.lean
+Meta/Arithmetic/RelaxedOdd.lean
+Meta/Collatz/OperationalParity.lean
+Meta/Collatz/RelaxedOddActionBridge.lean
+Meta/Collatz/CountdownConsumptionBridge.lean
+Meta/Collatz/DynamicClosureLoop.lean
+Meta/Collatz/DiagonalOrder.lean
 ```
 
-Ensuite, l'activation visible doit partir de cette source :
-
-```lean
-structure CollatzVisibleMediatingActivation
-    (visible : Nat) where
-  source :
-    CollatzVisibleMediatingSource visible
-  relaxedOdd :
-    NatEnrichedRelaxedOddRole source.index
-  visibleStep :
-    Nat
-  visibleStep_eq :
-    visibleStep = 3 * visible + 1
-  rightPayload :
-    Nat
-  rightPayload_eq :
-    rightPayload = relaxedOdd.rightPayload
-  visibleStep_eq_two_mul_rightPayload :
-    visibleStep = 2 * rightPayload
-  visibleStep_div_two_eq_rightPayload :
-    visibleStep / 2 = rightPayload
-```
-
-Constructeur cible :
-
-```lean
-def collatzVisibleMediatingActivation
-    {visible : Nat}
-    (source : CollatzVisibleMediatingSource visible) :
-    CollatzVisibleMediatingActivation visible
-```
-
-Ce constructeur doit utiliser :
+Verdict :
 
 ```text
-source.code_eq_visible
-natEnrichedRelaxedOddRole source.index
-natEnrichedParityMediatingCode_three_mul_add_one_eq_two_mul_rightPayload
-natEnrichedParityMediatingCode_three_mul_add_one_div_two_eq_rightPayload
+aucun fichier actuel ne fournit `start -> borne visible trajectorielle`.
 ```
 
-Le point technique exact est :
+Detail :
 
 ```text
-source.code_eq_visible :
-  natEnrichedParityRoleCode (mediatingValue source.index) = visible
+HeightDiagonal :
+  part d'un certificat de hauteur deja donne.
+  Donc ce n'est pas un producteur de borne Collatz.
+
+Window / FinitePigeonhole :
+  transforme une fenetre bornee en collision.
+  Donc ce n'est pas un producteur de fenetre bornee.
+
+RelaxedOdd :
+  prouve la relation locale entre le code mediating et le rightPayload.
+  Donc ce n'est pas une borne trajectorielle.
+
+CountdownConsumptionBridge :
+  prouve la consommation locale d'une divergence.
+  Donc ce n'est pas une borne trajectorielle.
+
+DynamicClosureLoop :
+  package production, consommation et reinsertion locales.
+  Donc ce n'est pas une borne trajectorielle.
+
+DiagonalOrder :
+  calibre l'ordre diagonal sur les indices.
+  Sur les indices nus, cet ordre est extensionnellement l'ordre Nat.
+  Donc ce n'est pas une mesure de descente ni une borne.
 ```
 
-Les theoremes existants portent d'abord sur :
-
-```text
-3 * natEnrichedParityRoleCode (mediatingValue source.index) + 1
-```
-
-Il faut donc obtenir les egalites visibles par reecriture avec
-`source.code_eq_visible`, puis appliquer les theoremes de `RelaxedOdd`.
-
-Comme `source` depend de `visible`, la reecriture ne doit pas remplacer
-`visible` dans tout le but. La preuve Lean doit reecrire seulement le membre
-gauche :
-
-```lean
-conv_lhs => rw [← source.code_eq_visible]
-```
-
-puis appliquer le theoreme relaxe correspondant. Une reecriture globale par
-`rw [← source.code_eq_visible]` n'est pas robuste dans ce contexte dependant.
-
-Ainsi, l'activation est bien fabriquee depuis la valeur visible elle-meme :
-
-```text
-visible
--> roleOfVisible visible
--> branche mediating
--> index interne
--> relaxedOdd
--> rightPayload
--> Collatz visible step
-```
-
-## Producteur total depuis la valeur visible
-
-La cible stricte demande plus que :
+Conclusion :
 
 ```text
-visible -> role enrichi
+le code actuel porte des fermetures locales ;
+il ne porte pas encore l'invariant trajectoriel global requis.
 ```
 
-et plus que :
+## Invariant trajectoriel requis
 
-```text
-si la branche produite est mediating, alors activation mediating.
-```
-
-Elle demande aussi plus que :
-
-```text
-visible -> role enrichi -> activation relaxee
-```
-
-car la fermeture interne deja prouvee dans `Meta/Collatz` depend d'une
-intersection :
+Pour que le document devienne capable de supporter la preuve cible, il faut
+introduire ou identifier une structure de ce type :
 
 ```lean
-intersection : PrimitiveMemoryReadingIntersection branch
-```
-
-Le vrai producteur doit donc construire, depuis la valeur visible, l'objet
-interne suffisant pour entrer dans :
-
-```lean
-CollatzDynamicClosureLoop intersection
-```
-
-### Verrou de positivite du formed index
-
-Toute intersection porte :
-
-```lean
-formedPositiveExcessOfIntersection intersection = intersection.excess + 1
-```
-
-Donc son index forme est toujours strictement positif.
-
-Par consequence, la lecture :
-
-```lean
-NatEnrichedParityRole.mediatingValue 0
-```
-
-qui code la valeur visible :
-
-```text
-1
-```
-
-ne peut pas produire une intersection dont l'index forme serait `0`.
-
-Ce cas doit etre traite comme terminal visible interne, pas comme activation
-de croissance.
-
-La cible correcte est donc :
-
-```text
-visible
--> roleOfVisible visible
--> closing branch
-   ou terminal mediating zero
-   ou nonterminal mediating succ
-```
-
-Seule la branche :
-
-```lean
-mediatingValue (Nat.succ k)
-```
-
-produit une intersection formee et donc une boucle de fermeture.
-
-### Intersection formee produite depuis le visible
-
-Pour une branche mediating non terminale :
-
-```lean
-roleOfVisible visible = NatEnrichedParityRole.mediatingValue (Nat.succ k)
-```
-
-il faut produire une intersection dont :
-
-```lean
-formedPositiveExcessOfIntersection intersection = Nat.succ k
-```
-
-Construction cible :
-
-```lean
-def collatzVisibleFormedBranch
-    (visible : Nat)
-    (terminalTime : Nat) :
-    MemoryBranch :=
-  canonicalBranch visible
-
-def collatzVisibleFormedIntersection
-    (visible : Nat)
-    (terminalTime : Nat) :
-    PrimitiveMemoryReadingIntersection
-      (collatzVisibleFormedBranch visible terminalTime) :=
-  primitiveMemoryReadingIntersection_of_sharedTrace
-    (branch := collatzVisibleFormedBranch visible terminalTime)
-    (globalTrace visible)
-    rfl
-    rfl
-    terminalTime
-```
-
-Theoreme cible :
-
-```lean
-theorem collatzVisibleFormedIntersection_formedPositiveExcess
-    (visible terminalTime : Nat) :
-    formedPositiveExcessOfIntersection
-      (collatzVisibleFormedIntersection visible terminalTime) =
-        Nat.succ terminalTime :=
-  rfl
-```
-
-Ainsi, pour `mediatingValue (Nat.succ k)`, on prend :
-
-```lean
-terminalTime := k
-```
-
-et l'index forme produit vaut bien :
-
-```text
-Nat.succ k
-```
-
-### Producteur total corrige
-
-Forme cible :
-
-```lean
-inductive CollatzVisibleInternalActivation
-    (visible : Nat) where
-  | closing
-      (index : Nat)
-      (role_eq :
-        natEnrichedParityRoleOfVisible visible =
-          NatEnrichedParityRole.closingExcess index)
-      (code_eq_visible :
-        natEnrichedParityRoleCode
-          (NatEnrichedParityRole.closingExcess index) = visible)
-  | terminalOne
-      (role_eq :
-        natEnrichedParityRoleOfVisible visible =
-          NatEnrichedParityRole.mediatingValue 0)
-      (code_eq_visible :
-        natEnrichedParityRoleCode
-          (NatEnrichedParityRole.mediatingValue 0) = visible)
-  | mediating
-      (terminalTime : Nat)
-      (source :
-        CollatzVisibleMediatingSource visible)
-      (source_index_eq :
-        source.index = Nat.succ terminalTime)
-      (intersection :
-        PrimitiveMemoryReadingIntersection
-          (collatzVisibleFormedBranch visible terminalTime))
-      (formedIndex_eq :
-        formedPositiveExcessOfIntersection intersection =
-          source.index)
-      (activation :
-        CollatzVisibleMediatingActivation visible)
-      (closureLoop :
-        CollatzDynamicClosureLoop intersection)
-```
-
-Constructeur total attendu :
-
-```lean
-def collatzVisibleInternalActivation
-    (visible : Nat) :
-    CollatzVisibleInternalActivation visible :=
-  match role_eq :
-      natEnrichedParityRoleOfVisible visible with
-  | NatEnrichedParityRole.closingExcess index =>
-      CollatzVisibleInternalActivation.closing
-        index
-        role_eq
-        (...)
-  | NatEnrichedParityRole.mediatingValue 0 =>
-      CollatzVisibleInternalActivation.terminalOne
-        role_eq
-        (...)
-  | NatEnrichedParityRole.mediatingValue (Nat.succ terminalTime) =>
-      let source :=
-        collatzVisibleMediatingSourceOfRoleEq role_eq
-      let intersection :=
-        collatzVisibleFormedIntersection visible terminalTime
-      CollatzVisibleInternalActivation.mediating
-        terminalTime
-        source
-        (...)
-        intersection
-        (...)
-        (collatzVisibleMediatingActivation source)
-        (collatzDynamicClosureLoop intersection)
-```
-
-Les preuves `code_eq_visible` doivent toutes provenir de :
-
-```lean
-natEnrichedParityRoleOfVisible_code visible
-```
-
-et de la preuve de branche `role_eq`.
-
-Ce producteur total est le vrai raccord :
-
-```text
-visible : Nat
--> roleOfVisible visible
--> closing branch ou mediating branch
--> terminalOne ou formed mediating intersection
--> activation interne correspondante
--> closureLoop quand la branche est mediating non terminale
-```
-
-Il n'ajoute pas une hypothese. Il effectue l'elimination constructive du role
-calcule par le cadre.
-
-### Theoreme public pour la branche mediating
-
-Une fois le producteur total pose, ajouter une facade qui extrait le cas
-mediating non terminal quand le producteur tombe effectivement sur
-`mediatingValue (Nat.succ terminalTime)` :
-
-```lean
-def collatzVisibleInternalActivation_mediatingSuccOfRoleEq
-    {visible terminalTime : Nat}
-    (role_eq :
-      natEnrichedParityRoleOfVisible visible =
-        NatEnrichedParityRole.mediatingValue (Nat.succ terminalTime)) :
-    CollatzVisibleMediatingActivation visible :=
-  match collatzVisibleInternalActivation visible with
-  | CollatzVisibleInternalActivation.mediating _ _ _ _ _ activation _ =>
-      activation
-  | CollatzVisibleInternalActivation.closing closingIndex closingRoleEq _ =>
-      False.elim (...)
-  | CollatzVisibleInternalActivation.terminalOne terminalRoleEq _ =>
-      False.elim (...)
-```
-
-Le cas impossible doit etre ferme par contradiction entre :
-
-```lean
-closingExcess closingIndex = mediatingValue index
-```
-
-obtenue depuis `closingRoleEq` et `role_eq`, puis par l'injectivite des
-constructeurs de `NatEnrichedParityRole`.
-
-Cette facade n'est pas le producteur principal. Le producteur principal reste :
-
-```lean
-collatzVisibleInternalActivation visible
-```
-
-qui est total.
-
-## Critere strict de cible atteinte
-
-La cible essentielle sera atteinte seulement quand le code prouvera :
-
-```text
-pour toute valeur visible,
-le cadre calcule un role interne ;
-si ce role est mediating zero, la valeur est le terminal visible `1` ;
-si ce role est mediating succ, le cadre produit directement :
-  - l'index interne,
-  - l'intersection formee,
-  - l'activation relaxee,
-  - le rightPayload,
-  - la boucle de fermeture interne.
-```
-
-Donc le producteur final attendu n'est pas seulement :
-
-```lean
-CollatzVisibleMediatingActivation visible
-```
-
-mais :
-
-```lean
-CollatzVisibleInternalActivation visible
-```
-
-avec une branche mediating non terminale portant :
-
-```lean
-CollatzDynamicClosureLoop intersection
-```
-
-## Definition cible de la lecture visible
-
-Il faut introduire un fichier :
-
-```text
-Meta/Collatz/VisibleRoleDynamics.lean
-```
-
-Ce fichier doit definir la lecture visible par roles, sans selection classique
-externe. Il ne doit pas definir une fonction totale par :
-
-```text
-if even then ... else ...
-```
-
-La selection vient du role operationnel deja porte par le cadre. Les deux
-lectures visibles sont :
-
-```lean
-def collatzVisibleClosingStep (n : Nat) : Nat := n / 2
-
-def collatzVisibleMediatingStep (n : Nat) : Nat := 3 * n + 1
-```
-
-Puis la selection ne doit pas etre le moteur du cadre. Elle doit etre une
-lecture visible tardive, produite par un role :
-
-```lean
-def collatzVisibleStepOfRole
-    (role : NatEnrichedParityRole) : Nat :=
-  match role with
-  | NatEnrichedParityRole.closingExcess k =>
-      collatzVisibleClosingStep
-        (natEnrichedParityRoleCode (NatEnrichedParityRole.closingExcess k))
-  | NatEnrichedParityRole.mediatingValue k =>
-      collatzVisibleMediatingStep
-        (natEnrichedParityRoleCode (NatEnrichedParityRole.mediatingValue k))
-```
-
-Cette definition evite de faire de la parite classique le point d'entree.
-
-## Producteur intrinseque attendu
-
-La structure `CollatzVisibleActivation (k : Nat)` reste utile, mais elle ne
-doit plus etre le point de depart principal. Elle devient la forme indexee
-interne obtenue apres extraction de l'index depuis la valeur visible.
-
-Il faut produire :
-
-```lean
-structure CollatzVisibleActivation (k : Nat) where
-  closingRole :
-    NatEnrichedParityRole
-  closingRole_eq :
-    closingRole = NatEnrichedParityRole.closingExcess k
-  mediatingRole :
-    NatEnrichedParityRole
-  mediatingRole_eq :
-    mediatingRole = NatEnrichedParityRole.mediatingValue k
-  relaxedOdd :
-    NatEnrichedRelaxedOddRole k
-  visibleSource :
-    Nat
-  visibleSource_eq :
-    visibleSource = natEnrichedParityRoleCode mediatingRole
-  visibleStep :
-    Nat
-  visibleStep_eq :
-    visibleStep = collatzVisibleStepOfRole mediatingRole
-  rightPayload :
-    Nat
-  rightPayload_eq :
-    rightPayload = relaxedOdd.rightPayload
-  visibleStep_eq_two_mul_rightPayload :
-    visibleStep = 2 * rightPayload
-  visibleStep_div_two_eq_rightPayload :
-    visibleStep / 2 = rightPayload
-```
-
-Cette structure ne doit contenir aucune hypothese.
-
-Constructeur attendu :
-
-```lean
-def collatzVisibleActivation (k : Nat) :
-  CollatzVisibleActivation k
-```
-
-Il doit etre construit depuis :
-
-```text
-NatEnrichedParityRole.mediatingValue k
-natEnrichedRelaxedOddRole k
-collatzRelaxedOddVisibleStep_eq_two_mul_rightPayload
-collatzRelaxedOddVisibleStep_div_two_eq_rightPayload
-```
-
-Puis le vrai producteur public doit etre :
-
-```lean
-def collatzVisibleActivationOfMediatingSource
-    {visible : Nat}
-    (source : CollatzVisibleMediatingSource visible) :
-    CollatzVisibleActivation source.index
-```
-
-et la facade :
-
-```lean
-def collatzVisibleMediatingActivationOfSource
-    {visible : Nat}
-    (source : CollatzVisibleMediatingSource visible) :
-    CollatzVisibleMediatingActivation visible
-```
-
-## Raccord secondaire : activation depuis une intersection
-
-Cette section ne doit pas etre lue comme le producteur principal de la cible.
-
-Le producteur principal part de :
-
-```lean
-visible : Nat
-```
-
-et construit lui-meme le cas interne :
-
-```text
-closing
-ou terminalOne
-ou mediating non terminal + intersection + fermeture
-```
-
-Le raccord depuis une intersection reste utile seulement comme facade interne
-pour reutiliser les theoremes deja codes. Il ne suffit pas a atteindre la cible
-stricte, car il suppose deja l'objet operationnel que la cible visible doit
-fabriquer.
-
-Le bon index interne est :
-
-```lean
-formedPositiveExcessOfIntersection intersection
-```
-
-La structure a ajouter est :
-
-Introduire une structure intrinsèque :
-
-```lean
-structure CollatzFormedVisibleActivation where
-  branch : MemoryBranch
-  intersection :
-    PrimitiveMemoryReadingIntersection branch
-  formedIndex : Nat
-  formedIndex_eq :
-    formedIndex = formedPositiveExcessOfIntersection intersection
-  visibleActivation :
-    CollatzVisibleActivation formedIndex
-  closureLoop :
-    CollatzDynamicClosureLoop intersection
-```
-
-Puis fournir un constructeur canonique depuis toute intersection :
-
-```lean
-def collatzFormedVisibleActivation
-    {branch : MemoryBranch}
-    (intersection : PrimitiveMemoryReadingIntersection branch) :
-    CollatzFormedVisibleActivation
-```
-
-Cette route respecte le code actuel.
-
-Elle transforme toute intersection operationnelle deja portee par le cadre en
-activation visible fermee. C'est un raccord interne, pas le producteur visible
-total.
-
-Le producteur visible total reste :
-
-```lean
-collatzVisibleInternalActivation visible
-```
-
-car lui seul part de la valeur visible elle-meme.
-
-## Trajectoire interne produite par le cadre
-
-Pour parler de chaine visible sans producteur externe, il faut d'abord produire
-la suite interne d'intersections.
-
-Ajouter :
-
-```lean
-abbrev CollatzInternalState :=
-  Sigma (fun branch : MemoryBranch =>
-    PrimitiveMemoryReadingIntersection branch)
-
-def CollatzInternalState.intersection
-    (state : CollatzInternalState) :
-    PrimitiveMemoryReadingIntersection state.1 :=
-  state.2
-
-def collatzNextInternalState
-    (state : CollatzInternalState) :
-    CollatzInternalState :=
-  match state with
-  | Sigma.mk branch intersection =>
-      Sigma.mk
-        (collatzNextInternalBranch intersection)
-        (collatzNextInternalIntersection intersection)
-
-def collatzInternalStateTrajectory
-    (state : CollatzInternalState) : Nat -> CollatzInternalState
-  | 0 => state
-  | t + 1 =>
-      collatzNextInternalState
-        (collatzInternalStateTrajectory state t)
-```
-
-Cette trajectoire est interne. Elle est produite par :
-
-```text
-collatzNextInternalIntersection
-```
-
-et non par une suite de roles arbitraire.
-
-Ensuite seulement, extraire la lecture visible :
-
-```lean
-def collatzInternalStateRole
-    (state : CollatzInternalState) :
-    NatEnrichedParityRole
-
-def collatzInternalStateVisibleStep
-    (state : CollatzInternalState) :
-    Nat
-```
-
-avec :
-
-```text
-role = arithmeticClosingRoleOfIntersection intersection
-```
-
-ou, pour l'activation courante :
-
-```text
-role = arithmeticMediatingRoleOfIntersection intersection
-```
-
-selon la facade visee.
-
-## Verrou dur
-
-Le verrou dur est :
-
-```text
-reinserted closingExcess peak
--> role admissible du prochain pas visible.
-```
-
-Il faut formaliser :
-
-```lean
-def nextRoleOfInternalTerminality
-    (terminality : CollatzInternalTerminality intersection) :
-    NatEnrichedParityRole :=
-  arithmeticClosingRoleOfIntersection terminality.nextIntersection
-```
-
-et prouver :
-
-```lean
-nextRoleOfInternalTerminality terminality =
-  NatEnrichedParityRole.closingExcess
-    (collatzDynamicClosureLoop intersection).peak
-```
-
-Ce theoreme existe deja sous la forme :
-
-```lean
-collatzCurrentPeak_reinserted_in_nextInternalIntersection
-```
-
-Il faut maintenant en extraire une facade visible :
-
-```lean
-theorem visibleStepOfNextRole_is_closing
-```
-
-qui donne :
-
-```text
-le prochain role interne est closing,
-donc sa lecture visible admissible est la lecture closing.
-```
-
-## Consequence visible exacte
-
-La consequence visible immediate n'est pas :
-
-```text
-la trajectoire atteint 1
-```
-
-ni directement :
-
-```text
-la trajectoire est bornee
-```
-
-La consequence visible exacte est :
-
-```text
-apres activation mediating relaxee,
-le prochain role interne force une lecture closing.
-```
-
-En notation :
-
-```text
-mediating activation
--> rightPayload
--> positiveWitness/peak
--> consumer
--> closingExcess peak
--> next visible reading is closing
-```
-
-Le premier theoreme cible doit donc etre :
-
-```lean
-theorem collatzInternalTerminality_nextVisibleRole_is_closing
-    {branch : MemoryBranch}
-    (intersection : PrimitiveMemoryReadingIntersection branch) :
-    nextRoleOfInternalTerminality
-      (collatzInternalTerminality intersection) =
-      NatEnrichedParityRole.closingExcess
-        (collatzDynamicClosureLoop intersection).peak
-```
-
-Puis :
-
-```lean
-theorem collatzInternalTerminality_nextVisibleStep_eq_div_two
-```
-
-qui exprime que la lecture visible du prochain role est la lecture closing.
-
-## Definition finale de croissance visible dans le cadre
-
-La cible finale porte sur la trajectoire interne produite par le cadre, pas sur
-une suite externe arbitraire :
-
-```text
-f : Nat -> Nat
-```
-
-La comparaison visible brute :
-
-```text
-f t < f (t + 1)
-```
-
-est seulement une lecture externe. Dans ce cadre, une croissance visible
-Collatz est une lecture de role :
-
-```text
-la branche visible continue a demander le regime mediating.
-```
-
-Donc la bonne definition de croissance visible au temps `t` est :
-
-```text
-dans la trajectoire interne produite par le cadre,
-le prochain role visible est encore mediating.
-```
-
-Cette definition demande positivement un role mediating au prochain pas.
-
-### Croissance visible au temps `t`
-
-Ajouter :
-
-```lean
-structure CollatzVisibleMediatingGrowthAt
-    (state : CollatzInternalState)
-    (t : Nat) where
-  current :
-    CollatzInternalState
-  current_eq :
-    current = collatzInternalStateTrajectory state t
-  nextRole :
-    NatEnrichedParityRole
-  nextRole_eq :
-    nextRole = collatzNextInternalStateRole current
-  mediatingIndex :
-    Nat
-  nextRole_is_mediating :
-    nextRole =
-      NatEnrichedParityRole.mediatingValue mediatingIndex
-```
-
-Cette structure signifie :
-
-```text
-au temps interne t, la lecture visible pretend continuer en mediating.
-```
-
-Elle ne contient aucun champ conditionnel. Elle est une demande positive de
-croissance visible mediating.
-
-### Exclusion locale
-
-Le theoreme local cible est :
-
-```lean
-theorem noCollatzVisibleMediatingGrowthAt
-    (state : CollatzInternalState)
-    (t : Nat) :
-    CollatzVisibleMediatingGrowthAt state t -> False
-```
-
-Preuve attendue :
-
-1. construire d'abord l'egalite mediating sur `growth.current` :
-
-```lean
-have hmedCurrent :
-    collatzNextInternalStateRole growth.current =
-      NatEnrichedParityRole.mediatingValue growth.mediatingIndex := by
-  rw [← growth.nextRole_eq]
-  exact growth.nextRole_is_mediating
-```
-
-2. ouvrir ensuite `growth.current` avec une equation :
-
-```lean
-cases hcurrent : growth.current with
-| mk branch intersection => ...
-```
-
-3. `collatzNextInternalStateRole current` se deploie en :
-
-```lean
-arithmeticClosingRoleOfIntersection
-  (collatzNextInternalIntersection intersection)
-```
-
-4. appliquer :
-
-```lean
-collatzCurrentPeak_reinserted_in_nextInternalIntersection intersection
-```
-
-qui donne :
-
-```lean
-collatzNextInternalStateRole current =
-  NatEnrichedParityRole.closingExcess
-    (collatzDynamicClosureLoop intersection).peak
-```
-
-5. reecrire `hmedCurrent` par `hcurrent`, puis par l'egalite closing ;
-6. fermer par disjonction des constructeurs :
-
-```lean
-NatEnrichedParityRole.closingExcess _ ≠
-  NatEnrichedParityRole.mediatingValue _
-```
-
-ou par `cases` / `noConfusion` sur l'egalite impossible.
-
-Point Lean verifie : construire `hmedCurrent` avant d'ouvrir `current` evite le
-probleme de reecriture dependante apres `cases`.
-
-### Croissance visible infinie
-
-Ajouter :
-
-```lean
-structure CollatzVisibleInfiniteMediatingGrowth
-    (state : CollatzInternalState) where
-  growthAt :
+structure CollatzVisibleTrajectoryInvariant
+    (start : Nat) where
+  value :
+    Nat -> Nat
+  visible_le_value :
     forall t : Nat,
-      CollatzVisibleMediatingGrowthAt state t
+      collatzVisibleTrajectory start t <= value t
+  value_le_bound :
+    forall t : Nat,
+      value t <= value 0
 ```
 
-Theoreme final :
+Alors la borne est immediate :
 
 ```lean
-theorem noCollatzVisibleInfiniteMediatingGrowth
-    (state : CollatzInternalState) :
-    CollatzVisibleInfiniteMediatingGrowth state -> False
+def collatzVisibleTrajectoryBoundOfInvariant
+    (start : Nat)
+    (inv : CollatzVisibleTrajectoryInvariant start) :
+    CollatzVisibleTrajectoryBound start where
+  bound := inv.value 0
+  start_le_bound := by
+    -- depuis visible_le_value 0
+  bounds_all := by
+    intro t
+    exact Nat.le_trans (inv.visible_le_value t) (inv.value_le_bound t)
 ```
 
-Preuve :
+Mais cette structure n'est acceptable que si l'on produit :
 
 ```lean
-intro growth
-exact noCollatzVisibleMediatingGrowthAt state 0 (growth.growthAt 0)
+def collatzVisibleTrajectoryInvariant
+    (start : Nat) :
+    CollatzVisibleTrajectoryInvariant start
 ```
 
-Ce theoreme est la cible finale de cette partie :
-
-```text
-pas de croissance visible infinie
-```
-
-au sens strict du cadre :
-
-```text
-pas de trajectoire interne produite par le cadre
-dont la lecture visible reste mediating a tous les temps.
-```
-
-La raison est constructive :
-
-```text
-chaque activation mediating non terminale fabrique sa fermeture,
-et la fermeture reinscrit le prochain role comme closingExcess.
-```
-
-## Implementation proposee
-
-### Nouveau fichier 1
-
-```text
-Meta/Collatz/VisibleRoleDynamics.lean
-```
-
-Contenu :
+Interdit :
 
 ```lean
-natEnrichedParityRoleOfVisible
-natEnrichedParityRoleOfVisible_code
-collatzVisibleFormedBranch
-collatzVisibleFormedIntersection
-collatzVisibleFormedIntersection_formedPositiveExcess
-collatzVisibleClosingStep
-collatzVisibleMediatingStep
-collatzVisibleStepOfRole
-collatzVisibleStepOfRole_closing
-collatzVisibleStepOfRole_mediating
-CollatzVisibleMediatingSource
-collatzVisibleMediatingSourceOfRoleEq
-CollatzVisibleMediatingActivation
-collatzVisibleMediatingActivation
-CollatzVisibleActivation
-collatzVisibleActivation
-CollatzVisibleInternalActivation
-collatzVisibleInternalActivation
-collatzVisibleInternalActivation_mediatingSuccOfRoleEq
+(inv : CollatzVisibleTrajectoryInvariant start) -> ...
 ```
 
-Objectif :
+car ce serait une hypothese aval.
 
-```text
-definir la lecture visible par roles, sans selection classique externe.
-produire l'analyse interne totale de toute valeur visible.
-```
+## Forme plus forte : mesure de descente par blocs
 
-### Nouveau fichier 2
+Une route plus informative consiste a produire des blocs dynamiques.
 
-```text
-Meta/Collatz/InternalStateTrajectory.lean
-```
+La croissance visible brute peut monter localement. Donc une descente pas a pas
+sur la valeur visible n'est pas la bonne forme.
 
-Contenu :
+La bonne forme possible est :
 
 ```lean
-CollatzInternalState
-CollatzInternalState.intersection
-collatzNextInternalState
-collatzInternalStateTrajectory
-collatzInternalStateTrajectory_zero
-collatzInternalStateTrajectory_succ
-collatzNextInternalStateRole
+structure CollatzVisibleBlockMeasure
+    (start : Nat) where
+  blockStart :
+    Nat -> Nat
+  blockValue :
+    Nat -> Nat
+  measure :
+    Nat -> Nat
+  blockValue_eq :
+    forall b : Nat,
+      blockValue b =
+        collatzVisibleTrajectory start (blockStart b)
+  block_covers :
+    forall t : Nat,
+      Exists (fun b : Nat =>
+        collatzVisibleTrajectory start t <= measure b)
+  measure_le_initial :
+    forall b : Nat,
+      measure b <= measure 0
 ```
 
-Objectif :
+Cette forme permettrait de borner tous les temps si :
 
 ```text
-produire la suite interne depuis `collatzNextInternalIntersection`.
+chaque temps est couvert par un bloc ;
+chaque bloc est majore par une mesure ;
+la mesure des blocs reste sous la mesure initiale.
 ```
 
-### Nouveau fichier 3
-
-```text
-Meta/Collatz/VisibleClosure.lean
-```
-
-Contenu :
+Theoreme cible depuis cette structure :
 
 ```lean
-nextRoleOfInternalTerminality
-collatzInternalTerminality_nextRole_eq_closing
-collatzInternalTerminality_nextVisibleStep_eq_closingStep
-CollatzVisibleMediatingGrowthAt
-noCollatzVisibleMediatingGrowthAt
-CollatzVisibleInfiniteMediatingGrowth
-noCollatzVisibleInfiniteMediatingGrowth
+def collatzVisibleTrajectoryBoundOfBlockMeasure
+    (start : Nat)
+    (blocks : CollatzVisibleBlockMeasure start) :
+    CollatzVisibleTrajectoryBound start
 ```
 
-Objectif :
-
-```text
-transformer la reinsertion closing interne en impossibilite d'une croissance
-visible mediating infinie.
-```
-
-## Ce que l'implementation demontrera
-
-Elle demontrera :
-
-```text
-toute activation mediating non terminale produite depuis une valeur visible
-fabrique une intersection operationnelle et une boucle de fermeture.
-```
-
-Elle demontrera aussi :
-
-```text
-cette boucle produit une prochaine lecture visible closing.
-```
-
-Elle demontrera aussi :
-
-```text
-toute valeur visible possede une analyse interne totale :
-closing, terminalOne, ou mediating non terminal.
-```
-
-et, dans le cas mediating produit par cette analyse :
-
-```text
-la valeur visible fabrique directement l'activation relaxee correspondante
-et la boucle de fermeture interne.
-```
-
-Elle demontrera enfin :
-
-```text
-une trajectoire interne produite par le cadre ne peut pas avoir une lecture
-visible mediating a tous les temps.
-```
-
-Forme finale Lean :
+Mais, encore une fois, la cible exige le producteur :
 
 ```lean
-theorem noCollatzVisibleInfiniteMediatingGrowth
-    (state : CollatzInternalState) :
-    CollatzVisibleInfiniteMediatingGrowth state -> False
+def collatzVisibleBlockMeasure
+    (start : Nat) :
+    CollatzVisibleBlockMeasure start
 ```
 
-Forme finale en langage du cadre :
+## Forme interdite : mesure locale non couvrante
+
+Une mesure locale du type :
+
+```lean
+current -> next -> next <= localPeak current
+```
+
+ne suffit pas.
+
+Elle doit aussi prouver :
 
 ```text
-pas de croissance visible infinie.
+tous les `localPeak current` restent sous une borne calculee depuis `start`.
 ```
 
-Sens exact :
+Sinon on obtient seulement :
 
 ```text
-pas de trajectoire interne Collatz dont la lecture visible reste indefiniment
-dans le regime mediating.
+chaque pas a son pic local.
 ```
 
-Mecanisme :
+Cela laisse possible une suite de pics locaux strictement croissante.
+
+Donc tout plan qui produit seulement :
 
 ```text
-mediating non terminal
--> activation relaxee
--> intersection formee
--> boucle de fermeture
--> prochain role closingExcess
--> impossibilite de rester mediating au prochain pas
+localPeak(t)
 ```
 
-Elle ne pretend pas encore a elle seule :
+sans preuve :
 
 ```text
-atteinte de 1
+forall t, localPeak(t) <= B(start)
 ```
 
-car l'atteinte de `1` demande ensuite la lecture terminale du cycle closing.
+est un echec de la cible.
 
-## Critere de validation
+## Verrou mathematique exact
 
-Le travail sera acceptable seulement si :
+Le verrou n'est pas :
 
 ```text
-1. aucun pont conditionnel n'est ajoute ;
-2. aucune hauteur visible n'est supposee ;
-3. aucune fenetre n'est supposee ;
-4. aucune trajectoire externe arbitraire n'est utilisee comme producteur ;
-5. toute valeur visible est analysee par `natEnrichedParityRoleOfVisible` ;
-6. le cas mediating produit une activation sans hypothese externe ;
-7. le role closing suivant est derive de InternalTerminality ;
-8. la lecture visible suivante est derivee du role closing ;
-9. `noCollatzVisibleMediatingGrowthAt` est prouve sans hypothese externe ;
-10. `noCollatzVisibleInfiniteMediatingGrowth` est prouve depuis le cas local ;
-11. l'audit Lean ne montre aucun axiome, Classical, propext, Quot.sound.
+montrer que 3n+1 est repris par /2.
 ```
+
+Le verrou est :
+
+```text
+montrer que la suite des reprises ne produit pas une suite non bornee de
+nouveaux pics visibles.
+```
+
+Forme Lean directe :
+
+```lean
+theorem collatzVisibleLocalPeaks_bounded
+    (start : Nat) :
+    Exists (fun B : Nat =>
+      forall t : Nat,
+        localVisiblePeak start t <= B)
+```
+
+puis :
+
+```lean
+theorem collatzVisibleTrajectory_le_localPeak
+    (start t : Nat) :
+    collatzVisibleTrajectory start t <= localVisiblePeak start t
+```
+
+Ce couple suffit a produire :
+
+```lean
+CollatzVisibleTrajectoryBound start
+```
+
+Mais ni `localVisiblePeak`, ni `collatzVisibleLocalPeaks_bounded`, ni le
+raccord `trajectory_le_localPeak` n'existent actuellement dans le code.
+
+## Decision d'implementation
+
+Le document supportera strictement l'implementation seulement quand l'une des
+trois familles suivantes sera entierement detaillee :
+
+```text
+1. producteur direct de `CollatzVisibleTrajectoryBound start` ;
+2. producteur de `CollatzVisibleTrajectoryInvariant start` ;
+3. producteur de `CollatzVisibleBlockMeasure start`.
+```
+
+Dans les trois cas, il faut un producteur depuis `start`.
+
+Le document ne doit pas autoriser une implementation avant d'avoir choisi une
+de ces familles et rempli ses champs sans hypothese externe.
+
+## Critere final d'acceptation
+
+La tache est acceptee seulement si le code fournit :
+
+```lean
+def collatzVisibleBound
+    (start : Nat) :
+    CollatzVisibleBound start
+```
+
+ou :
+
+```lean
+theorem noCollatzVisibleUnboundedGrowth
+    (start : Nat) :
+    CollatzVisibleUnboundedGrowth start -> False
+```
+
+avec une preuve constructive, sans axiome, sans `Classical`, sans `propext`,
+sans `Quot.sound`, et sans pont conditionnel.
+
+Tout resultat strictement plus faible vaut echec de la tache.
