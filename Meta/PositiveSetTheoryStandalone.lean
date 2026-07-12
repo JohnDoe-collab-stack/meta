@@ -1582,6 +1582,18 @@ def projectedRegimeCoordinationOfChange
         congrArg change.mapVisible diagonal.right_projects
   separated := diagonal.separated
 
+theorem projectedRegimeCoordinationOfChange_toProjectedRegimeCell
+    {S : RawPositiveSetSignature.{u, v, m}}
+    {R : ProjectionRegime.{u, v} S.FormedSet}
+    (change : ProjectionChange S R)
+    (diagonal : DiagonalCoordination S) :
+    ProjectedRegimeCoordination.toProjectedRegimeCell
+        (projectedRegimeCoordinationOfChange change diagonal) =
+      projectedRegimeCellOfChange change
+        (DiagonalCoordination.toProjectedSetCell diagonal) := by
+  cases diagonal
+  rfl
+
 structure ProjectedCellPersistence
     (S : RawPositiveSetSignature.{u, v, m})
     (cell : ProjectedSetCell S)
@@ -1601,6 +1613,26 @@ structure DiagonalCoordinationPersistence
   target_matches_change :
     targetCoordination =
       projectedRegimeCoordinationOfChange change diagonal
+
+def diagonalCoordinationPersistence_toProjectedCellPersistence
+    {S : RawPositiveSetSignature.{u, v, m}}
+    {diagonal : DiagonalCoordination S}
+    {R : ProjectionRegime.{u, v} S.FormedSet}
+    (persistence :
+      DiagonalCoordinationPersistence S diagonal R) :
+    ProjectedCellPersistence S
+      (DiagonalCoordination.toProjectedSetCell diagonal)
+      R where
+  change := persistence.change
+  targetCell :=
+    ProjectedRegimeCoordination.toProjectedRegimeCell
+      persistence.targetCoordination
+  target_matches_change := by
+    rw [persistence.target_matches_change]
+    exact
+      projectedRegimeCoordinationOfChange_toProjectedRegimeCell
+        persistence.change
+        diagonal
 
 structure PositiveDiagonalPersistence
     (S : RawPositiveSetSignature.{u, v, m})
@@ -2299,8 +2331,10 @@ end PositiveSetTheoryStandalone
 #print axioms PositiveSetTheoryStandalone.ProjectedRegimeCoordination
 #print axioms PositiveSetTheoryStandalone.ProjectedRegimeCoordination.toProjectedRegimeCell
 #print axioms PositiveSetTheoryStandalone.projectedRegimeCoordinationOfChange
+#print axioms PositiveSetTheoryStandalone.projectedRegimeCoordinationOfChange_toProjectedRegimeCell
 #print axioms PositiveSetTheoryStandalone.ProjectedCellPersistence
 #print axioms PositiveSetTheoryStandalone.DiagonalCoordinationPersistence
+#print axioms PositiveSetTheoryStandalone.diagonalCoordinationPersistence_toProjectedCellPersistence
 #print axioms PositiveSetTheoryStandalone.PositiveDiagonalPersistence
 #print axioms PositiveSetTheoryStandalone.PositiveConstructiveDiagonalPersistence
 #print axioms PositiveSetTheoryStandalone.positiveDiagonalPersistentWitness
