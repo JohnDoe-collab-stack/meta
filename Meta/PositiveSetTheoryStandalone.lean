@@ -139,6 +139,36 @@ structure ProjectedSetCell
   sameVisible : S.project formed = S.project shadow
   separated : formed = shadow -> False
 
+structure DiagonalCoordination
+    (S : RawPositiveSetSignature.{u, v, m}) where
+  index : S.VisibleSet
+  left : S.FormedSet
+  right : S.FormedSet
+  left_projects : S.project left = index
+  right_projects : S.project right = index
+  separated : left = right -> False
+
+def DiagonalCoordination.toProjectedSetCell
+    {S : RawPositiveSetSignature.{u, v, m}}
+    (diagonal : DiagonalCoordination S) :
+    ProjectedSetCell S where
+  formed := diagonal.left
+  shadow := diagonal.right
+  sameVisible :=
+    diagonal.left_projects.trans diagonal.right_projects.symm
+  separated := diagonal.separated
+
+def ProjectedSetCell.toDiagonalCoordination
+    {S : RawPositiveSetSignature.{u, v, m}}
+    (cell : ProjectedSetCell S) :
+    DiagonalCoordination S where
+  index := S.project cell.formed
+  left := cell.formed
+  right := cell.shadow
+  left_projects := rfl
+  right_projects := cell.sameVisible.symm
+  separated := cell.separated
+
 def ProjectionFiberFaithful
     (S : RawPositiveSetSignature.{u, v, m}) :
     Prop :=
@@ -185,6 +215,16 @@ structure PositiveSetDiagonalization
   cell : ProjectedSetCell S
   witness : WitnessOf cell
   witness_pos : Positive cell witness
+
+structure PositiveConstructiveDiagonalization
+    (S : RawPositiveSetSignature.{u, v, m})
+    (WitnessOf : DiagonalCoordination S -> Type w)
+    (Positive :
+      (diagonal : DiagonalCoordination S) ->
+        WitnessOf diagonal -> Prop) where
+  diagonal : DiagonalCoordination S
+  witness : WitnessOf diagonal
+  witness_pos : Positive diagonal witness
 
 /-! ## Empty and pair formations -/
 
@@ -1532,46 +1572,7 @@ structure ModelObligations
     (A B : S.FormedSet) ->
       PairProjectionLaw (pair A B)
 
-/-! ## Degenerate toy model for the raw adequate skeleton -/
-
-def degenerateRaw :
-    RawPositiveSetSignature.{0, 0, 0} where
-  FormedSet := Bool
-  VisibleSet := Unit
-  project := fun _ => ()
-  Mem := fun _ _ => Empty
-  VisibleMem := fun _ _ => False
-
-def degenerateMembershipProjection :
-    MembershipProjection degenerateRaw where
-  visibleMemOfMem h := nomatch h
-
-def degenerateMembershipReflection :
-    MembershipReflection degenerateRaw where
-  reflected h := nomatch h
-
-def degenerateVisibleExtensionality :
-    VisibleExtensionalStructure degenerateRaw where
-  visibleExtensionality V W _ := by
-    cases V
-    cases W
-    rfl
-
-def degenerateCell :
-    ProjectedSetCell degenerateRaw where
-  formed := true
-  shadow := false
-  sameVisible := rfl
-  separated := by
-    intro h
-    cases h
-
-def degenerateEmptyFormation :
-    EmptyFormation degenerateRaw where
-  set := true
-  elim _ h := nomatch h
-
-/-! ## Explicit syntax model of `PFSD` -/
+/-! ## Syntax membership skeleton and nonconstant model target -/
 
 inductive SyntaxFormed : Type where
   | empty : SyntaxFormed
@@ -1587,49 +1588,95 @@ def syntaxMem :
   | _, SyntaxFormed.empty => Empty
   | x, SyntaxFormed.pair A B => SyntaxOccurrence x A B
 
-def syntaxRaw :
+def singletonCode (n : Nat) : Nat :=
+  2 ^ n
+
+def unorderedPairCode (a b : Nat) : Nat :=
+  if a = b then
+    singletonCode a
+  else
+    singletonCode a + singletonCode b
+
+theorem unorderedPairCode_comm
+    (a b : Nat) :
+    unorderedPairCode a b = unorderedPairCode b a := by
+  unfold unorderedPairCode
+  by_cases h : a = b
+  · rw [h]
+  · have hb : b = a -> False := by
+      intro hb
+      exact h hb.symm
+    rw [if_neg h, if_neg hb, Nat.add_comm]
+
+def syntaxProjectCode :
+    SyntaxFormed -> Nat
+  | SyntaxFormed.empty => 0
+  | SyntaxFormed.pair A B =>
+      unorderedPairCode
+        (syntaxProjectCode A)
+        (syntaxProjectCode B)
+
+theorem syntaxProjectCode_pair_comm
+    (A B : SyntaxFormed) :
+    syntaxProjectCode (SyntaxFormed.pair A B) =
+      syntaxProjectCode (SyntaxFormed.pair B A) :=
+  unorderedPairCode_comm
+    (syntaxProjectCode A)
+    (syntaxProjectCode B)
+
+def syntaxNatVisibleMem
+    (u v : Nat) :
+    Prop :=
+  Exists
+    (fun a : Nat =>
+      Exists
+        (fun b : Nat =>
+          v = unorderedPairCode a b /\
+            (u = a \/ u = b)))
+
+def syntaxNatRaw :
     RawPositiveSetSignature.{0, 0, 0} where
   FormedSet := SyntaxFormed
-  VisibleSet := Unit
-  project := fun _ => ()
+  VisibleSet := Nat
+  project := syntaxProjectCode
   Mem := syntaxMem
-  VisibleMem := fun _ _ => True
+  VisibleMem := syntaxNatVisibleMem
 
-def syntaxOccurrenceToPairOccurrence
+def syntaxNatOccurrenceToPairOccurrence
     {x A B : SyntaxFormed} :
     SyntaxOccurrence x A B ->
-      PairOccurrence syntaxRaw x A B
+      PairOccurrence syntaxNatRaw x A B
   | SyntaxOccurrence.left h =>
       PairOccurrence.left
-        (S := syntaxRaw)
+        (S := syntaxNatRaw)
         (x := x)
         (A := A)
         (B := B)
         h
   | SyntaxOccurrence.right h =>
       PairOccurrence.right
-        (S := syntaxRaw)
+        (S := syntaxNatRaw)
         (x := x)
         (A := A)
         (B := B)
         h
 
-def pairOccurrenceToSyntaxOccurrence
+def pairOccurrenceToSyntaxNatOccurrence
     {x A B : SyntaxFormed} :
-    PairOccurrence syntaxRaw x A B ->
+    PairOccurrence syntaxNatRaw x A B ->
       SyntaxOccurrence x A B
   | PairOccurrence.left h =>
       SyntaxOccurrence.left h
   | PairOccurrence.right h =>
       SyntaxOccurrence.right h
 
-def syntaxOccurrenceEquiv
+def syntaxNatOccurrenceEquiv
     (x A B : SyntaxFormed) :
     TypeEquiv
       (syntaxMem x (SyntaxFormed.pair A B))
-      (PairOccurrence syntaxRaw x A B) where
-  toFun := syntaxOccurrenceToPairOccurrence
-  invFun := pairOccurrenceToSyntaxOccurrence
+      (PairOccurrence syntaxNatRaw x A B) where
+  toFun := syntaxNatOccurrenceToPairOccurrence
+  invFun := pairOccurrenceToSyntaxNatOccurrence
   left_inv := by
     intro occurrence
     cases occurrence with
@@ -1641,70 +1688,166 @@ def syntaxOccurrenceEquiv
     | left h => rfl
     | right h => rfl
 
-def syntaxEmptyFormation :
-    EmptyFormation syntaxRaw where
+def syntaxNatEmptyFormation :
+    EmptyFormation syntaxNatRaw where
   set := SyntaxFormed.empty
   elim _ h := nomatch h
 
-def syntaxPairFormation
+def syntaxNatPairFormation
     (A B : SyntaxFormed) :
-    PairEquivFormation syntaxRaw A B where
+    PairEquivFormation syntaxNatRaw A B where
   set := SyntaxFormed.pair A B
-  membership x := syntaxOccurrenceEquiv x A B
+  membership x := syntaxNatOccurrenceEquiv x A B
 
-def syntaxPairRigidity :
-    PairRigidity syntaxRaw syntaxPairFormation where
+def syntaxNatPairRigidity :
+    PairRigidity syntaxNatRaw syntaxNatPairFormation where
   parameters := by
     intro A B C D h
     cases h
     exact And.intro rfl rfl
 
-def syntaxPairProjection
-    (A B : SyntaxFormed) :
-    PairProjectionLaw (syntaxPairFormation A B) :=
-  fun U =>
-    Iff.intro
-      (fun _ => by
-        cases U
-        exact Or.inl rfl)
-      (fun _ => True.intro)
+def syntaxNatE : SyntaxFormed :=
+  SyntaxFormed.empty
 
-def syntaxVisibleExtensionality :
-    VisibleExtensionalStructure syntaxRaw where
-  visibleExtensionality V W _ := by
-    cases V
-    cases W
-    rfl
+def syntaxNatS : SyntaxFormed :=
+  SyntaxFormed.pair syntaxNatE syntaxNatE
 
-def syntaxPFSD :
-    PFSD.{0, 0, 0} where
-  S := syntaxRaw
-  visible := syntaxVisibleExtensionality
-  empty := syntaxEmptyFormation
-  pair := syntaxPairFormation
-  rigidity := syntaxPairRigidity
-  pairProjection := syntaxPairProjection
+def syntaxNatP : SyntaxFormed :=
+  SyntaxFormed.pair syntaxNatE syntaxNatS
 
-def syntaxPFSDCanonicalDiagonal :
-    PositiveSetDiagonalization syntaxPFSD.S
-      (PairSwapWitness syntaxPFSD.S syntaxPFSD.pair
-        (canonicalLeft syntaxPFSD.empty)
-        (canonicalRight syntaxPFSD.empty syntaxPFSD.pair))
-      (PairSwapPositive
-        (pair := syntaxPFSD.pair)
-        (canonicalLeft syntaxPFSD.empty)
-        (canonicalRight syntaxPFSD.empty syntaxPFSD.pair)) :=
-  PFSD.canonicalDiagonal syntaxPFSD
+def syntaxNatQ : SyntaxFormed :=
+  SyntaxFormed.pair syntaxNatS syntaxNatE
 
-/-! ## Nonconstant model obligation -/
+theorem syntaxNatE_project :
+    syntaxProjectCode syntaxNatE = 0 :=
+  rfl
 
-structure NonconstantPFSDModelObligation where
+theorem syntaxNatS_project :
+    syntaxProjectCode syntaxNatS = 1 :=
+  rfl
+
+theorem syntaxNatP_project :
+    syntaxProjectCode syntaxNatP = 3 :=
+  rfl
+
+theorem syntaxNatQ_project :
+    syntaxProjectCode syntaxNatQ = 3 :=
+  rfl
+
+theorem syntaxNatE_ne_S :
+    syntaxNatE = syntaxNatS -> False := by
+  intro h
+  cases h
+
+theorem syntaxNatP_ne_Q :
+    syntaxNatP = syntaxNatQ -> False := by
+  intro h
+  cases h
+
+theorem syntaxNat_project_nonconstant :
+    syntaxProjectCode syntaxNatE =
+      syntaxProjectCode syntaxNatS ->
+        False := by
+  intro h
+  cases h
+
+def syntaxNatDiagonalCoordination :
+    DiagonalCoordination syntaxNatRaw where
+  index := (3 : Nat)
+  left := syntaxNatP
+  right := syntaxNatQ
+  left_projects := syntaxNatP_project
+  right_projects := syntaxNatQ_project
+  separated := syntaxNatP_ne_Q
+
+def syntaxNatPairSwapWitness :
+    PairSwapWitness syntaxNatRaw syntaxNatPairFormation
+      syntaxNatE
+      syntaxNatS
+      (DiagonalCoordination.toProjectedSetCell
+        syntaxNatDiagonalCoordination) where
+  formed_is_pair := rfl
+  shadow_is_swapped_pair := rfl
+  parameters_separated := syntaxNatE_ne_S
+  a_left_in_formed :=
+    pairOccurrenceWitnessOfOccurrence
+      (syntaxNatPairFormation syntaxNatE syntaxNatS)
+      (PairOccurrence.left
+        (S := syntaxNatRaw)
+        (x := syntaxNatE)
+        (A := syntaxNatE)
+        (B := syntaxNatS)
+        rfl)
+  b_right_in_formed :=
+    pairOccurrenceWitnessOfOccurrence
+      (syntaxNatPairFormation syntaxNatE syntaxNatS)
+      (PairOccurrence.right
+        (S := syntaxNatRaw)
+        (x := syntaxNatS)
+        (A := syntaxNatE)
+        (B := syntaxNatS)
+        rfl)
+  b_left_in_shadow :=
+    pairOccurrenceWitnessOfOccurrence
+      (syntaxNatPairFormation syntaxNatS syntaxNatE)
+      (PairOccurrence.left
+        (S := syntaxNatRaw)
+        (x := syntaxNatS)
+        (A := syntaxNatS)
+        (B := syntaxNatE)
+        rfl)
+  a_right_in_shadow :=
+    pairOccurrenceWitnessOfOccurrence
+      (syntaxNatPairFormation syntaxNatS syntaxNatE)
+      (PairOccurrence.right
+        (S := syntaxNatRaw)
+        (x := syntaxNatE)
+        (A := syntaxNatS)
+        (B := syntaxNatE)
+        rfl)
+
+def syntaxNatPositiveConstructiveDiagonalization :
+    PositiveConstructiveDiagonalization syntaxNatRaw
+      (fun diagonal =>
+        PairSwapWitness syntaxNatRaw syntaxNatPairFormation
+          syntaxNatE
+          syntaxNatS
+          (DiagonalCoordination.toProjectedSetCell diagonal))
+      (fun diagonal witness =>
+        PairSwapPositive
+          (pair := syntaxNatPairFormation)
+          syntaxNatE
+          syntaxNatS
+          (DiagonalCoordination.toProjectedSetCell diagonal)
+          witness) where
+  diagonal := syntaxNatDiagonalCoordination
+  witness := syntaxNatPairSwapWitness
+  witness_pos := syntaxNatE_ne_S
+
+theorem syntaxNatDiagonal_not_fiberFaithful
+    (faithful : ProjectionFiberFaithful syntaxNatRaw) :
+    False :=
+  projectedSetCell_not_fiberFaithful
+    (DiagonalCoordination.toProjectedSetCell
+      syntaxNatDiagonalCoordination)
+    faithful
+
+theorem syntaxNatDiagonal_not_informationConserving
+    (conserving :
+      ProjectionInformationConserving syntaxNatRaw) :
+    False :=
+  projectedSetCell_not_informationConserving
+    (DiagonalCoordination.toProjectedSetCell
+      syntaxNatDiagonalCoordination)
+    conserving
+
+structure NonconstantPFSDModel where
   model : PFSD.{u, v, m}
-  visibleLeft : model.S.FormedSet
-  visibleRight : model.S.FormedSet
+  left : model.S.FormedSet
+  right : model.S.FormedSet
   visible_separated :
-    model.S.project visibleLeft =
-      model.S.project visibleRight ->
+    model.S.project left =
+      model.S.project right ->
         False
 
 end PositiveSetTheoryStandalone
@@ -1733,11 +1876,15 @@ end PositiveSetTheoryStandalone
 #print axioms PositiveSetTheoryStandalone.interfaceTransport_to_projectedIdentity
 #print axioms PositiveSetTheoryStandalone.interfaceTransport_iff_projectedIdentity
 #print axioms PositiveSetTheoryStandalone.ProjectedSetCell
+#print axioms PositiveSetTheoryStandalone.DiagonalCoordination
+#print axioms PositiveSetTheoryStandalone.DiagonalCoordination.toProjectedSetCell
+#print axioms PositiveSetTheoryStandalone.ProjectedSetCell.toDiagonalCoordination
 #print axioms PositiveSetTheoryStandalone.ProjectionFiberFaithful
 #print axioms PositiveSetTheoryStandalone.ProjectionInformationConserving
 #print axioms PositiveSetTheoryStandalone.projectedSetCell_not_fiberFaithful
 #print axioms PositiveSetTheoryStandalone.projectedSetCell_not_informationConserving
 #print axioms PositiveSetTheoryStandalone.PositiveSetDiagonalization
+#print axioms PositiveSetTheoryStandalone.PositiveConstructiveDiagonalization
 #print axioms PositiveSetTheoryStandalone.EmptyFormation
 #print axioms PositiveSetTheoryStandalone.EmptyProjectionLaw
 #print axioms PositiveSetTheoryStandalone.emptyProjectionLawOfReflection
@@ -1841,25 +1988,37 @@ end PositiveSetTheoryStandalone
 #print axioms PositiveSetTheoryStandalone.PFSOperational
 #print axioms PositiveSetTheoryStandalone.PFSTruth
 #print axioms PositiveSetTheoryStandalone.ModelObligations
-#print axioms PositiveSetTheoryStandalone.degenerateRaw
-#print axioms PositiveSetTheoryStandalone.degenerateMembershipProjection
-#print axioms PositiveSetTheoryStandalone.degenerateMembershipReflection
-#print axioms PositiveSetTheoryStandalone.degenerateVisibleExtensionality
-#print axioms PositiveSetTheoryStandalone.degenerateCell
-#print axioms PositiveSetTheoryStandalone.degenerateEmptyFormation
 #print axioms PositiveSetTheoryStandalone.SyntaxFormed
 #print axioms PositiveSetTheoryStandalone.SyntaxOccurrence
 #print axioms PositiveSetTheoryStandalone.syntaxMem
-#print axioms PositiveSetTheoryStandalone.syntaxRaw
-#print axioms PositiveSetTheoryStandalone.syntaxOccurrenceToPairOccurrence
-#print axioms PositiveSetTheoryStandalone.pairOccurrenceToSyntaxOccurrence
-#print axioms PositiveSetTheoryStandalone.syntaxOccurrenceEquiv
-#print axioms PositiveSetTheoryStandalone.syntaxEmptyFormation
-#print axioms PositiveSetTheoryStandalone.syntaxPairFormation
-#print axioms PositiveSetTheoryStandalone.syntaxPairRigidity
-#print axioms PositiveSetTheoryStandalone.syntaxPairProjection
-#print axioms PositiveSetTheoryStandalone.syntaxVisibleExtensionality
-#print axioms PositiveSetTheoryStandalone.syntaxPFSD
-#print axioms PositiveSetTheoryStandalone.syntaxPFSDCanonicalDiagonal
-#print axioms PositiveSetTheoryStandalone.NonconstantPFSDModelObligation
+#print axioms PositiveSetTheoryStandalone.singletonCode
+#print axioms PositiveSetTheoryStandalone.unorderedPairCode
+#print axioms PositiveSetTheoryStandalone.unorderedPairCode_comm
+#print axioms PositiveSetTheoryStandalone.syntaxProjectCode
+#print axioms PositiveSetTheoryStandalone.syntaxProjectCode_pair_comm
+#print axioms PositiveSetTheoryStandalone.syntaxNatVisibleMem
+#print axioms PositiveSetTheoryStandalone.syntaxNatRaw
+#print axioms PositiveSetTheoryStandalone.syntaxNatOccurrenceToPairOccurrence
+#print axioms PositiveSetTheoryStandalone.pairOccurrenceToSyntaxNatOccurrence
+#print axioms PositiveSetTheoryStandalone.syntaxNatOccurrenceEquiv
+#print axioms PositiveSetTheoryStandalone.syntaxNatEmptyFormation
+#print axioms PositiveSetTheoryStandalone.syntaxNatPairFormation
+#print axioms PositiveSetTheoryStandalone.syntaxNatPairRigidity
+#print axioms PositiveSetTheoryStandalone.syntaxNatE
+#print axioms PositiveSetTheoryStandalone.syntaxNatS
+#print axioms PositiveSetTheoryStandalone.syntaxNatP
+#print axioms PositiveSetTheoryStandalone.syntaxNatQ
+#print axioms PositiveSetTheoryStandalone.syntaxNatE_project
+#print axioms PositiveSetTheoryStandalone.syntaxNatS_project
+#print axioms PositiveSetTheoryStandalone.syntaxNatP_project
+#print axioms PositiveSetTheoryStandalone.syntaxNatQ_project
+#print axioms PositiveSetTheoryStandalone.syntaxNatE_ne_S
+#print axioms PositiveSetTheoryStandalone.syntaxNatP_ne_Q
+#print axioms PositiveSetTheoryStandalone.syntaxNat_project_nonconstant
+#print axioms PositiveSetTheoryStandalone.syntaxNatDiagonalCoordination
+#print axioms PositiveSetTheoryStandalone.syntaxNatPairSwapWitness
+#print axioms PositiveSetTheoryStandalone.syntaxNatPositiveConstructiveDiagonalization
+#print axioms PositiveSetTheoryStandalone.syntaxNatDiagonal_not_fiberFaithful
+#print axioms PositiveSetTheoryStandalone.syntaxNatDiagonal_not_informationConserving
+#print axioms PositiveSetTheoryStandalone.NonconstantPFSDModel
 /- AXIOM_AUDIT_END -/
