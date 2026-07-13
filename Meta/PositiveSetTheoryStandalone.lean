@@ -1983,6 +1983,521 @@ def syntaxMem :
   | _, SyntaxFormed.empty => Empty
   | x, SyntaxFormed.pair A B => SyntaxOccurrence x A B
 
+inductive SyntaxVisiblePre where
+  | empty : SyntaxVisiblePre
+  | singleton : SyntaxVisiblePre -> SyntaxVisiblePre
+  | doubleton : SyntaxVisiblePre -> SyntaxVisiblePre -> SyntaxVisiblePre
+
+def SyntaxVisiblePreLt :
+    SyntaxVisiblePre -> SyntaxVisiblePre -> Prop
+  | SyntaxVisiblePre.empty, SyntaxVisiblePre.empty => False
+  | SyntaxVisiblePre.empty, SyntaxVisiblePre.singleton _ => True
+  | SyntaxVisiblePre.empty, SyntaxVisiblePre.doubleton _ _ => True
+  | SyntaxVisiblePre.singleton _, SyntaxVisiblePre.empty => False
+  | SyntaxVisiblePre.singleton a, SyntaxVisiblePre.singleton b =>
+      SyntaxVisiblePreLt a b
+  | SyntaxVisiblePre.singleton _, SyntaxVisiblePre.doubleton _ _ => True
+  | SyntaxVisiblePre.doubleton _ _, SyntaxVisiblePre.empty => False
+  | SyntaxVisiblePre.doubleton _ _, SyntaxVisiblePre.singleton _ => False
+  | SyntaxVisiblePre.doubleton a b, SyntaxVisiblePre.doubleton c d =>
+      SyntaxVisiblePreLt a c \/
+        (a = c /\ SyntaxVisiblePreLt b d)
+
+inductive SyntaxVisiblePreCmp
+    (a b : SyntaxVisiblePre) :
+    Type where
+  | eq : a = b -> SyntaxVisiblePreCmp a b
+  | lt : SyntaxVisiblePreLt a b -> SyntaxVisiblePreCmp a b
+  | gt : SyntaxVisiblePreLt b a -> SyntaxVisiblePreCmp a b
+
+def syntaxVisiblePreCmp :
+    (a b : SyntaxVisiblePre) -> SyntaxVisiblePreCmp a b
+  | SyntaxVisiblePre.empty, SyntaxVisiblePre.empty =>
+      SyntaxVisiblePreCmp.eq rfl
+  | SyntaxVisiblePre.empty, SyntaxVisiblePre.singleton _ =>
+      SyntaxVisiblePreCmp.lt True.intro
+  | SyntaxVisiblePre.empty, SyntaxVisiblePre.doubleton _ _ =>
+      SyntaxVisiblePreCmp.lt True.intro
+  | SyntaxVisiblePre.singleton _, SyntaxVisiblePre.empty =>
+      SyntaxVisiblePreCmp.gt True.intro
+  | SyntaxVisiblePre.singleton a, SyntaxVisiblePre.singleton b =>
+      match syntaxVisiblePreCmp a b with
+      | SyntaxVisiblePreCmp.eq h =>
+          SyntaxVisiblePreCmp.eq
+            (congrArg SyntaxVisiblePre.singleton h)
+      | SyntaxVisiblePreCmp.lt h =>
+          SyntaxVisiblePreCmp.lt h
+      | SyntaxVisiblePreCmp.gt h =>
+          SyntaxVisiblePreCmp.gt h
+  | SyntaxVisiblePre.singleton _, SyntaxVisiblePre.doubleton _ _ =>
+      SyntaxVisiblePreCmp.lt True.intro
+  | SyntaxVisiblePre.doubleton _ _, SyntaxVisiblePre.empty =>
+      SyntaxVisiblePreCmp.gt True.intro
+  | SyntaxVisiblePre.doubleton _ _, SyntaxVisiblePre.singleton _ =>
+      SyntaxVisiblePreCmp.gt True.intro
+  | SyntaxVisiblePre.doubleton a b, SyntaxVisiblePre.doubleton c d =>
+      match syntaxVisiblePreCmp a c with
+      | SyntaxVisiblePreCmp.lt h =>
+          SyntaxVisiblePreCmp.lt (Or.inl h)
+      | SyntaxVisiblePreCmp.gt h =>
+          SyntaxVisiblePreCmp.gt (Or.inl h)
+      | SyntaxVisiblePreCmp.eq hac =>
+          match syntaxVisiblePreCmp b d with
+          | SyntaxVisiblePreCmp.eq hbd =>
+              SyntaxVisiblePreCmp.eq (by rw [hac, hbd])
+          | SyntaxVisiblePreCmp.lt hbd =>
+              SyntaxVisiblePreCmp.lt
+                (Or.inr (And.intro hac hbd))
+          | SyntaxVisiblePreCmp.gt hdb =>
+              SyntaxVisiblePreCmp.gt
+                (Or.inr (And.intro hac.symm hdb))
+
+theorem syntaxVisiblePreLt_irrefl :
+    (a : SyntaxVisiblePre) ->
+      SyntaxVisiblePreLt a a -> False
+  | SyntaxVisiblePre.empty, h => h
+  | SyntaxVisiblePre.singleton a, h =>
+      syntaxVisiblePreLt_irrefl a h
+  | SyntaxVisiblePre.doubleton a b, h => by
+      cases h with
+      | inl ha =>
+          exact syntaxVisiblePreLt_irrefl a ha
+      | inr hb =>
+          exact syntaxVisiblePreLt_irrefl b hb.right
+
+theorem syntaxVisiblePreLt_asymm :
+    (a b : SyntaxVisiblePre) ->
+      SyntaxVisiblePreLt a b ->
+      SyntaxVisiblePreLt b a ->
+        False
+  | SyntaxVisiblePre.empty, SyntaxVisiblePre.empty, h, _ => h
+  | SyntaxVisiblePre.empty, SyntaxVisiblePre.singleton _, _, h => h
+  | SyntaxVisiblePre.empty, SyntaxVisiblePre.doubleton _ _, _, h => h
+  | SyntaxVisiblePre.singleton _, SyntaxVisiblePre.empty, h, _ => h
+  | SyntaxVisiblePre.singleton a, SyntaxVisiblePre.singleton b, h, h' =>
+      syntaxVisiblePreLt_asymm a b h h'
+  | SyntaxVisiblePre.singleton _, SyntaxVisiblePre.doubleton _ _, _, h =>
+      h
+  | SyntaxVisiblePre.doubleton _ _, SyntaxVisiblePre.empty, h, _ => h
+  | SyntaxVisiblePre.doubleton _ _, SyntaxVisiblePre.singleton _, h, _ =>
+      h
+  | SyntaxVisiblePre.doubleton a b,
+    SyntaxVisiblePre.doubleton c d,
+    h,
+    h' => by
+      cases h with
+      | inl hac =>
+          cases h' with
+          | inl hca =>
+              exact syntaxVisiblePreLt_asymm a c hac hca
+          | inr htail =>
+              rw [htail.left] at hac
+              exact syntaxVisiblePreLt_irrefl a hac
+      | inr htail =>
+          cases h' with
+          | inl hca =>
+              rw [htail.left] at hca
+              exact syntaxVisiblePreLt_irrefl c hca
+          | inr htail' =>
+              exact
+                syntaxVisiblePreLt_asymm
+                  b
+                  d
+                  htail.right
+                  htail'.right
+
+def SyntaxVisiblePreNormal :
+    SyntaxVisiblePre -> Prop
+  | SyntaxVisiblePre.empty => True
+  | SyntaxVisiblePre.singleton a => SyntaxVisiblePreNormal a
+  | SyntaxVisiblePre.doubleton a b =>
+      SyntaxVisiblePreNormal a /\
+        SyntaxVisiblePreNormal b /\
+          SyntaxVisiblePreLt a b
+
+structure SyntaxVisible where
+  val : SyntaxVisiblePre
+  normal : SyntaxVisiblePreNormal val
+
+theorem syntaxVisible_ext
+    {A B : SyntaxVisible}
+    (h : A.val = B.val) :
+    A = B := by
+  cases A with
+  | mk av an =>
+      cases B with
+      | mk bv bn =>
+          cases h
+          have hn : an = bn := proof_irrel an bn
+          rw [hn]
+
+def syntaxVisibleEmpty :
+    SyntaxVisible where
+  val := SyntaxVisiblePre.empty
+  normal := True.intro
+
+def syntaxVisibleSingleton
+    (A : SyntaxVisible) :
+    SyntaxVisible where
+  val := SyntaxVisiblePre.singleton A.val
+  normal := A.normal
+
+def syntaxVisibleDoubleton
+    (A B : SyntaxVisible)
+    (h : SyntaxVisiblePreLt A.val B.val) :
+    SyntaxVisible where
+  val := SyntaxVisiblePre.doubleton A.val B.val
+  normal := And.intro A.normal (And.intro B.normal h)
+
+def syntaxVisiblePair
+    (A B : SyntaxVisible) :
+    SyntaxVisible :=
+  match syntaxVisiblePreCmp A.val B.val with
+  | SyntaxVisiblePreCmp.eq _ =>
+      syntaxVisibleSingleton A
+  | SyntaxVisiblePreCmp.lt h =>
+      syntaxVisibleDoubleton A B h
+  | SyntaxVisiblePreCmp.gt h =>
+      syntaxVisibleDoubleton B A h
+
+def syntaxVisibleMemPre
+    (U V : SyntaxVisiblePre) :
+    Prop :=
+  match V with
+  | SyntaxVisiblePre.empty => False
+  | SyntaxVisiblePre.singleton a => U = a
+  | SyntaxVisiblePre.doubleton a b => U = a \/ U = b
+
+def syntaxVisibleMem
+    (U V : SyntaxVisible) :
+    Prop :=
+  syntaxVisibleMemPre U.val V.val
+
+theorem syntaxVisiblePair_mem
+    (U A B : SyntaxVisible) :
+    syntaxVisibleMem U (syntaxVisiblePair A B) <->
+      (U = A \/ U = B) := by
+  unfold syntaxVisiblePair
+  cases syntaxVisiblePreCmp A.val B.val with
+  | eq h =>
+      apply Iff.intro
+      · intro hU
+        exact Or.inl (syntaxVisible_ext hU)
+      · intro hU
+        cases hU with
+        | inl hUA =>
+            rw [hUA]
+            rfl
+        | inr hUB =>
+            rw [hUB]
+            exact h.symm
+  | lt _ =>
+      apply Iff.intro
+      · intro hU
+        cases hU with
+        | inl hA =>
+            exact Or.inl (syntaxVisible_ext hA)
+        | inr hB =>
+            exact Or.inr (syntaxVisible_ext hB)
+      · intro hU
+        cases hU with
+        | inl hUA =>
+            rw [hUA]
+            exact Or.inl rfl
+        | inr hUB =>
+            rw [hUB]
+            exact Or.inr rfl
+  | gt _ =>
+      apply Iff.intro
+      · intro hU
+        cases hU with
+        | inl hB =>
+            exact Or.inr (syntaxVisible_ext hB)
+        | inr hA =>
+            exact Or.inl (syntaxVisible_ext hA)
+      · intro hU
+        cases hU with
+        | inl hUA =>
+            rw [hUA]
+            exact Or.inr rfl
+        | inr hUB =>
+            rw [hUB]
+            exact Or.inl rfl
+
+theorem syntaxVisiblePre_extensionality :
+    (V W : SyntaxVisiblePre) ->
+    SyntaxVisiblePreNormal V ->
+    SyntaxVisiblePreNormal W ->
+    ((U : SyntaxVisiblePre) ->
+      SyntaxVisiblePreNormal U ->
+        (syntaxVisibleMemPre U V <->
+          syntaxVisibleMemPre U W)) ->
+      V = W
+  | SyntaxVisiblePre.empty, SyntaxVisiblePre.empty, _, _, _ => rfl
+  | SyntaxVisiblePre.empty, SyntaxVisiblePre.singleton b, _, nb, h => by
+      have hb :
+          syntaxVisibleMemPre b (SyntaxVisiblePre.singleton b) :=
+        rfl
+      exact False.elim (((h b) nb).mpr hb)
+  | SyntaxVisiblePre.empty,
+    SyntaxVisiblePre.doubleton c d,
+    _,
+    nw,
+    h => by
+      have nc : SyntaxVisiblePreNormal c := nw.left
+      have hc :
+          syntaxVisibleMemPre c
+            (SyntaxVisiblePre.doubleton c d) :=
+        Or.inl rfl
+      exact False.elim (((h c) nc).mpr hc)
+  | SyntaxVisiblePre.singleton a, SyntaxVisiblePre.empty, na, _, h => by
+      have ha :
+          syntaxVisibleMemPre a (SyntaxVisiblePre.singleton a) :=
+        rfl
+      exact False.elim (((h a) na).mp ha)
+  | SyntaxVisiblePre.singleton a,
+    SyntaxVisiblePre.singleton b,
+    na,
+    _,
+    h => by
+      have hab : a = b := ((h a) na).mp rfl
+      rw [hab]
+  | SyntaxVisiblePre.singleton a,
+    SyntaxVisiblePre.doubleton c d,
+    _,
+    nw,
+    h => by
+      have nc : SyntaxVisiblePreNormal c := nw.left
+      have nd : SyntaxVisiblePreNormal d := nw.right.left
+      have hcd : SyntaxVisiblePreLt c d := nw.right.right
+      have hca : c = a := ((h c) nc).mpr (Or.inl rfl)
+      have hda : d = a := ((h d) nd).mpr (Or.inr rfl)
+      have hcdEq : c = d := hca.trans hda.symm
+      rw [hcdEq] at hcd
+      exact False.elim (syntaxVisiblePreLt_irrefl d hcd)
+  | SyntaxVisiblePre.doubleton a b,
+    SyntaxVisiblePre.empty,
+    nv,
+    _,
+    h => by
+      have na : SyntaxVisiblePreNormal a := nv.left
+      have ha :
+          syntaxVisibleMemPre a
+            (SyntaxVisiblePre.doubleton a b) :=
+        Or.inl rfl
+      exact False.elim (((h a) na).mp ha)
+  | SyntaxVisiblePre.doubleton a b,
+    SyntaxVisiblePre.singleton c,
+    nv,
+    _,
+    h => by
+      have na : SyntaxVisiblePreNormal a := nv.left
+      have nb : SyntaxVisiblePreNormal b := nv.right.left
+      have hab : SyntaxVisiblePreLt a b := nv.right.right
+      have hac : a = c := ((h a) na).mp (Or.inl rfl)
+      have hbc : b = c := ((h b) nb).mp (Or.inr rfl)
+      have habEq : a = b := hac.trans hbc.symm
+      rw [habEq] at hab
+      exact False.elim (syntaxVisiblePreLt_irrefl b hab)
+  | SyntaxVisiblePre.doubleton a b,
+    SyntaxVisiblePre.doubleton c d,
+    nv,
+    nw,
+    h => by
+      have na : SyntaxVisiblePreNormal a := nv.left
+      have nb : SyntaxVisiblePreNormal b := nv.right.left
+      have hab : SyntaxVisiblePreLt a b := nv.right.right
+      have hcd : SyntaxVisiblePreLt c d := nw.right.right
+      have ha : a = c \/ a = d :=
+        ((h a) na).mp (Or.inl rfl)
+      have hb : b = c \/ b = d :=
+        ((h b) nb).mp (Or.inr rfl)
+      cases ha with
+      | inl hac =>
+          cases hb with
+          | inl hbc =>
+              have habEq : a = b := hac.trans hbc.symm
+              rw [habEq] at hab
+              exact False.elim
+                (syntaxVisiblePreLt_irrefl b hab)
+          | inr hbd =>
+              rw [hac, hbd]
+      | inr had =>
+          cases hb with
+          | inl hbc =>
+              have hba : SyntaxVisiblePreLt b a := by
+                rw [hbc, had]
+                exact hcd
+              exact False.elim
+                (syntaxVisiblePreLt_asymm a b hab hba)
+          | inr hbd =>
+              have habEq : a = b := had.trans hbd.symm
+              rw [habEq] at hab
+              exact False.elim
+                (syntaxVisiblePreLt_irrefl b hab)
+
+theorem syntaxVisible_extensionality
+    (V W : SyntaxVisible)
+    (h :
+      (U : SyntaxVisible) ->
+        syntaxVisibleMem U V <-> syntaxVisibleMem U W) :
+    V = W := by
+  apply syntaxVisible_ext
+  exact
+    syntaxVisiblePre_extensionality
+      V.val
+      W.val
+      V.normal
+      W.normal
+      (fun U nU => by
+        change
+          syntaxVisibleMemPre U V.val <->
+            syntaxVisibleMemPre U W.val
+        exact h { val := U, normal := nU })
+
+def syntaxCanonicalProject :
+    SyntaxFormed -> SyntaxVisible
+  | SyntaxFormed.empty => syntaxVisibleEmpty
+  | SyntaxFormed.pair A B =>
+      syntaxVisiblePair
+        (syntaxCanonicalProject A)
+        (syntaxCanonicalProject B)
+
+def syntaxCanonicalRaw :
+    RawPositiveSetSignature.{0, 0, 0} where
+  FormedSet := SyntaxFormed
+  VisibleSet := SyntaxVisible
+  project := syntaxCanonicalProject
+  Mem := syntaxMem
+  VisibleMem := syntaxVisibleMem
+
+def syntaxCanonicalOccurrenceToPairOccurrence
+    {x A B : SyntaxFormed} :
+    SyntaxOccurrence x A B ->
+      PairOccurrence syntaxCanonicalRaw x A B
+  | SyntaxOccurrence.left h =>
+      PairOccurrence.left
+        (S := syntaxCanonicalRaw)
+        (x := x)
+        (A := A)
+        (B := B)
+        h
+  | SyntaxOccurrence.right h =>
+      PairOccurrence.right
+        (S := syntaxCanonicalRaw)
+        (x := x)
+        (A := A)
+        (B := B)
+        h
+
+def pairOccurrenceToSyntaxCanonicalOccurrence
+    {x A B : SyntaxFormed} :
+    PairOccurrence syntaxCanonicalRaw x A B ->
+      SyntaxOccurrence x A B
+  | PairOccurrence.left h =>
+      SyntaxOccurrence.left h
+  | PairOccurrence.right h =>
+      SyntaxOccurrence.right h
+
+def syntaxCanonicalOccurrenceEquiv
+    (x A B : SyntaxFormed) :
+    TypeEquiv
+      (syntaxMem x (SyntaxFormed.pair A B))
+      (PairOccurrence syntaxCanonicalRaw x A B) where
+  toFun := syntaxCanonicalOccurrenceToPairOccurrence
+  invFun := pairOccurrenceToSyntaxCanonicalOccurrence
+  left_inv := by
+    intro occurrence
+    cases occurrence with
+    | left _ => rfl
+    | right _ => rfl
+  right_inv := by
+    intro occurrence
+    cases occurrence with
+    | left _ => rfl
+    | right _ => rfl
+
+def syntaxCanonicalEmptyFormation :
+    EmptyFormation syntaxCanonicalRaw where
+  set := SyntaxFormed.empty
+  elim _ h := nomatch h
+
+def syntaxCanonicalPairFormation
+    (A B : SyntaxFormed) :
+    PairEquivFormation syntaxCanonicalRaw A B where
+  set := SyntaxFormed.pair A B
+  membership x := syntaxCanonicalOccurrenceEquiv x A B
+
+def syntaxCanonicalPairRigidity :
+    PairRigidity
+      syntaxCanonicalRaw
+      syntaxCanonicalPairFormation where
+  parameters := by
+    intro A B C D h
+    cases h
+    exact And.intro rfl rfl
+
+def syntaxCanonicalVisibleExtensionality :
+    VisibleExtensionalStructure syntaxCanonicalRaw where
+  visibleExtensionality :=
+    syntaxVisible_extensionality
+
+def syntaxCanonicalPairProjection
+    (A B : SyntaxFormed) :
+    PairProjectionLaw
+      (syntaxCanonicalPairFormation A B) :=
+  fun U =>
+    syntaxVisiblePair_mem
+      U
+      (syntaxCanonicalProject A)
+      (syntaxCanonicalProject B)
+
+def syntaxCanonicalPFSD :
+    PFSD.{0, 0, 0} where
+  S := syntaxCanonicalRaw
+  visible := syntaxCanonicalVisibleExtensionality
+  empty := syntaxCanonicalEmptyFormation
+  pair := syntaxCanonicalPairFormation
+  rigidity := syntaxCanonicalPairRigidity
+  pairProjection := syntaxCanonicalPairProjection
+
+def syntaxCanonicalPositiveConstructiveDiagonalization :
+    PositiveConstructiveDiagonalization syntaxCanonicalRaw
+      (fun diagonal =>
+        PairSwapWitness
+          syntaxCanonicalRaw
+          syntaxCanonicalPairFormation
+          (canonicalLeft syntaxCanonicalEmptyFormation)
+          (canonicalRight
+            syntaxCanonicalEmptyFormation
+            syntaxCanonicalPairFormation)
+          (DiagonalCoordination.toProjectedSetCell diagonal))
+      (fun diagonal witness =>
+        PairSwapPositive
+          (pair := syntaxCanonicalPairFormation)
+          (canonicalLeft syntaxCanonicalEmptyFormation)
+          (canonicalRight
+            syntaxCanonicalEmptyFormation
+            syntaxCanonicalPairFormation)
+          (DiagonalCoordination.toProjectedSetCell diagonal)
+          witness) :=
+  PFSD.canonicalConstructiveDiagonal syntaxCanonicalPFSD
+
+theorem syntaxCanonical_project_nonconstant :
+    syntaxCanonicalRaw.project SyntaxFormed.empty =
+      syntaxCanonicalRaw.project
+        (SyntaxFormed.pair SyntaxFormed.empty SyntaxFormed.empty) ->
+        False := by
+  intro h
+  have hv :
+      (syntaxCanonicalRaw.project SyntaxFormed.empty).val =
+        (syntaxCanonicalRaw.project
+          (SyntaxFormed.pair
+            SyntaxFormed.empty
+            SyntaxFormed.empty)).val :=
+    congrArg SyntaxVisible.val h
+  cases hv
+
 def singletonCode (n : Nat) : Nat :=
   2 ^ n
 
@@ -2246,6 +2761,14 @@ structure NonconstantPFSDModel where
       model.S.project right ->
         False
 
+def syntaxCanonicalNonconstantPFSDModel :
+    NonconstantPFSDModel where
+  model := syntaxCanonicalPFSD
+  left := SyntaxFormed.empty
+  right := SyntaxFormed.pair SyntaxFormed.empty SyntaxFormed.empty
+  visible_separated :=
+    syntaxCanonical_project_nonconstant
+
 end PositiveSetTheoryStandalone
 
 /- AXIOM_AUDIT_BEGIN -/
@@ -2413,6 +2936,37 @@ end PositiveSetTheoryStandalone
 #print axioms PositiveSetTheoryStandalone.SyntaxFormed
 #print axioms PositiveSetTheoryStandalone.SyntaxOccurrence
 #print axioms PositiveSetTheoryStandalone.syntaxMem
+#print axioms PositiveSetTheoryStandalone.SyntaxVisiblePre
+#print axioms PositiveSetTheoryStandalone.SyntaxVisiblePreLt
+#print axioms PositiveSetTheoryStandalone.SyntaxVisiblePreCmp
+#print axioms PositiveSetTheoryStandalone.syntaxVisiblePreCmp
+#print axioms PositiveSetTheoryStandalone.syntaxVisiblePreLt_irrefl
+#print axioms PositiveSetTheoryStandalone.syntaxVisiblePreLt_asymm
+#print axioms PositiveSetTheoryStandalone.SyntaxVisiblePreNormal
+#print axioms PositiveSetTheoryStandalone.SyntaxVisible
+#print axioms PositiveSetTheoryStandalone.syntaxVisible_ext
+#print axioms PositiveSetTheoryStandalone.syntaxVisibleEmpty
+#print axioms PositiveSetTheoryStandalone.syntaxVisibleSingleton
+#print axioms PositiveSetTheoryStandalone.syntaxVisibleDoubleton
+#print axioms PositiveSetTheoryStandalone.syntaxVisiblePair
+#print axioms PositiveSetTheoryStandalone.syntaxVisibleMemPre
+#print axioms PositiveSetTheoryStandalone.syntaxVisibleMem
+#print axioms PositiveSetTheoryStandalone.syntaxVisiblePair_mem
+#print axioms PositiveSetTheoryStandalone.syntaxVisiblePre_extensionality
+#print axioms PositiveSetTheoryStandalone.syntaxVisible_extensionality
+#print axioms PositiveSetTheoryStandalone.syntaxCanonicalProject
+#print axioms PositiveSetTheoryStandalone.syntaxCanonicalRaw
+#print axioms PositiveSetTheoryStandalone.syntaxCanonicalOccurrenceToPairOccurrence
+#print axioms PositiveSetTheoryStandalone.pairOccurrenceToSyntaxCanonicalOccurrence
+#print axioms PositiveSetTheoryStandalone.syntaxCanonicalOccurrenceEquiv
+#print axioms PositiveSetTheoryStandalone.syntaxCanonicalEmptyFormation
+#print axioms PositiveSetTheoryStandalone.syntaxCanonicalPairFormation
+#print axioms PositiveSetTheoryStandalone.syntaxCanonicalPairRigidity
+#print axioms PositiveSetTheoryStandalone.syntaxCanonicalVisibleExtensionality
+#print axioms PositiveSetTheoryStandalone.syntaxCanonicalPairProjection
+#print axioms PositiveSetTheoryStandalone.syntaxCanonicalPFSD
+#print axioms PositiveSetTheoryStandalone.syntaxCanonicalPositiveConstructiveDiagonalization
+#print axioms PositiveSetTheoryStandalone.syntaxCanonical_project_nonconstant
 #print axioms PositiveSetTheoryStandalone.singletonCode
 #print axioms PositiveSetTheoryStandalone.unorderedPairCode
 #print axioms PositiveSetTheoryStandalone.unorderedPairCode_comm
@@ -2443,4 +2997,5 @@ end PositiveSetTheoryStandalone
 #print axioms PositiveSetTheoryStandalone.syntaxNatDiagonal_not_fiberFaithful
 #print axioms PositiveSetTheoryStandalone.syntaxNatDiagonal_not_informationConserving
 #print axioms PositiveSetTheoryStandalone.NonconstantPFSDModel
+#print axioms PositiveSetTheoryStandalone.syntaxCanonicalNonconstantPFSDModel
 /- AXIOM_AUDIT_END -/
