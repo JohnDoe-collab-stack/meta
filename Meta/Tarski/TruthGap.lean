@@ -170,6 +170,185 @@ theorem tarski_undefinability_core
   exact hNotTruth hTruth
 
 /--
+Local Tarski mismatch, obtained from the fixed point alone.
+
+No global truth definition is assumed here.  The fixed point already refutes
+agreement between the candidate truth predicate and semantic holding at the
+liar sentence.
+-/
+theorem tarski_local_mismatch
+    {Sentence : Type u}
+    {TruthAt : Sentence -> Prop}
+    {Holds : Sentence -> Prop}
+    (fixedPoint :
+      TarskiDiagonalFixedPoint Sentence TruthAt Holds) :
+    (TruthAt fixedPoint.liar ↔ Holds fixedPoint.liar) ->
+      False := by
+  intro correct
+  have hNotTruth :
+      TruthAt fixedPoint.liar -> False := by
+    intro hTruth
+    have hHolds :
+        Holds fixedPoint.liar :=
+      correct.mp hTruth
+    exact
+      (fixedPoint.liar_spec.mp hHolds)
+        hTruth
+  have hHolds :
+      Holds fixedPoint.liar :=
+    fixedPoint.liar_spec.mpr hNotTruth
+  have hTruth :
+      TruthAt fixedPoint.liar :=
+    correct.mpr hHolds
+  exact hNotTruth hTruth
+
+/--
+Positive Tarski diagonal data.
+
+This is the inhabited object extracted from a fixed point alone: an explicit
+visible index, semantic and syntactic poles over that index, their separation,
+the fixed-point specification, and the local mismatch certificate.
+-/
+structure TarskiPositiveDiagonal
+    (Sentence : Type u)
+    (TruthAt : Sentence -> Prop)
+    (Holds : Sentence -> Prop) where
+  index : Sentence
+  formed : TarskiInterface Sentence
+  shadow : TarskiInterface Sentence
+  formed_is_semantic :
+    formed = TarskiInterface.semantic index
+  shadow_is_syntactic :
+    shadow = TarskiInterface.syntactic index
+  formed_projects :
+    (@TarskiInterface.project Sentence) formed = index
+  shadow_projects :
+    (@TarskiInterface.project Sentence) shadow = index
+  separated :
+    formed = shadow -> False
+  fixedPointSpec :
+    Holds index ↔ (TruthAt index -> False)
+  mismatch :
+    (TruthAt index ↔ Holds index) -> False
+
+/-- The positive diagonal produced by a Tarski fixed point. -/
+def tarskiPositiveDiagonalOfFixedPoint
+    {Sentence : Type u}
+    {TruthAt : Sentence -> Prop}
+    {Holds : Sentence -> Prop}
+    (fixedPoint :
+      TarskiDiagonalFixedPoint Sentence TruthAt Holds) :
+    TarskiPositiveDiagonal Sentence TruthAt Holds where
+  index := fixedPoint.liar
+  formed := TarskiInterface.semantic fixedPoint.liar
+  shadow := TarskiInterface.syntactic fixedPoint.liar
+  formed_is_semantic := rfl
+  shadow_is_syntactic := rfl
+  formed_projects := rfl
+  shadow_projects := rfl
+  separated := by
+    intro h
+    cases h
+  fixedPointSpec := fixedPoint.liar_spec
+  mismatch := tarski_local_mismatch fixedPoint
+
+/--
+Local truth mismatch over the two Tarski interfaces.
+
+Unlike `TarskiDiagonalObstruction`, this does not orient the local truth values
+as `formed true` and `shadow false`; it only stores the constructive failure of
+agreement, which is exactly what the fixed point provides without extra
+decidability.
+-/
+structure LocalTruthMismatch
+    (Sentence : Type u)
+    (TruthAt : Sentence -> Prop)
+    (Holds : Sentence -> Prop) where
+  index : Sentence
+  semantic : TarskiInterface Sentence
+  syntactic : TarskiInterface Sentence
+  sameSyntax :
+    (@TarskiInterface.project Sentence) semantic =
+      (@TarskiInterface.project Sentence) syntactic
+  semantic_projects :
+    (@TarskiInterface.project Sentence) semantic = index
+  syntactic_projects :
+    (@TarskiInterface.project Sentence) syntactic = index
+  separated :
+    semantic = syntactic -> False
+  noAgreement :
+    (TarskiInterface.truth TruthAt Holds syntactic ↔
+      TarskiInterface.truth TruthAt Holds semantic) ->
+        False
+
+/-- A positive diagonal exposes its local truth mismatch. -/
+def TarskiPositiveDiagonal.localTruthMismatch
+    {Sentence : Type u}
+    {TruthAt : Sentence -> Prop}
+    {Holds : Sentence -> Prop}
+    (diagonal :
+      TarskiPositiveDiagonal Sentence TruthAt Holds) :
+    LocalTruthMismatch Sentence TruthAt Holds where
+  index := diagonal.index
+  semantic := diagonal.formed
+  syntactic := diagonal.shadow
+  sameSyntax :=
+    diagonal.formed_projects.trans
+      diagonal.shadow_projects.symm
+  semantic_projects := diagonal.formed_projects
+  syntactic_projects := diagonal.shadow_projects
+  separated := diagonal.separated
+  noAgreement := by
+    intro agreement
+    rw [diagonal.shadow_is_syntactic, diagonal.formed_is_semantic] at agreement
+    exact diagonal.mismatch agreement
+
+/-- The local truth mismatch produced by a fixed point. -/
+def localTruthMismatchOfFixedPoint
+    {Sentence : Type u}
+    {TruthAt : Sentence -> Prop}
+    {Holds : Sentence -> Prop}
+    (fixedPoint :
+      TarskiDiagonalFixedPoint Sentence TruthAt Holds) :
+    LocalTruthMismatch Sentence TruthAt Holds :=
+  (tarskiPositiveDiagonalOfFixedPoint fixedPoint).localTruthMismatch
+
+/--
+A positive diagonal refutes any exact projected truth definition.
+
+The contradiction is introduced only when a global projected definition is
+confronted with the already inhabited local mismatch.
+-/
+theorem TarskiPositiveDiagonal.refutesExactProjectedTruthDefinition
+    {Sentence : Type u}
+    {TruthAt : Sentence -> Prop}
+    {Holds : Sentence -> Prop}
+    (diagonal :
+      TarskiPositiveDiagonal Sentence TruthAt Holds)
+    (definition :
+      ExactProjectedTruthDefinition
+        (@TarskiInterface.project Sentence)
+        (TarskiInterface.truth TruthAt Holds)
+        TruthAt) :
+    False :=
+  diagonal.mismatch
+    (definition.correct
+      (TarskiInterface.semantic diagonal.index))
+
+/-- A positive diagonal refutes an ordinary Tarski truth definition. -/
+theorem TarskiPositiveDiagonal.refutesTruthDefinition
+    {Sentence : Type u}
+    {TruthAt : Sentence -> Prop}
+    {Holds : Sentence -> Prop}
+    (diagonal :
+      TarskiPositiveDiagonal Sentence TruthAt Holds)
+    (definition :
+      TarskiTruthDefinition TruthAt Holds) :
+    False :=
+  diagonal.mismatch
+    (definition.correct diagonal.index)
+
+/--
 The ordinary Tarski refutation is equivalent to the exact projective
 refutation over the semantic/syntactic interface.
 -/
@@ -283,6 +462,28 @@ def exactProjectedTruthDefinitionOfPredicate
     (context.truthDefinitionOfPredicate tau definesTruth)
 
 /--
+Positive arithmetic Tarski counterexample extractor.
+
+For every candidate predicate `tau`, it returns the diagonal sentence on which
+the intended truth equation fails.  The usual negative undefinability theorem
+is recovered by applying a globally correct candidate to this explicit
+counterexample.
+-/
+def explicitTruthCounterexample
+    (context : ArithmeticTarskiContext.{u, v})
+    (tau : context.Predicate) :
+    { sentence : context.Sentence //
+        (context.models sentence ↔
+          context.models (context.applyQuote tau sentence)) ->
+            False } :=
+  ⟨ context.diagonal tau
+  , fun agreement =>
+      tarski_local_mismatch
+        (context.fixedPoint tau)
+        (Iff.symm agreement)
+  ⟩
+
+/--
 Tarski's undefinability theorem in the arithmetic shape:
 there is no arithmetical predicate `tau` such that every sentence has the same
 truth value as `tau/[⌜sentence⌝]`.
@@ -295,11 +496,44 @@ theorem undefinability_of_truth
           context.models (context.applyQuote tau sentence)) ->
       False := by
   intro candidate
-  rcases candidate with ⟨tau, definesTruth⟩
-  exact
-    tarski_undefinability_core
-      (context.fixedPoint tau)
-      (context.truthDefinitionOfPredicate tau definesTruth)
+  cases candidate with
+  | intro tau definesTruth =>
+      exact
+        (context.explicitTruthCounterexample tau).property
+          (definesTruth
+            (context.explicitTruthCounterexample tau).val)
+
+/-- The negative arithmetic theorem obtained from the positive extractor. -/
+theorem undefinability_of_truth_via_explicitCounterexample
+    (context : ArithmeticTarskiContext.{u, v}) :
+    (∃ tau : context.Predicate,
+      (sentence : context.Sentence) ->
+        context.models sentence ↔
+          context.models (context.applyQuote tau sentence)) ->
+      False := by
+  intro candidate
+  cases candidate with
+  | intro tau definesTruth =>
+      exact
+        (context.explicitTruthCounterexample tau).property
+          (definesTruth
+            (context.explicitTruthCounterexample tau).val)
+
+/-- Compatibility proof: the original core still follows directly. -/
+theorem undefinability_of_truth_via_truthDefinition
+    (context : ArithmeticTarskiContext.{u, v}) :
+    (∃ tau : context.Predicate,
+      (sentence : context.Sentence) ->
+        context.models sentence ↔
+          context.models (context.applyQuote tau sentence)) ->
+      False := by
+  intro candidate
+  cases candidate with
+  | intro tau definesTruth =>
+      exact
+        tarski_undefinability_core
+          (context.fixedPoint tau)
+          (context.truthDefinitionOfPredicate tau definesTruth)
 
 end ArithmeticTarskiContext
 
@@ -615,13 +849,24 @@ end Meta
 #print axioms Meta.ClosedStabilityTheorem.TarskiInterface.truth
 #print axioms Meta.ClosedStabilityTheorem.tarskiTruthDefinition_iff_exactProjectedTruthDefinition
 #print axioms Meta.ClosedStabilityTheorem.tarski_undefinability_core
+#print axioms Meta.ClosedStabilityTheorem.tarski_local_mismatch
+#print axioms Meta.ClosedStabilityTheorem.TarskiPositiveDiagonal
+#print axioms Meta.ClosedStabilityTheorem.tarskiPositiveDiagonalOfFixedPoint
+#print axioms Meta.ClosedStabilityTheorem.LocalTruthMismatch
+#print axioms Meta.ClosedStabilityTheorem.TarskiPositiveDiagonal.localTruthMismatch
+#print axioms Meta.ClosedStabilityTheorem.localTruthMismatchOfFixedPoint
+#print axioms Meta.ClosedStabilityTheorem.TarskiPositiveDiagonal.refutesExactProjectedTruthDefinition
+#print axioms Meta.ClosedStabilityTheorem.TarskiPositiveDiagonal.refutesTruthDefinition
 #print axioms Meta.ClosedStabilityTheorem.tarski_undefinability_equiv_exact_projective
 #print axioms Meta.ClosedStabilityTheorem.ArithmeticTarskiContext
 #print axioms Meta.ClosedStabilityTheorem.ArithmeticTarskiContext.truthAt
 #print axioms Meta.ClosedStabilityTheorem.ArithmeticTarskiContext.fixedPoint
 #print axioms Meta.ClosedStabilityTheorem.ArithmeticTarskiContext.truthDefinitionOfPredicate
 #print axioms Meta.ClosedStabilityTheorem.ArithmeticTarskiContext.exactProjectedTruthDefinitionOfPredicate
+#print axioms Meta.ClosedStabilityTheorem.ArithmeticTarskiContext.explicitTruthCounterexample
 #print axioms Meta.ClosedStabilityTheorem.ArithmeticTarskiContext.undefinability_of_truth
+#print axioms Meta.ClosedStabilityTheorem.ArithmeticTarskiContext.undefinability_of_truth_via_explicitCounterexample
+#print axioms Meta.ClosedStabilityTheorem.ArithmeticTarskiContext.undefinability_of_truth_via_truthDefinition
 #print axioms Meta.ClosedStabilityTheorem.ArithmeticTarskiContext.undefinability_of_truth_via_projective_corollary
 #print axioms Meta.ClosedStabilityTheorem.TarskiTruthRepair
 #print axioms Meta.ClosedStabilityTheorem.TarskiDiagonalObstruction
