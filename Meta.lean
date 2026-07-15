@@ -2,6 +2,8 @@ import Meta.Core.RelaxedUsageRegime
 import Meta.Core.BilateralCore
 import Meta.Core.ProjectiveCore
 import Meta.Core.ProjectedIdentity
+import Meta.Core.TransportCoherence
+import Meta.Core.TransportCoherenceModel
 import Meta.Core.StrictRelaxation
 import Meta.Core.ClosedStabilityTheorem
 import Meta.Core.DynamicCore
@@ -45,6 +47,8 @@ import Meta.Tarski.TruthGap
 import Meta.Tarski.GapContraction
 import Meta.Tarski.ReferentialOrder
 import Meta.Tarski.DynamicReturn
+import Meta.Tarski.DynamicRelaxedUsage
+import Meta.Tarski.ConstructivePatchModel
 import Meta.Tarski.FoundationBridge
 import Meta.Beth.ImplicitExplicit
 import Meta.Beth.GapContraction
@@ -60,8 +64,12 @@ import Meta.Synthesis.TarskiBethBellGap
 
 /- AXIOM_AUDIT_BEGIN -/
 #print axioms Meta.RelaxedUsageRegime.projectedIdentityTransport_strictlyIncludedIn_relaxedUsageTransport
+#print axioms Meta.RelaxedUsageRegime.projectedRepresentability_strict
+#print axioms Meta.TransportCoherenceModel.threePhase_direct_transport_eq_composed
 #print axioms Meta.DynamicRelaxedUsage.dynamicRelaxedRegime_not_exactProjective
 #print axioms Meta.DynamicRelaxedUsageModel.switchDynamicRelaxationSynthesis
+#print axioms Meta.TarskiDynamicRelaxedUsage.tarskiDynamicRelaxedUsageSynthesis
+#print axioms Meta.ConstructivePatchModel.constructiveTarskiClosedSystem
 #print axioms Meta.ClosedStabilityTheorem.IdentityOfUseCell
 #print axioms Meta.ClosedStabilityTheorem.projectedIdentityCell_internalDifference_usedIdentity
 #print axioms Meta.ClosedStabilityTheorem.InterfaceTransport

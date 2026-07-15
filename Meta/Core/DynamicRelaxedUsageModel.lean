@@ -567,6 +567,26 @@ def switchLeftRepair : SwitchRepair SwitchInterface.leftPole :=
 def switchRightRepair : SwitchRepair SwitchInterface.rightPole :=
   switchRepairAt SwitchState.rightToLeft
 
+/-- Lawful proof-relevant composition of all switch uses. -/
+def switchLawfulCompositionalUse :
+    LawfulCompositionalUse
+      (dynamicRelaxedRegimeOfReturnFamily
+        switchIntrinsicDynamicReturnFamily)
+      (dynamicCompositionalUseOfReturnFamily
+        switchIntrinsicDynamicReturnFamily) :=
+  dynamicLawfulCompositionalUseOfReturnFamily
+    switchIntrinsicDynamicReturnFamily
+
+/-- Coherent formed and visible transport in the switch system. -/
+def switchCompositionalTransport :
+    CompositionalTransport
+      (dynamicRelaxedRegimeOfReturnFamily
+        switchIntrinsicDynamicReturnFamily)
+      (dynamicCompositionalUseOfReturnFamily
+        switchIntrinsicDynamicReturnFamily) :=
+  dynamicCompositionalTransportOfReturnFamily
+    switchIntrinsicDynamicReturnFamily
+
 /-- The closed result retains the system and every substantive witness. -/
 structure SwitchDynamicRelaxationSynthesis where
   varyingSystem :
@@ -607,6 +627,18 @@ structure SwitchDynamicRelaxationSynthesis where
       SwitchInterface.leftPole
   leftRepair : SwitchRepair SwitchInterface.leftPole
   rightRepair : SwitchRepair SwitchInterface.rightPole
+  lawfulUse :
+    LawfulCompositionalUse
+      (dynamicRelaxedRegimeOfReturnFamily
+        switchIntrinsicDynamicReturnFamily)
+      (dynamicCompositionalUseOfReturnFamily
+        switchIntrinsicDynamicReturnFamily)
+  coherentTransport :
+    CompositionalTransport
+      (dynamicRelaxedRegimeOfReturnFamily
+        switchIntrinsicDynamicReturnFamily)
+      (dynamicCompositionalUseOfReturnFamily
+        switchIntrinsicDynamicReturnFamily)
   notExactProjective :
     ExactProjectiveRepresentation.{0, q, 0, 0, 0, 0, 0, 0, 0}
         (dynamicRelaxedRegimeOfReturnFamily
@@ -632,6 +664,8 @@ def switchDynamicRelaxationSynthesis :
       SwitchState.rightToLeft
   leftRepair := switchLeftRepair
   rightRepair := switchRightRepair
+  lawfulUse := switchLawfulCompositionalUse
+  coherentTransport := switchCompositionalTransport
   notExactProjective := switchDynamicRegime_notExactProjective
 
 end DynamicRelaxedUsageModel
@@ -664,6 +698,8 @@ end Meta
 #print axioms Meta.DynamicRelaxedUsageModel.switchDynamicRegime_notExactProjective
 #print axioms Meta.DynamicRelaxedUsageModel.switchInitialCycle_preservesIntersection
 #print axioms Meta.DynamicRelaxedUsageModel.switchTwoSteps_return
+#print axioms Meta.DynamicRelaxedUsageModel.switchLawfulCompositionalUse
+#print axioms Meta.DynamicRelaxedUsageModel.switchCompositionalTransport
 #print axioms Meta.DynamicRelaxedUsageModel.SwitchDynamicRelaxationSynthesis
 #print axioms Meta.DynamicRelaxedUsageModel.switchDynamicRelaxationSynthesis
 /- AXIOM_AUDIT_END -/

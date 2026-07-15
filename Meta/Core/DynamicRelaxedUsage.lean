@@ -595,6 +595,207 @@ def dynamicCompositionalUseOfReturnFamily
   identity := fun _ interface => DynamicGapUse.refl interface
   compose := fun first second => first.compose second
 
+/-- Dynamic use composition satisfies identity and associativity laws. -/
+def dynamicLawfulCompositionalUseOfReturnFamily
+    {Branch : Type u}
+    {complete : BidirectionalCompleteness.{u, v, w} Branch}
+    {coherence : RoundTripCoherence complete}
+    {branch : Branch}
+    {Source : Type a}
+    {Interface : Type x}
+    {WitnessOf : Interface -> Type y}
+    {RealizesInterface :
+      StrongTerminalCycleFromIntersection complete branch ->
+        Interface ->
+        Type z}
+    {Visible : Type r}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    (family :
+      IntrinsicDynamicReturnFamily
+        complete coherence branch Source Interface WitnessOf
+        RealizesInterface Visible project RepairOf) :
+    LawfulCompositionalUse
+      (dynamicRelaxedRegimeOfReturnFamily family)
+      (dynamicCompositionalUseOfReturnFamily family) where
+  leftIdentity := by
+    intro context left right use
+    cases use <;> rfl
+  rightIdentity := by
+    intro context left right use
+    cases use <;> rfl
+  associativity := by
+    intro context firstPoint secondPoint thirdPoint fourthPoint
+      first second third
+    cases first with
+    | refl => rfl
+    | of_noncontractive firstSeparation firstCoordination =>
+        cases second with
+        | refl => rfl
+        | of_noncontractive secondSeparation secondCoordination =>
+            exact
+              (family.separatedAt context.source
+                (secondCoordination.left_eq_formed.symm.trans
+                  firstCoordination.right_eq_shadow)).elim
+
+/-- Identity for visible equality transport. -/
+def DynamicVisibleTransportRelation.identity
+    {Branch : Type u}
+    {complete : BidirectionalCompleteness.{u, v, w} Branch}
+    {coherence : RoundTripCoherence complete}
+    {branch : Branch}
+    {Source : Type a}
+    {Interface : Type x}
+    {WitnessOf : Interface -> Type y}
+    {RealizesInterface :
+      StrongTerminalCycleFromIntersection complete branch ->
+        Interface ->
+        Type z}
+    {Visible : Type r}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    {family :
+      IntrinsicDynamicReturnFamily
+        complete coherence branch Source Interface WitnessOf
+        RealizesInterface Visible project RepairOf}
+    {context : DynamicUsageContext family}
+    (visible : Visible) :
+    DynamicVisibleTransportRelation family context visible visible where
+  equality := rfl
+
+/-- Composition of visible equality transports. -/
+def DynamicVisibleTransportRelation.compose
+    {Branch : Type u}
+    {complete : BidirectionalCompleteness.{u, v, w} Branch}
+    {coherence : RoundTripCoherence complete}
+    {branch : Branch}
+    {Source : Type a}
+    {Interface : Type x}
+    {WitnessOf : Interface -> Type y}
+    {RealizesInterface :
+      StrongTerminalCycleFromIntersection complete branch ->
+        Interface ->
+        Type z}
+    {Visible : Type r}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    {family :
+      IntrinsicDynamicReturnFamily
+        complete coherence branch Source Interface WitnessOf
+        RealizesInterface Visible project RepairOf}
+    {context : DynamicUsageContext family}
+    {left middle right : Visible}
+    (first :
+      DynamicVisibleTransportRelation family context left middle)
+    (second :
+      DynamicVisibleTransportRelation family context middle right) :
+    DynamicVisibleTransportRelation family context left right where
+  equality := first.equality.trans second.equality
+
+/-- Visible equality transports with fixed endpoints are proof-irrelevant. -/
+theorem DynamicVisibleTransportRelation.unique
+    {Branch : Type u}
+    {complete : BidirectionalCompleteness.{u, v, w} Branch}
+    {coherence : RoundTripCoherence complete}
+    {branch : Branch}
+    {Source : Type a}
+    {Interface : Type x}
+    {WitnessOf : Interface -> Type y}
+    {RealizesInterface :
+      StrongTerminalCycleFromIntersection complete branch ->
+        Interface ->
+        Type z}
+    {Visible : Type r}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    {family :
+      IntrinsicDynamicReturnFamily
+        complete coherence branch Source Interface WitnessOf
+        RealizesInterface Visible project RepairOf}
+    {context : DynamicUsageContext family}
+    {left right : Visible}
+    (first second :
+      DynamicVisibleTransportRelation family context left right) :
+    first = second := by
+  cases first
+  cases second
+  rfl
+
+/-- Both dynamic readings carry lawful composition preserved by transport. -/
+def dynamicCompositionalTransportOfReturnFamily
+    {Branch : Type u}
+    {complete : BidirectionalCompleteness.{u, v, w} Branch}
+    {coherence : RoundTripCoherence complete}
+    {branch : Branch}
+    {Source : Type a}
+    {Interface : Type x}
+    {WitnessOf : Interface -> Type y}
+    {RealizesInterface :
+      StrongTerminalCycleFromIntersection complete branch ->
+        Interface ->
+        Type z}
+    {Visible : Type r}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    (family :
+      IntrinsicDynamicReturnFamily
+        complete coherence branch Source Interface WitnessOf
+        RealizesInterface Visible project RepairOf) :
+    CompositionalTransport
+      (dynamicRelaxedRegimeOfReturnFamily family)
+      (dynamicCompositionalUseOfReturnFamily family) where
+  useLaws := dynamicLawfulCompositionalUseOfReturnFamily family
+  outIdentity := by
+    intro context reading interface
+    cases reading with
+    | formed => exact DynamicGapUse.refl interface
+    | visible =>
+        exact
+          DynamicVisibleTransportRelation.identity
+            (project interface)
+  outCompose := by
+    intro context reading left middle right first second
+    cases reading with
+    | formed => exact first.compose second
+    | visible => exact first.compose second
+  outLeftIdentity := by
+    intro context reading left right relation
+    cases reading with
+    | formed =>
+        exact
+          (dynamicLawfulCompositionalUseOfReturnFamily family).leftIdentity
+            relation
+    | visible =>
+        exact DynamicVisibleTransportRelation.unique _ _
+  outRightIdentity := by
+    intro context reading left right relation
+    cases reading with
+    | formed =>
+        exact
+          (dynamicLawfulCompositionalUseOfReturnFamily family).rightIdentity
+            relation
+    | visible =>
+        exact DynamicVisibleTransportRelation.unique _ _
+  outAssociativity := by
+    intro context reading firstPoint secondPoint thirdPoint fourthPoint
+      first second third
+    cases reading with
+    | formed =>
+        exact
+          (dynamicLawfulCompositionalUseOfReturnFamily family).associativity
+            first second third
+    | visible =>
+        exact DynamicVisibleTransportRelation.unique _ _
+  transportIdentity := by
+    intro context reading interface
+    cases reading <;> rfl
+  transportComposition := by
+    intro context reading left middle right first second
+    cases reading with
+    | formed => rfl
+    | visible =>
+        exact DynamicVisibleTransportRelation.unique _ _
+
 /-! ## Causal extraction from the current gap -/
 
 /-- Non-contractive use at an arbitrary context of the family. -/
@@ -1032,6 +1233,95 @@ def dynamicGapCausalState
   formedUse_eq_memoryUse := rfl
   visibleUse_eq_memoryUse := rfl
 
+/-- The canonical formed transport is exactly the image of the memorized use. -/
+theorem dynamicGapCausalState_formedTransport_eq_memoryTransport
+    {Branch : Type u}
+    {complete : BidirectionalCompleteness.{u, v, w} Branch}
+    {coherence : RoundTripCoherence complete}
+    {branch : Branch}
+    {Source : Type a}
+    {Interface : Type x}
+    {WitnessOf : Interface -> Type y}
+    {RealizesInterface :
+      StrongTerminalCycleFromIntersection complete branch ->
+        Interface ->
+        Type z}
+    {Visible : Type r}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    (family :
+      IntrinsicDynamicReturnFamily
+        complete coherence branch Source Interface WitnessOf
+        RealizesInterface Visible project RepairOf)
+    (source : Source) :
+    (dynamicGapCausalState family source).formedTransport.transported =
+      (dynamicRelaxedRegimeOfReturnFamily family).transport
+        (dynamicGapCausalState family source).memory.use
+        DynamicGapReading.formed :=
+  rfl
+
+/-- The canonical visible transport is the second image of the same use. -/
+theorem dynamicGapCausalState_visibleTransport_eq_memoryTransport
+    {Branch : Type u}
+    {complete : BidirectionalCompleteness.{u, v, w} Branch}
+    {coherence : RoundTripCoherence complete}
+    {branch : Branch}
+    {Source : Type a}
+    {Interface : Type x}
+    {WitnessOf : Interface -> Type y}
+    {RealizesInterface :
+      StrongTerminalCycleFromIntersection complete branch ->
+        Interface ->
+        Type z}
+    {Visible : Type r}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    (family :
+      IntrinsicDynamicReturnFamily
+        complete coherence branch Source Interface WitnessOf
+        RealizesInterface Visible project RepairOf)
+    (source : Source) :
+    (dynamicGapCausalState family source).visibleTransport.transported =
+      (dynamicRelaxedRegimeOfReturnFamily family).transport
+        (dynamicGapCausalState family source).memory.use
+        DynamicGapReading.visible :=
+  rfl
+
+/-- Dynamic transport sends every use composition to output composition. -/
+theorem dynamicTransport_preservesComposition
+    {Branch : Type u}
+    {complete : BidirectionalCompleteness.{u, v, w} Branch}
+    {coherence : RoundTripCoherence complete}
+    {branch : Branch}
+    {Source : Type a}
+    {Interface : Type x}
+    {WitnessOf : Interface -> Type y}
+    {RealizesInterface :
+      StrongTerminalCycleFromIntersection complete branch ->
+        Interface ->
+        Type z}
+    {Visible : Type r}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    (family :
+      IntrinsicDynamicReturnFamily
+        complete coherence branch Source Interface WitnessOf
+        RealizesInterface Visible project RepairOf)
+    {context : DynamicUsageContext family}
+    {left middle right : Interface}
+    (reading : DynamicGapReading)
+    (first : DynamicGapUse family context left middle)
+    (second : DynamicGapUse family context middle right) :
+    (dynamicRelaxedRegimeOfReturnFamily family).transport
+        (DynamicGapUse.compose first second)
+        reading =
+      (dynamicCompositionalTransportOfReturnFamily family).outCompose
+        reading
+        ((dynamicRelaxedRegimeOfReturnFamily family).transport first reading)
+        ((dynamicRelaxedRegimeOfReturnFamily family).transport second reading) :=
+  (dynamicCompositionalTransportOfReturnFamily family).transportComposition
+    reading first second
+
 /-! ## Gap-driven transition and iteration -/
 
 /-- A transition can run only from a complete causal state of the current gap. -/
@@ -1431,17 +1721,15 @@ theorem dynamicRelaxedRegime_not_exactProjective
         (family.formedAt family.initial)
         (family.shadowAt family.initial) :=
     Nonempty.intro (dynamicGapAuthorizedUse family family.initial)
-  have backward :
-      HasUse
-        (dynamicRelaxedRegimeOfReturnFamily family)
-        family.initialContext
-        (family.shadowAt family.initial)
-        (family.formedAt family.initial) :=
-    hasUse_symm_of_exactProjectiveRepresentation representation forward
   exact
-    Nonempty.elim backward
-      (fun impossible =>
-        dynamicGapUse_noBackward family family.initialContext impossible)
+    not_exactProjective_of_asymmetric_use
+      forward
+      (fun backward =>
+        Nonempty.elim backward
+          (fun impossible =>
+            dynamicGapUse_noBackward
+              family family.initialContext impossible))
+      representation
 
 /-- The same strictness theorem read from a closed varying system. -/
 theorem GenuinelyVaryingDynamicUsageSystem.not_exactProjective
@@ -1479,6 +1767,9 @@ end Meta
 #print axioms Meta.DynamicRelaxedUsage.DynamicGapUse.compose
 #print axioms Meta.DynamicRelaxedUsage.dynamicGapUse_noBackward
 #print axioms Meta.DynamicRelaxedUsage.dynamicRelaxedRegimeOfReturnFamily
+#print axioms Meta.DynamicRelaxedUsage.dynamicLawfulCompositionalUseOfReturnFamily
+#print axioms Meta.DynamicRelaxedUsage.DynamicVisibleTransportRelation.compose
+#print axioms Meta.DynamicRelaxedUsage.dynamicCompositionalTransportOfReturnFamily
 #print axioms Meta.DynamicRelaxedUsage.dynamicGapNonContractiveUse
 #print axioms Meta.DynamicRelaxedUsage.dynamicGapAuthorizedUse
 #print axioms Meta.DynamicRelaxedUsage.dynamicGapVisibleTransport
@@ -1486,6 +1777,9 @@ end Meta
 #print axioms Meta.DynamicRelaxedUsage.dynamicUsageMemory
 #print axioms Meta.DynamicRelaxedUsage.DynamicGapCausalState
 #print axioms Meta.DynamicRelaxedUsage.dynamicGapCausalState
+#print axioms Meta.DynamicRelaxedUsage.dynamicGapCausalState_formedTransport_eq_memoryTransport
+#print axioms Meta.DynamicRelaxedUsage.dynamicGapCausalState_visibleTransport_eq_memoryTransport
+#print axioms Meta.DynamicRelaxedUsage.dynamicTransport_preservesComposition
 #print axioms Meta.DynamicRelaxedUsage.GapDrivenDynamicSystem
 #print axioms Meta.DynamicRelaxedUsage.dynamicUsageStep
 #print axioms Meta.DynamicRelaxedUsage.GenuineDynamicUsageVariation

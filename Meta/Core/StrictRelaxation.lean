@@ -1,4 +1,4 @@
-import Meta.Core.RelaxedUsageRegime
+import Meta.Core.TransportCoherence
 import Meta.Core.ProjectedIdentity
 
 /-!
@@ -48,6 +48,13 @@ structure ExactProjectiveRepresentation
       HasUse I gamma x y <->
         project gamma x = project gamma y
 
+/-- Propositional existence of an exact projective representation. -/
+def ProjectivelyRepresentable
+    {X : Type u}
+    (I : RelaxedInterfaceRegime X) :
+    Prop :=
+  Nonempty (ExactProjectiveRepresentation.{u, v} I)
+
 /-- Exact projective use is reflexive. -/
 theorem hasUse_refl_of_exactProjectiveRepresentation
     {X : Type u}
@@ -69,6 +76,34 @@ theorem hasUse_symm_of_exactProjectiveRepresentation
     HasUse I gamma y x :=
   (representation.use_iff_projectedIdentity gamma y x).mpr
     ((representation.use_iff_projectedIdentity gamma x y).mp use).symm
+
+/-- Any asymmetric use refutes every exact projective representation. -/
+theorem not_exactProjective_of_asymmetric_use
+    {X : Type u}
+    {I : RelaxedInterfaceRegime X}
+    {gamma : I.Ctx}
+    {x y : X}
+    (forward : HasUse I gamma x y)
+    (noBackward : HasUse I gamma y x -> False)
+    (representation : ExactProjectiveRepresentation I) :
+    False :=
+  noBackward
+    (hasUse_symm_of_exactProjectiveRepresentation
+      representation
+      forward)
+
+/-- Asymmetric use also refutes propositional projective representability. -/
+theorem not_projectivelyRepresentable_of_asymmetric_use
+    {X : Type u}
+    {I : RelaxedInterfaceRegime X}
+    {gamma : I.Ctx}
+    {x y : X}
+    (forward : HasUse I gamma x y)
+    (noBackward : HasUse I gamma y x -> False)
+    (represented : ProjectivelyRepresentable I) :
+    False :=
+  Nonempty.elim represented
+    (not_exactProjective_of_asymmetric_use forward noBackward)
 
 /-- Exact projective use is transitive. -/
 theorem hasUse_trans_of_exactProjectiveRepresentation
@@ -128,6 +163,15 @@ def exactProjectiveRepresentationOfProjection
     · intro projectedIdentity
       exact Nonempty.intro (PLift.up projectedIdentity)
 
+/-- Every projection-induced relaxed regime is projectively representable. -/
+theorem relaxedRegimeOfProjection_projectivelyRepresentable
+    {X : Type u}
+    {Visible : Type v}
+    (project : X -> Visible) :
+    ProjectivelyRepresentable.{u, v}
+      (relaxedRegimeOfProjection project) :=
+  Nonempty.intro (exactProjectiveRepresentationOfProjection project)
+
 /-- Projected uses carry identity and composition intrinsically. -/
 def compositionalUseOfProjection
     {X : Type u}
@@ -136,6 +180,63 @@ def compositionalUseOfProjection
     CompositionalUse (relaxedRegimeOfProjection project) where
   identity := fun _ _ => PLift.up rfl
   compose := fun useXY useYZ => PLift.up (useXY.down.trans useYZ.down)
+
+/-- Projected use composition satisfies the category laws on witnesses. -/
+def lawfulCompositionalUseOfProjection
+    {X : Type u}
+    {Visible : Type v}
+    (project : X -> Visible) :
+    LawfulCompositionalUse
+      (relaxedRegimeOfProjection project)
+      (compositionalUseOfProjection project) where
+  leftIdentity := by
+    intro gamma x y use
+    cases use
+    rfl
+  rightIdentity := by
+    intro gamma x y use
+    cases use
+    rfl
+  associativity := by
+    intro gamma w x y z first second third
+    cases first
+    cases second
+    cases third
+    rfl
+
+/-- Projected equality transport preserves identity and composition. -/
+def compositionalTransportOfProjection
+    {X : Type u}
+    {Visible : Type v}
+    (project : X -> Visible) :
+    CompositionalTransport
+      (relaxedRegimeOfProjection project)
+      (compositionalUseOfProjection project) where
+  useLaws := lawfulCompositionalUseOfProjection project
+  outIdentity := fun _ _ _ => PLift.up rfl
+  outCompose := by
+    intro gamma rho x y z first second
+    exact PLift.up (first.down.trans second.down)
+  outLeftIdentity := by
+    intro gamma rho x y relation
+    cases relation
+    rfl
+  outRightIdentity := by
+    intro gamma rho x y relation
+    cases relation
+    rfl
+  outAssociativity := by
+    intro gamma rho w x y z first second third
+    cases first
+    cases second
+    cases third
+    rfl
+  transportIdentity := by
+    intro gamma rho x
+    rfl
+  transportComposition := by
+    intro gamma rho x y z first second
+    rfl
 
 /--
 Data-level inclusion of projected identity transport in relaxed use transport.
@@ -239,6 +340,51 @@ def directionalCompositionalUse :
     | after => exact PhaseUse.reflAfter
   compose := fun useXY useYZ => useXY.compose useYZ
 
+/-- Directional use composition satisfies identity and associativity laws. -/
+def directionalLawfulCompositionalUse :
+    LawfulCompositionalUse
+      directionalRelaxedRegime
+      directionalCompositionalUse where
+  leftIdentity := by
+    intro gamma x y use
+    cases use <;> rfl
+  rightIdentity := by
+    intro gamma x y use
+    cases use <;> rfl
+  associativity := by
+    intro gamma w x y z first second third
+    cases first <;> cases second <;> cases third <;> rfl
+
+/-- Directional transport is a lawful image of directional use. -/
+def directionalCompositionalTransport :
+    CompositionalTransport
+      directionalRelaxedRegime
+      directionalCompositionalUse where
+  useLaws := directionalLawfulCompositionalUse
+  outIdentity := by
+    intro gamma rho phase
+    cases phase with
+    | before => exact PhaseUse.reflBefore
+    | after => exact PhaseUse.reflAfter
+  outCompose := by
+    intro gamma rho x y z first second
+    exact first.compose second
+  outLeftIdentity := by
+    intro gamma rho x y relation
+    cases relation <;> rfl
+  outRightIdentity := by
+    intro gamma rho x y relation
+    cases relation <;> rfl
+  outAssociativity := by
+    intro gamma rho w x y z first second third
+    cases first <;> cases second <;> cases third <;> rfl
+  transportIdentity := by
+    intro gamma rho x
+    cases x <;> rfl
+  transportComposition := by
+    intro gamma rho x y z first second
+    rfl
+
 /-- The forward transition is non-contractive, not merely postulated as use. -/
 def directionalNonContractiveUse_forward :
     NonContractiveUse
@@ -319,10 +465,29 @@ theorem directionalRelaxedRegime_not_exactProjective
     (representation :
       ExactProjectiveRepresentation directionalRelaxedRegime) :
     False :=
-  directional_not_hasUse_backward
-    (hasUse_symm_of_exactProjectiveRepresentation
-      representation
-      directional_hasUse_forward)
+  not_exactProjective_of_asymmetric_use
+    directional_hasUse_forward
+    directional_not_hasUse_backward
+    representation
+
+/-- The directional regime is not projectively representable. -/
+theorem directionalRelaxedRegime_not_projectivelyRepresentable
+    (represented : ProjectivelyRepresentable directionalRelaxedRegime) :
+    False :=
+  not_projectivelyRepresentable_of_asymmetric_use
+    directional_hasUse_forward
+    directional_not_hasUse_backward
+    represented
+
+/-- Class-level strictness on the concrete directional countermodel. -/
+theorem projectedRepresentability_strict :
+    ProjectivelyRepresentable.{0, 0}
+        (relaxedRegimeOfProjection (fun phase : Phase => phase)) /\
+      (ProjectivelyRepresentable.{0, 0} directionalRelaxedRegime -> False) :=
+  And.intro
+    (relaxedRegimeOfProjection_projectivelyRepresentable
+      (fun phase : Phase => phase))
+    directionalRelaxedRegime_not_projectivelyRepresentable
 
 /-! ## Strict inclusion -/
 
@@ -391,13 +556,21 @@ end Meta
 
 /- AXIOM_AUDIT_BEGIN -/
 #print axioms Meta.RelaxedUsageRegime.ExactProjectiveRepresentation
+#print axioms Meta.RelaxedUsageRegime.ProjectivelyRepresentable
 #print axioms Meta.RelaxedUsageRegime.hasUse_symm_of_exactProjectiveRepresentation
+#print axioms Meta.RelaxedUsageRegime.not_exactProjective_of_asymmetric_use
+#print axioms Meta.RelaxedUsageRegime.not_projectivelyRepresentable_of_asymmetric_use
 #print axioms Meta.RelaxedUsageRegime.projectedIdentityTransport_in_relaxedUsageTransport
 #print axioms Meta.RelaxedUsageRegime.internalIdentityTransport_in_projectedIdentityTransport
+#print axioms Meta.RelaxedUsageRegime.compositionalTransportOfProjection
 #print axioms Meta.RelaxedUsageRegime.directionalRelaxedRegime
 #print axioms Meta.RelaxedUsageRegime.directionalCompositionalUse
+#print axioms Meta.RelaxedUsageRegime.directionalLawfulCompositionalUse
+#print axioms Meta.RelaxedUsageRegime.directionalCompositionalTransport
 #print axioms Meta.RelaxedUsageRegime.directionalTransportChain_forward
 #print axioms Meta.RelaxedUsageRegime.directionalRelaxedRegime_not_exactProjective
+#print axioms Meta.RelaxedUsageRegime.directionalRelaxedRegime_not_projectivelyRepresentable
+#print axioms Meta.RelaxedUsageRegime.projectedRepresentability_strict
 #print axioms Meta.RelaxedUsageRegime.strictRelaxationOfIdentity
 #print axioms Meta.RelaxedUsageRegime.projectedIdentityTransport_strictlyIncludedIn_relaxedUsageTransport
 /- AXIOM_AUDIT_END -/
