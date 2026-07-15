@@ -166,18 +166,20 @@ Un modèle à trois phases reste pertinent uniquement pour tester la composition
 de deux transports non réflexifs. Il ne doit pas être présenté comme une
 nouvelle preuve de l'habitabilité dynamique.
 
-### 1.4 Algorithme Tarski déjà présent
+### 1.4 Voie Tarski syntaxique active
 
-`Meta/Tarski/TruthGap.lean` contient déjà :
+L'ancienne voie qui patchait directement un prédicat sémantique arbitraire
+`Sentence → Prop` a été supprimée. Elle ne doit pas être réintroduite : son
+état suivant vivait hors du type syntaxique des candidats.
+
+`Meta/Tarski/TruthGap.lean` conserve la voie correcte :
 
 ```text
-TarskiCausalAlgorithm
-TarskiCausalAlgorithmStep
 PatchableArithmeticTarskiContext
 PatchableArithmeticTarskiContext.AlgorithmStep
 ```
 
-Le second reste dans un type syntaxique `Predicate` et calcule :
+Elle reste dans un type syntaxique `Predicate` et calcule :
 
 ```text
 prédicat courant
@@ -188,16 +190,17 @@ prédicat courant
 → nouveau mismatch.
 ```
 
-Il prouve la réparation au point courant, la conservation hors de ce point et
-l'impossibilité d'une correction globale après toute itération.
-
-Le manque est désormais :
+Elle prouve la réparation au point courant, la conservation hors de ce point et
+l'impossibilité d'une correction globale après toute itération. Son raccord au
+système dynamique et son modèle fermé sont maintenant réalisés dans :
 
 ```text
-raccorder cet algorithme au système dynamique d'usage relaxé ;
-construire une instance syntaxique fermée du contexte patchable ;
-puis construire une arithmétisation véritable.
+Meta/Tarski/DynamicRelaxedUsage.lean
+Meta/Tarski/ConstructivePatchModel.lean
 ```
+
+Les deux objectifs restants sont la théorie exacte de cette orbite concrète et
+l'arithmétisation Foundation véritable.
 
 ## 2. Contraintes non négociables
 
