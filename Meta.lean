@@ -5,6 +5,8 @@ import Meta.Core.ProjectedIdentity
 import Meta.Core.StrictRelaxation
 import Meta.Core.ClosedStabilityTheorem
 import Meta.Core.DynamicCore
+import Meta.Core.DynamicRelaxedUsage
+import Meta.Core.DynamicRelaxedUsageModel
 import Meta.Core.DynamicRoleCarrier
 import Meta.Core.OrderGap
 import Meta.Core.Parity
@@ -58,6 +60,8 @@ import Meta.Synthesis.TarskiBethBellGap
 
 /- AXIOM_AUDIT_BEGIN -/
 #print axioms Meta.RelaxedUsageRegime.projectedIdentityTransport_strictlyIncludedIn_relaxedUsageTransport
+#print axioms Meta.DynamicRelaxedUsage.dynamicRelaxedRegime_not_exactProjective
+#print axioms Meta.DynamicRelaxedUsageModel.switchDynamicRelaxationSynthesis
 #print axioms Meta.ClosedStabilityTheorem.IdentityOfUseCell
 #print axioms Meta.ClosedStabilityTheorem.projectedIdentityCell_internalDifference_usedIdentity
 #print axioms Meta.ClosedStabilityTheorem.InterfaceTransport

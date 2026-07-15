@@ -1,5 +1,22 @@
 # Système dynamique bilatéral
 
+## Principe fondationnel
+
+L'identité conserve sa souveraineté sur la coïncidence interne. Elle ne possède
+plus le monopole de la coordination, de la substitution et du transport.
+
+```text
+InternalIdentityTransport
+⊆
+ProjectedIdentityTransport
+⊊
+RelaxedUsageTransport
+```
+
+Le gap projectif est une réalisation de cette relaxation, non son principe
+fondateur. Le résultat décisif est qu'un usage peut être cohérent, composable,
+directionnel et opératoire sans être engendré par une identité.
+
 ## Statut formel
 
 Le résultat de stricte relaxation est formalisé dans
@@ -152,5 +169,118 @@ une réalisation dérivée dans laquelle :
 séparation formée = non-contraction
 ```
 
-La dynamique exploite cette coordination sans transformer l'égalité visible en
-égalité interne.
+L'architecture rend possible une synthèse dans laquelle la dynamique exploite
+cette coordination sans transformer l'égalité visible en égalité interne.
+
+## Synthèse dynamique formalisée
+
+Le raccord est maintenant implémenté dans :
+
+```text
+Meta/Core/DynamicRelaxedUsage.lean
+Meta/Core/DynamicRelaxedUsageModel.lean
+```
+
+La construction générique suit effectivement :
+
+```text
+retour dynamique courant
+→ intersection source
+→ contexte avec provenance
+→ gap formé / ombre
+→ séparation + coordination indexée
+→ certificat d'usage causal
+→ transports formé et visible
+→ mémoire bilatérale
+→ état causal complet
+→ transition interne
+→ nouveau gap et nouveau droit de transport
+```
+
+`Coord` et `Use` sont deux types distincts. Le constructeur non réflexif de
+`Use` conserve littéralement la séparation et la coordination qui l'ont
+produit. L'état causal consommé par la transition conserve simultanément :
+
+```text
+le cycle fort issu de l'intersection ;
+l'égalité entre cette intersection et celle du retour ;
+la non-contraction ;
+l'usage courant ;
+le transport formé ;
+le transport visible.
+```
+
+La fonction `next` n'est pas une donnée indépendante. Elle est définie par
+l'application de `advance` à la somme dépendante contenant la source et son
+état causal canonique.
+
+## Instance non triviale
+
+Le modèle fini `DynamicRelaxedUsageModel` possède :
+
+```text
+deux états alternants ;
+trois interfaces ;
+deux visibles ;
+une projection globalement non constante ;
+une fibre visible contenant deux pôles séparés ;
+quatre familles bilatérales typées distinctes ;
+des témoins d'interface portant leur source ;
+des réparations indexées avec une opération `apply` ;
+une transition qui inspecte l'usage de l'état causal ;
+une inversion effective de l'usage au pas suivant.
+```
+
+Dans l'état `leftToRight` :
+
+```text
+leftPole → rightPole
+¬(rightPole → leftPole)
+```
+
+Dans l'état `rightToLeft` :
+
+```text
+rightPole → leftPole
+¬(leftPole → rightPole)
+```
+
+Les deux pôles ont toujours le même visible, mais un troisième objet `marker`
+possède un visible distinct. La contraction locale n'est donc pas dissimulée
+dans une projection constante.
+
+La récupération n'est pas juxtaposée à un jeton de réparation :
+
+```text
+localRecovery.recovered
+=
+localRecovery.repair.apply
+```
+
+et `apply_correct` fournit ensuite l'égalité avec le pôle formé.
+
+## Résultat de stricte synthèse
+
+Le régime dynamique générique n'admet aucune représentation projective
+exacte. Un tel représentant transformerait l'usage courant en égalité visible,
+puis sa symétrie produirait l'usage inverse que le gap réfute.
+
+Le paquet fermé :
+
+```text
+switchDynamicRelaxationSynthesis
+```
+
+ne reçoit aucun argument et conserve la famille de retours, la transition, la
+variation, l'étape initiale, les deux usages orientés, les réparations, la
+non-constance de la projection et la non-réductibilité projective.
+
+Le statut exact devient :
+
+```text
+relaxation non identitaire : démontrée
+dynamique bilatérale       : démontrée
+synthèse dynamique         : démontrée
+instance non triviale       : construite
+audits constructifs         : validés
+```
