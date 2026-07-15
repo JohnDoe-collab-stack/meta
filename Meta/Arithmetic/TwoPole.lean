@@ -1,4 +1,4 @@
-import Meta.Core.TwoPole
+import Meta.Core.ProjectiveCore
 import Meta.Arithmetic.GapContraction
 
 /-!

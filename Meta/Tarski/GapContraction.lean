@@ -1,4 +1,4 @@
-import Meta.Core.Gap
+import Meta.Core.ProjectiveCore
 import Meta.Tarski.TruthGap
 
 /-!

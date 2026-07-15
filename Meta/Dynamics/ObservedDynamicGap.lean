@@ -1,5 +1,5 @@
 import Meta.Dynamics.ObservedWindow
-import Meta.Core.DynamicStability
+import Meta.Core.DynamicCore
 import Meta.Arithmetic.DynamicGap
 
 /-!

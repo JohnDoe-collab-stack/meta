@@ -1,5 +1,5 @@
 import Meta.Arithmetic.DynamicGap
-import Meta.Core.ReferentialLength
+import Meta.Core.ProjectiveCore
 
 /-!
 # Arithmetic gap contraction

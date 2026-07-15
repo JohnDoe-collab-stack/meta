@@ -1,5 +1,5 @@
 import Meta.Arithmetic.TwoPole
-import Meta.Core.DynamicParitySeparation
+import Meta.Core.Parity
 import Meta.Core.OrderGap
 import Mathlib.Algebra.Group.Even
 
