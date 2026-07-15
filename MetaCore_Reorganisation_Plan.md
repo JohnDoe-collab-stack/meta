@@ -119,8 +119,8 @@ ProjectedIdentity
 
 StrictRelaxation
   → inclusion des usages projectifs
-  → contre-modèle directionnel composable
-  → stricte non-réductibilité à l'égalité projetée
+  → obstruction générique par asymétrie
+  → caractérisation de la représentabilité projective
 
 ClosedStabilityTheorem
   → combinaison BilateralCore + ProjectiveCore
@@ -137,19 +137,26 @@ DynamicRelaxedUsage
   → transition consommant l'état causal complet
   → variation intrinsèque du droit de transport
 
-DynamicRelaxedUsageModel
+DynamicRoleCarrier
+  → lecture générique du retour dynamique en rôles
+
+Specialization/DirectionalRelaxation
+  → contre-modèle directionnel composable
+  → stricte non-réductibilité à l'égalité projetée
+
+Specialization/TransportCoherenceModel
+  → modèle de transport composé à trois phases
+
+Specialization/DynamicRelaxedUsageModel
   → instance finie non constante et non contractive
   → réparation exécutable
   → inversion effective de l'usage
 
-DynamicRoleCarrier
-  → lecture générique du retour dynamique en rôles
-
-Parity
+Specialization/Parity
   → réalisation minimale autonome
   → spécialisation dynamique du porteur de rôles
 
-OrderGap
+Specialization/OrderGap
   → test ordonné en aval
 ```
 
@@ -166,23 +173,31 @@ ProjectiveCore
   → ProjectedIdentity
   → StrictRelaxation
 
+StrictRelaxation
+  → Specialization/DirectionalRelaxation
+
+TransportCoherence
+  → Specialization/TransportCoherenceModel
+
 BilateralCore + ProjectiveCore
   → ClosedStabilityTheorem
   → DynamicCore
   → DynamicRoleCarrier
-  → Parity
+  → Specialization/Parity
 
 ProjectiveCore + DynamicCore
-  → OrderGap
+  → Specialization/OrderGap
 
 StrictRelaxation + DynamicCore
   → DynamicRelaxedUsage
-  → DynamicRelaxedUsageModel
+  → Specialization/DynamicRelaxedUsageModel
 ```
 
 `ProjectiveCore` n'importe ni `BilateralCore`, ni `ProjectedIdentity`.
-`DynamicCore` ne dépend pas de `Parity`. Aucun cycle n'apparaît dans cette
-architecture.
+`DynamicCore` ne dépend d'aucune spécialisation. Les réalisations concrètes et
+les extensions de domaine sont regroupées sous `Meta/Core/Specialization` et
+n'importent que les noyaux génériques dont elles sont des instances. Aucun
+cycle n'apparaît dans cette architecture.
 
 ## 3. Audit de `ProjectiveCore`
 

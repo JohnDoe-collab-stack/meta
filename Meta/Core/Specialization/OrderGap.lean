@@ -4,7 +4,8 @@ import Meta.Core.DynamicCore
 /-!
 # Ordered projection gaps
 
-This file is the Core factor for the ordered visible test of a gap.
+This specialization applies the generic projective and dynamic cores to the
+ordered visible test of a gap.
 
 It contains, in one place:
 

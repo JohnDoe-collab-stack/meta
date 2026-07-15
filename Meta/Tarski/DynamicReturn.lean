@@ -1,4 +1,4 @@
-import Meta.Core.OrderGap
+import Meta.Core.Specialization.OrderGap
 import Meta.Tarski.ReferentialOrder
 
 /-!

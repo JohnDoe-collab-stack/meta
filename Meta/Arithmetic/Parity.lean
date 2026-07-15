@@ -1,6 +1,6 @@
 import Meta.Arithmetic.TwoPole
-import Meta.Core.Parity
-import Meta.Core.OrderGap
+import Meta.Core.Specialization.Parity
+import Meta.Core.Specialization.OrderGap
 import Mathlib.Algebra.Group.Even
 
 /-!

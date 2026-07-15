@@ -1,9 +1,9 @@
-import Meta.Core.Parity
+import Meta.Core.Specialization.Parity
 
 /-!
 # Compatibility facade for minimal parity separation
 
-Import `Meta.Core.Parity` in new code.
+Import `Meta.Core.Specialization.Parity` in new code.
 -/
 
 /- AXIOM_AUDIT_BEGIN -/
