@@ -1,5 +1,5 @@
-import Meta.Core.ReferentialLength
-import Meta.Core.DynamicTwoPole
+import Meta.Core.ProjectiveCore
+import Meta.Core.DynamicCore
 
 /-!
 # Ordered projection gaps

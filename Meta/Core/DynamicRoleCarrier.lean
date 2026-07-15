@@ -1,4 +1,4 @@
-import Meta.Core.DynamicTwoPole
+import Meta.Core.DynamicCore
 
 /-!
 # Dynamic role carriers
