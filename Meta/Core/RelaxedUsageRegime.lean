@@ -4,16 +4,20 @@ namespace Meta
 namespace RelaxedUsageRegime
 
 /--
-A totally relaxed interface regime.
+A relaxed interface regime separates individuation from authorized transport.
 
 The regime does not start from internal equality, projected equality, or global
 substitution. It carries its own contexts, authorized readings, output types,
 separation witnesses, coordination witnesses, use witnesses, and output
 relations.
 
-The `defaultCtx` and `defaultRead` fields make the regime non-vacuous:
-there is at least one context, and every context has at least one authorized
-reading on which transport can act.
+Its primitive constructive chain is:
+
+`Sep + Coord -> Use -> transport`.
+
+The `defaultCtx` and `defaultRead` fields ensure that a context and an
+authorized reading are always available. Concrete elements and uses remain
+positive data of an instance.
 -/
 structure RelaxedInterfaceRegime (X : Type u) where
   Ctx : Type c
@@ -60,6 +64,39 @@ structure RelaxedInterfaceRegime (X : Type u) where
         OutRel gamma rho
           (read gamma rho x)
           (read gamma rho y)
+
+/--
+Propositional availability of a regime-internal use witness.
+
+This deliberately forgets only the particular proof-relevant witness stored in
+`Use`; it does not replace the regime's use relation by equality.
+-/
+def HasUse
+    {X : Type u}
+    (I : RelaxedInterfaceRegime X)
+    (gamma : I.Ctx)
+    (x y : X) :
+    Prop :=
+  Nonempty (I.Use gamma x y)
+
+/--
+Intrinsic identity and composition operations for the proof-relevant use
+witnesses of a relaxed regime.
+-/
+structure CompositionalUse
+    {X : Type u}
+    (I : RelaxedInterfaceRegime X) where
+  identity :
+    (gamma : I.Ctx) ->
+    (x : X) ->
+      I.Use gamma x x
+
+  compose :
+    {gamma : I.Ctx} ->
+    {x y z : X} ->
+      I.Use gamma x y ->
+      I.Use gamma y z ->
+      I.Use gamma x z
 
 /--
 The globally available default context of a regime.
@@ -275,6 +312,8 @@ end RelaxedUsageRegime
 end Meta
 
 /- AXIOM_AUDIT_BEGIN -/
+#print axioms Meta.RelaxedUsageRegime.HasUse
+#print axioms Meta.RelaxedUsageRegime.CompositionalUse
 #print axioms Meta.RelaxedUsageRegime.NonContractiveUse.use
 #print axioms Meta.RelaxedUsageRegime.NonContractiveUse.transport
 #print axioms Meta.RelaxedUsageRegime.NonContractiveUse.defaultTransport
