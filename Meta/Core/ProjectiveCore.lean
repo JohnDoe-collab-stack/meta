@@ -492,6 +492,393 @@ def terminalProjectionOfLocalProjectiveRecovery
   projected := rfl
 
 
+/-! ## Contractible, structural, and operational gaps -/
+
+/--
+A contractible referential gap.
+
+This is the precise form of the informal case `gap = 0`: the visible value
+already determines the enriched interface inside each projection fiber.
+-/
+abbrev ContractibleReferentialGap
+    (Interface : Type u)
+    (Visible : Type v)
+    (project : Interface -> Visible) :
+    Prop :=
+  ProjectionFiberFaithful Interface Visible project
+
+/--
+A structural referential gap.
+
+This is the precise form of the informal case `gap > 0`: two separated
+enriched interfaces have the same visible projection.
+-/
+abbrev StructuralReferentialGap
+    (Interface : Type u)
+    (Visible : Type v)
+    (project : Interface -> Visible) :
+    Type (max u v) :=
+  ProjectionObstruction Interface Visible project
+
+/--
+An operational referential gap.
+
+This strengthens a structural gap by carrying the formed interface, its
+projected shadow, and a repair indexed by the formed interface.
+-/
+abbrev OperationalReferentialGap
+    (Interface : Type u)
+    (Visible : Type v)
+    (project : Interface -> Visible)
+    (RepairOf : Interface -> Type s) :
+    Type (max u v s) :=
+  LocalProjectiveRecovery Interface Visible project RepairOf
+
+/-- An operational gap exposes the underlying structural gap. -/
+def structuralGapOfOperationalGap
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    (gap :
+      OperationalReferentialGap Interface Visible project RepairOf) :
+    StructuralReferentialGap Interface Visible project :=
+  localProjectiveRecovery_obstruction gap
+
+/-- A structural gap refutes contractibility of the projection fiber. -/
+theorem structuralGap_not_contractible
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    (gap :
+      StructuralReferentialGap Interface Visible project)
+    (contractible :
+      ContractibleReferentialGap Interface Visible project) :
+    False :=
+  projectionObstruction_notFiberFaithful gap contractible
+
+/-- A structural gap refutes global information conservation by projection. -/
+theorem structuralGap_not_informationConserving
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    (gap :
+      StructuralReferentialGap Interface Visible project)
+    (conserving :
+      ProjectionInformationConserving Interface Visible project) :
+    False :=
+  projectionObstruction_notInformationConserving gap conserving
+
+/-- An operational gap refutes contractibility of the projection fiber. -/
+theorem operationalGap_not_contractible
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    (gap :
+      OperationalReferentialGap Interface Visible project RepairOf)
+    (contractible :
+      ContractibleReferentialGap Interface Visible project) :
+    False :=
+  localProjectiveRecovery_notFiberFaithful gap contractible
+
+/-- An operational gap refutes global information conservation by projection. -/
+theorem operationalGap_not_informationConserving
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    (gap :
+      OperationalReferentialGap Interface Visible project RepairOf)
+    (conserving :
+      ProjectionInformationConserving Interface Visible project) :
+    False :=
+  localProjectiveRecovery_notInformationConserving gap conserving
+
+/-- An operational gap rules out a uniform visible-to-interface reconstruction. -/
+def noProjectiveReconstructionOfOperationalGap
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    (gap :
+      OperationalReferentialGap Interface Visible project RepairOf) :
+    ((recover : Visible -> Interface) ->
+      ((interface : Interface) ->
+        recover (project interface) = interface) ->
+          False) :=
+  noProjectiveReconstructionOfLocalProjectiveRecovery gap
+
+
+/-! ## Referential length regimes -/
+
+/-- The short regime: the visible projection has contractible fibers. -/
+abbrev ShortReferentialPresentation
+    (Interface : Type u)
+    (Visible : Type v)
+    (project : Interface -> Visible) :
+    Prop :=
+  ContractibleReferentialGap Interface Visible project
+
+/-- The enriched structural regime: one visible value can cover separated interfaces. -/
+abbrev EnrichedStructuralReferentialLength
+    (Interface : Type u)
+    (Visible : Type v)
+    (project : Interface -> Visible) :
+    Type (max u v) :=
+  StructuralReferentialGap Interface Visible project
+
+/--
+The enriched operational regime: a structural gap plus local repair of the
+formed interface.
+-/
+abbrev EnrichedOperationalReferentialLength
+    (Interface : Type u)
+    (Visible : Type v)
+    (project : Interface -> Visible)
+    (RepairOf : Interface -> Type s) :
+    Type (max u v s) :=
+  OperationalReferentialGap Interface Visible project RepairOf
+
+/-- A structural enriched length refutes the short presentation. -/
+theorem structuralLength_refutes_shortPresentation
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    (gap :
+      EnrichedStructuralReferentialLength Interface Visible project)
+    (short :
+      ShortReferentialPresentation Interface Visible project) :
+    False :=
+  structuralGap_not_contractible gap short
+
+/-- An operational enriched length refutes the short presentation. -/
+theorem operationalLength_refutes_shortPresentation
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    (gap :
+      EnrichedOperationalReferentialLength
+        Interface
+        Visible
+        project
+        RepairOf)
+    (short :
+      ShortReferentialPresentation Interface Visible project) :
+    False :=
+  operationalGap_not_contractible gap short
+
+/-- An operational enriched length exposes the structural enriched length it carries. -/
+def structuralLengthOfOperationalLength
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    (gap :
+      EnrichedOperationalReferentialLength
+        Interface
+        Visible
+        project
+        RepairOf) :
+    EnrichedStructuralReferentialLength Interface Visible project :=
+  structuralGapOfOperationalGap gap
+
+
+/-! ## Two-pole aliases -/
+
+/-- A structural two-pole interface: two separated interfaces share one visible projection. -/
+abbrev StructuralTwoPole
+    (Interface : Type u)
+    (Visible : Type v)
+    (project : Interface -> Visible) :
+    Type (max u v) :=
+  StructuralReferentialGap Interface Visible project
+
+/--
+An operational two-pole interface: a structural two-pole interface together
+with the local repair carried by its formed pole.
+-/
+abbrev OperationalTwoPole
+    (Interface : Type u)
+    (Visible : Type v)
+    (project : Interface -> Visible)
+    (RepairOf : Interface -> Type s) :
+    Type (max u v s) :=
+  OperationalReferentialGap Interface Visible project RepairOf
+
+/-! ## Structural two-pole projections -/
+
+/-- The left pole of a structural two-pole interface. -/
+def structuralTwoPole_leftPole
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    (twoPole : StructuralTwoPole Interface Visible project) :
+    Interface :=
+  twoPole.left
+
+/-- The right pole of a structural two-pole interface. -/
+def structuralTwoPole_rightPole
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    (twoPole : StructuralTwoPole Interface Visible project) :
+    Interface :=
+  twoPole.right
+
+/-- The two structural poles share the same visible projection. -/
+def structuralTwoPole_sameVisible
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    (twoPole : StructuralTwoPole Interface Visible project) :
+    project (structuralTwoPole_leftPole twoPole) =
+      project (structuralTwoPole_rightPole twoPole) :=
+  twoPole.sameProjection
+
+/-- The structural two-pole interface keeps its poles separated. -/
+def structuralTwoPole_separatedPoles
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    (twoPole : StructuralTwoPole Interface Visible project) :
+    structuralTwoPole_leftPole twoPole =
+      structuralTwoPole_rightPole twoPole -> False :=
+  twoPole.separatedInterface
+
+/-! ## Operational two-pole projections -/
+
+/-- The formed pole of an operational two-pole interface. -/
+def operationalTwoPole_leftPole
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    (twoPole : OperationalTwoPole Interface Visible project RepairOf) :
+    Interface :=
+  twoPole.formed
+
+/-- The shadow pole of an operational two-pole interface. -/
+def operationalTwoPole_rightPole
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    (twoPole : OperationalTwoPole Interface Visible project RepairOf) :
+    Interface :=
+  twoPole.shadow
+
+/-- The two operational poles share the same visible projection. -/
+def operationalTwoPole_sameVisible
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    (twoPole : OperationalTwoPole Interface Visible project RepairOf) :
+    project (operationalTwoPole_leftPole twoPole) =
+      project (operationalTwoPole_rightPole twoPole) :=
+  twoPole.sameProjection
+
+/-- The operational two-pole interface keeps its poles separated. -/
+def operationalTwoPole_separatedPoles
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    (twoPole : OperationalTwoPole Interface Visible project RepairOf) :
+    operationalTwoPole_leftPole twoPole =
+      operationalTwoPole_rightPole twoPole -> False :=
+  twoPole.separated
+
+/-- The local repair carried by the formed pole. -/
+def operationalTwoPole_repair
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    (twoPole : OperationalTwoPole Interface Visible project RepairOf) :
+    RepairOf (operationalTwoPole_leftPole twoPole) :=
+  twoPole.repair
+
+/-- The recovered pole of an operational two-pole interface. -/
+def operationalTwoPole_recovered
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    (twoPole : OperationalTwoPole Interface Visible project RepairOf) :
+    Interface :=
+  twoPole.recovered
+
+/-- The recovered pole is the formed pole. -/
+def operationalTwoPole_recovered_eq_leftPole
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    (twoPole : OperationalTwoPole Interface Visible project RepairOf) :
+    operationalTwoPole_recovered twoPole =
+      operationalTwoPole_leftPole twoPole :=
+  twoPole.recovered_eq_formed
+
+/-- An operational two-pole interface exposes its structural two-pole interface. -/
+def operationalTwoPole_structural
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    (twoPole : OperationalTwoPole Interface Visible project RepairOf) :
+    StructuralTwoPole Interface Visible project :=
+  structuralGapOfOperationalGap twoPole
+
+/-! ## Refutation of contracted readings -/
+
+/-- A structural two-pole interface refutes the short referential presentation. -/
+theorem structuralTwoPole_refutes_shortPresentation
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    (twoPole : StructuralTwoPole Interface Visible project)
+    (short : ShortReferentialPresentation Interface Visible project) :
+    False :=
+  structuralLength_refutes_shortPresentation twoPole short
+
+/-- An operational two-pole interface refutes the short referential presentation. -/
+theorem operationalTwoPole_refutes_shortPresentation
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    (twoPole : OperationalTwoPole Interface Visible project RepairOf)
+    (short : ShortReferentialPresentation Interface Visible project) :
+    False :=
+  operationalLength_refutes_shortPresentation twoPole short
+
+/-- An operational two-pole interface refutes contractibility of the visible fiber. -/
+theorem operationalTwoPole_not_contractible
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    (twoPole : OperationalTwoPole Interface Visible project RepairOf)
+    (contractible : ContractibleReferentialGap Interface Visible project) :
+    False :=
+  operationalGap_not_contractible twoPole contractible
+
+/-- An operational two-pole interface rules out uniform visible reconstruction. -/
+def operationalTwoPole_noProjectiveReconstruction
+    {Interface : Type u}
+    {Visible : Type v}
+    {project : Interface -> Visible}
+    {RepairOf : Interface -> Type s}
+    (twoPole : OperationalTwoPole Interface Visible project RepairOf) :
+    ((recover : Visible -> Interface) ->
+      ((interface : Interface) -> recover (project interface) = interface) ->
+        False) :=
+  noProjectiveReconstructionOfOperationalGap twoPole
+
+
 end ClosedStabilityTheorem
 end Meta
 
@@ -507,5 +894,10 @@ end Meta
 #print axioms Meta.ClosedStabilityTheorem.localTruthGapRecovery_localFormation_projectedTruth_independent
 #print axioms Meta.ClosedStabilityTheorem.RecoveryBundle
 #print axioms Meta.ClosedStabilityTheorem.TerminalProjection
+#print axioms Meta.ClosedStabilityTheorem.StructuralReferentialGap
+#print axioms Meta.ClosedStabilityTheorem.OperationalReferentialGap
+#print axioms Meta.ClosedStabilityTheorem.EnrichedOperationalReferentialLength
+#print axioms Meta.ClosedStabilityTheorem.StructuralTwoPole
+#print axioms Meta.ClosedStabilityTheorem.OperationalTwoPole
+#print axioms Meta.ClosedStabilityTheorem.operationalTwoPole_noProjectiveReconstruction
 /- AXIOM_AUDIT_END -/
-

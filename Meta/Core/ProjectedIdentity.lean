@@ -1,4 +1,4 @@
-import Meta.Core.ClosedStabilityTheorem
+import Meta.Core.ProjectiveCore
 
 /-!
 # Projected identity, identity of use, and non-contractive transport
