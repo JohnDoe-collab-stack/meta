@@ -697,6 +697,134 @@ theorem ArithmeticTarskiContext.undefinability_of_truth_via_explicitCounterexamp
 
 doit etre le corollaire negatif.
 
+## Algorithme causal complet
+
+La trace causale d'une source exacte ne suffit pas a elle seule a former une
+dynamique algorithmique. Elle decrit :
+
+```text
+source candidate exacte
+-> trace
+-> gap
+-> refutation
+```
+
+L'algorithme complet ajoute le processus :
+
+```text
+candidat
+-> point diagonal
+-> mismatch local
+-> patch local
+-> nouveau candidat
+-> nouveau point diagonal
+```
+
+Dans `Meta/Tarski/TruthGap.lean`, deux niveaux sont necessaires.
+
+### Niveau predicatif abstrait
+
+Le patch constructif :
+
+```lean
+def tarskiLocalPatchTruthAt
+```
+
+force l'accord au point diagonal courant et preserve le candidat hors de ce
+point :
+
+```lean
+theorem tarskiLocalPatchTruthAt_agrees_at
+theorem tarskiLocalPatchTruthAt_preserves_off_index
+```
+
+Le moteur :
+
+```lean
+structure TarskiCausalAlgorithm
+```
+
+porte une diagonalisation pour tout candidat `Sentence -> Prop`. Son pas :
+
+```lean
+def TarskiCausalAlgorithm.step
+```
+
+produit :
+
+```text
+fixedPoint
+positiveDiagonal
+mismatch
+nextTruthAt
+repaired_index_agreement
+preserves_off_index
+nextFixedPoint
+nextPositiveDiagonal
+```
+
+et son iteration :
+
+```lean
+def TarskiCausalAlgorithm.iterateTruthAt
+def TarskiCausalAlgorithm.iterationStep
+```
+
+formalise la variation effective du candidat et du prochain gap.
+
+### Niveau syntaxique patchable
+
+Pour ne pas sortir de la syntaxe, les candidats peuvent aussi rester dans
+`Predicate` :
+
+```lean
+structure PatchableArithmeticTarskiContext
+```
+
+Cette structure ajoute une operation interne :
+
+```lean
+patchPredicate :
+  Predicate -> Sentence -> Predicate
+```
+
+avec deux lois :
+
+```text
+patch_agrees_at
+patch_preserves_off_index
+```
+
+Le pas :
+
+```lean
+def PatchableArithmeticTarskiContext.step
+```
+
+reste dans le regime syntaxique :
+
+```text
+Predicate_n
+-> sentence diagonale_n
+-> Predicate_{n+1}
+-> sentence diagonale_{n+1}
+```
+
+Les theoremes :
+
+```lean
+PatchableArithmeticTarskiContext.iterationStep_repairs_current_index
+PatchableArithmeticTarskiContext.iterationStep_preserves_off_current_index
+```
+
+certifient que chaque iteration repare localement son point courant et preserve
+le candidat precedent hors de ce point.
+
+Cette couche est l'algorithme dynamique complet au sens constructif du cadre :
+elle ne promet pas une verite globale finale, mais elle formalise une boucle
+interne de challenge diagonal, reparation locale, nouveau candidat et nouveau
+challenge.
+
 ## Criteres d'acceptation
 
 L'implementation est acceptable seulement si les points suivants sont vrais.
@@ -774,6 +902,41 @@ si une reparation externe existe, alors...
 
 ne doit servir de fermeture principale.
 
+14. L'algorithme complet expose des pas iteres :
+
+```lean
+TarskiCausalAlgorithm.step
+TarskiCausalAlgorithm.iterateTruthAt
+PatchableArithmeticTarskiContext.step
+PatchableArithmeticTarskiContext.iteratePredicate
+```
+
+15. Chaque pas algorithmique prouve simultanement :
+
+```text
+reparation au point diagonal courant
+preservation hors de ce point
+rediagonalisation du candidat repare
+```
+
+16. La version syntaxique reste dans `Predicate`; elle ne remplace pas
+silencieusement un predicat syntaxique par une fonction semantique arbitraire
+`Sentence -> Prop`.
+
+17. L'algorithme prouve la non-terminalite globale de chaque etat :
+
+```lean
+TarskiCausalAlgorithm.truthAt_notGloballyCorrect
+TarskiCausalAlgorithm.iterateTruthAt_notGloballyCorrect
+PatchableArithmeticTarskiContext.predicate_notGloballyCorrect
+PatchableArithmeticTarskiContext.iteratedPredicate_notGloballyCorrect
+PatchableArithmeticTarskiContext.step_nextPredicate_notGloballyCorrect
+```
+
+Autrement dit, le patch local produit un prochain candidat et un prochain
+challenge, mais ne doit jamais etre presente comme une fermeture globale de la
+verite.
+
 ### Criteres Lean
 
 Chaque fichier Lean modifie doit avoir un unique bloc :
@@ -800,6 +963,18 @@ Les nouvelles declarations principales doivent etre auditees :
 #print axioms Meta.ClosedStabilityTheorem.tarskiCausalLocallyRecoveredDynamicReturn
 #print axioms Meta.ClosedStabilityTheorem.tarskiCausalDynamicReturn_operationalGap
 #print axioms Meta.ClosedStabilityTheorem.tarskiCausalDynamicReturn_structuralGap
+#print axioms Meta.ClosedStabilityTheorem.tarskiLocalPatchTruthAt
+#print axioms Meta.ClosedStabilityTheorem.TarskiCausalAlgorithm
+#print axioms Meta.ClosedStabilityTheorem.TarskiCausalAlgorithm.step
+#print axioms Meta.ClosedStabilityTheorem.TarskiCausalAlgorithm.iterateTruthAt
+#print axioms Meta.ClosedStabilityTheorem.TarskiCausalAlgorithm.truthAt_notGloballyCorrect
+#print axioms Meta.ClosedStabilityTheorem.TarskiCausalAlgorithm.iterateTruthAt_notGloballyCorrect
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.step
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.iteratePredicate
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.predicate_notGloballyCorrect
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.iteratedPredicate_notGloballyCorrect
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.step_nextPredicate_notGloballyCorrect
 ```
 
 L'audit doit afficher :
@@ -867,6 +1042,12 @@ trace causale
 
 reparation causale locale
   = recuperation du pole forme produite par la trace
+
+algorithme causal
+  = candidat -> point diagonal -> patch local -> nouveau candidat
+
+algorithme syntaxique patchable
+  = meme boucle, mais les candidats restent dans Predicate
 ```
 
 ## Formulation finale visee
@@ -881,12 +1062,15 @@ trace locale : meme phrase visible, pole semantique, pole syntaxique,
 orientation de verite, obstruction projective et refutation de la source.
 Cette trace alimente ensuite le retour dynamique, avec witness et reparation
 non triviaux, sans cacher la causalite dans Unit.
+Separément, l'algorithme causal itere les candidats : chaque point diagonal
+courant est repare localement, le candidat est preserve hors de ce point, puis
+un nouveau point diagonal est extrait.
 ```
 
 Ce qui reste exclu :
 
 ```text
-une reparation algorithmique globale de TruthAt ;
+une reparation algorithmique globale terminale de TruthAt ;
 une derivation constructive du pont Foundation classique ;
 une pretention que la source candidate est habitable comme etat coherent.
 ```
@@ -897,4 +1081,11 @@ Ce qui devient etabli :
 la preuve de Tarski est refactorisee comme production causale d'un gap
 projectif oriente, puis comme consommation dynamique de ce gap par les
 theoremes generiques de non-contraction et de non-reconstruction.
+
+La dynamique algorithmique locale est formalisee : les candidats peuvent etre
+patches au point diagonal courant, iteres, puis confrontes a un nouveau point
+diagonal, sans effacer la distinction syntaxe/semantique et sans promettre une
+fermeture globale impossible.
+La non-terminalite est egalement formalisee : tout etat qui pretend definir
+globalement la verite est refute, y compris les etats produits par iteration.
 ```

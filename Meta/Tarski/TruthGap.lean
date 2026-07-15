@@ -313,6 +313,272 @@ def localTruthMismatchOfFixedPoint
     LocalTruthMismatch Sentence TruthAt Holds :=
   (tarskiPositiveDiagonalOfFixedPoint fixedPoint).localTruthMismatch
 
+/-! ## Algorithmic local repair -/
+
+/--
+Patch a candidate truth predicate at one visible sentence.
+
+At `index`, the patched predicate is forced to agree with `Holds index`.
+Away from `index`, it preserves the old candidate truth predicate.  This uses
+only propositional equality; no decidable equality or classical case split is
+required.
+-/
+def tarskiLocalPatchTruthAt
+    {Sentence : Type u}
+    (TruthAt : Sentence -> Prop)
+    (Holds : Sentence -> Prop)
+    (index : Sentence) :
+    Sentence -> Prop :=
+  fun sentence =>
+    (sentence = index ∧ Holds index) ∨
+      (TruthAt sentence ∧ (sentence = index -> False))
+
+/-- The local patch agrees with semantic holding at the patched sentence. -/
+theorem tarskiLocalPatchTruthAt_agrees_at
+    {Sentence : Type u}
+    {TruthAt : Sentence -> Prop}
+    {Holds : Sentence -> Prop}
+    {index : Sentence} :
+    tarskiLocalPatchTruthAt TruthAt Holds index index ↔ Holds index := by
+  constructor
+  · intro patched
+    cases patched with
+    | inl direct =>
+        exact direct.2
+    | inr offIndex =>
+        have impossible : False :=
+          offIndex.2 rfl
+        cases impossible
+  · intro holds
+    exact Or.inl ⟨rfl, holds⟩
+
+/-- Away from the patched sentence, the local patch preserves the candidate. -/
+theorem tarskiLocalPatchTruthAt_preserves_off_index
+    {Sentence : Type u}
+    {TruthAt : Sentence -> Prop}
+    {Holds : Sentence -> Prop}
+    {index sentence : Sentence}
+    (offIndex : sentence = index -> False) :
+    tarskiLocalPatchTruthAt TruthAt Holds index sentence ↔
+      TruthAt sentence := by
+  constructor
+  · intro patched
+    cases patched with
+    | inl direct =>
+        have impossible : False :=
+          offIndex direct.1
+        cases impossible
+    | inr preserved =>
+        exact preserved.1
+  · intro truth
+    exact Or.inr ⟨truth, offIndex⟩
+
+/--
+An intrinsic diagonalization engine for candidate truth predicates.
+
+It supplies, for every candidate predicate, the diagonal fixed point that will
+challenge that candidate.  This is the algorithmic interface needed for an
+iterated local repair process.
+-/
+structure TarskiCausalAlgorithm
+    (Sentence : Type u)
+    (Holds : Sentence -> Prop) :
+    Type (u + 1) where
+  fixedPointOf :
+    (TruthAt : Sentence -> Prop) ->
+      TarskiDiagonalFixedPoint Sentence TruthAt Holds
+
+/--
+One complete algorithmic step.
+
+The step takes a candidate predicate, extracts its diagonal challenge, records
+the mismatch, patches the candidate locally at the challenged index, and
+rediagonalizes the patched candidate.
+-/
+structure TarskiCausalAlgorithmStep
+    {Sentence : Type u}
+    {Holds : Sentence -> Prop}
+    (algorithm : TarskiCausalAlgorithm Sentence Holds)
+    (TruthAt : Sentence -> Prop) :
+    Type (u + 1) where
+  fixedPoint :
+    TarskiDiagonalFixedPoint Sentence TruthAt Holds
+  positiveDiagonal :
+    TarskiPositiveDiagonal Sentence TruthAt Holds
+  mismatch :
+    LocalTruthMismatch Sentence TruthAt Holds
+  nextTruthAt :
+    Sentence -> Prop
+  nextTruthAt_eq_patch :
+    nextTruthAt =
+      tarskiLocalPatchTruthAt TruthAt Holds positiveDiagonal.index
+  repaired_index_agreement :
+    nextTruthAt positiveDiagonal.index ↔ Holds positiveDiagonal.index
+  preserves_off_index :
+    (sentence : Sentence) ->
+      (sentence = positiveDiagonal.index -> False) ->
+        (nextTruthAt sentence ↔ TruthAt sentence)
+  nextFixedPoint :
+    TarskiDiagonalFixedPoint Sentence nextTruthAt Holds
+  nextPositiveDiagonal :
+    TarskiPositiveDiagonal Sentence nextTruthAt Holds
+
+/--
+The canonical algorithmic step for a candidate predicate.
+
+This is the constructive transition:
+
+candidate -> diagonal challenge -> local patch -> next diagonal challenge.
+-/
+def TarskiCausalAlgorithm.step
+    {Sentence : Type u}
+    {Holds : Sentence -> Prop}
+    (algorithm : TarskiCausalAlgorithm Sentence Holds)
+    (TruthAt : Sentence -> Prop) :
+    TarskiCausalAlgorithmStep algorithm TruthAt :=
+  let fixedPoint := algorithm.fixedPointOf TruthAt
+  let positiveDiagonal :=
+    tarskiPositiveDiagonalOfFixedPoint fixedPoint
+  let nextTruthAt :=
+    tarskiLocalPatchTruthAt
+      TruthAt
+      Holds
+      positiveDiagonal.index
+  let nextFixedPoint := algorithm.fixedPointOf nextTruthAt
+  { fixedPoint := fixedPoint
+    positiveDiagonal := positiveDiagonal
+    mismatch := positiveDiagonal.localTruthMismatch
+    nextTruthAt := nextTruthAt
+    nextTruthAt_eq_patch := rfl
+    repaired_index_agreement :=
+      tarskiLocalPatchTruthAt_agrees_at
+    preserves_off_index := by
+      intro sentence
+      change
+        (sentence = positiveDiagonal.index -> False) ->
+          (tarskiLocalPatchTruthAt TruthAt Holds positiveDiagonal.index sentence ↔
+            TruthAt sentence)
+      exact
+        tarskiLocalPatchTruthAt_preserves_off_index
+          (TruthAt := TruthAt)
+          (Holds := Holds)
+          (index := positiveDiagonal.index)
+          (sentence := sentence)
+    nextFixedPoint := nextFixedPoint
+    nextPositiveDiagonal :=
+      tarskiPositiveDiagonalOfFixedPoint nextFixedPoint }
+
+/-- Iterate the causal algorithm on candidate truth predicates. -/
+def TarskiCausalAlgorithm.iterateTruthAt
+    {Sentence : Type u}
+    {Holds : Sentence -> Prop}
+    (algorithm : TarskiCausalAlgorithm Sentence Holds) :
+    Nat -> (Sentence -> Prop) -> Sentence -> Prop
+  | 0, TruthAt =>
+      TruthAt
+  | Nat.succ n, TruthAt =>
+      let current := algorithm.iterateTruthAt n TruthAt
+      (algorithm.step current).nextTruthAt
+
+/-- The algorithmic step at a chosen iteration. -/
+def TarskiCausalAlgorithm.iterationStep
+    {Sentence : Type u}
+    {Holds : Sentence -> Prop}
+    (algorithm : TarskiCausalAlgorithm Sentence Holds)
+    (initialTruthAt : Sentence -> Prop)
+    (n : Nat) :
+    TarskiCausalAlgorithmStep
+      algorithm
+      (algorithm.iterateTruthAt n initialTruthAt) :=
+  algorithm.step (algorithm.iterateTruthAt n initialTruthAt)
+
+/--
+The patched predicate at the next iteration agrees with `Holds` at the current
+diagonal index.
+-/
+theorem TarskiCausalAlgorithm.iterationStep_repairs_current_index
+    {Sentence : Type u}
+    {Holds : Sentence -> Prop}
+    (algorithm : TarskiCausalAlgorithm Sentence Holds)
+    (initialTruthAt : Sentence -> Prop)
+    (n : Nat) :
+    let step := algorithm.iterationStep initialTruthAt n
+    step.nextTruthAt step.positiveDiagonal.index ↔
+      Holds step.positiveDiagonal.index := by
+  exact
+    (algorithm.iterationStep initialTruthAt n).repaired_index_agreement
+
+/--
+The patched predicate at the next iteration preserves the previous candidate
+away from the current diagonal index.
+-/
+theorem TarskiCausalAlgorithm.iterationStep_preserves_off_current_index
+    {Sentence : Type u}
+    {Holds : Sentence -> Prop}
+    (algorithm : TarskiCausalAlgorithm Sentence Holds)
+    (initialTruthAt : Sentence -> Prop)
+    (n : Nat)
+    (sentence : Sentence) :
+    (sentence =
+      (algorithm.iterationStep initialTruthAt n).positiveDiagonal.index ->
+        False) ->
+      ((algorithm.iterationStep initialTruthAt n).nextTruthAt sentence ↔
+        algorithm.iterateTruthAt n initialTruthAt sentence) :=
+  TarskiCausalAlgorithmStep.preserves_off_index
+    (algorithm.iterationStep initialTruthAt n)
+    sentence
+
+/--
+Every iteration has a next diagonal challenge after its local repair.
+-/
+def TarskiCausalAlgorithm.iterationStep_nextMismatch
+    {Sentence : Type u}
+    {Holds : Sentence -> Prop}
+    (algorithm : TarskiCausalAlgorithm Sentence Holds)
+    (initialTruthAt : Sentence -> Prop)
+    (n : Nat) :
+    LocalTruthMismatch
+      Sentence
+      (algorithm.iterationStep initialTruthAt n).nextTruthAt
+      Holds :=
+  (algorithm.iterationStep initialTruthAt n).nextPositiveDiagonal.localTruthMismatch
+
+/--
+No candidate accepted by the diagonalization engine can be globally correct.
+
+This is the non-terminality theorem for the abstract algorithm: local repair
+can move the candidate, but it never creates a closed global truth predicate.
+-/
+theorem TarskiCausalAlgorithm.truthAt_notGloballyCorrect
+    {Sentence : Type u}
+    {Holds : Sentence -> Prop}
+    (algorithm : TarskiCausalAlgorithm Sentence Holds)
+    (TruthAt : Sentence -> Prop)
+    (definition :
+      TarskiTruthDefinition TruthAt Holds) :
+    False :=
+  tarski_undefinability_core
+    (algorithm.fixedPointOf TruthAt)
+    definition
+
+/--
+No iterated abstract candidate is globally correct.
+-/
+theorem TarskiCausalAlgorithm.iterateTruthAt_notGloballyCorrect
+    {Sentence : Type u}
+    {Holds : Sentence -> Prop}
+    (algorithm : TarskiCausalAlgorithm Sentence Holds)
+    (initialTruthAt : Sentence -> Prop)
+    (n : Nat)
+    (definition :
+      TarskiTruthDefinition
+        (algorithm.iterateTruthAt n initialTruthAt)
+        Holds) :
+    False :=
+  algorithm.truthAt_notGloballyCorrect
+    (algorithm.iterateTruthAt n initialTruthAt)
+    definition
+
 /--
 A positive diagonal refutes any exact projected truth definition.
 
@@ -536,6 +802,260 @@ theorem undefinability_of_truth_via_truthDefinition
           (context.truthDefinitionOfPredicate tau definesTruth)
 
 end ArithmeticTarskiContext
+
+/-! ## Syntax-level patchable Tarski dynamics -/
+
+/--
+An arithmetic Tarski context whose syntactic predicate regime is internally
+closed under local diagonal repair.
+
+The patch operation stays inside `Predicate`: it is not an external semantic
+replacement of the candidate.  At the patched sentence it agrees with
+`models`; away from that sentence it preserves the previous candidate.
+-/
+structure PatchableArithmeticTarskiContext :
+    Type (max (u + 1) (v + 1)) where
+  context : ArithmeticTarskiContext.{u, v}
+  patchPredicate :
+    context.Predicate -> context.Sentence -> context.Predicate
+  patch_agrees_at :
+    (tau : context.Predicate) ->
+      (index : context.Sentence) ->
+        context.models
+          (context.applyQuote (patchPredicate tau index) index) ↔
+            context.models index
+  patch_preserves_off_index :
+    (tau : context.Predicate) ->
+      (index sentence : context.Sentence) ->
+        (sentence = index -> False) ->
+          (context.models
+            (context.applyQuote (patchPredicate tau index) sentence) ↔
+              context.models (context.applyQuote tau sentence))
+
+namespace PatchableArithmeticTarskiContext
+
+/-- The candidate truth predicate induced by a syntactic predicate. -/
+def truthAt
+    (patchable : PatchableArithmeticTarskiContext.{u, v})
+    (tau : patchable.context.Predicate) :
+    patchable.context.Sentence -> Prop :=
+  patchable.context.truthAt tau
+
+/-- The current diagonal challenge for a syntactic candidate. -/
+def diagonalSentence
+    (patchable : PatchableArithmeticTarskiContext.{u, v})
+    (tau : patchable.context.Predicate) :
+    patchable.context.Sentence :=
+  patchable.context.diagonal tau
+
+/-- The next syntactic candidate produced by local diagonal repair. -/
+def nextPredicate
+    (patchable : PatchableArithmeticTarskiContext.{u, v})
+    (tau : patchable.context.Predicate) :
+    patchable.context.Predicate :=
+  patchable.patchPredicate tau (patchable.diagonalSentence tau)
+
+/--
+One syntax-level algorithmic Tarski step.
+
+The step remains inside the syntactic predicate type.  It records the current
+diagonal challenge, performs the internal patch, proves local repair at the
+challenged sentence, proves preservation away from it, and exposes the next
+diagonal challenge.
+-/
+structure AlgorithmStep
+    (patchable : PatchableArithmeticTarskiContext.{u, v})
+    (tau : patchable.context.Predicate) :
+    Type (max u v) where
+  diagonalSentence :
+    patchable.context.Sentence
+  diagonalSentence_eq :
+    diagonalSentence = patchable.diagonalSentence tau
+  fixedPoint :
+    TarskiDiagonalFixedPoint
+      patchable.context.Sentence
+      (patchable.truthAt tau)
+      patchable.context.models
+  mismatch :
+    LocalTruthMismatch
+      patchable.context.Sentence
+      (patchable.truthAt tau)
+      patchable.context.models
+  nextPredicate :
+    patchable.context.Predicate
+  nextPredicate_eq_patch :
+    nextPredicate =
+      patchable.patchPredicate tau diagonalSentence
+  repaired_index_agreement :
+    patchable.truthAt nextPredicate diagonalSentence ↔
+      patchable.context.models diagonalSentence
+  preserves_off_index :
+    (sentence : patchable.context.Sentence) ->
+      (sentence = diagonalSentence -> False) ->
+        (patchable.truthAt nextPredicate sentence ↔
+          patchable.truthAt tau sentence)
+  nextFixedPoint :
+    TarskiDiagonalFixedPoint
+      patchable.context.Sentence
+      (patchable.truthAt nextPredicate)
+      patchable.context.models
+  nextMismatch :
+    LocalTruthMismatch
+      patchable.context.Sentence
+      (patchable.truthAt nextPredicate)
+      patchable.context.models
+
+/-- The canonical syntax-level algorithmic step. -/
+def step
+    (patchable : PatchableArithmeticTarskiContext.{u, v})
+    (tau : patchable.context.Predicate) :
+    patchable.AlgorithmStep tau :=
+  let index := patchable.diagonalSentence tau
+  let next := patchable.nextPredicate tau
+  let nextFixedPoint := patchable.context.fixedPoint next
+  { diagonalSentence := index
+    diagonalSentence_eq := rfl
+    fixedPoint := patchable.context.fixedPoint tau
+    mismatch :=
+      localTruthMismatchOfFixedPoint
+        (patchable.context.fixedPoint tau)
+    nextPredicate := next
+    nextPredicate_eq_patch := rfl
+    repaired_index_agreement :=
+      patchable.patch_agrees_at tau index
+    preserves_off_index := by
+      intro sentence offIndex
+      exact
+        patchable.patch_preserves_off_index
+          tau
+          index
+          sentence
+          offIndex
+    nextFixedPoint := nextFixedPoint
+    nextMismatch :=
+      localTruthMismatchOfFixedPoint nextFixedPoint }
+
+/-- Iterate the syntax-level repair algorithm on syntactic predicates. -/
+def iteratePredicate
+    (patchable : PatchableArithmeticTarskiContext.{u, v}) :
+    Nat -> patchable.context.Predicate -> patchable.context.Predicate
+  | 0, tau =>
+      tau
+  | Nat.succ n, tau =>
+      patchable.nextPredicate
+        (patchable.iteratePredicate n tau)
+
+/-- The syntax-level step at a chosen iteration. -/
+def iterationStep
+    (patchable : PatchableArithmeticTarskiContext.{u, v})
+    (initialPredicate : patchable.context.Predicate)
+    (n : Nat) :
+    patchable.AlgorithmStep
+      (patchable.iteratePredicate n initialPredicate) :=
+  patchable.step
+    (patchable.iteratePredicate n initialPredicate)
+
+/-- Each syntax-level iteration locally repairs its current diagonal sentence. -/
+theorem iterationStep_repairs_current_index
+    (patchable : PatchableArithmeticTarskiContext.{u, v})
+    (initialPredicate : patchable.context.Predicate)
+    (n : Nat) :
+    let step := patchable.iterationStep initialPredicate n
+    patchable.truthAt step.nextPredicate step.diagonalSentence ↔
+      patchable.context.models step.diagonalSentence := by
+  exact
+    (patchable.iterationStep initialPredicate n).repaired_index_agreement
+
+/--
+Each syntax-level iteration preserves the previous predicate away from the
+current diagonal sentence.
+-/
+theorem iterationStep_preserves_off_current_index
+    (patchable : PatchableArithmeticTarskiContext.{u, v})
+    (initialPredicate : patchable.context.Predicate)
+    (n : Nat)
+    (sentence : patchable.context.Sentence) :
+    (sentence =
+      (patchable.iterationStep initialPredicate n).diagonalSentence ->
+        False) ->
+      (patchable.truthAt
+        (patchable.iterationStep initialPredicate n).nextPredicate
+        sentence ↔
+          patchable.truthAt
+            (patchable.iteratePredicate n initialPredicate)
+            sentence) :=
+  PatchableArithmeticTarskiContext.AlgorithmStep.preserves_off_index
+    (patchable.iterationStep initialPredicate n)
+    sentence
+
+/--
+No syntactic predicate in a patchable Tarski context can globally define
+semantic truth.
+-/
+theorem truthAt_notGloballyCorrect
+    (patchable : PatchableArithmeticTarskiContext.{u, v})
+    (tau : patchable.context.Predicate)
+    (definition :
+      TarskiTruthDefinition
+        (patchable.truthAt tau)
+        patchable.context.models) :
+    False :=
+  tarski_undefinability_core
+    (patchable.context.fixedPoint tau)
+    definition
+
+/--
+The usual arithmetic equation form of global correctness is also refuted.
+-/
+theorem predicate_notGloballyCorrect
+    (patchable : PatchableArithmeticTarskiContext.{u, v})
+    (tau : patchable.context.Predicate)
+    (definesTruth :
+      (sentence : patchable.context.Sentence) ->
+        patchable.context.models sentence ↔
+          patchable.truthAt tau sentence) :
+    False :=
+  patchable.truthAt_notGloballyCorrect
+    tau
+    { correct := by
+        intro sentence
+        exact (definesTruth sentence).symm }
+
+/--
+No iterated syntactic candidate is globally correct.
+-/
+theorem iteratedPredicate_notGloballyCorrect
+    (patchable : PatchableArithmeticTarskiContext.{u, v})
+    (initialPredicate : patchable.context.Predicate)
+    (n : Nat)
+    (definesTruth :
+      (sentence : patchable.context.Sentence) ->
+        patchable.context.models sentence ↔
+          patchable.truthAt
+            (patchable.iteratePredicate n initialPredicate)
+            sentence) :
+    False :=
+  patchable.predicate_notGloballyCorrect
+    (patchable.iteratePredicate n initialPredicate)
+    definesTruth
+
+/--
+In particular, the next predicate produced by any step is not terminally
+correct.
+-/
+theorem step_nextPredicate_notGloballyCorrect
+    (patchable : PatchableArithmeticTarskiContext.{u, v})
+    (tau : patchable.context.Predicate)
+    (definesTruth :
+      (sentence : patchable.context.Sentence) ->
+        patchable.context.models sentence ↔
+          patchable.truthAt (patchable.step tau).nextPredicate sentence) :
+    False :=
+  patchable.predicate_notGloballyCorrect
+    (patchable.step tau).nextPredicate
+    definesTruth
+
+end PatchableArithmeticTarskiContext
 
 /-- The unit repair carried by the pure Tarski corollary. -/
 def TarskiTruthRepair
@@ -855,6 +1375,19 @@ end Meta
 #print axioms Meta.ClosedStabilityTheorem.LocalTruthMismatch
 #print axioms Meta.ClosedStabilityTheorem.TarskiPositiveDiagonal.localTruthMismatch
 #print axioms Meta.ClosedStabilityTheorem.localTruthMismatchOfFixedPoint
+#print axioms Meta.ClosedStabilityTheorem.tarskiLocalPatchTruthAt
+#print axioms Meta.ClosedStabilityTheorem.tarskiLocalPatchTruthAt_agrees_at
+#print axioms Meta.ClosedStabilityTheorem.tarskiLocalPatchTruthAt_preserves_off_index
+#print axioms Meta.ClosedStabilityTheorem.TarskiCausalAlgorithm
+#print axioms Meta.ClosedStabilityTheorem.TarskiCausalAlgorithmStep
+#print axioms Meta.ClosedStabilityTheorem.TarskiCausalAlgorithm.step
+#print axioms Meta.ClosedStabilityTheorem.TarskiCausalAlgorithm.iterateTruthAt
+#print axioms Meta.ClosedStabilityTheorem.TarskiCausalAlgorithm.iterationStep
+#print axioms Meta.ClosedStabilityTheorem.TarskiCausalAlgorithm.iterationStep_repairs_current_index
+#print axioms Meta.ClosedStabilityTheorem.TarskiCausalAlgorithm.iterationStep_preserves_off_current_index
+#print axioms Meta.ClosedStabilityTheorem.TarskiCausalAlgorithm.iterationStep_nextMismatch
+#print axioms Meta.ClosedStabilityTheorem.TarskiCausalAlgorithm.truthAt_notGloballyCorrect
+#print axioms Meta.ClosedStabilityTheorem.TarskiCausalAlgorithm.iterateTruthAt_notGloballyCorrect
 #print axioms Meta.ClosedStabilityTheorem.TarskiPositiveDiagonal.refutesExactProjectedTruthDefinition
 #print axioms Meta.ClosedStabilityTheorem.TarskiPositiveDiagonal.refutesTruthDefinition
 #print axioms Meta.ClosedStabilityTheorem.tarski_undefinability_equiv_exact_projective
@@ -868,6 +1401,20 @@ end Meta
 #print axioms Meta.ClosedStabilityTheorem.ArithmeticTarskiContext.undefinability_of_truth_via_explicitCounterexample
 #print axioms Meta.ClosedStabilityTheorem.ArithmeticTarskiContext.undefinability_of_truth_via_truthDefinition
 #print axioms Meta.ClosedStabilityTheorem.ArithmeticTarskiContext.undefinability_of_truth_via_projective_corollary
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.truthAt
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.diagonalSentence
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.nextPredicate
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.AlgorithmStep
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.step
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.iteratePredicate
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.iterationStep
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.iterationStep_repairs_current_index
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.iterationStep_preserves_off_current_index
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.truthAt_notGloballyCorrect
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.predicate_notGloballyCorrect
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.iteratedPredicate_notGloballyCorrect
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.step_nextPredicate_notGloballyCorrect
 #print axioms Meta.ClosedStabilityTheorem.TarskiTruthRepair
 #print axioms Meta.ClosedStabilityTheorem.TarskiDiagonalObstruction
 #print axioms Meta.ClosedStabilityTheorem.TarskiDiagonalObstruction.ProjectedTruthDefinition
