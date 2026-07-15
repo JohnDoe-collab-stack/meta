@@ -4,6 +4,12 @@
 This import-free root contains projection, obstruction, reconstruction,
 proof-relevant local recovery, and local projected-truth separation. It is
 independent of bilateral completeness and terminal cycles.
+
+Conceptually, a projective gap is an instance of the more primitive relaxed
+usage regime: visible equality supplies one possible coordination law, while
+formed separation prevents contraction. Non-injectivity is therefore the
+minimal projective realization used here, not the foundational principle of
+the whole architecture.
 -/
 
 namespace Meta
