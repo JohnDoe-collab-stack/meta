@@ -13,6 +13,7 @@ import Meta.Core.Specialization.TransportCoherenceModel
 import Meta.Core.Specialization.DynamicRelaxedUsageModel
 import Meta.Core.Specialization.OrderGap
 import Meta.Core.Specialization.Parity
+import Meta.Semantics.FoundationalStability
 import Meta.Arithmetic.Core
 import Meta.Arithmetic.Canonical
 import Meta.Arithmetic.RepeatedIndex
@@ -70,6 +71,11 @@ import Meta.Synthesis.TarskiBethBellGap
 #print axioms Meta.TransportCoherenceModel.threePhase_direct_transport_eq_composed
 #print axioms Meta.DynamicRelaxedUsage.dynamicRelaxedRegime_not_exactProjective
 #print axioms Meta.DynamicRelaxedUsageModel.switchDynamicRelaxationSynthesis
+#print axioms Meta.RelaxedSemantics.generalRelaxedFoundationalSemantics
+#print axioms Meta.RelaxedSemantics.foundationalTransport_withoutIdentity
+#print axioms Meta.RelaxedSemantics.foundationalUseGraph_nonreduction
+#print axioms Meta.RelaxedSemantics.foundationalTransitionGraph_nonreduction
+#print axioms Meta.RelaxedSemantics.FiniteCumulativeDynamicModel.finiteDynamicFoundationalSystem
 #print axioms Meta.TarskiDynamicRelaxedUsage.tarskiDynamicRelaxedUsageSynthesis
 #print axioms Meta.ConstructivePatchModel.constructiveTarskiClosedSystem
 #print axioms Meta.ConstructivePatchModel.constructiveTarskiOrbitTheorem
