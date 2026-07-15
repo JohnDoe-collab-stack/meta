@@ -49,6 +49,7 @@ import Meta.Tarski.ReferentialOrder
 import Meta.Tarski.DynamicReturn
 import Meta.Tarski.DynamicRelaxedUsage
 import Meta.Tarski.ConstructivePatchModel
+import Meta.Tarski.ConstructivePatchOrbit
 import Meta.Tarski.FoundationBridge
 import Meta.Beth.ImplicitExplicit
 import Meta.Beth.GapContraction
@@ -70,6 +71,7 @@ import Meta.Synthesis.TarskiBethBellGap
 #print axioms Meta.DynamicRelaxedUsageModel.switchDynamicRelaxationSynthesis
 #print axioms Meta.TarskiDynamicRelaxedUsage.tarskiDynamicRelaxedUsageSynthesis
 #print axioms Meta.ConstructivePatchModel.constructiveTarskiClosedSystem
+#print axioms Meta.ConstructivePatchModel.constructiveTarskiOrbitTheorem
 #print axioms Meta.ClosedStabilityTheorem.IdentityOfUseCell
 #print axioms Meta.ClosedStabilityTheorem.projectedIdentityCell_internalDifference_usedIdentity
 #print axioms Meta.ClosedStabilityTheorem.InterfaceTransport

@@ -24,6 +24,42 @@ Le premier travail prouve la geometrie globale de l'instance actuelle. Le
 second change d'instance ; il ne peut pas etre remplace par un renommage du
 modele fini, par le theoreme officiel de Tarski ou par un pont conditionnel.
 
+### 0.1 Statut d'execution
+
+La partie A est implementee dans :
+
+```text
+Meta/Tarski/ConstructivePatchOrbit.lean
+```
+
+Le module prouve effectivement :
+
+```text
+support_n = [n, ..., 1] ;
+maximum support_n = n ;
+index_n = atom (n + 1) ;
+iteratePredicate n initial = candidat_n ;
+iterateSource n initial = candidat_n ;
+candidat_n accepte exactement les atomes positifs inferieurs ou egaux a n ;
+candidat_n est correct sur chaque index_k pour k < n ;
+candidat_n rejette index_n ;
+candidat_(n+1) repare index_n ;
+les indices, candidats et iteres determinent leur rang ;
+aucune periode strictement positive ne ramene exactement au meme etat ;
+chaque rang porte son LocalTruthMismatch ;
+chaque itere reste globalement incomplet.
+```
+
+Ces resultats sont regroupes dans l'habitant ferme :
+
+```text
+constructiveTarskiOrbitTheorem : ConstructiveTarskiOrbitTheorem
+```
+
+Le fichier compile sans axiome et ne depend ni de `Classical`, ni de
+`propext`, ni de `Quot.sound`. La partie B Foundation reste ouverte et conserve
+toutes les exigences des sections 12 a 23.
+
 ## 1. Frontiere apres suppression de l'ancienne API
 
 La voie qui patchait directement une fonction semantique
