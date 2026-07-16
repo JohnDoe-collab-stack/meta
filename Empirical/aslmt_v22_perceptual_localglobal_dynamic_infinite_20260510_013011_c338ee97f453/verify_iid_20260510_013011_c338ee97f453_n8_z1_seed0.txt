@@ -1,0 +1,4 @@
+ok=False
+lines=64
+violations=10315
+props_count={"ablation_z": 82, "cue_gate": 2048, "image_gate": 4012, "swap_follow": 4089, "swap_orig": 84}

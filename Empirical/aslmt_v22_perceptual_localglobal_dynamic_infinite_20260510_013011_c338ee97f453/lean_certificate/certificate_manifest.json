@@ -1,0 +1,15 @@
+{
+  "kind": "v22_lean_certificate_manifest",
+  "ok": true,
+  "output_hashes": {
+    "certificate.audit.json": "4be9f74c2a6094759b6fc405f922f55f20eaa893a798176e606df922a5fedae1",
+    "certificate.lean": "1cbefbb3e513f31e8f2a1fbb4d51f6e9749a94568fb32175152cc5e346e51cd9",
+    "certificate.normalized.json": "89121ccfd80c3acc2ffc591838ff97058608ac3b7dd288b28f45b3baa80614c9"
+  },
+  "outputs": {
+    "audit": "/mnt/c/users/frederick/documents/foru2read/Empirical/aslmt/runs/aslmt_v22_perceptual_localglobal_dynamic_infinite_20260510_013011_c338ee97f453/lean_certificate/certificate.audit.json",
+    "lean": "/mnt/c/users/frederick/documents/foru2read/Empirical/aslmt/runs/aslmt_v22_perceptual_localglobal_dynamic_infinite_20260510_013011_c338ee97f453/lean_certificate/certificate.lean",
+    "normalized": "/mnt/c/users/frederick/documents/foru2read/Empirical/aslmt/runs/aslmt_v22_perceptual_localglobal_dynamic_infinite_20260510_013011_c338ee97f453/lean_certificate/certificate.normalized.json"
+  },
+  "run_dir": "/mnt/c/users/frederick/documents/foru2read/Empirical/aslmt/runs/aslmt_v22_perceptual_localglobal_dynamic_infinite_20260510_013011_c338ee97f453"
+}

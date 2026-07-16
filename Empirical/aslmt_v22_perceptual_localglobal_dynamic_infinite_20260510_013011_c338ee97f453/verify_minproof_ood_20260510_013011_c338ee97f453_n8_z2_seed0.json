@@ -1,0 +1,8 @@
+{
+  "lines": 64,
+  "meaning": "ok=True means every certified collision re-verifies; when z_classes < n_classes, every context also has a verified collision witness.",
+  "ok": true,
+  "props_count": {},
+  "violations": 0,
+  "violations_list": []
+}

@@ -1,0 +1,14 @@
+{"marginal_nogo_ok": true, "minproof_ok": true, "split": "iid", "struct_ok": false, "struct_rejected": true, "z_classes": 1}
+{"marginal_nogo_ok": true, "minproof_ok": true, "split": "ood", "struct_ok": false, "struct_rejected": true, "z_classes": 1}
+{"marginal_nogo_ok": true, "minproof_ok": true, "split": "iid", "struct_ok": false, "struct_rejected": true, "z_classes": 2}
+{"marginal_nogo_ok": true, "minproof_ok": true, "split": "ood", "struct_ok": false, "struct_rejected": true, "z_classes": 2}
+{"marginal_nogo_ok": true, "minproof_ok": true, "split": "iid", "struct_ok": false, "struct_rejected": true, "z_classes": 3}
+{"marginal_nogo_ok": true, "minproof_ok": true, "split": "ood", "struct_ok": false, "struct_rejected": true, "z_classes": 3}
+{"marginal_nogo_ok": true, "minproof_ok": true, "split": "iid", "struct_ok": false, "struct_rejected": true, "z_classes": 4}
+{"marginal_nogo_ok": true, "minproof_ok": true, "split": "ood", "struct_ok": false, "struct_rejected": true, "z_classes": 4}
+{"marginal_nogo_ok": true, "minproof_ok": true, "split": "iid", "struct_ok": false, "struct_rejected": true, "z_classes": 5}
+{"marginal_nogo_ok": true, "minproof_ok": true, "split": "ood", "struct_ok": false, "struct_rejected": true, "z_classes": 5}
+{"marginal_nogo_ok": true, "minproof_ok": true, "split": "iid", "struct_ok": false, "struct_rejected": true, "z_classes": 6}
+{"marginal_nogo_ok": true, "minproof_ok": true, "split": "ood", "struct_ok": false, "struct_rejected": true, "z_classes": 6}
+{"marginal_nogo_ok": true, "minproof_ok": true, "split": "iid", "struct_ok": false, "struct_rejected": true, "z_classes": 7}
+{"marginal_nogo_ok": true, "minproof_ok": true, "split": "ood", "struct_ok": false, "struct_rejected": true, "z_classes": 7}
