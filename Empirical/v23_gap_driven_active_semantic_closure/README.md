@@ -25,6 +25,12 @@ la remplace pas.
 
 ## Contrat d'implémentation
 
+Le contrat scientifique normatif est désormais
+[`SCIENTIFIC_PROTOCOL.md`](SCIENTIFIC_PROTOCOL.md). Il fige les choix de
+réalisation, les domaines, les architectures, les budgets, les baselines, les
+interventions, les partitions, les seuils et les portes de décision avant le
+premier run scientifique.
+
 La première cible n'est pas un entraînement GPU. Elle est une petite instance
 finie dont Python et Lean calculent exactement les mêmes objets :
 
@@ -47,8 +53,8 @@ l'état suivant.
 ## Ordre initial
 
 ```text
-1. écrire SCIENTIFIC_PROTOCOL.md à partir du plan validé ;
-2. définir le schéma de trace brut et son vérificateur indépendant ;
+1. maintenir `SCIENTIFIC_PROTOCOL.md` gelé pour la campagne identifiée ;
+2. conserver le schéma de trace brut et son vérificateur structurel exécutable ;
 3. implémenter le petit environnement fini isomorphe à Meta/AI ;
 4. vérifier exhaustivement la concordance Lean/Python ;
 5. prouver les no-go passif et visible factorisé ;
@@ -69,7 +75,13 @@ Les smoke tests écrivent dans `/tmp` ou dans des sorties explicitement nommées
 
 ## Statut
 
-Racine empirique initialisée. Le modèle Lean fini de référence existe désormais
-dans `Meta/AI/FiniteActiveSemanticClosure.lean`, mais aucun environnement
-Python v23, run, résultat appris ou certificat de trace n'existe encore. Ce
-README ne revendique donc aucun résultat empirique.
+Racine empirique initialisée et protocole scientifique écrit. Le schéma JSONL
+canonique, son parseur strict, son vérificateur structurel exécutable et leurs
+tests mécaniques existent. Ce vérificateur réutilise le parseur normatif : il
+n'est pas présenté comme une seconde implémentation indépendante. Les futurs
+vérificateurs sémantiques devront recalculer les faits depuis leurs entrées
+autoritatives sans faire confiance aux `validity_flags`. Le modèle Lean fini de
+référence existe dans
+`Meta/AI/FiniteActiveSemanticClosure.lean`, mais aucun environnement Python
+v23, run, résultat appris ou certificat sémantique de trace n'existe encore. Ce
+README et le protocole ne revendiquent donc aucun résultat empirique.
