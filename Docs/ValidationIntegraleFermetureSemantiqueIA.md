@@ -285,16 +285,17 @@ depuis le monde, la cible, le gap brut ou une action oracle invalide la chaîne.
 
 #### Obtenir une information pertinente
 
-Une réponse est pertinente si elle satisfait au moins une propriété d'effet
-formelle et une propriété contrefactuelle :
+Une réponse est pertinente seulement si elle satisfait simultanément les trois
+obligations suivantes :
 
 ```text
 effet formel :
   la réponse permet de construire un patch qui ferme le gap courant ;
 
 effet contrefactuel :
-  remplacer la réponse par une réponse incompatible change le patch
-  ou fait échouer son certificat ;
+  sur une paire de mondes encore compatibles exigeant des réparations
+  incompatibles, remplacer la réponse par celle de l'autre monde fait échouer
+  l'applicabilité ou GapClosedBy, et pas seulement une métadonnée du patch ;
 
 effet informationnel :
   la réponse réduit strictement la fibre des mondes encore compatibles
@@ -590,7 +591,7 @@ Le pont actuel vérifie principalement la cohérence d'un schéma JSON et de
 chaînes attendues. Il ne dérive pas son universalité depuis le moteur, le
 modèle ou une preuve Lean.
 
-Le nouveau pont doit être supprimé comme source de vérité. Les propriétés
+Ce pont doit cesser d'être une source de vérité. Les propriétés
 doivent être recalculées depuis :
 
 ```text
@@ -746,8 +747,11 @@ QueryAdmissible
 
 ne peuvent pas être `Unit` sous un autre nom. L'instance doit exhiber deux
 gaps dont les évidences sont distinguables, deux usages orientés distinguables,
-et deux réponses induisant des patches distinguables. Les fonctions `selectQuery` et
-`buildRepair` doivent être non constantes sur ces témoins.
+et deux réponses induisant des réparations distinguables. Une `GapEvidence`
+contient une dérivation rejouable depuis la vue de l'agent ; elle ne peut pas
+être un simple tag dont la justification sémantique serait fournie ensuite par
+le vérificateur. Les fonctions `selectQuery` et `buildRepair` doivent être non
+constantes sur ces témoins.
 
 `GapAuthorizedUse`, `GapAuthorizedTransport` et `Query` sont trois types
 distincts. Le premier autorise, le deuxième réalise une relation de sortie, le
@@ -946,8 +950,10 @@ oublie définitionnellement `world`. `candidate` est syntaxique et modifiable.
 gaps détectés, usages autorisés, transports, actions, réponses et réparations
 déjà exécutés, avec leur provenance accessible à l'agent.
 `RepairRecord` ne contient aucun booléen ou preuve sémantique affirmant que le
-gap est fermé ; cette propriété est recalculée depuis `world`, `candidate` et
-`ClosedOn` par la couche de vérification.
+gap est fermé. La couche de vérification recalcule d'abord `KnownCorrectAt` ou
+`KnownClosedOn` sur tous les mondes compatibles avec la vue et l'historique ;
+elle en déduit ensuite `CorrectAt` ou `ClosedOn` sur le monde réel grâce à sa
+preuve de compatibilité.
 
 ### 4.2 Gap opérationnel et témoin sémantique
 
@@ -980,6 +986,28 @@ leurs `ObservationUpdate`, depuis `observe world`, produit exactement
 `view.observation`. Cette relation est définie avant le certificat ci-dessous et
 sa version finie calculable est `CompatibleWorlds` de la section 10.5.
 
+Définir aussi l'invariant non vacuant :
+
+```text
+ActualWorldCompatible(state) :=
+  CompatibleWithViewHistory state.agent state.world
+
+initial_actualCompatible :
+  ActualWorldCompatible (initialState world)
+
+next_preserves_actualCompatible :
+  ActualWorldCompatible state
+  → ActualWorldCompatible (nextState state)
+
+reachable_actualCompatible :
+  ReachableFromInitial state
+  → ActualWorldCompatible state.
+```
+
+Les deux derniers théorèmes sont dérivés de la correction de `respond`, de
+`applyObservationUpdate` et de l'ajout exact du `RepairRecord`. Ils ne sont pas
+des champs libres d'un état atteignable.
+
 ```lean
 inductive SemanticGapEvidence
     (state : ActiveSemanticClosureState)
@@ -990,6 +1018,9 @@ inductive SemanticGapEvidence
         Agrees
           (interpret state.agent.candidate operational.index)
           (evaluate state.world operational.index) → False)
+      (observableEvidenceRealization :
+        WitnessedEvidenceRealization
+          state operational operational.observableEvidence disagrees)
   | unresolvedFiber
       (kind_eq : operational.kind = .unresolvedFiber)
       (leftWorld rightWorld : SemanticWorld)
@@ -1000,6 +1031,11 @@ inductive SemanticGapEvidence
       (targetsSeparated :
         evaluate leftWorld operational.index =
           evaluate rightWorld operational.index → False)
+      (observableEvidenceRealization :
+        FiberEvidenceRealization
+          state operational operational.observableEvidence
+          leftWorld rightWorld
+          leftCompatible rightCompatible targetsSeparated)
 
 structure TypedSemanticGap
     (state : ActiveSemanticClosureState)
@@ -1028,6 +1064,14 @@ l'instance constructive fermée, la détection produit toujours un gap
 sémantiquement certifié. Dans l'expérience apprise, le certificat est recalculé
 par le vérificateur et peut échouer.
 
+`WitnessedEvidenceRealization` et `FiberEvidenceRealization` sont définies dans
+la spécialisation et relient la dérivation observable exacte à son contenu
+sémantique. Elles exigent notamment le rejeu des observations ou règles citées
+par `GapEvidence`. Elles ne peuvent pas être habitées uniformément ni ignorer
+leur argument `operational.observableEvidence`. Ainsi le vérificateur valide la
+raison effectivement produite par l'agent ; il ne lui substitue pas une raison
+oracle trouvée après coup.
+
 `SemanticGapPoleRealization` est une famille preuve-pertinente. Dans la branche
 `witnessedMismatch`, elle identifie les pôles aux lectures sémantique courante et
 syntaxique candidate. Dans la branche `unresolvedFiber`, elle les identifie aux
@@ -1044,9 +1088,10 @@ inductive OperationalGapStatus
   | open (gap : OperationalGap view)
 ```
 
-Un théorème de correction séparé relie `closed` à la correction globale sur le
-domaine fini. Le constructeur `closed` ne porte pas cette vérité par simple
-nomination.
+Un théorème de correction séparé relie `closed` à `KnownClosedOn` sur le domaine
+fini canonique. `ClosedOn` sur le monde réel n'est obtenu qu'ensuite, depuis la
+compatibilité du monde réel. Le constructeur `closed` ne porte aucune de ces
+vérités par simple nomination.
 
 ### 4.3 Usage dérivé
 
@@ -1163,6 +1208,14 @@ respond_local :
 respond_withinBound :
   EncodedBitLength (respond world query)
   ≤ (responseFootprint query).maxResponseBits
+
+selectedQuery_splitsCompatibleFiber :
+  detectGap view = .open gap
+  → ∃ world₀ world₁,
+      CompatibleWithViewHistory view world₀
+      ∧ CompatibleWithViewHistory view world₁
+      ∧ respond world₀ (selectQuery transport)
+          ≠ respond world₁ (selectQuery transport)
 ```
 
 Elle ne doit pas être stockée dans le gap avant l'exécution de la requête.
@@ -1194,7 +1247,9 @@ structure IntrinsicRepair
   historyRecord :
     RepairRecord
       view gap use transport query response candidatePatch
-  responseUsed : RepairDerivedFrom response candidatePatch
+  responseUsed :
+    RepairDerivedFrom
+      response candidatePatch observationUpdate historyRecord
   provenance :
     RepairProvenance
       view gap use transport query response
@@ -1233,7 +1288,10 @@ buildRepair :
 ```
 
 doit utiliser la réponse. Une réparation indépendante de la réponse échoue au
-test de causalité.
+test de causalité. `RepairDerivedFrom` porte sur la réparation entière, car une
+réponse peut fermer un `unresolvedFiber` par `ObservationUpdate` sans modifier
+une candidate déjà correcte. Une preuve uniformément habitable qui ignore la
+réponse ne satisfait pas ce champ.
 
 L'exécution agent-side est définitionnelle :
 
@@ -1255,9 +1313,24 @@ constructeur dans le système certifié.
 Les effets sémantiques sont des théorèmes, pas des entrées du constructeur :
 
 ```text
+buildRepair_strictlyReducesCompatibleFiber ;
+buildRepair_preservesActualCompatibility ;
+buildRepair_responseNecessaryForClosure ;
 buildRepair_closesCurrentGap ;
 buildRepair_preservesRepairedHistory.
 ```
+
+Les deux premiers théorèmes parlent de la vue produite par
+`executeAgentRepair`, pas d'une « vue après réponse » construite par une fonction
+cachée. La requête sélectionnée sépare la fibre avant acquisition ; la réponse
+est ensuite incorporée uniquement par l'`ObservationUpdate` et le
+`RepairRecord` de la réparation exécutée. C'est cette exécution qui réduit
+strictement `CompatibleWorlds` tout en conservant le monde réel.
+`buildRepair_responseNecessaryForClosure` fournit une paire discriminante de
+mondes compatibles dont les réponses et réparations requises diffèrent, puis
+prouve que la réponse croisée ne satisfait pas `GapClosedBy` ou rend le patch
+inapplicable. Une réponse qui ne change qu'un champ historique sans effet sur la
+fermeture échoue donc à cette loi.
 
 Leur preuve peut utiliser `state.world`, le témoin sémantique du gap et la loi
 de correction de `respond`. La fonction calculant le patch, elle, ne le peut
@@ -1375,9 +1448,11 @@ ClosedOn world candidateₙ repairedPrefixₙ
 ```
 
 Deux systèmes réalisent « la même fermeture » seulement s'ils sont évalués sur
-le même monde, la même candidate initiale, le même domaine, le même budget
-d'interaction et le même prédicat `ClosedOn`. Une métrique approximative égale
-ne suffit pas.
+le même monde, la même vue initiale, la même candidate initiale, le même domaine
+et le même budget d'interaction, puis satisfont le même couple de critères :
+`KnownClosedOn` relativement à leur vue finale et `ClosedOn` sur le monde réel.
+Une métrique approximative égale ou une bonne prédiction accidentelle dans le
+seul monde caché ne suffit pas.
 
 ### 4.8 Graphe causal autorisé
 
@@ -1634,10 +1709,14 @@ ActiveSemanticClosureState
 AgentClosureState
 ActiveClosureSchema
 CompatibleWithViewHistory
+ActualWorldCompatible
+ReachableFromInitial
 OperationalGapKind
 OperationalGap
 OperationalGapStatus
 SemanticGapEvidence
+WitnessedEvidenceRealization
+FiberEvidenceRealization
 SemanticGapPoleRealization
 TypedSemanticGap
 GapAuthorizedUse
@@ -1661,6 +1740,13 @@ activeSemanticClosure_nonProjective
 activeSemanticClosure_transportCoherent
 applyCandidatePatch
 applyObservationUpdate
+selectedQuery_splitsCompatibleFiber
+buildRepair_strictlyReducesCompatibleFiber
+buildRepair_preservesActualCompatibility
+buildRepair_responseNecessaryForClosure
+initial_actualCompatible
+next_preserves_actualCompatible
+reachable_actualCompatible
 ```
 
 ### 6.2 Raccord fondationnel intrinsèque
@@ -1677,6 +1763,8 @@ une RelaxedInterpretation de la syntaxe indépendante ;
 un GapRepairAlgebra dont le successeur est la transition IA ;
 un prédicat admissible représentant CorrectAt ;
 un prédicat admissible représentant ClosedOn ;
+des prédicats admissibles représentant CompatibleWithViewHistory,
+KnownCorrectAt, KnownClosedOn, FiberDeterminateAt et GapClosedBy ;
 une instance des théorèmes génériques de soundness et de conservativité.
 ```
 
@@ -1737,8 +1825,9 @@ Les lois d'alignement minimales sont :
 
 ```text
 gapAlignment :
-  les pôles, l'indice, la séparation et la coordination du gap opérationnel
-  sont ceux interprétés dans contextualModel.regime ;
+  le genre, l'évidence, les pôles, leur réalisation, l'indice, la séparation et
+  la coordination du gap opérationnel sont ceux interprétés dans
+  contextualModel.regime ;
 
 useAlignment :
   l'usage produit par authorize est exactement l'usage interprété depuis
@@ -1749,8 +1838,9 @@ transportAlignment :
   ContextualRelaxedRegime, avec la même OutRel ;
 
 correctnessAlignment :
-  CorrectAt et ClosedOn sont équivalents aux jugements Holds des prédicats
-  admissibles correspondants ;
+  CompatibleWithViewHistory, CorrectAt, ClosedOn, KnownCorrectAt,
+  KnownClosedOn, FiberDeterminateAt et GapClosedBy sont équivalents aux
+  jugements Holds des prédicats admissibles correspondants ;
 
 transitionAlignment :
   system.nextState est égal au next dérivé de repairAlgebra, et la réparation
@@ -1761,13 +1851,17 @@ Pour empêcher qu'un type d'alignement masque une preuve vide, la réalisation
 doit exposer au moins les fonctions calculables suivantes :
 
 ```text
-contextOfState : état fermé → contexte ;
-semanticTermOfGap : gap validé → terme au contexte de l'état ;
-syntacticTermOfGap : gap validé → terme au même contexte ;
+contextOfState : état de fermeture active → contexte ;
+leftTermOfGap : gap validé → terme au contexte de l'état ;
+rightTermOfGap : gap validé → terme au même contexte ;
+evidenceKindOfGap : gap validé → genre d'évidence fondationnelle ;
+poleRealizationOfGap : réalisation des deux termes selon ce genre ;
 projectionReading : lecture des deux termes vers leur VisibleIndex commun ;
 regimeUseOfAuthorization : GapAuthorizedUse → ContextualRelaxedRegime.Use ;
 regimeTransportOfExecution : transport opérationnel → OutRel correspondant ;
 predicateOfIndex : VisibleIndex → AdmissiblePredicateDoctrine.Pred ;
+compatiblePredicateOfView : AgentClosureState → prédicat admissible ;
+knownCorrectPredicateOfViewIndex : vue → indice → prédicat admissible ;
 repairOfIntrinsic : IntrinsicRepair → réparation portée par GapRepairAlgebra.
 ```
 
@@ -1852,6 +1946,9 @@ transport opérationnellement distinct sous un même usage compatible
 
 réponse différente sous requête informative
 → réparation différente ;
+
+réponse croisée entre mondes compatibles exigeant des réparations incompatibles
+→ échec de GapClosedBy ou de l'applicabilité ;
 
 réparation différente et effective
 → état suivant différent ;
@@ -1947,7 +2044,9 @@ ajouter une réponse à l'historique. `SameInitialInformation` contient l'égali
 des `AgentClosureState` initiaux réellement transmis. Le no-go se prouve par
 induction : mêmes vue, mémoire et candidate donnent le même patch, donc le même
 état passif à tout rang autorisé. `IncompatibleRequiredRepairs` fournit ensuite
-la preuve qu'aucune candidate commune ne satisfait les deux fermetures requises.
+deux mondes compatibles avec cette vue, un indice commun et deux cibles
+distinctes. Par `agrees_target_unique`, aucune candidate commune ne satisfait
+`KnownCorrectAt` sur cette fibre.
 Le type `Memory` et sa capacité sérialisée sont comptés dans `ResourceBudget` ;
 ils ne sont pas fixés artificiellement à zéro.
 
@@ -1956,7 +2055,8 @@ Le no-go passif doit partir d'une paire explicite :
 ```text
 state₀ ≠ state₁ ;
 agentView₀ = agentView₁ ;
-requiredClosure₀ ≠ requiredClosure₁.
+les deux mondes sont compatibles avec cette vue commune ;
+evaluate state₀.world index ≠ evaluate state₁.world index.
 ```
 
 Pour toute politique déterministe sans interaction, la sortie est la même sur
@@ -1989,10 +2089,10 @@ preuve-pertinente accessible aux deux architectures, tandis que leurs
 cette différence.
 
 Prouver alors qu'un contrôleur dont requête et patch factorisent exactement par
-ce visible ne ferme pas les deux états. Ce théorème ne doit pas être obtenu par
-simple réutilisation de `not_exactProjective_of_asymmetric_use` : il porte sur
-la fermeture de tâche, tandis que ce dernier porte sur la représentation de
-`HasUse`.
+ce visible ne produit pas `GapClosedBy` dans les deux états sous le budget
+annoncé. Ce théorème ne doit pas être obtenu par simple réutilisation de
+`not_exactProjective_of_asymmetric_use` : il porte sur la fermeture de tâche,
+tandis que ce dernier porte sur la représentation de `HasUse`.
 
 La randomisation ne restaure pas une garantie de fermeture : à seed commun, le
 contrôleur choisit la même action sur les deux visibles égaux. Sur la paire
@@ -2015,7 +2115,8 @@ repair_closes_detectedGap ;
 repair_preserves_closedPrefix ;
 finiteOrbit_reachesClosedOn ;
 openOrbit_preservesPrefix ;
-openOrbit_hasFreshMismatch.
+openOrbit_hasFreshGap ;
+tarskiOpenOrbit_hasFreshMismatch.
 ```
 
 Les théorèmes de l'orbite ouverte doivent réutiliser
@@ -2143,10 +2244,10 @@ La réponse doit dépendre réellement du couple :
 ```
 
 La requête porte son indice et son opération d'acquisition. Le gap influence la
-réponse uniquement par la chaîne `gap → use → transport → query` ; il n'est pas une entrée
-secrète supplémentaire de l'environnement. Deux requêtes distinctes admissibles
-pour un même gap doivent pouvoir produire des réponses ou des réductions de
-fibre distinctes dans au moins une instance.
+réponse uniquement par la chaîne `gap → use → transport → query` ; il n'est pas
+une entrée secrète supplémentaire de l'environnement. Deux requêtes distinctes
+admissibles pour un même gap doivent pouvoir produire des réponses ou des
+réductions de fibre distinctes dans au moins une instance.
 
 Le vérificateur recalcule la réponse. Aucun certificat ne peut fournir un bit
 de réponse sans démontrer qu'il est égal à la fonction d'environnement.
@@ -2232,9 +2333,10 @@ règles avec provenance. Une observation est un rendu non injectif d'une
 exécution. Une requête déclenche une intervention ou une expérience dont la
 réponse est une trace partielle, et non l'étiquette finale directement donnée.
 
-Lorsque la candidate est incorrecte, le patch modifie une de ses sous-structures. Il doit pouvoir fermer
-plusieurs occurrences relevant de la même règle tout en préservant les règles
-déjà validées. Les partitions d'évaluation retiennent hors entraînement :
+Lorsque la candidate est incorrecte, le patch modifie une de ses
+sous-structures. Il doit pouvoir fermer plusieurs occurrences relevant de la
+même règle tout en préservant les règles déjà validées. Les partitions
+d'évaluation retiennent hors entraînement :
 
 ```text
 des programmes ;
@@ -2371,7 +2473,8 @@ Superviser uniquement le gap de référence, mais ni l'usage, ni le transport, n
 la requête, ni la réparation. Le modèle apprend les actions depuis :
 
 ```text
-réduction du mismatch ;
+réduction du gap courant, par correction du mismatch ou détermination de la
+fibre compatible ;
 coût de requête ;
 préservation des réparations antérieures ;
 réussite finale.
@@ -2493,8 +2596,10 @@ le monde.
 
 Injecter la réponse valide d'un autre monde ou d'un autre gap.
 
-Attendu : le patch change de manière prédite ou son certificat d'applicabilité
-échoue. Une performance inchangée signale que la réponse est ignorée.
+Attendu : le patch change de manière sémantiquement pertinente et la réparation
+croisée échoue à `GapClosedBy`, ou son certificat d'applicabilité échoue. Une
+simple variation de métadonnée avec la même fermeture signale que la réponse est
+ignorée.
 
 La réponse permutée doit avoir le même type dépendant `Response query`. Une
 réponse issue d'une autre requête est rejetée, sauf si une conversion explicite
@@ -2799,8 +2904,8 @@ point choisi.
 
 ### 11.5 Même critère de fermeture
 
-Toutes les baselines doivent produire une `Candidate` évaluée par le même
-`ClosedOn`. Il est interdit de comparer :
+Toutes les baselines doivent produire une `Candidate` et une vue finale évaluées
+par les mêmes `KnownClosedOn` et `ClosedOn`. Il est interdit de comparer :
 
 ```text
 le système complet sur exact match
@@ -2964,6 +3069,7 @@ arrêt de la requête sous suppression du transport ;
 changement de requête sous permutation d'un transport compatible ;
 effet total du gap sur la requête médié par l'usage et le transport ;
 changement de patch sous permutation de réponse ;
+échec de fermeture ou d'applicabilité sous réponse croisée discriminante ;
 persistance du gap sous réparation entièrement neutre ;
 fermeture du gap sous patch correct ;
 effet indirect gap → patch → fermeture ;
@@ -3021,7 +3127,8 @@ Il reconstruit :
 les contextes depuis les seeds et la configuration ;
 les mondes depuis les règles de l'environnement ;
 les réponses depuis monde et action ;
-les gaps depuis monde et candidate ;
+le gap opérationnel de référence depuis AgentClosureState uniquement ;
+la validité sémantique de ce gap depuis monde, vue et candidate ;
 les usages autorisés depuis la vue et le gap ;
 les transports depuis l'usage et la lecture autorisée ;
 les patches depuis les sorties sérialisées ;
@@ -3115,6 +3222,12 @@ inductive CertifiedStepTrace
     (state : ActiveSemanticClosureState) where
   | closed
       (detected : detectGap state.agent = .closed)
+      (actualCompatible : ActualWorldCompatible state)
+      (knownClosed :
+        KnownClosedOn
+          state.agent
+          state.agent.candidate
+          canonicalFiniteDomain)
       (next : ActiveSemanticClosureState)
       (next_eq : next = state)
   | open
@@ -3141,16 +3254,20 @@ inductive CertifiedStepTrace
       (next_eq : next = executeRepair state repair)
 ```
 
-La branche `closed` ne contient aucun emplacement pour un usage, une réponse ou
-un patch sentinelle. `RawTrace` contient l'en-tête de provenance et une liste de
+`canonicalFiniteDomain` est fixé par l'instance et ne peut pas être remplacé par
+une liste fournie dans la trace. La branche `closed` ne contient aucun
+emplacement pour un usage, une réponse ou un patch sentinelle. `RawTrace`
+contient l'en-tête de provenance et une liste de
 `RawStepTrace`. Un `RawStepTrace` peut contenir des valeurs invalides issues du
 modèle ; le décodeur et `ValidTrace` doivent construire
 `CertifiedStepTrace` ou retourner un diagnostic de rejet. Ils ne peuvent pas
 remplacer une valeur invalide par la valeur canonique du vérificateur.
 
 La trace distingue `predictedGap`, `usedGap` et `referenceGap`. Les deux premiers
-sont liés aux sorties du modèle et au graphe causal ; le troisième est recalculé
-depuis le monde par le vérificateur. Les fusionner dans un seul champ `gap`
+sont liés aux sorties du modèle et au graphe causal ; le troisième est un gap
+opérationnel recalculé depuis `AgentClosureState` par le détecteur canonique de
+la tâche. Le vérificateur utilise ensuite le monde séparément pour construire ou
+réfuter sa `SemanticGapEvidence`. Les fusionner dans un seul champ `gap`
 masquerait soit une erreur de détection, soit une substitution oracle.
 
 ### 15.3 Prédicat de validité
@@ -3167,18 +3284,22 @@ qui vérifie :
 projection commune ;
 séparation ;
 évidence sémantique conforme au genre de gap ;
+réalisation de l'évidence opérationnelle exacte dans l'évidence sémantique ;
+preuve de KnownClosedOn sur canonicalFiniteDomain dans chaque branche closed ;
+compatibilité du monde réel dans chaque état certifié ;
 égalité entre gap prédit et gap utilisé hors intervention ;
 provenance de l'usage ;
 provenance du transport ;
 admissibilité de la requête ;
-alignement de l'usage, du transport et de CorrectAt avec la réalisation
-fondationnelle ;
+alignement de l'usage, du transport, de CorrectAt, de KnownCorrectAt et de
+GapClosedBy avec la réalisation fondationnelle ;
 exactitude de la réponse ;
 respect de la ResponseFootprint et du coût déclaré ;
 préservation du monde réel dans CompatibleWorlds après mise à jour ;
 applicabilité du patch ;
 égalité de l'état suivant ;
-fermeture du gap courant ;
+`GapClosedBy` pour le gap courant, avec réduction stricte de la fibre lorsqu'une
+réponse informative est requise ;
 persistance ;
 composition ;
 partition IID/OOD ;
@@ -3500,7 +3621,7 @@ Chaque revendication publique doit être reliée à quatre artefacts.
 | No-go passif | collision à vue identique | paire aux cibles incompatibles | baseline marginale | neutralisation de la requête |
 | No-go visible factorisé | no-go borné pour `VisibleFactoredClosureController` | actions requises incompatibles | baseline factorisée | permutation de pôles visibles égaux |
 | Budgets comparables | `ResourceBudget` | contrôleurs au même budget | courbe de Pareto | variation du budget |
-| Fermeture finie | induction constructive | borne N | succès terminal | réparation entièrement neutre |
+| Fermeture finie | induction constructive vers `KnownClosedOn`, puis corollaire `ClosedOn` | borne N | succès terminal épistémique et réel | réparation entièrement neutre |
 | Orbite ouverte | `constructiveTarskiOrbitTheorem` et induction sur l'itération | indices distincts | horizon extrapolé | recherche de cycle |
 | Certificat fidèle | `ValidTrace` | données réifiées | compilation Lean | falsification des artefacts |
 | Checkpoint lié à la trace | `runModel weights inputs = trace` | agent entier quantifié | rejeu indépendant | mutation d'un poids |
@@ -3683,6 +3804,7 @@ aucun axiome interdit ;
 instance non triviale ;
 réalisation fondationnelle de l'instance IA construite ;
 lois d'alignement prouvées sur les mêmes gaps, usages, transports et réparations ;
+fermeture épistémique KnownClosedOn alignée et dérivée sans oracle ;
 aucun pont conditionnel externe.
 ```
 
@@ -3727,6 +3849,7 @@ transport dérivé de l'usage et non décoratif ;
 requête causalement dépendante du transport ;
 requête utilisée ;
 réponse utilisée ;
+réponse nécessaire à GapClosedBy sur une paire discriminante ;
 patch effectif ;
 next exclusivement produit par le patch.
 ```
@@ -3737,6 +3860,7 @@ next exclusivement produit par le patch.
 plusieurs transitions ;
 persistance ;
 nouveaux gaps ;
+KnownClosedOn conservé sur le préfixe réparé ;
 pas de cycle artificiel ;
 composition cohérente.
 ```
@@ -3823,6 +3947,11 @@ La validation intégrale échoue si l'un des faits suivants est observé :
 le modèle résout la tâche sans requête ;
 le détecteur de gap reçoit directement world ou target ;
 le gap n'a aucune évidence accessible à l'agent ;
+le vérificateur remplace l'évidence produite par l'agent par un témoin
+sémantique indépendant trouvé après coup ;
+le statut closed est accepté sans preuve de KnownClosedOn sur le domaine annoncé ;
+le statut closed est accepté alors que la fibre compatible est vide ou exclut
+le monde réel ;
 un unresolvedFiber ne contient pas deux mondes compatibles aux cibles séparées ;
 un witnessedMismatch est attribué sans réfutation observable ;
 les pôles du gap ne réalisent pas les lectures portées par son évidence ;
@@ -3833,7 +3962,10 @@ Use peut être permuté sans changer le transport ni déclencher un refus typé 
 le transport peut être supprimé sans bloquer la requête ;
 le transport peut être permuté sans changer la requête ni déclencher un refus ;
 la réponse peut être permutée sans changer le patch ;
+la réponse ne modifie que des métadonnées sans effet sur GapClosedBy ;
 la réponse ne réduit aucune fibre de mondes compatibles ;
+une réparation est déclarée fermante parce qu'elle est correcte seulement dans
+le monde réel, sans KnownCorrectAt sur la fibre compatible restante ;
 le patch peut être neutralisé sans conserver le gap ;
 next est appris ou fourni indépendamment du patch ;
 les réparations antérieures sont oubliées ;
@@ -3899,7 +4031,8 @@ La proposition validée sera alors :
 > Il est une donnée sémantique typée qui conserve la séparation, autorise un
 > transport local non identitaire dont l'exécution sélectionne une acquisition
 > d'information. La réponse obtenue permet de construire une réparation
-> intrinsèque dont l'exécution cause la transition vers l'état suivant.
+> intrinsèque dont l'exécution cause la transition vers l'état suivant et rend
+> la candidate correcte sur toute la fibre de mondes encore compatibles.
 > Cette dynamique est constructive, composable, non représentable exactement
 > par l'identité projetée sur son régime d'usage, et non réalisable par le
 > contrôleur visible factorisé défini sous le même budget. Elle est
@@ -3952,7 +4085,7 @@ une définition, une preuve cible, une mesure et une falsification.
 | réalisation fondationnelle | `ActiveClosureFoundationalRealization` | mêmes régime, doctrine, interprétation et transition | concordance des jugements | modèle indépendant juxtaposé |
 | information pertinente | réduction stricte de `CompatibleWorlds` | monde éliminé et monde conservé | réduction de fibre | réponse permutée/neutre |
 | réparation intrinsèque | `IntrinsicRepair` sans monde | effet de correction et provenance | fermeture locale | réparation neutre/externe |
-| conservation | `ClosedOn repairedPrefix` | invariant inductif | oubli cumulatif | retrait ou permutation d'un patch |
+| conservation | `KnownClosedOn repairedPrefix`, puis `ClosedOn` | invariant inductif épistémique et corollaire réel | oubli cumulatif | retrait ou permutation d'un patch |
 | poursuite dynamique | `next = executeRepair` | orbite finie et ouverte | transitions et nouveaux gaps | `next` parallèle ou cycle |
 | impossibilité passive | `PassiveClosurePolicy` | paire à vue identique | plafond passif | oracle passif séparé |
 | impossibilité factorisée | `VisibleFactoredClosureController` | actions incompatibles sous budget | baseline factorisée | enrichissement hors classe |
