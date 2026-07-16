@@ -700,8 +700,8 @@ def validate_trace_record(
                 _fail("agent_object_leak", f"$.{field}", f"forbidden keys at {leaks}")
     before_fiber = _expect_hash_set(record["compatible_fiber_before"], "$.compatible_fiber_before")
     after_fiber = _expect_hash_set(record["compatible_fiber_after"], "$.compatible_fiber_after")
-    if world_commitment not in before_fiber or world_commitment not in after_fiber:
-        _fail("actual_world_missing", "$", "actual world commitment must remain in both fibers")
+    if world_commitment not in before_fiber:
+        _fail("actual_world_missing", "$.compatible_fiber_before", "actual world commitment must be compatible before execution")
     _expect_enum(record["gap_status"], GAP_STATUSES, "$.gap_status")
     status = _expect_enum(record["execution_status"], EXECUTION_STATUSES, "$.execution_status")
     if not isinstance(record["known_closed_prefix"], list):
@@ -714,6 +714,12 @@ def validate_trace_record(
     if record["state_after_hash"] != expected_state_hash:
         _fail("state_hash_mismatch", "$.state_after_hash", f"expected {expected_state_hash}")
     intervention_kind = _validate_intervention(record)
+    if intervention_kind == "natural" and world_commitment not in after_fiber:
+        _fail(
+            "actual_world_missing",
+            "$.compatible_fiber_after",
+            "natural execution must preserve compatibility with the actual world",
+        )
     if intervention_kind != "natural" and record["split"] != "intervention":
         _fail("intervention_split", "$.split", "intervened records belong to the intervention split")
     _validate_validity_flags(record["validity_flags"])

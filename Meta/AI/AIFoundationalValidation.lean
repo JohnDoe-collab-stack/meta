@@ -3,7 +3,7 @@ import Meta.AI.ActiveClosureUseGraphNonReduction
 import Meta.AI.OpenActiveSemanticClosure
 import Meta.AI.OpenClosureFoundationalRealization
 import Meta.AI.VisibleFactoredClosureNoGo
-import Meta.AI.ActiveClosureInterventions
+import Meta.AI.FiniteInterventionMatrix
 import Meta.AI.LeanValidationCompleteness
 
 /-!
@@ -339,6 +339,8 @@ structure AIFoundationalValidation where
   openOrbit : AIOpenOrbitCertificate
   sharedSchema : SameActiveClosureSchema
   finiteNoGo : AIClosureNoGoCertificate
+  finiteInterventions :
+    FiniteInterventionMatrix.CompleteFiniteInterventionCertificate
   certifiedRun : AICertifiedRunCertificate
   finiteIdentityConservative :
     RelaxedSemantics.StrictIdentityConservativity Foundational.closureSignature
@@ -374,6 +376,8 @@ def aiFoundationalValidation : AIFoundationalValidation where
   openOrbit := aiOpenOrbitCertificate
   sharedSchema := sameActiveClosureSchema
   finiteNoGo := aiClosureNoGoCertificate
+  finiteInterventions :=
+    FiniteInterventionMatrix.completeFiniteInterventionCertificate
   certifiedRun := aiCertifiedRunCertificate
   finiteIdentityConservative := Foundational.closureIdentityConservativity
   finiteSyntaxConsistent := Foundational.closureSyntax_consistent

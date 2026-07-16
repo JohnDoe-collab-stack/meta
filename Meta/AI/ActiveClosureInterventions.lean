@@ -218,8 +218,8 @@ theorem intervenedOpenRun_world
 open Finite
 
 def intervenedObservation0 : Observation :=
-  { first := .exact .red
-    second := .unknown
+  { first := .excludes .red
+    second := .exact .green
     third := .unknown }
 
 def observationIntervenedState0 : ClosedState :=
@@ -266,20 +266,23 @@ def finiteCrossedResponseIntervention0 :=
     query0 (finiteSystem.selectedQueryAdmissible transport0)
     alternateResponse0
 
-theorem finiteObservationIntervention_changesDetectedIndex :
+theorem intervenedObservation0_compatible :
+    knowledgeCompatible intervenedObservation0 canonicalWorld := by
+  exact ⟨(by intro equality; cases equality), rfl, True.intro⟩
+
+theorem finiteObservationIntervention_preservesDetectedIndex :
     detectedIndex (finiteSystem.detectGap state0.agent) =
       detectedIndex
-        (finiteSystem.detectGap observationIntervenedState0.agent) -> False := by
-  intro equality
-  cases equality
+        (finiteSystem.detectGap observationIntervenedState0.agent) :=
+  rfl
 
 theorem finiteObservationIntervention_changesSuccessor :
     runNatural finiteSystem state0 = finiteObservationIntervention0 -> False := by
   intro equality
-  have candidateEquality := congrArg
-    (fun state : ClosedState => state.agent.candidate.first)
+  have observationEquality := congrArg
+    (fun state : ClosedState => state.agent.observation.second)
     equality
-  cases candidateEquality
+  cases observationEquality
 
 theorem finiteGapIntervention_changesUseDirection :
     finiteNaturalOpenRun0.use.direction =
@@ -405,7 +408,9 @@ end Meta
 #print axioms Meta.ActiveSemanticClosure.Interventions.runWithQuery
 #print axioms Meta.ActiveSemanticClosure.Interventions.runWithResponse
 #print axioms Meta.ActiveSemanticClosure.Interventions.runWithPatch
-#print axioms Meta.ActiveSemanticClosure.Interventions.finiteObservationIntervention_changesDetectedIndex
+#print axioms Meta.ActiveSemanticClosure.Interventions.intervenedObservation0_compatible
+#print axioms Meta.ActiveSemanticClosure.Interventions.finiteObservationIntervention_preservesDetectedIndex
+#print axioms Meta.ActiveSemanticClosure.Interventions.finiteObservationIntervention_changesSuccessor
 #print axioms Meta.ActiveSemanticClosure.Interventions.finiteGapIntervention_changesSuccessor
 #print axioms Meta.ActiveSemanticClosure.Interventions.finiteTransportIntervention_changesQuery
 #print axioms Meta.ActiveSemanticClosure.Interventions.finiteQueryIntervention_changesResponseKind

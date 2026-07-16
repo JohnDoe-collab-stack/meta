@@ -352,6 +352,14 @@ class TraceSchemaTests(unittest.TestCase):
         with self.assertRaisesRegex(TraceSchemaError, "actual_world_missing"):
             validate_trace_record(record)
 
+    def test_counterfactual_intervention_may_exclude_actual_world(self) -> None:
+        record = structurally_valid_intervention_record("I_response_cross")
+        record["compatible_fiber_after"] = [H2]
+        record["gap_closed_by"] = None
+        record["validity_flags"]["actual_world_compatible"] = False  # type: ignore[index]
+        record["validity_flags"]["gap_closed"] = False  # type: ignore[index]
+        self.assertEqual(validate_trace_record(record), record)
+
     def test_natural_step_must_reduce_fiber_and_change_state(self) -> None:
         record = natural_advanced_record()
         record["compatible_fiber_after"] = copy.deepcopy(record["compatible_fiber_before"])

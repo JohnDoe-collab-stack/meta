@@ -877,7 +877,8 @@ I_use_permute : substituer une autre direction licite ;
 I_transport_suppress : retirer le transport ;
 I_transport_permute : substituer un transport licite différent ;
 I_query_neutral : imposer noInformation ;
-I_query_alternate : choisir un autre index admissible ;
+I_query_alternate : choisir une autre requête informative admissible
+  sur le même index dépendant ;
 I_response_cross : croiser deux réponses de même type ;
 I_response_neutral : utiliser la réponse non informative ;
 I_repair_neutral : imposer keep ;

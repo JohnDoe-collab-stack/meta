@@ -290,10 +290,10 @@ structure TypedInterventionCertificate where
   transportIntervention : IntervenedOpenRun finiteSystem state0 gap0
   queryIntervention : IntervenedOpenRun finiteSystem state0 gap0
   responseIntervention : IntervenedOpenRun finiteSystem state0 gap0
-  observationChangesDetectedIndex :
+  observationPreservesDetectedIndex :
     detectedIndex (finiteSystem.detectGap state0.agent) =
       detectedIndex
-        (finiteSystem.detectGap observationIntervenedState0.agent) -> False
+        (finiteSystem.detectGap observationIntervenedState0.agent)
   observationChangesSuccessor :
     natural.after = observationIntervention -> False
   gapChangesUseDirection :
@@ -363,8 +363,8 @@ def typedInterventionCertificate : TypedInterventionCertificate where
   transportIntervention := finiteTransportIntervention0
   queryIntervention := finiteConfirmQueryIntervention0
   responseIntervention := finiteCrossedResponseIntervention0
-  observationChangesDetectedIndex :=
-    finiteObservationIntervention_changesDetectedIndex
+  observationPreservesDetectedIndex :=
+    finiteObservationIntervention_preservesDetectedIndex
   observationChangesSuccessor := by
     intro equality
     exact finiteObservationIntervention_changesSuccessor

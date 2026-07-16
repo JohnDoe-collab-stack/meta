@@ -75,13 +75,42 @@ Les smoke tests écrivent dans `/tmp` ou dans des sorties explicitement nommées
 
 ## Statut
 
-Racine empirique initialisée et protocole scientifique écrit. Le schéma JSONL
-canonique, son parseur strict, son vérificateur structurel exécutable et leurs
-tests mécaniques existent. Ce vérificateur réutilise le parseur normatif : il
-n'est pas présenté comme une seconde implémentation indépendante. Les futurs
-vérificateurs sémantiques devront recalculer les faits depuis leurs entrées
-autoritatives sans faire confiance aux `validity_flags`. Le modèle Lean fini de
-référence existe dans
-`Meta/AI/FiniteActiveSemanticClosure.lean`, mais aucun environnement Python
-v23, run, résultat appris ou certificat sémantique de trace n'existe encore. Ce
-README et le protocole ne revendiquent donc aucun résultat empirique.
+Le niveau A exécutable est implémenté :
+
+```text
+schéma JSONL canonique et parseur strict ;
+environnement Python exact sur les 27 mondes ;
+vérificateur sémantique indépendant des fonctions causales du producteur ;
+108 états naturels vérifiés, stases terminales comprises ;
+matrice des 18 interventions déclarées, avec 8 avancées et 10 refus typés ;
+vérificateur indépendant des interventions et de leur appariement naturel ;
+snapshot Lean/Python de 108 états naturels et des 18 interventions, avec chaîne
+causale complète pour chaque branche avancée et stade exact pour chaque refus ;
+codage Lean constructif sans `Classical`, `propext` ni `Quot.sound` ;
+no-go passif exact sur 64 candidates ;
+no-go visible factorisé sur 30 actions et 900 contrôleurs ;
+optimum randomisé rationnel exact ;
+arbre adaptatif actif à 27 feuilles et capacité totale de 5 bits ;
+tests adversariaux des traces et certificats.
+```
+
+Ces calculs sont pour l'instant des validations de développement. Ils ne sont
+pas encore des résultats scientifiques citables : aucune exécution n'a été
+gelée sous un nom `timestamp+sha256`, aucun `protocol.lock.json` final n'a été
+émis et aucun bundle de résultats de référence n'est publié.
+
+La concordance de développement couvre exhaustivement la dynamique naturelle
+et les dix-huit interventions du protocole. Lean classe chaque intervention
+dans `Meta/AI/FiniteInterventionMatrix.lean`, avec certificat interne de la
+raison de chaque refus. Pour les huit interventions exécutables, le snapshot
+compare aussi l'état initial, la fibre, le gap, l'usage, le transport, la
+requête, la réponse, le patch, la mise à jour d'observation, l'historique et
+l'état final. Python matérialise la trace complète, la vérifie indépendamment
+et le comparateur échoue dès qu'un token du snapshot diffère.
+G2 scientifique exige encore l'exécution figée et hashée prescrite par G0.
+
+Restent ouverts : l'agent quantifié certifiable et sa réification Lean, les deux
+domaines appris, le modèle et les baselines appariées, les certificats de
+causalité et de dynamique, les runs multi-seeds, les OOD scellés, le gel G0,
+les réplications et l'audit final G8. Aucun résultat appris v23 n'est donc
+revendiqué à ce stade.
