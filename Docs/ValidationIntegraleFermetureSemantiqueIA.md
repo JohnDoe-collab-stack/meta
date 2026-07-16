@@ -24,9 +24,10 @@ La thèse à valider est :
 
 > Un système peut conserver l'identité stricte pour l'individuation, détecter
 > une non-coïncidence sémantique locale entre deux pôles coordonnés, transformer
-> ce gap en droit d'usage non identitaire, en dériver une requête et une
-> réparation intrinsèques, puis produire son état suivant sans contracter les
-> pôles ni recevoir sa transition d'un ordonnanceur externe.
+> ce gap en droit d'usage non identitaire, exécuter le transport autorisé, en
+> dériver une requête et une réparation intrinsèques, puis produire son état
+> suivant sans contracter les pôles ni recevoir sa transition d'un ordonnanceur
+> externe.
 
 La chaîne complète est :
 
@@ -85,8 +86,20 @@ Meta/Semantics/DynamicFoundationalStability.lean
   EffectiveRepairAt
   RepairDrivenInvariant
 
+Meta/Semantics/ContextualRelaxedRegime.lean
+  ContextualRelaxedRegime
+  LawfulContextualRelaxedRegime
+
+Meta/Semantics/AdmissiblePredicateDoctrine.lean
+  AdmissiblePredicateDoctrine
+  LawfulAdmissiblePredicateDoctrine
+
+Meta/Semantics/Interpretation.lean
+  RelaxedInterpretation
+
 Meta/Semantics/FoundationalStability.lean
   generalRelaxedFoundationalSemantics
+  comme témoin fermé de référence, pas comme certificat de l'instance IA
 
 Meta/Tarski/ConstructivePatchOrbit.lean
   constructiveTarskiOrbitTheorem.
@@ -102,7 +115,10 @@ Les éléments qui ne sont pas encore fermés ensemble sont :
 
 ```text
 une frontière typée entre monde sémantique et vue de l'agent ;
-une requête calculée depuis l'usage courant ;
+une réalisation fondationnelle intrinsèque des états, usages, transports,
+réparations et jugements de fermeture de l'agent ;
+un transport exécuté depuis l'usage courant puis une requête calculée depuis ce
+transport ;
 une réponse environnementale calculée après cette requête ;
 un patch calculé depuis la réponse sans accès direct au monde ;
 un théorème d'effet causal observable ;
@@ -139,6 +155,7 @@ Il existe une instance non triviale et entièrement calculable où :
 ```text
 gapₙ
 → usageₙ
+→ transportₙ
 → requêteₙ
 → réponseₙ
 → réparationₙ
@@ -152,7 +169,8 @@ les gaps successifs sont séparés.
 
 Un système appris réalise cette architecture sur des observations non
 symboliques. Son succès disparaît ou se transforme de la manière prédite quand
-on intervient sur le gap, l'usage, la requête, la réponse ou la réparation.
+on intervient sur le gap, l'usage, le transport, la requête, la réponse ou la
+réparation.
 
 #### Résultats informationnels et comparatifs
 
@@ -242,8 +260,9 @@ séparation
 + règle d'admissibilité du contexte.
 ```
 
-La requête doit être calculée depuis ce droit. Une tête de requête possédant un
-chemin direct depuis le monde, la cible ou une action oracle invalide la chaîne.
+Ce droit doit produire un transport preuve-pertinent, puis la requête doit être
+calculée depuis ce transport. Une tête de requête possédant un chemin direct
+depuis le monde, la cible, le gap brut ou une action oracle invalide la chaîne.
 
 #### Obtenir une information pertinente
 
@@ -271,7 +290,8 @@ pertinente au sens de la théorie.
 Une réparation est intrinsèque si :
 
 ```text
-elle est calculée par le système depuis gap, usage et réponse ;
+elle est calculée par le système depuis gap, usage, transport, requête et
+réponse ;
 elle n'accède pas à SemanticWorld ;
 elle est un programme syntaxique rejouable ;
 son exécution est l'unique définition de l'état suivant ;
@@ -357,6 +377,11 @@ structure VisibleFactoredClosureController where
         patchFromVisibleResponse (visibleState state) response
 ```
 
+Ici `FullState` désigne l'état complet accessible à l'agent, incluant les
+témoins opérationnels et leur provenance, jamais `SemanticWorld` ni la cible
+cachée. `VisibleState` en est la projection dont la classe factorisée impose
+l'usage exclusif.
+
 Le no-go attendu est :
 
 ```text
@@ -366,6 +391,14 @@ deux états exigent des requêtes ou patches incompatibles
 →
 aucun VisibleFactoredClosureController ne ferme les deux.
 ```
+
+Les deux états peuvent différer dans leur gap preuve-pertinent ou leur état
+interne complet, mais pas dans `visibleState`. Le système actif et le contrôleur
+factorisé reçoivent le même `FullState` comme donnée de départ ; la restriction
+du second est l'équation de factorisation, pas la suppression matérielle d'une
+entrée. Une comparaison empirique qui transmet seulement `VisibleState` à la
+baseline tout en donnant `FullState` au système actif mesure une asymétrie
+d'information et ne certifie pas ce no-go.
 
 Ce théorème de politique factorisée est distinct de la stricte relaxation de
 `HasUse`. Les deux doivent être présents dans la validation finale.
@@ -380,6 +413,7 @@ R = (
   paramètres entraînables,
   bits d'état persistant,
   cardinalité ou dimension du médiateur,
+  bits des gaps, usages et transports sérialisés,
   nombre de requêtes,
   bits reçus par réponse,
   FLOPs d'inférence,
@@ -485,7 +519,8 @@ La nouvelle expérience doit séparer :
 ```text
 un régime supervisé de contrôle ;
 un régime faiblement supervisé ;
-un régime où requête et réparation sont apprises depuis la réussite finale.
+un régime où gap, usage, transport, requête et réparation sont appris depuis la
+réussite finale.
 ```
 
 ### 2.5 Paramètre de rendu et temps dynamique
@@ -494,7 +529,7 @@ Le paramètre `t` du rendu actuel modifie une géométrie statique. Il ne
 constitue pas une orbite d'états :
 
 ```text
-stateₙ → gapₙ → repairₙ → stateₙ₊₁.
+stateₙ → gapₙ → useₙ → transportₙ → queryₙ → responseₙ → repairₙ → stateₙ₊₁.
 ```
 
 La validation dynamique doit enregistrer des transitions réellement produites
@@ -611,6 +646,8 @@ Visible := Unit ;
 project := fonction constante ;
 Gap := Unit ;
 Use := Unit ;
+GapAuthorizedUse := Query par alias ou renommage ;
+GapAuthorizedTransport := Use ou Query par alias ;
 Repair := Unit ;
 Witness := Unit ;
 OutRel := Use par définition ;
@@ -630,6 +667,10 @@ une projection non constante ;
 au moins une fibre non triviale ;
 des gaps preuve-pertinents ;
 des usages orientés ;
+au moins un gap admettant deux usages licites distinguables ;
+des transports preuve-pertinents distincts des usages et des requêtes ;
+au moins un usage admettant deux lectures transportées distinguables ;
+au moins un transport autorisant deux requêtes licites distinguables ;
 des réponses dépendant réellement de l'action ;
 des réparations modifiant réellement le candidat ;
 des lectures de sortie distinctes des usages ;
@@ -643,6 +684,7 @@ Les familles introduites plus loin :
 ```text
 GapEvidence ;
 UseEvidence ;
+TransportEvidence ;
 RepairDerivedFrom ;
 RepairProvenance ;
 QueryAdmissible
@@ -652,6 +694,11 @@ ne peuvent pas être `Unit` sous un autre nom. L'instance doit exhiber deux
 gaps dont les évidences sont distinguables, deux usages orientés distinguables,
 et deux réponses induisant des patches distinguables. Les fonctions `query` et
 `buildRepair` doivent être non constantes sur ces témoins.
+
+`GapAuthorizedUse`, `GapAuthorizedTransport` et `Query` sont trois types
+distincts. Le premier autorise, le deuxième réalise une relation de sortie, le
+troisième agit sur l'environnement. Une bijection éventuelle dans une petite
+instance ne dispense pas de ces sémantiques et de leurs lois séparées.
 
 ### 3.3 Intrinsécité causale
 
@@ -666,7 +713,8 @@ si statusₙ = closed :
 
 si statusₙ = open gapₙ :
   useₙ       := authorize(gapₙ)
-  queryₙ     := selectQuery(gapₙ, useₙ)
+  transportₙ := executeTransport(gapₙ, useₙ)
+  queryₙ     := selectQuery(transportₙ)
   responseₙ  := environment(stateₙ.world, queryₙ)
   repairₙ    := buildRepair(
                   agentView(stateₙ),
@@ -730,6 +778,7 @@ Les fonctions suivantes ne peuvent prendre ni `SemanticWorld`, ni
 ```text
 detectGap ;
 authorize ;
+executeTransport ;
 selectQuery ;
 buildRepair ;
 executeCandidatePatch.
@@ -795,7 +844,8 @@ agentView : ActiveSemanticClosureState → AgentClosureState
 
 oublie définitionnellement `world`. `candidate` est syntaxique et modifiable.
 `history` n'est pas une source de vérité cachée : il conserve uniquement les
-actions, réponses et réparations déjà exécutées.
+gaps détectés, usages autorisés, transports, actions, réponses et réparations
+déjà exécutés, avec leur provenance accessible à l'agent.
 
 ### 4.2 Gap opérationnel et témoin sémantique
 
@@ -806,9 +856,13 @@ L'agent produit :
 structure OperationalGap
     (view : AgentClosureState) where
   index : VisibleIndex
-  proposedQueryClass : QueryClass
   observableEvidence : GapEvidence view index
 ```
+
+Le gap ne contient ni action, ni classe de requête, ni réponse attendue. Ces
+données seraient un canal permettant de renommer une politique oracle en
+« détection ». Le choix d'une classe de requête appartient exclusivement à
+`GapAuthorizedUse` puis à `query`.
 
 Le système fermé et le vérificateur établissent ensuite :
 
@@ -858,7 +912,6 @@ structure GapAuthorizedUse
     (gap : OperationalGap view) where
   direction : UseDirection
   evidence : UseEvidence view gap direction
-  queryAdmissible : QueryAdmissible view gap.index direction
 ```
 
 Le théorème sémantique correspondant consomme le témoin de validité du gap et
@@ -871,31 +924,87 @@ coordination :=
     semanticGap.syntactic_projects.symm.
 ```
 
+Il doit ensuite prouver que l'usage opérationnel est l'interprétation de cette
+séparation et de cette coordination dans le même régime contextuel :
+
+```text
+authorizedUse_semanticAlignment :
+  interpretAuthorizedUse operationalUse
+  =
+  contextualRegime.useOfNoncontractive
+    separation
+    coordination.
+```
+
+Une preuve indépendante affirmant seulement qu'un `Use` existe ne suffit pas.
+`UseEvidence` doit être calculable depuis `view` et `gap`, tandis que la loi
+d'alignement est démontrée par le système fermé. Elle ne peut contenir le monde,
+la réponse future ou l'identifiant de la requête correcte.
+
 `UseDirection` doit contenir au moins une direction non inversible. Un théorème
 doit réfuter l'usage inverse et déclencher le critère générique de
 non-représentabilité projective exacte.
 
-### 4.4 Requête et réponse
+L'exécution du droit d'usage produit un transport explicite :
 
-La requête est calculée depuis l'usage :
+```lean
+structure GapAuthorizedTransport
+    (view : AgentClosureState)
+    (gap : OperationalGap view)
+    (use : GapAuthorizedUse view gap) where
+  reading : AuthorizedReading view gap use
+  outputRelation : TransportOutputRelation view gap use reading
+  evidence : TransportEvidence view gap use reading outputRelation
+```
+
+La fonction :
+
+```text
+executeTransport :
+  (view : AgentClosureState) →
+  (gap : OperationalGap view) →
+  (use : GapAuthorizedUse view gap) →
+  GapAuthorizedTransport view gap use
+```
+
+est l'instance opérationnelle de `CompositionalTransport.transport`. Le théorème
+`transportAlignment` de la réalisation fondationnelle identifie son
+`outputRelation` à la même `OutRel`. `GapAuthorizedTransport` n'est ni un alias de
+`GapAuthorizedUse`, ni une requête déjà choisie.
+
+### 4.4 Transport, requête et réponse
+
+La requête est calculée depuis l'usage et son transport exécuté :
 
 ```text
 Query : VisibleIndex → Type
 
 query :
-  GapAuthorizedUse view gap →
+  {use : GapAuthorizedUse view gap} →
+  GapAuthorizedTransport view gap use →
   Query gap.index
+
+selectedQuery_admissible :
+  {use : GapAuthorizedUse view gap} →
+  (transport : GapAuthorizedTransport view gap use) →
+  QueryAdmissible view gap use transport (query transport)
 ```
+
+`view`, `gap` et `use` indexent le type dépendant mais ne sont pas des entrées
+opératoires parallèles de la politique de requête. Dans l'implémentation
+tensorielle causale stricte, seul le transport sérialisé est transmis à la tête
+`queryPolicy`. Toute information nécessaire doit donc avoir été produite par
+`executeTransport` et auditée comme telle.
 
 La réponse est calculée par l'environnement fermé :
 
 ```text
-Response : VisibleIndex → Type
+Response : {index : VisibleIndex} → Query index → Type
 
 respond :
   (world : SemanticWorld) →
   (query : Query index) →
-  Response index.
+  Response query.
 ```
 
 Elle ne doit pas être stockée dans le gap avant l'exécution de la requête.
@@ -918,10 +1027,14 @@ structure IntrinsicRepair
     (view : AgentClosureState)
     (gap : OperationalGap view)
     (use : GapAuthorizedUse view gap)
-    (response : Response gap.index) where
+    (transport : GapAuthorizedTransport view gap use)
+    (query : Query gap.index)
+    (response : Response query) where
   patchedCandidate : Candidate
   responseUsed : RepairDerivedFrom response patchedCandidate
-  provenance : RepairProvenance view gap use response patchedCandidate
+  provenance :
+    RepairProvenance
+      view gap use transport query response patchedCandidate
 ```
 
 La fonction :
@@ -931,8 +1044,10 @@ buildRepair :
   (view : AgentClosureState) →
   (gap : OperationalGap view) →
   (use : GapAuthorizedUse view gap) →
-  (response : Response gap.index) →
-  IntrinsicRepair view gap use response
+  (transport : GapAuthorizedTransport view gap use) →
+  (query : Query gap.index) →
+  (response : Response query) →
+  IntrinsicRepair view gap use transport query response
 ```
 
 doit utiliser la réponse. Une réparation indépendante de la réponse échoue au
@@ -960,10 +1075,12 @@ nextState state =
       state
   | open gap =>
       let use := authorize state.agent gap
-      let request := query use
+      let transport := executeTransport state.agent gap use
+      let request := query transport
       let response := respond state.world request
       let repair :=
-        buildRepair state.agent gap use response
+        buildRepair
+          state.agent gap use transport request response
       executeRepair state repair
 ```
 
@@ -1030,20 +1147,31 @@ ne suffit pas.
 Le système doit publier ses équations structurelles :
 
 ```text
-Oₙ = observe(W, Aₙ)
+O₀ = observe(W)
+Oₙ = Aₙ.observation
 Gₙ = detectGap(Aₙ, Oₙ)
 Uₙ = authorize(Aₙ, Gₙ)
-Qₙ = selectQuery(Aₙ, Gₙ, Uₙ)
+Tₙ = executeTransport(Aₙ, Gₙ, Uₙ)
+Qₙ = selectQuery(Tₙ)
 Rₙ = respond(W, Qₙ)
-Pₙ = buildRepair(Aₙ, Gₙ, Uₙ, Rₙ)
+Pₙ = buildRepair(Aₙ, Gₙ, Uₙ, Tₙ, Qₙ, Rₙ)
 Aₙ₊₁ = executeRepair(Aₙ, Pₙ).
 ```
+
+`Oₙ` est la projection visible opérationnelle enregistrée dans
+`AgentClosureState.observation`. L'observation initiale vient du monde ; ensuite,
+toute nouvelle information environnementale entre uniquement par `Rₙ` et peut
+être incorporée dans l'observation ou l'historique par `IntrinsicRepair`. Il
+n'existe pas de rafraîchissement caché `observe(W, Aₙ₊₁)` après le patch. Si un
+domaine exige une observation brute et un encodage perceptuel distincts, les
+deux fonctions agent-side sont publiées et chacune reçoit son test de
+sensibilité.
 
 où `W` est le monde et `Aₙ` l'état de l'agent. Les seules arêtes directes
 depuis `W` sont :
 
 ```text
-W → Oₙ ;
+W → O₀ ;
 W → Rₙ ;
 W → validation externe.
 ```
@@ -1053,11 +1181,14 @@ Les chemins suivants sont interdits dans le modèle validé :
 ```text
 W → Gₙ ;
 W → Uₙ ;
+W → Tₙ ;
 W → Pₙ ;
 target → Qₙ ;
 target → Pₙ ;
 Aₙ → Aₙ₊₁ en contournant Pₙ ;
-Oₙ → Qₙ en contournant Gₙ et Uₙ dans la variante causale stricte.
+Gₙ → Qₙ en contournant Uₙ et Tₙ ;
+Uₙ → Qₙ en contournant Tₙ ;
+Oₙ → Qₙ en contournant Gₙ, Uₙ et Tₙ dans la variante causale stricte.
 ```
 
 La dépendance syntaxique dans le graphe de calcul ne suffit pas. Pour chaque
@@ -1077,11 +1208,23 @@ Définir au minimum :
 
 ```text
 runNatural state ;
+runWithObservation state intervenedObservation ;
 runWithGap state intervenedGap ;
+runWithUse state gap intervenedUse ;
+runWithTransport state gap use intervenedTransport ;
 runWithQuery state intervenedQuery ;
 runWithResponse state intervenedResponse ;
 runWithPatch state intervenedPatch.
 ```
+
+`runWithUse` accepte seulement un usage bien typé pour la même vue et le même
+gap. Une valeur issue d'un autre gap doit être transportée par une compatibilité
+explicite ou rejetée avant l'appel à l'environnement. Cette contrainte empêche
+une intervention causale de fabriquer une trace mal typée.
+
+`runWithTransport` impose de même un transport indexé par le gap et l'usage
+courants. L'usage, le monde, l'observation et la candidate restent fixes ; la
+requête, la réponse, le patch et l'état suivant sont recalculés.
 
 Chaque variante partage le monde, la candidate et le bruit contrôlé pertinents.
 Cette sémantique évite d'appeler « causal » un simple mélange de sorties issues
@@ -1142,6 +1285,7 @@ Meta/AI/
   FiniteActiveSemanticClosure.lean
   OpenActiveSemanticClosure.lean
   VisibleFactoredClosureNoGo.lean
+  ActiveClosureFoundationalRealization.lean
   CertifiedInference.lean
   EmpiricalTraceSchema.lean
   EmpiricalTraceVerifier.lean
@@ -1181,7 +1325,16 @@ Meta.AI.VisibleFactoredClosureNoGo     |
                         v
               Meta.AI.EmpiricalTraceVerifier
 
-Meta.Semantics.FoundationalStability
+Meta.Semantics.ContextualRelaxedRegime
+Meta.Semantics.AdmissiblePredicateDoctrine
+Meta.Semantics.Interpretation
+Meta.Semantics.Soundness
+Meta.Semantics.IdentityConservativity
+Meta.Semantics.UseGraphNonReduction
+Meta.Semantics.DynamicFoundationalStability
+        |
+        v
+Meta.AI.ActiveClosureFoundationalRealization
         |
         +------------------------------+
                                        v
@@ -1206,21 +1359,31 @@ GapRepairAlgebra
 GapDrivenDynamicSystem.
 ```
 
-Le certificat final `AIFoundationalValidation.lean` combine ensuite cette
-spécialisation avec `generalRelaxedFoundationalSemantics`. Cette combinaison est
-en aval et ne modifie pas la sémantique générale déjà fermée.
+Le certificat final ne peut pas combiner cette spécialisation avec
+`generalRelaxedFoundationalSemantics` par simple produit de structures. Cette
+constante est l'habitant concret du modèle fini déjà présent dans
+`FoundationalStability.lean` ; elle ne démontre rien sur les états, usages ou
+réparations de l'agent. Elle reste un témoin de référence et un test de
+non-régression.
+
+L'instance IA doit construire sa propre réalisation des interfaces génériques
+de `Meta/Semantics`, puis prouver que les objets opérationnels de l'agent sont
+exactement ceux de cette réalisation.
 
 Déclarations principales attendues :
 
 ```text
 ActiveSemanticClosureState
 AgentClosureState
+ActiveClosureSchema
 OperationalGap
 OperationalGapStatus
 TypedSemanticGap
 GapAuthorizedUse
+GapAuthorizedTransport
 IntrinsicRepair
 ActiveSemanticClosureSystem
+SameActiveClosureSchema
 CorrectAt
 ClosedOn
 VisibleFactoredClosureController
@@ -1229,13 +1392,166 @@ activeSemanticClosure_nonProjective
 activeSemanticClosure_transportCoherent
 ```
 
-### 6.2 Théorèmes de causalité structurelle
+### 6.2 Raccord fondationnel intrinsèque
+
+`ActiveClosureFoundationalRealization.lean` doit construire, pour le système IA
+considéré :
+
+```text
+une ContextCategory et ses lois ;
+un IndexedTermLanguage et ses lois de réindexation ;
+un ContextualRelaxedRegime et ses lois ;
+une AdmissiblePredicateDoctrine et ses lois ;
+une RelaxedInterpretation de la syntaxe indépendante ;
+un GapRepairAlgebra dont le successeur est la transition IA ;
+un prédicat admissible représentant CorrectAt ;
+un prédicat admissible représentant ClosedOn ;
+une instance des théorèmes génériques de soundness et de conservativité.
+```
+
+La structure cible est conceptuellement :
+
+```lean
+structure ActiveClosureFoundationalRealization
+    (system : ActiveSemanticClosureSystem) where
+  contextualModel : AIContextualModel system
+  regimeLaws :
+    LawfulContextualRelaxedRegime contextualModel.regime
+  doctrineLaws :
+    LawfulAdmissiblePredicateDoctrine contextualModel.doctrine
+  interpretation :
+    AIClosureInterpretation system contextualModel
+  repairAlgebra :
+    AIClosureGapRepairAlgebra system contextualModel
+  gapAlignment :
+    OperationalGapAlignment system contextualModel
+  useAlignment :
+    AuthorizedUseAlignment system contextualModel
+  transportAlignment :
+    OperationalTransportAlignment system contextualModel
+  correctnessAlignment :
+    ClosurePredicateAlignment system contextualModel
+  transitionAlignment :
+    RepairTransitionAlignment system contextualModel repairAlgebra
+```
+
+Les types auxiliaires de cette esquisse doivent être des structures
+preuve-pertinentes définies dans le même module, et non des alias vers `Unit` ou
+des propositions sans données. Leurs lois minimales sont :
+
+```text
+gapAlignment :
+  les pôles, l'indice, la séparation et la coordination du gap opérationnel
+  sont ceux interprétés dans contextualModel.regime ;
+
+useAlignment :
+  l'usage produit par authorize est exactement l'usage interprété depuis
+  la séparation et la coordination de ce gap ;
+
+transportAlignment :
+  le transport exécuté par l'agent est le transport du même Use dans le même
+  ContextualRelaxedRegime, avec la même OutRel ;
+
+correctnessAlignment :
+  CorrectAt et ClosedOn sont équivalents aux jugements Holds des prédicats
+  admissibles correspondants ;
+
+transitionAlignment :
+  system.nextState est égal au next dérivé de repairAlgebra, et la réparation
+  portée par l'algèbre est exactement IntrinsicRepair exécutée par l'agent.
+```
+
+Pour empêcher qu'un type d'alignement masque une preuve vide, la réalisation
+doit exposer au moins les fonctions calculables suivantes :
+
+```text
+contextOfState : état fermé → contexte ;
+semanticTermOfGap : gap validé → terme au contexte de l'état ;
+syntacticTermOfGap : gap validé → terme au même contexte ;
+projectionReading : lecture des deux termes vers leur VisibleIndex commun ;
+regimeUseOfAuthorization : GapAuthorizedUse → ContextualRelaxedRegime.Use ;
+regimeTransportOfExecution : transport opérationnel → OutRel correspondant ;
+predicateOfIndex : VisibleIndex → AdmissiblePredicateDoctrine.Pred ;
+repairOfIntrinsic : IntrinsicRepair → réparation portée par GapRepairAlgebra.
+```
+
+Les théorèmes d'alignement parlent des sorties de ces fonctions. Aucun champ ne
+peut prendre directement comme entrée une preuve déjà nommée
+`correctAlignment` ou `transitionAlignment` et la recopier comme résultat.
+
+Le paquet final doit avoir la forme :
+
+```lean
+structure AIFoundationalValidation where
+  finiteSystem : ActiveSemanticClosureSystem
+  finiteRealization :
+    ActiveClosureFoundationalRealization finiteSystem
+  finiteClosure :
+    AIFiniteClosureCertificate finiteSystem finiteRealization
+  openSystem : ActiveSemanticClosureSystem
+  openRealization :
+    ActiveClosureFoundationalRealization openSystem
+  openOrbit :
+    AIOpenOrbitCertificate openSystem openRealization
+  sharedSchema :
+    SameActiveClosureSchema finiteSystem openSystem
+  finiteNoGo :
+    AIClosureNoGoCertificate finiteSystem finiteRealization
+  certifiedRun :
+    AICertifiedRunCertificate finiteSystem finiteRealization
+```
+
+La fermeture finie et l'orbite ouverte sont donc deux instances du même schéma,
+pas deux propriétés potentiellement incompatibles imposées à un unique système.
+`SameActiveClosureSchema` conserve les types et lois abstraits du gap, de
+l'usage, du transport et de la réparation, sans exiger que les mondes ou les
+domaines d'indices soient identiques. Il contient un `ActiveClosureSchema`
+commun et deux réalisations de ses opérations `detectGap`, `authorize`,
+`executeTransport`, `query`, `buildRepair` et `executeRepair` dans les domaines
+fini et ouvert. Il n'exige
+pas un morphisme point par point entre deux mondes différents. Une proposition
+constante ou l'égalité de deux chaînes de noms ne constitue pas un schéma
+partagé.
+
+Il est interdit d'y placer côte à côte :
+
+```text
+un paquet composé d'un GeneralRelaxedFoundationalSemantics indépendant ;
+d'un ActiveSemanticClosureSystem indépendant ;
+sans égalité reliant leurs usages, transports, prédicats et transitions.
+```
+
+Une telle structure prouverait seulement que deux modèles existent. Elle ne
+prouverait pas que la fermeture active réalise la sémantique fondationnelle.
+
+Depuis la réalisation, et non comme hypothèses ajoutées au certificat final,
+il faut dériver :
+
+```text
+soundness des jugements de séparation, coordination, usage et prédicat ;
+conservativité du fragment d'identité stricte ;
+consistance du calcul de transport sur la syntaxe IA ;
+non-réduction de la sémantique au seul graphe des usages ;
+stabilité des prédicats de fermeture sous réparation et réindexation.
+```
+
+Si l'une de ces conclusions exige un champ du même nom dans
+`AIFoundationalValidation`, le raccord est conditionnel et échoue à l'exigence
+fondationnelle.
+
+### 6.3 Théorèmes de causalité structurelle
 
 Prouver :
 
 ```text
 gap différent sous hypothèses discriminantes
-→ requête différente ;
+→ usage différent ;
+
+usage différent sous un même gap et hypothèses de transport discriminantes
+→ transport différent ou refus typé de l'usage ;
+
+transport opérationnellement distinct sous un même usage compatible
+→ requête différente ou refus typé du transport ;
 
 réponse différente sous requête informative
 → réparation différente ;
@@ -1266,6 +1582,7 @@ Ajouter également les égalités d'équations structurelles :
 ```text
 detectedGap_eq_detectGap ;
 authorizedUse_eq_authorize ;
+executedTransport_eq_executeTransport ;
 selectedQuery_eq_selectQuery ;
 environmentResponse_eq_respond ;
 builtRepair_eq_buildRepair ;
@@ -1275,7 +1592,7 @@ nextAgent_eq_executeRepair.
 Elles établissent la provenance ; les théorèmes de sensibilité établissent
 l'effectivité. Les deux niveaux sont nécessaires.
 
-### 6.3 Lois de transport
+### 6.4 Lois de transport
 
 Prouver dans l'instance :
 
@@ -1292,7 +1609,7 @@ absence de transport vers une lecture non autorisée.
 `OutRel` doit exprimer une relation sémantique sur les sorties et ne doit pas
 être définitionnellement identique à `Use`.
 
-### 6.4 Non-réduction
+### 6.5 Non-réduction
 
 L'instance doit satisfaire simultanément :
 
@@ -1305,7 +1622,7 @@ conservativité du fragment identitaire ;
 consistance du calcul de transport.
 ```
 
-### 6.5 No-go passif et no-go de factorisation visible
+### 6.6 No-go passif et no-go de factorisation visible
 
 Définir séparément :
 
@@ -1345,6 +1662,14 @@ budget d'une requête ;
 réponse neutre ou non informative pour la mauvaise requête.
 ```
 
+Cette paire n'est pas obligatoirement celle du no-go passif. Pour le no-go
+passif, `agentView₀ = agentView₁` interdit toute décision initiale différente et
+l'avantage actif doit venir d'une requête commune dont la réponse distingue les
+mondes. Pour le no-go factorisé, les `FullState` peuvent différer par une donnée
+preuve-pertinente accessible aux deux architectures, tandis que leurs
+`visibleState` coïncident ; seul le contrôleur soumis à `queryAt_eq` doit oublier
+cette différence.
+
 Prouver alors qu'un contrôleur dont requête et patch factorisent exactement par
 ce visible ne ferme pas les deux états. Ce théorème ne doit pas être obtenu par
 simple réutilisation de `not_exactProjective_of_asymmetric_use` : il porte sur
@@ -1356,7 +1681,7 @@ contrôleur choisit la même action sur les deux visibles égaux. Sur la paire
 équiprobable et sous le budget d'une requête, calculer également le meilleur
 taux moyen atteignable par la classe factorisée.
 
-### 6.6 Correction de la détection et de la fermeture
+### 6.7 Correction de la détection et de la fermeture
 
 Prouver dans l'instance finie :
 
@@ -1377,7 +1702,7 @@ Les théorèmes de l'orbite ouverte doivent réutiliser
 nouvelle instance IA peut avoir sa propre preuve, mais ne doit pas renommer la
 preuve Tarski comme si elle certifiait les poids appris.
 
-### 6.7 Audit
+### 6.8 Audit
 
 Chaque fichier possède exactement un bloc final :
 
@@ -1466,6 +1791,12 @@ constitue pas une détection par l'agent. Lorsque l'observation ne permet que de
 détecter une sous-détermination, le gap opérationnel doit l'énoncer ainsi ; il
 ne doit pas prétendre connaître la valeur sémantique encore cachée.
 
+Le tenseur ou objet sérialisé du gap ne contient pas la classe de requête cible,
+l'identifiant de l'action optimale ou une copie chiffrée de la réponse. Un audit
+de schéma et de provenance doit détecter tout champ déterministe de ce type. La
+prédictibilité statistique d'une requête depuis une évidence légitime n'est pas
+une fuite ; son stockage direct ou son encodage par identifiant en est une.
+
 ### 7.4 Requête active
 
 L'espace des requêtes doit contenir :
@@ -1478,15 +1809,23 @@ un coût explicite ;
 ```
 
 La meilleure action ne doit pas être identifiable depuis un indice trivial ou
-un seul bit constant du rendu.
+un seul bit constant du rendu. Elle doit être sélectionnée depuis le droit
+d'usage construit après la détection, et non lue dans le gap comme une étiquette
+déjà fournie.
 
 ### 7.5 Réponse environnementale
 
-La réponse doit dépendre réellement du triplet :
+La réponse doit dépendre réellement du couple :
 
 ```text
-(world, gap concerné, query).
+(world, query typée).
 ```
+
+La requête porte son indice et son opération d'acquisition. Le gap influence la
+réponse uniquement par la chaîne `gap → use → query` ; il n'est pas une entrée
+secrète supplémentaire de l'environnement. Deux requêtes distinctes admissibles
+pour un même gap doivent pouvoir produire des réponses ou des réductions de
+fibre distinctes dans au moins une instance.
 
 Le vérificateur recalcule la réponse. Aucun certificat ne peut fournir un bit
 de réponse sans démontrer qu'il est égal à la fonction d'environnement.
@@ -1511,6 +1850,8 @@ Un épisode scientifique doit contenir au moins :
 
 ```text
 trois gaps successifs ;
+trois usages autorisés ;
+trois transports exécutés ;
 trois requêtes ;
 trois réponses ;
 trois réparations effectives ;
@@ -1532,6 +1873,7 @@ est une théorie partielle de ce monde. Ce niveau sert à démontrer :
 ```text
 concordance Lean/Python ;
 exactitude des gaps ;
+exactitude des usages et transports ;
 exactitude des réponses ;
 exactitude des patches ;
 fermeture et persistance ;
@@ -1565,6 +1907,8 @@ Ce niveau est obligatoire pour exclure l'interprétation :
 
 ```text
 gap = adresse d'une case ;
+use = étiquette de requête ;
+transport = requête renommée ;
 query = lecture directe de la case ;
 repair = écriture de la réponse dans la case.
 ```
@@ -1579,6 +1923,7 @@ world n'est jamais dans les entrées du modèle ;
 target n'est pas présent avant la réponse ;
 les futures réponses ne sont pas dans history ;
 le patch ne reçoit pas l'état suivant ;
+la tête transport ne reçoit pas l'étiquette de requête ;
 la tête de requête ne reçoit pas une étiquette de requête cachée ;
 les données OOD ne participent pas à la sélection.
 ```
@@ -1592,11 +1937,19 @@ La variante validant la chaîne causale stricte doit avoir des modules séparés
 ```text
 gapEncoder      : AgentView → OperationalGapStatus ;
 useConstructor  : AgentView → OperationalGap → GapAuthorizedUse ;
-queryPolicy     : AgentView → OperationalGap → GapAuthorizedUse → Query ;
+transportExecutor : AgentView → OperationalGap → GapAuthorizedUse
+                    → GapAuthorizedTransport ;
+queryPolicy     : GapAuthorizedTransport → Query ;
 repairBuilder   : AgentView → OperationalGap → GapAuthorizedUse
+                  → GapAuthorizedTransport → Query
                   → Response → IntrinsicRepair ;
 repairExecutor  : Candidate → IntrinsicRepair → Candidate.
 ```
+
+Les paramètres dépendants `view`, `gap` et `use` nécessaires au typage ne sont
+pas concaténés à l'entrée tensorielle de `queryPolicy`. Le manifeste des flux
+doit distinguer indices de type, métadonnées de provenance et tenseurs
+effectivement lus pendant l'inférence.
 
 La candidate suivante est exactement la sortie de `repairExecutor`. Il n'existe
 pas de tête parallèle `nextCandidate`. Les architectures plus libres peuvent
@@ -1614,7 +1967,11 @@ Avant tout entraînement à grande échelle, construire des tests unitaires avec
 ```text
 deux vues produisant deux gaps distincts ;
 deux gaps autorisant deux usages distincts ;
-deux usages sélectionnant deux requêtes distinctes ;
+un même gap autorisant deux usages licites aux transports distincts ;
+deux usages produisant deux transports distincts ;
+un même usage admettant deux transports licites distinguables ;
+deux transports sélectionnant deux requêtes distinctes ;
+un même transport autorisant deux requêtes aux réponses distinguables ;
 deux réponses produisant deux patches distincts ;
 deux patches produisant deux candidates distinctes.
 ```
@@ -1632,6 +1989,8 @@ Superviser :
 
 ```text
 gap ;
+usage ;
+transport ;
 requête ;
 réparation ;
 état suivant.
@@ -1642,8 +2001,8 @@ Il ne suffit pas pour la revendication principale.
 
 ### 8.2 Supervision intermédiaire
 
-Superviser le gap de référence mais pas la requête ni la réparation. Le modèle
-apprend les actions depuis :
+Superviser uniquement le gap de référence, mais ni l'usage, ni le transport, ni
+la requête, ni la réparation. Le modèle apprend les actions depuis :
 
 ```text
 réduction du mismatch ;
@@ -1654,8 +2013,8 @@ réussite finale.
 
 ### 8.3 Apprentissage causal final
 
-Ne superviser directement ni la requête ni le patch. Les signaux autorisés
-sont :
+Ne superviser directement ni le gap de référence, ni l'usage, ni le transport,
+ni la requête, ni le patch. Les signaux autorisés sont :
 
 ```text
 observation ;
@@ -1666,12 +2025,30 @@ critère terminal ou cumulatif.
 ```
 
 Le modèle doit encore produire des objets intermédiaires typés et auditables.
-Une politique opaque qui atteint la cible sans exposer gap, usage et patch ne
-valide pas la théorie, même si sa performance est élevée.
+Une politique opaque qui atteint la cible sans exposer gap, usage, transport et
+patch ne valide pas la théorie, même si sa performance est élevée.
+
+Le gap de référence, l'usage canonique, le transport canonique et la meilleure
+requête restent disponibles au vérificateur après gel du modèle, mais ne
+participent ni à la perte, ni à la sélection de checkpoint, ni au réglage
+d'hyperparamètres dans ce régime. Une perte auto-supervisée calculée depuis les
+observations effectivement accessibles est permise si sa provenance est
+auditée.
 
 ## 9. Interventions causales obligatoires
 
 La causalité est testée par interventions contrôlées sur une trace identique.
+
+### 9.0 Permutation de la projection visible
+
+Remplacer l'observation ou projection visible courante par une autre valeur
+bien typée, à monde, candidate, historique et seed constants.
+
+Attendu : la détection est recalculée et suit la projection intervenue sous des
+hypothèses discriminantes. L'usage, le transport, la requête, la réponse et le
+patch sont ensuite entièrement recalculés. Ce test porte sur la flèche
+`projection visible → gap` et ne doit pas injecter directement un gap de
+référence.
 
 ### 9.1 Suppression du gap
 
@@ -1690,36 +2067,91 @@ do(gap₁ := gap₂)
 
 à monde, observation et candidate constants.
 
-Attendu : la requête et la cible du patch suivent le gap permuté. Si elles
-restent inchangées, le gap est décoratif.
+Attendu : l'usage, le transport, la requête et la cible du patch suivent le gap
+permuté. S'ils restent tous inchangés, le gap est décoratif.
 
-### 9.3 Neutralisation de la requête
+### 9.3 Suppression du droit d'usage
+
+```text
+do(use := absent)
+```
+
+Attendu : aucune requête n'est exécutée et aucune réponse n'est obtenue. Le
+système peut signaler que le gap est détecté mais non autorisé ; il ne peut pas
+contourner `Use` pour construire directement une action ou un patch.
+
+### 9.4 Permutation des usages
+
+Pour un même gap possédant deux usages opérationnels bien typés, remplacer
+l'usage naturel par l'usage alternatif en conservant monde, observation,
+candidate et gap.
+
+Attendu : le transport suit l'usage intervenu, ou l'usage est rejeté par une loi
+d'admissibilité avant tout appel à `respond`. Un usage provenant d'un autre gap
+sans preuve de compatibilité doit être refusé, pas converti silencieusement.
+
+### 9.5 Suppression du transport
+
+```text
+do(transport := absent)
+```
+
+Attendu : aucune requête n'est exécutée. Le système conserve le gap et l'usage,
+mais ne peut pas traiter le droit abstrait comme s'il avait déjà produit sa
+relation de sortie.
+
+### 9.6 Permutation des transports
+
+Pour un même gap et un même usage possédant deux lectures licites, remplacer le
+transport naturel par l'autre transport.
+
+Attendu : la requête suit la lecture et la relation de sortie intervenues, ou le
+transport est rejeté avant l'appel à `respond`. Une requête inchangée n'est
+acceptable que si un théorème de quotient opérationnel prouve que les deux
+transports autorisent exactement la même acquisition ; ce cas ne compte pas
+comme témoin de sensibilité.
+
+### 9.7 Neutralisation de la requête
 
 Remplacer l'action choisie par une action non informative.
 
 Attendu : la réponse ne suffit plus à construire une réparation certifiée.
 
-### 9.4 Permutation des réponses
+Exécuter aussi une seconde requête informative licite pour le même transport.
+Attendu : `respond` suit la requête intervenue et la réduction de fibre change
+comme prévu. Cette variante teste directement `query → response` sans modifier
+le monde.
+
+### 9.8 Permutation des réponses
 
 Injecter la réponse valide d'un autre monde ou d'un autre gap.
 
 Attendu : le patch change de manière prédite ou son certificat d'applicabilité
 échoue. Une performance inchangée signale que la réponse est ignorée.
 
-### 9.5 Neutralisation de la réparation
+La réponse permutée doit avoir le même type dépendant `Response query`. Une
+réponse issue d'une autre requête est rejetée, sauf si une conversion explicite
+prouve leur compatibilité. Le contraste principal utilise donc deux mondes ou
+deux états donnant des réponses différentes à la même requête.
+
+### 9.9 Neutralisation de la réparation
 
 Exécuter un patch identité.
 
 Attendu : le gap courant persiste et l'état suivant n'est pas déclaré fermé.
 
-### 9.6 Permutation des réparations
+### 9.10 Permutation des réparations
 
 Exécuter le patch d'un autre gap.
 
 Attendu : le gap ciblé par ce patch peut changer, mais le gap courant ne doit
 pas être déclaré fermé sans preuve.
 
-### 9.7 Contournement direct
+Si les types dépendants empêchent l'application directe, l'échec de typage est
+le résultat attendu et doit être enregistré comme rejet causal, non contourné
+par une désérialisation non vérifiée.
+
+### 9.11 Contournement direct
 
 Fournir au décodeur final la réponse ou l'état caché en dehors de l'API de
 réparation.
@@ -1727,23 +2159,27 @@ réparation.
 Ce test sert uniquement de plafond. Cette variante est exclue de la validation
 principale et doit être marquée comme oracle.
 
-### 9.8 Médiation causale
+### 9.12 Médiation causale
 
 Mesurer séparément :
 
 ```text
-effet du gap sur la requête ;
+effet du gap sur l'usage ;
+effet de l'usage sur le transport ;
+effet du transport sur la requête ;
+effet total du gap sur la requête via l'usage et le transport ;
 effet de la requête sur la réponse reçue ;
 effet de la réponse sur le patch ;
 effet du patch sur l'état suivant ;
 effet total du gap sur la fermeture ;
-effet résiduel quand le médiateur est fixé.
+effet résiduel quand Use est fixé ;
+effet résiduel quand le transport est fixé.
 ```
 
 L'objectif n'est pas seulement une corrélation. Les interventions doivent
 établir que les variables intermédiaires sont utilisées dans l'ordre annoncé.
 
-### 9.9 Invariance des variables non intervenues
+### 9.13 Invariance des variables non intervenues
 
 Pour chaque intervention, enregistrer les variables qui doivent rester fixes et
 les comparer bit à bit lorsque le calcul est déterministe. Par exemple :
@@ -1751,19 +2187,20 @@ les comparer bit à bit lorsque le calcul est déterministe. Par exemple :
 ```text
 do(gap := autreGap)
 conserve : world, candidate, observation, seed de bruit ;
-recalcule : use, query, response, patch, next.
+recalcule : use, transport, query, response, patch, next.
 ```
 
 Une intervention qui change simultanément le monde et le gap ne permet pas
 d'attribuer l'effet au gap.
 
-### 9.10 Recherche de chemins de contournement
+### 9.14 Recherche de chemins de contournement
 
 En plus des ablations, entraîner des sondes et inspecter le graphe de calcul :
 
 ```text
-la tête query ne reçoit que les tenseurs autorisés ;
-la tête patch ne reçoit que candidate, gap, use et response ;
+la tête transport ne reçoit que candidate, gap et use ;
+la tête query ne reçoit comme tenseur opératoire que transport ;
+la tête patch ne reçoit que candidate, gap, use, transport, query et response ;
 le décodeur de next exécute le patch au lieu de prédire next ;
 aucune skip connection ne relie observation à next hors patch ;
 aucun identifiant d'épisode ne code le monde ;
@@ -1863,8 +2300,12 @@ La borne ne doit pas compter uniquement `z`. Comptabiliser :
 ```text
 capacité de l'observation initiale ;
 capacité du latent ;
+capacité du gap sérialisé ;
+capacité de l'usage sérialisé ;
+capacité du transport sérialisé ;
 nombre de choix de requête ;
 nombre de réponses possibles ;
+capacité des patches et de la candidate ;
 mémoire persistante ;
 nombre d'étapes adaptatives.
 ```
@@ -1872,7 +2313,8 @@ nombre d'étapes adaptatives.
 Pour une suite de `q` requêtes, le transcript complet est :
 
 ```text
-(observation, z, [(queryᵢ, responseᵢ) | 0 ≤ i ≤ q]).
+(observation, candidate₀, z,
+ [(gapᵢ, useᵢ, transportᵢ, queryᵢ, responseᵢ, patchᵢ) | 0 ≤ i < q]).
 ```
 
 Le no-go doit produire deux mondes ayant le même transcript complet pour la
@@ -1928,6 +2370,7 @@ modèle passif toutes observations initiales ;
 mémoire récurrente sans action ;
 apprentissage actif classique sans gap typé ;
 world model avec planification ;
+contrôleur recevant FullState mais factorisant exactement par VisibleState ;
 agent avec requête mais sans réparation structurée ;
 agent avec réparation externe ;
 système complet gap-driven.
@@ -1939,6 +2382,7 @@ système complet gap-driven.
 sans séparation ;
 sans coordination ;
 sans usage orienté ;
+sans transport explicite, avec requête directe depuis Use ;
 sans coût de requête ;
 sans réponse ;
 sans preuve d'applicabilité du patch ;
@@ -1996,6 +2440,8 @@ recherche. Les contrôles oracle sont publiés séparément :
 ```text
 oracle world ;
 oracle gap ;
+oracle use ;
+oracle transport ;
 oracle query ;
 oracle response ;
 oracle patch.
@@ -2068,6 +2514,7 @@ signification et les mêmes lois :
 ```text
 OperationalGap ;
 GapAuthorizedUse ;
+GapAuthorizedTransport ;
 Query ;
 Response ;
 IntrinsicRepair ;
@@ -2076,12 +2523,18 @@ provenance de next ;
 interventions causales.
 ```
 
-Les frontières `gapEncoder → useConstructor → queryPolicy → repairBuilder →
-repairExecutor`, les pertes causales principales et les vérificateurs de
+Les frontières `gapEncoder → useConstructor → transportExecutor → queryPolicy →
+repairBuilder → repairExecutor`, les pertes causales principales et les vérificateurs de
 provenance restent identiques. Seuls les encodeurs d'observation, les types de
 requête/réponse et l'interpréteur de candidate peuvent être spécialisés. Toute
 branche de contrôle propre à un domaine doit être déclarée et ne peut pas
 contourner le gap.
+
+Chaque domaine doit en outre construire sa propre
+`ActiveClosureFoundationalRealization`. Le premier domaine ne peut pas fournir
+le certificat sémantique du second. Les deux réalisations doivent instancier le
+même `ActiveClosureSchema` et satisfaire les mêmes lois d'alignement, même si
+leurs mondes, indices et candidates diffèrent.
 
 Rapporter séparément :
 
@@ -2121,7 +2574,13 @@ violations des lois de composition.
 ### 13.2 Mesures causales
 
 ```text
-changement de requête sous permutation du gap ;
+changement de gap sous permutation de la projection visible ;
+changement d'usage sous permutation du gap ;
+arrêt de la requête sous suppression de l'usage ;
+changement de transport sous permutation d'un usage compatible ;
+arrêt de la requête sous suppression du transport ;
+changement de requête sous permutation d'un transport compatible ;
+effet total du gap sur la requête médié par l'usage et le transport ;
 changement de patch sous permutation de réponse ;
 persistance du gap sous patch identité ;
 fermeture du gap sous patch correct ;
@@ -2181,6 +2640,8 @@ les contextes depuis les seeds et la configuration ;
 les mondes depuis les règles de l'environnement ;
 les réponses depuis monde et action ;
 les gaps depuis monde et candidate ;
+les usages autorisés depuis la vue et le gap ;
+les transports depuis l'usage et la lecture autorisée ;
 les patches depuis les sorties sérialisées ;
 les états suivants par exécution ;
 les métriques depuis les prédictions brutes.
@@ -2212,6 +2673,8 @@ Le falsificateur doit muter au minimum :
 ```text
 un contexte ;
 un gap ;
+un usage ;
+un transport ;
 une action ;
 une réponse ;
 un patch ;
@@ -2249,15 +2712,23 @@ configuration ;
 états ;
 observations ;
 gaps ;
+usages ;
+transports ;
 requêtes ;
 réponses ;
 patches ;
 états suivants ;
+étiquette d'intervention et valeur imposée, lorsqu'elles existent ;
 hashes de provenance comme données.
 ```
 
 Il n'écrit aucun `axiom` et ne transforme aucun booléen JSON déclaré en
 théorème sans recalcul.
+
+La trace distingue `predictedGap`, `usedGap` et `referenceGap`. Les deux premiers
+sont liés aux sorties du modèle et au graphe causal ; le troisième est recalculé
+depuis le monde par le vérificateur. Les fusionner dans un seul champ `gap`
+masquerait soit une erreur de détection, soit une substitution oracle.
 
 ### 15.3 Prédicat de validité
 
@@ -2273,8 +2744,12 @@ qui vérifie :
 projection commune ;
 séparation ;
 mismatch ;
+égalité entre gap prédit et gap utilisé hors intervention ;
 provenance de l'usage ;
+provenance du transport ;
 admissibilité de la requête ;
+alignement de l'usage, du transport et de CorrectAt avec la réalisation
+fondationnelle ;
 exactitude de la réponse ;
 applicabilité du patch ;
 égalité de l'état suivant ;
@@ -2284,6 +2759,18 @@ composition ;
 partition IID/OOD ;
 obligations informationnelles finies.
 ```
+
+Définir séparément :
+
+```text
+ValidInterventionTrace intervention trace
+```
+
+qui vérifie que seule l'équation désignée par `intervention` est remplacée, que
+les variables déclarées invariantes sont identiques à la trace naturelle, et
+que toutes les variables en aval sont recalculées. Une trace interventionnelle
+ne peut pas être acceptée par `ValidTrace` en se faisant passer pour une
+exécution naturelle.
 
 ### 15.4 Preuve calculée
 
@@ -2348,6 +2835,13 @@ ValidCertifiedRun weights inputs trace :=
 
 La porte de certification porte sur `ValidCertifiedRun`, pas seulement sur
 `ValidTrace`.
+
+`runModel` recalcule tous les objets revendiqués : gap, usage, transport, requête
+et patch, pas uniquement l'état final. Si le réseau produit des logits suivis de
+décodeurs symboliques, ces décodeurs et leurs règles de départage font partie de
+`runModel`. Il est interdit d'injecter dans `certifiedTrace` un usage ou un
+transport canonique calculé par le vérificateur lorsque le modèle en a produit
+un autre.
 
 Il n'est pas nécessaire de formaliser l'entraînement. Il est nécessaire de
 lier exactement le modèle final aux décisions finies revendiquées.
@@ -2568,7 +3062,10 @@ Chaque revendication publique doit être reliée à quatre artefacts.
 | Projection non fidèle | `ProjectionObstruction` | paire explicite | collision observée | permutation des pôles |
 | Détection correcte | soundness/completeness du détecteur | gap opérationnel certifié | précision/localisation/calibration | faux gap compatible |
 | Usage non identitaire | `not_exactProjective_of_asymmetric_use` | usage orienté | action avant→après | tentative inverse |
+| Droit d'usage causal | `AuthorizedUseAlignment` | `Sep + Coord → Use` du même gap | sensibilité gap→usage→transport | suppression/permutation de l'usage |
 | Transport cohérent | `CompositionalTransport` | composition calculée | trace composée | permutation d'ordre |
+| Transport causal | `OperationalTransportAlignment` | même `Use` et même `OutRel` | sensibilité usage→transport→requête | suppression/permutation du transport |
+| Réalisation fondationnelle | `ActiveClosureFoundationalRealization` | régime, doctrine et interprétation IA | concordance des jugements | rupture d'une loi d'alignement |
 | Gap causal | `GapRepairAlgebra` | `next = execute repair` | transition rejouée | suppression/permutation du gap |
 | Réponse pertinente | réduction stricte de fibre | monde éliminé et monde conservé | taille de fibre | permutation de réponse |
 | Réponse utilisée | loi de réparation | patch dépendant | sensibilité du patch | neutralisation/permutation de réponse |
@@ -2594,6 +3091,7 @@ Meta/AI/
   FiniteActiveSemanticClosure.lean
   OpenActiveSemanticClosure.lean
   VisibleFactoredClosureNoGo.lean
+  ActiveClosureFoundationalRealization.lean
   CertifiedInference.lean
   EmpiricalTraceSchema.lean
   EmpiricalTraceVerifier.lean
@@ -2660,6 +3158,8 @@ Critères de sortie :
 compilation complète ;
 audits sans axiome ;
 non-trivialité vérifiée ;
+réalisation fondationnelle intrinsèque construite ;
+alignement gap/use/transport/correction/transition prouvé ;
 next dérivé du repair ;
 causalité structurelle démontrée ;
 non-projectivité démontrée ;
@@ -2672,8 +3172,8 @@ Implémenter l'environnement exécutable correspondant exactement à l'instance
 finie, puis tester la concordance des transitions sur tout petit domaine
 exhaustif.
 
-Critère de sortie : Lean et Python calculent les mêmes gaps, réponses, patches
-et états suivants sur le domaine de référence.
+Critère de sortie : Lean et Python calculent les mêmes gaps, usages, transports,
+requêtes, réponses, patches et états suivants sur le domaine de référence.
 
 ### Phase 3 — Agent certifiable
 
@@ -2754,6 +3254,8 @@ aucun artefact manquant.
 Lean compile ;
 aucun axiome interdit ;
 instance non triviale ;
+réalisation fondationnelle de l'instance IA construite ;
+lois d'alignement prouvées sur les mêmes gaps, usages, transports et réparations ;
 aucun pont conditionnel externe.
 ```
 
@@ -2761,6 +3263,7 @@ aucun pont conditionnel externe.
 
 ```text
 Python et Lean concordent ;
+gaps, usages, transports et requêtes recalculés ;
 réponses recalculées ;
 contextes canoniques ;
 transitions rejouables.
@@ -2792,6 +3295,9 @@ meilleur contrôleur fini sous le budget calculé.
 
 ```text
 gap non décoratif ;
+usage dérivé du gap et non décoratif ;
+transport dérivé de l'usage et non décoratif ;
+requête causalement dépendante du transport ;
 requête utilisée ;
 réponse utilisée ;
 patch effectif ;
@@ -2822,6 +3328,7 @@ validation dans deux domaines.
 
 ```text
 `ValidCertifiedRun` prouvé dans Lean ;
+contrastes finis `ValidInterventionTrace` prouvés dans Lean ;
 checkpoint certifiable lié par calcul à la trace ;
 audit sans axiome ;
 falsificateur efficace ;
@@ -2857,8 +3364,9 @@ Formulation autorisée :
 
 Formulation autorisée :
 
-> Une réalisation exécutable utilise causalement le gap pour produire sa
-> requête, sa réparation et son état suivant.
+> Une réalisation exécutable utilise causalement le gap pour produire un droit
+> d'usage, exécute le transport autorisé par ce droit, puis utilise ce transport
+> pour produire sa requête, sa réparation et son état suivant.
 
 ### Après G7
 
@@ -2887,7 +3395,12 @@ La validation intégrale échoue si l'un des faits suivants est observé :
 le modèle résout la tâche sans requête ;
 le détecteur de gap reçoit directement world ou target ;
 le gap n'a aucune évidence accessible à l'agent ;
+le gap contient directement la classe de requête ou l'action correcte ;
 le gap peut être permuté sans changer l'action ;
+Use peut être supprimé sans bloquer la requête ;
+Use peut être permuté sans changer le transport ni déclencher un refus typé ;
+le transport peut être supprimé sans bloquer la requête ;
+le transport peut être permuté sans changer la requête ni déclencher un refus ;
 la réponse peut être permutée sans changer le patch ;
 la réponse ne réduit aucune fibre de mondes compatibles ;
 le patch peut être neutralisé sans conserver le gap ;
@@ -2895,6 +3408,7 @@ next est appris ou fourni indépendamment du patch ;
 les réparations antérieures sont oubliées ;
 la projection est constante sur tout le modèle ;
 Use ou Repair est trivial ;
+GapAuthorizedUse est seulement Query renommé sans sémantique de transport ;
 OutRel est seulement un renommage de Use ;
 la borne minimale utilise une fausse réponse environnementale ;
 l'OOD a influencé l'entraînement ou la sélection ;
@@ -2902,6 +3416,8 @@ le vérificateur fait confiance aux booléens du certificat ;
 le hash du checkpoint est présenté comme preuve de son exécution ;
 la trace Lean n'est pas reliée par calcul au petit agent certifiable ;
 le module Lean utilise un axiome ;
+le certificat fondationnel juxtapose un modèle sémantique indépendant et le
+système IA sans lois d'alignement ;
 le pont empirique affirme une universalité non dérivée ;
 une unique seed soutient la conclusion générale ;
 les baselines disposent de moins d'information ou de calcul sans justification ;
@@ -2919,21 +3435,22 @@ Le paquet final doit contenir :
 
 ```text
 1. une sémantique constructive générale ;
-2. une instance finie fermée ;
-3. une orbite ouverte cumulative ;
-4. un environnement Python concordant ;
-5. un no-go passif exact ;
-6. un no-go de contrôleur visible factorisé ;
-7. un petit agent certifiable avec inférence Lean exacte ;
-8. un agent appris multi-étapes de scaling ;
-9. des baselines appariées sur une frontière de Pareto ;
-10. des interventions causales ;
-11. des bornes informationnelles corrigées ;
-12. deux domaines de validation ;
-13. des tests OOD scellés ;
-14. un certificat Lean Mode B lié au modèle ;
-15. un falsificateur indépendant ;
-16. une réplication complète.
+2. une réalisation fondationnelle intrinsèque du système IA ;
+3. une instance finie fermée ;
+4. une orbite ouverte cumulative ;
+5. un environnement Python concordant ;
+6. un no-go passif exact ;
+7. un no-go de contrôleur visible factorisé ;
+8. un petit agent certifiable avec inférence Lean exacte ;
+9. un agent appris multi-étapes de scaling ;
+10. des baselines appariées sur une frontière de Pareto ;
+11. des interventions causales incluant usage et transport ;
+12. des bornes informationnelles corrigées ;
+13. deux domaines de validation ;
+14. des tests OOD scellés ;
+15. un certificat Lean Mode B lié au modèle ;
+16. un falsificateur indépendant ;
+17. une réplication complète.
 ```
 
 La proposition validée sera alors :
@@ -2947,6 +3464,11 @@ La proposition validée sera alors :
 > contrôleur visible factorisé défini sous le même budget. Elle est
 > empiriquement observable et causalement falsifiable.
 
+Cette proposition n'est recevable que si gap, usage, transport, prédicats de
+correction et transition sont interprétés dans une même réalisation
+fondationnelle de l'instance IA. L'existence séparée d'un modèle sémantique
+fermé et d'un agent performant ne satisfait pas le résultat.
+
 ## 24. Ordre de travail immédiat
 
 L'ordre de mise en oeuvre est strict :
@@ -2954,19 +3476,20 @@ L'ordre de mise en oeuvre est strict :
 ```text
 1. figer v22 et publier son audit de limites ;
 2. définir l'instance Lean ActiveSemanticClosure ;
-3. prouver fermeture finie et orbite ouverte ;
-4. construire l'environnement Python isomorphe au petit modèle fini ;
-5. produire le vérificateur canonique avant l'entraînement ;
-6. prouver les no-go passif et visible factorisé ;
-7. corriger et généraliser le no-go de capacité totale du transcript ;
-8. construire le petit agent quantifié et certifier son inférence ;
-9. implémenter l'agent multi-étapes de scaling et les baselines ;
-10. auditer les flux de données et exécuter les interventions causales ;
-11. valider la seconde spécialisation de domaine ;
-12. ouvrir les partitions OOD scellées ;
-13. générer et compiler le certificat Lean Mode B de campagne ;
-14. falsifier les vérificateurs ;
-15. répliquer l'évaluation et le nouvel entraînement.
+3. construire sa réalisation fondationnelle et prouver tous les alignements ;
+4. prouver fermeture finie et orbite ouverte ;
+5. construire l'environnement Python isomorphe au petit modèle fini ;
+6. produire le vérificateur canonique avant l'entraînement ;
+7. prouver les no-go passif et visible factorisé ;
+8. corriger et généraliser le no-go de capacité totale du transcript ;
+9. construire le petit agent quantifié et certifier son inférence ;
+10. implémenter l'agent multi-étapes de scaling et les baselines ;
+11. auditer les flux de données et exécuter les interventions causales ;
+12. valider la seconde spécialisation de domaine ;
+13. ouvrir les partitions OOD scellées ;
+14. générer et compiler le certificat Lean Mode B de campagne ;
+15. falsifier les vérificateurs ;
+16. répliquer l'évaluation et le nouvel entraînement.
 ```
 
 Il ne faut pas commencer par une nouvelle grande campagne GPU. Le premier
@@ -2983,7 +3506,9 @@ une définition, une preuve cible, une mesure et une falsification.
 |---|---|---|---|---|
 | détecter | `OperationalGap` depuis `AgentView` | soundness/completeness/localisation | précision et calibration | gap faux ou permuté |
 | non-coïncidence locale | `TypedSemanticGap.mismatch` via `Agrees` | témoin sémantique fini | taux de vrais mismatches | accès direct au monde |
-| droit d'interrogation | `GapAuthorizedUse` | provenance `Sep + Coord → Use` | admissibilité et asymétrie | usage inverse ou constant |
+| droit d'interrogation | `GapAuthorizedUse` | provenance et alignement `Sep + Coord → Use` | admissibilité, asymétrie et médiation | usage supprimé, inversé ou permuté |
+| transport autorisé | `GapAuthorizedTransport` | alignement avec `CompositionalTransport` et `OutRel` | composition et sensibilité | transport supprimé ou permuté |
+| réalisation fondationnelle | `ActiveClosureFoundationalRealization` | mêmes régime, doctrine, interprétation et transition | concordance des jugements | modèle indépendant juxtaposé |
 | information pertinente | réduction stricte de `CompatibleWorlds` | monde éliminé et monde conservé | réduction de fibre | réponse permutée/neutre |
 | réparation intrinsèque | `IntrinsicRepair` sans monde | effet de correction et provenance | fermeture locale | patch identité/externe |
 | conservation | `ClosedOn repairedPrefix` | invariant inductif | oubli cumulatif | retrait ou permutation d'un patch |
@@ -3003,7 +3528,11 @@ Le plan bloque explicitement :
 ```text
 projection constante comme seul visible ;
 Use, Gap, Repair ou Witness égaux à Unit ;
+GapAuthorizedUse renommant Query sans loi de transport ;
+GapAuthorizedTransport renommant Use ou Query sans OutRel propre ;
 OutRel renommant Use ;
+classe de requête ou action correcte stockée dans OperationalGap ;
+Use présent mais contourné par queryPolicy ;
 next fourni séparément ;
 world transmis au détecteur ou au patch ;
 gap latent sans sémantique d'intervention ;
@@ -3012,6 +3541,7 @@ history enregistrée sans correction persistante ;
 OOD vu pendant l'entraînement ;
 hash présenté comme preuve d'exécution ;
 axiomes Lean ;
+modèle fondationnel et système IA seulement juxtaposés ;
 no-go projectif annoncé hors de sa classe ;
 comparaison à une baseline sous-dotée ;
 validation sur une seule seed ou un seul domaine.
@@ -3026,6 +3556,7 @@ doivent être fixés dans le protocole v23 avant le premier run scientifique :
 le petit monde fini exact ;
 le langage compositionnel du niveau B ;
 les deux domaines finaux ;
+la ContextCategory, le langage indexé et la doctrine de la réalisation IA ;
 la relation Agrees ;
 la classe exacte de Query et Response ;
 le budget du no-go visible factorisé ;
@@ -3049,6 +3580,7 @@ de toute architecture projective. Il exige :
 
 ```text
 une preuve générale bornée ;
+une réalisation fondationnelle intrinsèque et alignée ;
 une instance constructive fermée ;
 un agent exact certifiable ;
 un agent appris de scaling ;
@@ -3062,3 +3594,38 @@ et une réplication.
 Le document reste un plan d'implémentation et de validation. Aucun tableau de
 couverture ne doit être cité comme résultat avant production et vérification de
 ses artefacts.
+
+### 25.4 Relecture critique flèche par flèche
+
+Cette table constitue l'audit de cohérence du plan, pas un résultat expérimental.
+
+| Flèche revendiquée | Objet calculé | Equation structurelle | Intervention minimale | Certificat attendu |
+|---|---|---|---|---|
+| état → projection | `AgentClosureState.observation` | `O₀ = observe(W)`, puis `Oₙ = Aₙ.observation` | `runWithObservation` | provenance de l'observation |
+| projection → gap | `OperationalGapStatus` | `Gₙ = detectGap(Aₙ, Oₙ)` | permutation de projection | soundness, completeness, localisation |
+| gap → usage | `GapAuthorizedUse` | `Uₙ = authorize(Aₙ, Gₙ)` | suppression/permutation de Use | `AuthorizedUseAlignment` |
+| usage → transport | `GapAuthorizedTransport` | `Tₙ = executeTransport(Aₙ, Gₙ, Uₙ)` | suppression/permutation du transport | `OperationalTransportAlignment` |
+| transport → requête | `Query` | `Qₙ = selectQuery(Tₙ)` | transport alternatif puis requête alternative | `selectedQuery_admissible` |
+| requête → réponse | `Response Qₙ` | `Rₙ = respond(W, Qₙ)` | requête non informative ou alternative | réponse recalculée et réduction de fibre |
+| réponse → réparation | `IntrinsicRepair` | `Pₙ = buildRepair(Aₙ, Gₙ, Uₙ, Tₙ, Qₙ, Rₙ)` | permutation de réponse bien typée | `RepairDerivedFrom` et applicabilité |
+| réparation → état suivant | `ActiveSemanticClosureState` | `Aₙ₊₁ = executeRepair(Aₙ, Pₙ)` | patch identité ou alternatif | égalité de next, monde conservé, patch effectif |
+| état suivant → nouveau gap | orbite finie ou ouverte | réapplication des équations au rang suivant | horizon et recherche de cycle | persistance, fraîcheur ou fermeture terminale |
+| chaîne IA → sémantique fondationnelle | `ActiveClosureFoundationalRealization` | lois d'alignement point par point | mutation d'un alignement | soundness, conservativité, consistance, non-réduction |
+
+Chaque ligne doit apparaître dans le schéma de trace, dans `runModel`, dans le
+vérificateur Python et, pour le petit agent certifiable, dans
+`ValidCertifiedRun` ou `ValidInterventionTrace`. Une flèche seulement nommée dans
+un diagramme échoue à cette relecture.
+
+L'audit a également séparé trois comparaisons qui ne doivent pas être fusionnées :
+
+```text
+no-go passif : mêmes AgentView, avantage obtenu par une réponse active ;
+no-go factorisé : mêmes VisibleState mais FullState distincts accessibles à l'agent ;
+comparaison empirique : mêmes informations et frontière de ressources publiée.
+```
+
+Enfin, la fermeture finie et l'orbite ouverte sont deux réalisations d'un schéma
+commun, et non deux certificats imposés artificiellement au même système. Le
+modèle fondationnel de référence et le système IA ne sont pas juxtaposés : chaque
+instance IA doit construire sa propre réalisation et ses alignements.
