@@ -282,11 +282,23 @@ def finiteMeasureClosureCertificate : FiniteMeasureClosureCertificate where
 
 structure TypedInterventionCertificate where
   natural : IntervenedOpenRun finiteSystem state0 gap0
+  observationIntervention : ClosedState
+  observationIntervention_eq :
+    observationIntervention = finiteObservationIntervention0
+  gapIntervention : IntervenedOpenRun finiteSystem state0 alternateGap0
   useIntervention : IntervenedOpenRun finiteSystem state0 gap0
   transportIntervention : IntervenedOpenRun finiteSystem state0 gap0
   queryIntervention : IntervenedOpenRun finiteSystem state0 gap0
   responseIntervention : IntervenedOpenRun finiteSystem state0 gap0
-  patchIntervention : IntervenedOpenRun finiteSystem state0 gap0
+  observationChangesDetectedIndex :
+    detectedIndex (finiteSystem.detectGap state0.agent) =
+      detectedIndex
+        (finiteSystem.detectGap observationIntervenedState0.agent) -> False
+  observationChangesSuccessor :
+    natural.after = observationIntervention -> False
+  gapChangesUseDirection :
+    natural.use.direction = gapIntervention.use.direction -> False
+  gapChangesSuccessor : natural.after = gapIntervention.after -> False
   useChangesDirection :
     natural.use.direction = useIntervention.use.direction -> False
   useChangesTransport :
@@ -294,37 +306,89 @@ structure TypedInterventionCertificate where
       useIntervention.transport.reading.direction -> False
   transportChangesQuery :
     natural.query = transportIntervention.query -> False
+  queryChangesResponseKind :
+    finiteResponseKind natural.response =
+      finiteResponseKind queryIntervention.response -> False
   responseChangesRepair :
     natural.repair.candidatePatch =
       responseIntervention.repair.candidatePatch -> False
   responseChangesSuccessor : natural.after = responseIntervention.after -> False
   crossedResponseFailsClosure :
     GapClosedBy finiteSystem state0 gap0 responseIntervention.after -> False
+  patchDeterminedByResponse :
+    ∀ repair :
+      IntrinsicRepair
+        finiteData finiteGapLanguage finiteTransportLanguage
+        finiteInteractionLanguage
+        state0.agent gap0 use0 transport0 query0 response0,
+      repair.candidatePatch = repair0.candidatePatch
+  observationUpdateDeterminedByResponse :
+    ∀ repair :
+      IntrinsicRepair
+        finiteData finiteGapLanguage finiteTransportLanguage
+        finiteInteractionLanguage
+        state0.agent gap0 use0 transport0 query0 response0,
+      finiteInteractionLanguage.applyObservationUpdate
+          repair.observationUpdate =
+        finiteInteractionLanguage.applyObservationUpdate
+          repair0.observationUpdate
+  historyRecordDeterminedByResponse :
+    ∀ repair :
+      IntrinsicRepair
+        finiteData finiteGapLanguage finiteTransportLanguage
+        finiteInteractionLanguage
+        state0.agent gap0 use0 transport0 query0 response0,
+      repair.historyRecord = repair0.historyRecord
+  successorDeterminedByResponse :
+    ∀ repair :
+      IntrinsicRepair
+        finiteData finiteGapLanguage finiteTransportLanguage
+        finiteInteractionLanguage
+        state0.agent gap0 use0 transport0 query0 response0,
+      ActiveSemanticClosureSystem.executeRepair state0 repair =
+        ActiveSemanticClosureSystem.executeRepair state0 repair0
   allRunsPreserveWorld :
     natural.after.world = state0.world ∧
     useIntervention.after.world = state0.world ∧
     transportIntervention.after.world = state0.world ∧
     queryIntervention.after.world = state0.world ∧
-    responseIntervention.after.world = state0.world ∧
-    patchIntervention.after.world = state0.world
+    responseIntervention.after.world = state0.world
 
 def typedInterventionCertificate : TypedInterventionCertificate where
   natural := finiteNaturalOpenRun0
+  observationIntervention := finiteObservationIntervention0
+  observationIntervention_eq := rfl
+  gapIntervention := finiteGapIntervention0
   useIntervention := finiteUseIntervention0
   transportIntervention := finiteTransportIntervention0
   queryIntervention := finiteConfirmQueryIntervention0
   responseIntervention := finiteCrossedResponseIntervention0
-  patchIntervention := finiteCrossedPatchIntervention0
+  observationChangesDetectedIndex :=
+    finiteObservationIntervention_changesDetectedIndex
+  observationChangesSuccessor := by
+    intro equality
+    exact finiteObservationIntervention_changesSuccessor
+      (finiteNaturalOpenRun0_after_eq.trans equality)
+  gapChangesUseDirection := finiteGapIntervention_changesUseDirection
+  gapChangesSuccessor := finiteGapIntervention_changesSuccessor
   useChangesDirection := finiteUseIntervention_changesDirection
   useChangesTransport := finiteUseIntervention_changesTransport
   transportChangesQuery := finiteTransportIntervention_changesQuery
+  queryChangesResponseKind := finiteQueryIntervention_changesResponseKind
   responseChangesRepair := finiteCrossedResponse_changesRepair
   responseChangesSuccessor := finiteCrossedResponse_changesSuccessor
   crossedResponseFailsClosure := finiteCrossedResponse_failsClosure
+  patchDeterminedByResponse := finiteRepairPatch_determinedByResponse
+  observationUpdateDeterminedByResponse :=
+    finiteRepairObservation_determinedByResponse
+  historyRecordDeterminedByResponse :=
+    finiteRepairRecord_determinedByResponse
+  successorDeterminedByResponse :=
+    finiteRepairExecution_determinedByResponse
   allRunsPreserveWorld :=
     ⟨intervenedOpenRun_world _, intervenedOpenRun_world _,
       intervenedOpenRun_world _, intervenedOpenRun_world _,
-      intervenedOpenRun_world _, intervenedOpenRun_world _⟩
+      intervenedOpenRun_world _⟩
 
 structure AILeanNonV23Obligations where
   finiteSemantic : FiniteSemanticNontriviality

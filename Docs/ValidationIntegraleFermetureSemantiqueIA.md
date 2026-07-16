@@ -1602,6 +1602,15 @@ et `runWithPatch` exigent respectivement une `Query gap.index`, une
 affichés dans leur signature. Aucun cast non certifié ni effacement dynamique de
 ces indices n'est admis.
 
+Une équation intrinsèquement fonctionnelle ne doit pas être rendue
+artificiellement manipulable. Si `RepairDerivedFrom` détermine entièrement le
+patch, la mise à jour d'observation et l'enregistrement historique à réponse
+fixée, l'audit doit prouver cette détermination et refuser un patch alternatif
+prétendument valide. L'effet causal est alors établi par une intervention sur la
+réponse, suivie de la variation de la réparation et de l'état exécuté. Une
+intervention directe sur la réparation ne peut être utilisée que lorsqu'un
+second `IntrinsicRepair` bien typé et intrinsèquement dérivé existe réellement.
+
 Chaque variante partage le monde, la candidate et le bruit contrôlé pertinents.
 Cette sémantique évite d'appeler « causal » un simple mélange de sorties issues
 d'épisodes différents.
@@ -2026,7 +2035,12 @@ CertifiedInference
 ActiveClosureInterventions
   définit des interventions dépendantes sur observation, gap, usage,
   transport, requête, réponse et patch ; chaque intervention remplace un seul
-  maillon et recalcule les maillons aval sans cast non certifié ;
+  maillon et recalcule les maillons aval sans cast non certifié ; l'instance
+  finie prouve séparément observation→indice détecté, gap→sens d'usage,
+  usage→transport, transport→requête, requête→forme de réponse et
+  réponse→réparation→successeur ; à réponse fixée, elle prouve en outre
+  l'unicité opérationnelle du patch, de la mise à jour, de l'enregistrement et
+  de l'état exécuté au lieu de fabriquer un contrefactuel incohérent ;
 
 LeanValidationCompleteness
   fournit `AILeanNonV23Obligations`, qui exige des témoins atteignables de
@@ -2038,6 +2052,12 @@ AIFoundationalValidation
   assemble les deux systèmes, leurs réalisations, le schéma causal commun,
   les no-go, le run fini certifié et `AILeanNonV23Obligations`.
 ```
+
+L'empreinte de réponse n'est pas un état intermédiaire du graphe causal. Elle
+est un contrat informationnel associé à la requête : elle borne la réponse et
+permet de prouver sa localité par rapport au monde. Le graphe conserve donc
+l'arête réelle `requête → réponse`, tandis que l'empreinte certifie ce que cette
+arête est autorisée à lire et à produire.
 
 L'orbite ouverte expose en outre la forme exacte de la candidate au rang `n`,
 la correction connue de chaque entrée déjà apprise, leur conservation sous la

@@ -41,6 +41,14 @@ def runNatural
     ActiveSemanticClosureState D :=
   system.nextState state
 
+def detectedIndex
+    {D : ActiveClosureData.{u}}
+    {G : ActiveClosureGapLanguage.{u, v} D}
+    {view : AgentClosureState D} :
+    OperationalGapStatus D G view -> Option D.VisibleIndex
+  | .closed => none
+  | .open gap => some gap.index
+
 def replaceObservation
     (state : ActiveSemanticClosureState D)
     (observation : D.Observation) : ActiveSemanticClosureState D :=
@@ -209,7 +217,39 @@ theorem intervenedOpenRun_world
 
 open Finite
 
+def intervenedObservation0 : Observation :=
+  { first := .exact .red
+    second := .unknown
+    third := .unknown }
+
+def observationIntervenedState0 : ClosedState :=
+  replaceObservation state0 intervenedObservation0
+
+def alternateGap0 : Gap state0.agent :=
+  { index := .second
+    kind := .unresolvedFiber
+    observableEvidence := .unknown .second rfl }
+
+inductive FiniteResponseKind where
+  | revealed
+  | confirmed
+  | noInformation
+  deriving DecidableEq
+
+def finiteResponseKind
+    {index : Index}
+    {query : Query index} : Response query -> FiniteResponseKind
+  | .revealed _ => .revealed
+  | .confirmed _ => .confirmed
+  | .noInformation => .noInformation
+
 def finiteNaturalOpenRun0 := runWithGap finiteSystem state0 gap0
+
+def finiteObservationIntervention0 :=
+  runWithObservation finiteSystem state0 intervenedObservation0
+
+def finiteGapIntervention0 :=
+  runWithGap finiteSystem state0 alternateGap0
 
 def finiteUseIntervention0 :=
   runWithUse finiteSystem state0 gap0 inspectUse0
@@ -226,10 +266,34 @@ def finiteCrossedResponseIntervention0 :=
     query0 (finiteSystem.selectedQueryAdmissible transport0)
     alternateResponse0
 
-def finiteCrossedPatchIntervention0 :=
-  runWithPatch finiteSystem state0 gap0 use0 transport0
-    query0 (finiteSystem.selectedQueryAdmissible transport0)
-    alternateResponse0 alternateRepair0
+theorem finiteObservationIntervention_changesDetectedIndex :
+    detectedIndex (finiteSystem.detectGap state0.agent) =
+      detectedIndex
+        (finiteSystem.detectGap observationIntervenedState0.agent) -> False := by
+  intro equality
+  cases equality
+
+theorem finiteObservationIntervention_changesSuccessor :
+    runNatural finiteSystem state0 = finiteObservationIntervention0 -> False := by
+  intro equality
+  have candidateEquality := congrArg
+    (fun state : ClosedState => state.agent.candidate.first)
+    equality
+  cases candidateEquality
+
+theorem finiteGapIntervention_changesUseDirection :
+    finiteNaturalOpenRun0.use.direction =
+      finiteGapIntervention0.use.direction -> False := by
+  intro equality
+  cases equality
+
+theorem finiteGapIntervention_changesSuccessor :
+    finiteNaturalOpenRun0.after = finiteGapIntervention0.after -> False := by
+  intro equality
+  have candidateEquality := congrArg
+    (fun state : ClosedState => state.agent.candidate.first)
+    equality
+  cases candidateEquality
 
 theorem finiteUseIntervention_changesDirection :
     finiteNaturalOpenRun0.use.direction =
@@ -247,6 +311,55 @@ theorem finiteTransportIntervention_changesQuery :
     finiteNaturalOpenRun0.query = finiteTransportIntervention0.query -> False := by
   intro equality
   cases equality
+
+theorem finiteQueryIntervention_changesResponseKind :
+    finiteResponseKind finiteNaturalOpenRun0.response =
+      finiteResponseKind finiteConfirmQueryIntervention0.response -> False := by
+  intro equality
+  cases equality
+
+theorem finiteRepairPatch_determinedByResponse
+    (repair :
+      IntrinsicRepair
+        finiteData finiteGapLanguage finiteTransportLanguage
+        finiteInteractionLanguage
+        state0.agent gap0 use0 transport0 query0 response0) :
+    repair.candidatePatch = repair0.candidatePatch :=
+  repair.responseUsed.patchEq.trans repair0.responseUsed.patchEq.symm
+
+theorem finiteRepairObservation_determinedByResponse
+    (repair :
+      IntrinsicRepair
+        finiteData finiteGapLanguage finiteTransportLanguage
+        finiteInteractionLanguage
+        state0.agent gap0 use0 transport0 query0 response0) :
+    finiteInteractionLanguage.applyObservationUpdate repair.observationUpdate =
+      finiteInteractionLanguage.applyObservationUpdate
+        repair0.observationUpdate :=
+  repair.responseUsed.updateEq.trans repair0.responseUsed.updateEq.symm
+
+theorem finiteRepairRecord_determinedByResponse
+    (repair :
+      IntrinsicRepair
+        finiteData finiteGapLanguage finiteTransportLanguage
+        finiteInteractionLanguage
+        state0.agent gap0 use0 transport0 query0 response0) :
+    repair.historyRecord = repair0.historyRecord :=
+  repair.responseUsed.recordEq.trans repair0.responseUsed.recordEq.symm
+
+theorem finiteRepairExecution_determinedByResponse
+    (repair :
+      IntrinsicRepair
+        finiteData finiteGapLanguage finiteTransportLanguage
+        finiteInteractionLanguage
+        state0.agent gap0 use0 transport0 query0 response0) :
+    ActiveSemanticClosureSystem.executeRepair state0 repair =
+      ActiveSemanticClosureSystem.executeRepair state0 repair0 := by
+  unfold ActiveSemanticClosureSystem.executeRepair
+    ActiveSemanticClosureSystem.executeAgentRepair
+  rw [finiteRepairPatch_determinedByResponse repair]
+  rw [finiteRepairObservation_determinedByResponse repair]
+  rw [finiteRepairRecord_determinedByResponse repair]
 
 theorem finiteCrossedResponse_changesRepair :
     finiteNaturalOpenRun0.repair.candidatePatch =
@@ -292,6 +405,11 @@ end Meta
 #print axioms Meta.ActiveSemanticClosure.Interventions.runWithQuery
 #print axioms Meta.ActiveSemanticClosure.Interventions.runWithResponse
 #print axioms Meta.ActiveSemanticClosure.Interventions.runWithPatch
+#print axioms Meta.ActiveSemanticClosure.Interventions.finiteObservationIntervention_changesDetectedIndex
+#print axioms Meta.ActiveSemanticClosure.Interventions.finiteGapIntervention_changesSuccessor
 #print axioms Meta.ActiveSemanticClosure.Interventions.finiteTransportIntervention_changesQuery
+#print axioms Meta.ActiveSemanticClosure.Interventions.finiteQueryIntervention_changesResponseKind
+#print axioms Meta.ActiveSemanticClosure.Interventions.finiteRepairPatch_determinedByResponse
+#print axioms Meta.ActiveSemanticClosure.Interventions.finiteRepairExecution_determinedByResponse
 #print axioms Meta.ActiveSemanticClosure.Interventions.finiteCrossedResponse_failsClosure
 /- AXIOM_AUDIT_END -/

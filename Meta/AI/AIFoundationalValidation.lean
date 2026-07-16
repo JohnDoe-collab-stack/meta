@@ -35,7 +35,6 @@ inductive ActiveClosureOperation where
   | executeTransport
   | selectQuery
   | environmentRespond
-  | responseFootprint
   | buildRepair
   | applyCandidatePatch
   | applyObservationUpdate
@@ -50,9 +49,6 @@ inductive ActiveClosureDependency :
   | authorize_transport : ActiveClosureDependency .authorizeUse .executeTransport
   | transport_query : ActiveClosureDependency .executeTransport .selectQuery
   | query_response : ActiveClosureDependency .selectQuery .environmentRespond
-  | query_footprint : ActiveClosureDependency .selectQuery .responseFootprint
-  | footprint_response :
-      ActiveClosureDependency .responseFootprint .environmentRespond
   | response_repair : ActiveClosureDependency .environmentRespond .buildRepair
   | repair_candidate : ActiveClosureDependency .buildRepair .applyCandidatePatch
   | repair_observation : ActiveClosureDependency .buildRepair .applyObservationUpdate
@@ -68,9 +64,6 @@ structure ActiveClosureSchema where
   authorize_transport : ActiveClosureDependency .authorizeUse .executeTransport
   transport_query : ActiveClosureDependency .executeTransport .selectQuery
   query_response : ActiveClosureDependency .selectQuery .environmentRespond
-  query_footprint : ActiveClosureDependency .selectQuery .responseFootprint
-  footprint_response :
-    ActiveClosureDependency .responseFootprint .environmentRespond
   response_repair : ActiveClosureDependency .environmentRespond .buildRepair
   repair_candidate : ActiveClosureDependency .buildRepair .applyCandidatePatch
   repair_observation : ActiveClosureDependency .buildRepair .applyObservationUpdate
@@ -86,8 +79,6 @@ def activeClosureSchema : ActiveClosureSchema where
   authorize_transport := .authorize_transport
   transport_query := .transport_query
   query_response := .query_response
-  query_footprint := .query_footprint
-  footprint_response := .footprint_response
   response_repair := .response_repair
   repair_candidate := .repair_candidate
   repair_observation := .repair_observation
