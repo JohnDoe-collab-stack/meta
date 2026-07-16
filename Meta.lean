@@ -45,6 +45,7 @@ import Meta.Collatz.DiagonalOrder
 import Meta.Dynamics.ObservedDiscrete
 import Meta.Dynamics.ObservedWindow
 import Meta.Dynamics.ObservedDynamicGap
+import Meta.AI.ActiveClosureFoundationalRealization
 import Meta.Tarski.TruthGap
 import Meta.Tarski.GapContraction
 import Meta.Tarski.ReferentialOrder
@@ -76,6 +77,7 @@ import Meta.Synthesis.TarskiBethBellGap
 #print axioms Meta.RelaxedSemantics.foundationalUseGraph_nonreduction
 #print axioms Meta.RelaxedSemantics.foundationalTransitionGraph_nonreduction
 #print axioms Meta.RelaxedSemantics.FiniteCumulativeDynamicModel.finiteDynamicFoundationalSystem
+#print axioms Meta.ActiveSemanticClosure.Foundational.activeClosureFoundationalRealization
 #print axioms Meta.TarskiDynamicRelaxedUsage.tarskiDynamicRelaxedUsageSynthesis
 #print axioms Meta.ConstructivePatchModel.constructiveTarskiClosedSystem
 #print axioms Meta.ConstructivePatchModel.constructiveTarskiOrbitTheorem

@@ -1801,6 +1801,15 @@ reachable_actualCompatible
 
 ### 6.2 Raccord fondationnel intrinsèque
 
+Statut : ce raccord est réalisé pour l'orbite finie dans
+`Meta/AI/ActiveClosureFoundationalRealization.lean`. La réalisation distingue
+explicitement deux variances que l'esquisse initiale confondait : les
+jugements de correction et de fermeture sont covariants le long des
+réparations, tandis que `CompatibleWithViewHistory` est contravariant, car une
+réparation informative réduit le fibre des mondes compatibles. Le fichier
+contient un contre-exemple constructif à sa covariance. Cette distinction est
+une obligation de correction, pas un aménagement de présentation.
+
 `ActiveClosureFoundationalRealization.lean` doit construire, pour le système IA
 considéré :
 
@@ -1811,10 +1820,11 @@ un ContextualRelaxedRegime et ses lois ;
 une AdmissiblePredicateDoctrine et ses lois ;
 une RelaxedInterpretation de la syntaxe indépendante ;
 un GapRepairAlgebra dont le successeur est la transition IA ;
-un prédicat admissible représentant CorrectAt ;
-un prédicat admissible représentant ClosedOn ;
-des prédicats admissibles représentant CompatibleWithViewHistory,
-KnownCorrectAt, KnownClosedOn, FiberDeterminateAt et GapClosedBy ;
+des prédicats contextuels représentant exactement CorrectAt, ClosedOn,
+CompatibleWithViewHistory, KnownCorrectAt, KnownClosedOn, FiberDeterminateAt
+et GapClosedBy ;
+une structure covariante pour les jugements conservés par la réparation ;
+une structure contravariante pour CompatibleWithViewHistory ;
 une instance des théorèmes génériques de soundness et de conservativité.
 ```
 
@@ -1890,7 +1900,9 @@ transportAlignment :
 correctnessAlignment :
   CompatibleWithViewHistory, CorrectAt, ClosedOn, KnownCorrectAt,
   KnownClosedOn, FiberDeterminateAt et GapClosedBy sont équivalents aux
-  jugements Holds des prédicats admissibles correspondants ;
+  jugements Holds des prédicats contextuels correspondants ; KnownCorrectAt,
+  KnownClosedOn, FiberDeterminateAt et GapClosedBy sont transportés vers
+  l'avant, tandis que CompatibleWithViewHistory est réfléchi vers l'arrière ;
 
 transitionAlignment :
   system.nextState est égal au next dérivé de repairAlgebra, et la réparation
