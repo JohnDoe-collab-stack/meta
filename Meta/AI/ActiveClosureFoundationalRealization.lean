@@ -2000,6 +2000,29 @@ def activeClosureFoundationalNontriviality :
   repairClosesInitialGap := gap0ClosedByState1
   interpretationSeparatesTerms := originPole_ne_destinationPole
 
+abbrev initialClosureFiberRegime :=
+  closureContextualRegime.fiberRegime
+    (contextOfState .initial) ClosureSort.gap
+
+def initialClosureForwardHasUse :
+    RelaxedUsageRegime.HasUse initialClosureFiberRegime () .origin .destination :=
+  Nonempty.intro (regimeUseOfAuthorization .first)
+
+theorem initialClosureBackwardHasUse_refuted :
+    RelaxedUsageRegime.HasUse initialClosureFiberRegime () .destination .origin ->
+      False := by
+  intro backward
+  exact Nonempty.elim backward (poleUse_noBackward (contextOfState .initial))
+
+theorem initialClosureFiber_not_exactProjective
+    (representation :
+      RelaxedUsageRegime.ExactProjectiveRepresentation
+        initialClosureFiberRegime) : False :=
+  RelaxedUsageRegime.not_exactProjective_of_asymmetric_use
+    initialClosureForwardHasUse
+    initialClosureBackwardHasUse_refuted
+    representation
+
 structure AIContextualModel where
   contextLaws : LawfulContextCategory closureContextCategory
   termLaws : LawfulIndexedTermLanguage closureTermLanguage
@@ -2064,5 +2087,6 @@ end Meta
 #print axioms Meta.ActiveSemanticClosure.Foundational.operationalTransportAlignment
 #print axioms Meta.ActiveSemanticClosure.Foundational.repairTransitionAlignment
 #print axioms Meta.ActiveSemanticClosure.Foundational.activeClosureFoundationalNontriviality
+#print axioms Meta.ActiveSemanticClosure.Foundational.initialClosureFiber_not_exactProjective
 #print axioms Meta.ActiveSemanticClosure.Foundational.activeClosureFoundationalRealization
 /- AXIOM_AUDIT_END -/

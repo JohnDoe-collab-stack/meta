@@ -185,7 +185,9 @@ inductive GapEvidence
 
 inductive UseDirection where
   | correctWitnessedMismatch
+  | inspectWitnessedMismatch
   | resolveFiber
+  | inspectFiber
   deriving DecidableEq
 
 inductive UseEvidence
@@ -200,11 +202,21 @@ inductive UseEvidence
       UseEvidence
         view index .witnessedMismatch gapEvidence
         .correctWitnessedMismatch
+  | inspectMismatch
+      (gapEvidence : GapEvidence view index .witnessedMismatch) :
+      UseEvidence
+        view index .witnessedMismatch gapEvidence
+        .inspectWitnessedMismatch
   | fiber
       (gapEvidence : GapEvidence view index .unresolvedFiber) :
       UseEvidence
         view index .unresolvedFiber gapEvidence
         .resolveFiber
+  | inspectFiber
+      (gapEvidence : GapEvidence view index .unresolvedFiber) :
+      UseEvidence
+        view index .unresolvedFiber gapEvidence
+        .inspectFiber
 
 def finiteGapLanguage : ActiveClosureGapLanguage finiteData where
   GapEvidence := GapEvidence
@@ -217,6 +229,11 @@ abbrev Gap (view : AgentState) :=
 abbrev AuthorizedUse (view : AgentState) (gap : Gap view) :=
   GapAuthorizedUse finiteData finiteGapLanguage view gap
 
+inductive ReadingFocus where
+  | candidate
+  | evidence
+  deriving DecidableEq
+
 structure AuthorizedReading
     (view : AgentState)
     (gap : Gap view)
@@ -225,6 +242,7 @@ structure AuthorizedReading
   indexEq : index = gap.index
   direction : UseDirection
   directionEq : direction = use.direction
+  focus : ReadingFocus
 
 structure TransportOutput
     (view : AgentState)
@@ -261,10 +279,12 @@ abbrev AuthorizedTransport
 
 inductive Query : Index -> Type where
   | reveal (index : Index) : Query index
+  | confirm (index : Index) : Query index
   | noInformation (index : Index) : Query index
 
 inductive Response : {index : Index} -> Query index -> Type where
   | revealed (value : Value) : Response (.reveal index)
+  | confirmed (value : Value) : Response (.confirm index)
   | noInformation : Response (.noInformation index)
 
 inductive QueryAdmissible
@@ -274,6 +294,7 @@ inductive QueryAdmissible
     (transport : AuthorizedTransport view gap use) :
     Query gap.index -> Type where
   | reveal : QueryAdmissible view gap use transport (.reveal gap.index)
+  | confirm : QueryAdmissible view gap use transport (.confirm gap.index)
 
 inductive ObservationUpdate
     (observation : Observation) :
@@ -285,6 +306,10 @@ inductive ObservationUpdate
       (index : Index)
       (value : Value) :
       ObservationUpdate observation (.reveal index) (.revealed value)
+  | confirmed
+      (index : Index)
+      (value : Value) :
+      ObservationUpdate observation (.confirm index) (.confirmed value)
   | noInformation
       (index : Index) :
       ObservationUpdate
@@ -298,12 +323,14 @@ def applyObservationUpdate
     (update : ObservationUpdate observation query response) : Observation := by
   cases update with
   | revealed value => exact observation.setExact index value
+  | confirmed value => exact observation.setExact index value
   | noInformation => exact observation
 
 def responseValue
     {index : Index}
     {query : Query index} : Response query -> Option Value
   | .revealed value => some value
+  | .confirmed value => some value
   | .noInformation => none
 
 def patchOfResponse
@@ -345,6 +372,7 @@ def updateOfResponse
     ObservationUpdate observation query response := by
   cases response with
   | revealed value => exact .revealed index value
+  | confirmed value => exact .confirmed index value
   | noInformation => exact .noInformation index
 
 structure RepairDerivedFrom
@@ -475,7 +503,8 @@ def executeTransport
     { index := gap.index
       indexEq := rfl
       direction := use.direction
-      directionEq := rfl }
+      directionEq := rfl
+      focus := .candidate }
   output :=
     { requestedIndex := gap.index
       requestedEq := rfl
@@ -490,16 +519,24 @@ def selectQuery
     {view : AgentState}
     {gap : Gap view}
     {use : AuthorizedUse view gap}
-    (_transport : AuthorizedTransport view gap use) : Query gap.index :=
-  @Query.reveal gap.index
+    (transport : AuthorizedTransport view gap use) : Query gap.index :=
+  match transport.reading.focus with
+  | .candidate => @Query.reveal gap.index
+  | .evidence => @Query.confirm gap.index
 
 def selectedQueryAdmissible
     {view : AgentState}
     {gap : Gap view}
     {use : AuthorizedUse view gap}
     (transport : AuthorizedTransport view gap use) :
-    QueryAdmissible view gap use transport (selectQuery transport) :=
-  .reveal
+    QueryAdmissible view gap use transport (selectQuery transport) := by
+  cases focusEq : transport.reading.focus with
+  | candidate =>
+      rw [selectQuery, focusEq]
+      exact .reveal
+  | evidence =>
+      rw [selectQuery, focusEq]
+      exact .confirm
 
 def respond
     (world : World)
@@ -507,7 +544,83 @@ def respond
     (query : Query index) : Response query := by
   cases query with
   | reveal => exact .revealed (world.at index)
+  | confirm => exact .confirmed (world.at index)
   | noInformation => exact .noInformation
+
+structure ResponseFootprint
+    {index : Index} (query : Query index) where
+  requestedIndex : Index
+  requestedIndex_eq : requestedIndex = index
+  maxResponseBits : Nat
+
+def responseFootprint
+    {index : Index} (query : Query index) : ResponseFootprint query := by
+  cases query with
+  | reveal =>
+      exact
+        { requestedIndex := index
+          requestedIndex_eq := rfl
+          maxResponseBits := 2 }
+  | confirm =>
+      exact
+        { requestedIndex := index
+          requestedIndex_eq := rfl
+          maxResponseBits := 2 }
+  | noInformation =>
+      exact
+        { requestedIndex := index
+          requestedIndex_eq := rfl
+          maxResponseBits := 0 }
+
+def WorldsAgreeOn
+    {index : Index}
+    {query : Query index}
+    (footprint : ResponseFootprint query)
+    (left right : World) : Prop :=
+  left.at footprint.requestedIndex = right.at footprint.requestedIndex
+
+def encodedResponseBits
+    {index : Index}
+    {query : Query index} : Response query -> Nat
+  | .revealed _ => 2
+  | .confirmed _ => 2
+  | .noInformation => 0
+
+theorem respond_local
+    {index : Index}
+    (query : Query index)
+    (left right : World)
+    (agree : WorldsAgreeOn (responseFootprint query) left right) :
+    respond left query = respond right query := by
+  cases query with
+  | reveal =>
+      have atIndex : left.at index = right.at index := by
+        rw [<-(responseFootprint (Query.reveal index)).requestedIndex_eq]
+        exact agree
+      exact congrArg Response.revealed atIndex
+  | confirm =>
+      have atIndex : left.at index = right.at index := by
+        rw [<-(responseFootprint (Query.confirm index)).requestedIndex_eq]
+        exact agree
+      exact congrArg Response.confirmed atIndex
+  | noInformation => rfl
+
+theorem respond_withinBound
+    (world : World)
+    {index : Index}
+    (query : Query index) :
+    encodedResponseBits (respond world query) <=
+      (responseFootprint query).maxResponseBits := by
+  cases query with
+  | reveal =>
+      change 2 <= 2
+      exact Nat.le_refl 2
+  | confirm =>
+      change 2 <= 2
+      exact Nat.le_refl 2
+  | noInformation =>
+      change 0 <= 0
+      exact Nat.le_refl 0
 
 def buildRepair
     (view : AgentState)
@@ -588,6 +701,22 @@ def state2 : ClosedState :=
 def state3 : ClosedState :=
   finiteSystem.nextState state2
 
+def state0_reachable :
+    ReachableFromInitial finiteSystem canonicalWorld state0 :=
+  .initial
+
+def state1_reachable :
+    ReachableFromInitial finiteSystem canonicalWorld state1 :=
+  .next state0_reachable
+
+def state2_reachable :
+    ReachableFromInitial finiteSystem canonicalWorld state2 :=
+  .next state1_reachable
+
+def state3_reachable :
+    ReachableFromInitial finiteSystem canonicalWorld state3 :=
+  .next state2_reachable
+
 def gap0 : Gap state0.agent :=
   { index := .first
     kind := .witnessedMismatch
@@ -610,8 +739,81 @@ def use0 : AuthorizedUse state0.agent gap0 :=
 def transport0 : AuthorizedTransport state0.agent gap0 use0 :=
   finiteSystem.executeTransport state0.agent gap0 use0
 
+def inspectUse0 : AuthorizedUse state0.agent gap0 where
+  direction := .inspectWitnessedMismatch
+  evidence := .inspectMismatch gap0.observableEvidence
+
+theorem use0_ne_inspectUse0 : use0 = inspectUse0 -> False := by
+  intro equality
+  have directionEquality := congrArg
+    (fun use : AuthorizedUse state0.agent gap0 => use.direction) equality
+  cases directionEquality
+
+def evidenceReading0 : AuthorizedReading state0.agent gap0 use0 where
+  index := gap0.index
+  indexEq := rfl
+  direction := use0.direction
+  directionEq := rfl
+  focus := .evidence
+
+def evidenceTransport0 : AuthorizedTransport state0.agent gap0 use0 where
+  reading := evidenceReading0
+  output :=
+    { requestedIndex := gap0.index
+      requestedEq := rfl
+      informative := true }
+  evidence :=
+    { direction := use0.direction
+      directionEq := rfl
+      informativeEq := rfl
+      reachesGap := rfl }
+
+def rejectedTransportOutput0 :
+    TransportOutput state0.agent gap0 use0 transport0.reading where
+  requestedIndex := gap0.index
+  requestedEq := rfl
+  informative := false
+
+theorem rejectedTransportOutput0_hasNoEvidence :
+    TransportEvidence
+      state0.agent gap0 use0 transport0.reading rejectedTransportOutput0 -> False := by
+  intro evidence
+  cases evidence.informativeEq
+
+theorem transport0_ne_evidenceTransport0 :
+    transport0 = evidenceTransport0 -> False := by
+  intro equality
+  have focusEquality := congrArg
+    (fun transport : AuthorizedTransport state0.agent gap0 use0 =>
+      transport.reading.focus)
+    equality
+  cases focusEquality
+
 def query0 : Query gap0.index :=
   finiteSystem.selectQuery transport0
+
+def confirmQuery0 : Query gap0.index := .confirm gap0.index
+
+def evidenceQuery0 : Query gap0.index :=
+  finiteSystem.selectQuery evidenceTransport0
+
+theorem evidenceQuery0_eq_confirm : evidenceQuery0 = confirmQuery0 := rfl
+
+def confirmQuery0_admissible :
+    QueryAdmissible state0.agent gap0 use0 transport0 confirmQuery0 :=
+  .confirm
+
+def noInformationQuery0 : Query gap0.index := .noInformation gap0.index
+
+theorem noInformationQuery0_not_admissible :
+    QueryAdmissible
+      state0.agent gap0 use0 transport0 noInformationQuery0 -> False := by
+  intro admissible
+  cases admissible
+
+theorem query0_ne_confirmQuery0 : query0 = confirmQuery0 -> False := by
+  intro equality
+  cases equality
 
 def response0 : Response query0 :=
   finiteSystem.respond state0.world query0
@@ -1086,6 +1288,51 @@ def secondEliminatedWorld : World := secondFiberAlternative
 
 def thirdEliminatedWorld : World := thirdFiberAlternative
 
+structure SelectedQuerySplitsCompatibleFiber
+    (state : ClosedState)
+    (gap : Gap state.agent)
+    (use : AuthorizedUse state.agent gap)
+    (transport : AuthorizedTransport state.agent gap use) where
+  leftWorld : World
+  rightWorld : World
+  leftCompatible : compatibleWithViewHistory state.agent leftWorld
+  rightCompatible : compatibleWithViewHistory state.agent rightWorld
+  responsesSeparated :
+    finiteSystem.respond leftWorld (finiteSystem.selectQuery transport) =
+      finiteSystem.respond rightWorld (finiteSystem.selectQuery transport) -> False
+
+def selectedQuery0_splitsCompatibleFiber :
+    SelectedQuerySplitsCompatibleFiber state0 gap0 use0 transport0 where
+  leftWorld := canonicalWorld
+  rightWorld := firstEliminatedWorld
+  leftCompatible := state0_actualCompatible
+  rightCompatible := (compatible_state0_iff firstEliminatedWorld).mpr (by
+    intro equality
+    cases equality)
+  responsesSeparated := by
+    intro equality
+    cases equality
+
+def selectedQuery1_splitsCompatibleFiber :
+    SelectedQuerySplitsCompatibleFiber state1 gap1 use1 transport1 where
+  leftWorld := canonicalWorld
+  rightWorld := secondFiberAlternative
+  leftCompatible := state1_actualCompatible
+  rightCompatible := secondFiberAlternative_compatible
+  responsesSeparated := by
+    intro equality
+    cases equality
+
+def selectedQuery2_splitsCompatibleFiber :
+    SelectedQuerySplitsCompatibleFiber state2 gap2 use2 transport2 where
+  leftWorld := canonicalWorld
+  rightWorld := thirdFiberAlternative
+  leftCompatible := state2_actualCompatible
+  rightCompatible := thirdFiberAlternative_compatible
+  responsesSeparated := by
+    intro equality
+    cases equality
+
 def alternateResponse0 : Response query0 := .revealed .blue
 
 def alternateRepair0 :=
@@ -1325,6 +1572,75 @@ theorem state3_knownClosedOnRepairedPrefix :
           | head => exact gap2ClosedByState3.knownCorrect
           | tail _ membership => cases membership
 
+def canonicalDomain : List Index := [.first, .second, .third]
+
+def gapPresenceCount (view : AgentState) (index : Index) : Nat :=
+  match gapAt view index with
+  | none => 0
+  | some _ => 1
+
+def openGapCount (view : AgentState) : Nat :=
+  gapPresenceCount view .first +
+    gapPresenceCount view .second +
+    gapPresenceCount view .third
+
+theorem state0_openGapCount : openGapCount state0.agent = 3 := rfl
+
+theorem state1_openGapCount : openGapCount state1.agent = 2 := rfl
+
+theorem state2_openGapCount : openGapCount state2.agent = 1 := rfl
+
+theorem state3_openGapCount : openGapCount state3.agent = 0 := rfl
+
+theorem state1_strictlyReducesOpenGaps :
+    openGapCount state1.agent < openGapCount state0.agent := by
+  rw [state1_openGapCount, state0_openGapCount]
+  exact Nat.lt_succ_self 2
+
+theorem state2_strictlyReducesOpenGaps :
+    openGapCount state2.agent < openGapCount state1.agent := by
+  rw [state2_openGapCount, state1_openGapCount]
+  exact Nat.lt_succ_self 1
+
+theorem state3_strictlyReducesOpenGaps :
+    openGapCount state3.agent < openGapCount state2.agent := by
+  rw [state3_openGapCount, state2_openGapCount]
+  exact Nat.lt_succ_self 0
+
+def finiteClosureBound : Nat := canonicalDomain.length
+
+def finiteStateAt : Nat -> ClosedState
+  | 0 => state0
+  | stage + 1 => finiteSystem.nextState (finiteStateAt stage)
+
+theorem finiteStateAt_zero : finiteStateAt 0 = state0 := rfl
+
+theorem finiteStateAt_one : finiteStateAt 1 = state1 := rfl
+
+theorem finiteStateAt_two : finiteStateAt 2 = state2 := rfl
+
+theorem finiteStateAt_bound : finiteStateAt finiteClosureBound = state3 := rfl
+
+theorem finiteOrbit_reachesKnownClosedOn :
+    KnownClosedOn finiteSystem
+      (finiteStateAt finiteClosureBound).agent
+      (finiteStateAt finiteClosureBound).agent.candidate
+      canonicalDomain := by
+  change KnownClosedOn finiteSystem
+    state3.agent state3.agent.candidate repairedPrefix3
+  exact state3_knownClosedOnRepairedPrefix
+
+theorem finiteOrbit_reachesClosedOn :
+    ClosedOn finiteData
+      (finiteStateAt finiteClosureBound).world
+      (finiteStateAt finiteClosureBound).agent.candidate
+      canonicalDomain := by
+  change ClosedOn finiteData state3.world state3.agent.candidate canonicalDomain
+  intro index membership
+  exact correctAt_of_knownCorrectAt
+    (finiteOrbit_reachesKnownClosedOn index membership)
+    state3_actualCompatible
+
 structure FiniteClosureOrbitCertificate where
   firstGap :
     TypedSemanticGap
@@ -1387,6 +1703,7 @@ end Meta
 
 /- AXIOM_AUDIT_BEGIN -/
 #print axioms Meta.ActiveSemanticClosure.Finite.finiteSystem
+#print axioms Meta.ActiveSemanticClosure.Finite.state3_reachable
 #print axioms Meta.ActiveSemanticClosure.Finite.typedGap0
 #print axioms Meta.ActiveSemanticClosure.Finite.typedGap1
 #print axioms Meta.ActiveSemanticClosure.Finite.typedGap2
@@ -1399,5 +1716,13 @@ end Meta
 #print axioms Meta.ActiveSemanticClosure.Finite.alternateResponse0_not_closesGap
 #print axioms Meta.ActiveSemanticClosure.Finite.alternateResponse1_not_closesGap
 #print axioms Meta.ActiveSemanticClosure.Finite.alternateResponse2_not_closesGap
+#print axioms Meta.ActiveSemanticClosure.Finite.respond_local
+#print axioms Meta.ActiveSemanticClosure.Finite.respond_withinBound
+#print axioms Meta.ActiveSemanticClosure.Finite.use0_ne_inspectUse0
+#print axioms Meta.ActiveSemanticClosure.Finite.transport0_ne_evidenceTransport0
+#print axioms Meta.ActiveSemanticClosure.Finite.noInformationQuery0_not_admissible
+#print axioms Meta.ActiveSemanticClosure.Finite.selectedQuery0_splitsCompatibleFiber
+#print axioms Meta.ActiveSemanticClosure.Finite.finiteOrbit_reachesKnownClosedOn
+#print axioms Meta.ActiveSemanticClosure.Finite.finiteOrbit_reachesClosedOn
 #print axioms Meta.ActiveSemanticClosure.Finite.finiteClosureOrbitCertificate
 /- AXIOM_AUDIT_END -/

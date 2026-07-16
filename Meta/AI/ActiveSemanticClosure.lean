@@ -700,6 +700,44 @@ structure LawfulActiveSemanticClosureSystem
       (system.nextState state).agent
       (system.nextState state).world
 
+def ActualWorldCompatible
+    {D : ActiveClosureData.{u}}
+    {G : ActiveClosureGapLanguage.{u, v} D}
+    {T : ActiveClosureTransportLanguage.{u, v} D G}
+    {I : ActiveClosureInteractionLanguage.{u, v} D G T}
+    (system : ActiveSemanticClosureSystem D G T I)
+    (state : ActiveSemanticClosureState D) : Prop :=
+  system.CompatibleWithViewHistory state.agent state.world
+
+inductive ReachableFromInitial
+    {D : ActiveClosureData.{u}}
+    {G : ActiveClosureGapLanguage.{u, v} D}
+    {T : ActiveClosureTransportLanguage.{u, v} D G}
+    {I : ActiveClosureInteractionLanguage.{u, v} D G T}
+    (system : ActiveSemanticClosureSystem D G T I)
+    (world : D.SemanticWorld) : ActiveSemanticClosureState D -> Prop where
+  | initial : ReachableFromInitial system world (system.initialState world)
+  | next
+      {state : ActiveSemanticClosureState D}
+      (reachable : ReachableFromInitial system world state) :
+      ReachableFromInitial system world (system.nextState state)
+
+theorem reachable_actualCompatible
+    {D : ActiveClosureData.{u}}
+    {G : ActiveClosureGapLanguage.{u, v} D}
+    {T : ActiveClosureTransportLanguage.{u, v} D G}
+    {I : ActiveClosureInteractionLanguage.{u, v} D G T}
+    {system : ActiveSemanticClosureSystem D G T I}
+    (laws : LawfulActiveSemanticClosureSystem system)
+    {world : D.SemanticWorld}
+    {state : ActiveSemanticClosureState D}
+    (reachable : ReachableFromInitial system world state) :
+    ActualWorldCompatible system state := by
+  induction reachable with
+  | initial => exact laws.initialActualCompatible world
+  | next reachable inductionHypothesis =>
+      exact laws.nextPreservesActualCompatibility _ inductionHypothesis
+
 end ActiveSemanticClosure
 end Meta
 
@@ -711,4 +749,5 @@ end Meta
 #print axioms Meta.ActiveSemanticClosure.fiberDeterminateAt_of_knownCorrectAt
 #print axioms Meta.ActiveSemanticClosure.GapClosedBy
 #print axioms Meta.ActiveSemanticClosure.LawfulActiveSemanticClosureSystem
+#print axioms Meta.ActiveSemanticClosure.reachable_actualCompatible
 /- AXIOM_AUDIT_END -/

@@ -1668,7 +1668,11 @@ Meta/AI/
   OpenActiveSemanticClosure.lean
   VisibleFactoredClosureNoGo.lean
   ActiveClosureFoundationalRealization.lean
+  OpenClosureFoundationalRealization.lean
+  ActiveClosureUseGraphNonReduction.lean
+  ActiveClosureInterventions.lean
   CertifiedInference.lean
+  LeanValidationCompleteness.lean
   EmpiricalTraceSchema.lean
   EmpiricalTraceVerifier.lean
   AIFoundationalValidation.lean
@@ -1693,8 +1697,8 @@ Meta.AI.ActiveSemanticClosure
         v                              v
 Meta.AI.FiniteActiveSemanticClosure  Meta.AI.OpenActiveSemanticClosure
         |                              |
-        v                              |
-Meta.AI.VisibleFactoredClosureNoGo     |
+        v                              v
+Meta.AI.VisibleFactoredClosureNoGo   Meta.AI.OpenClosureFoundationalRealization
         |                              |
         +---------------+--------------+
                         |
@@ -1717,6 +1721,9 @@ Meta.Semantics.DynamicFoundationalStability
         |
         v
 Meta.AI.ActiveClosureFoundationalRealization
+        |
+        v
+Meta.AI.ActiveClosureUseGraphNonReduction
         |
         +------------------------------+
                                        v
@@ -1991,6 +1998,59 @@ stabilité des prédicats de fermeture sous réparation et réindexation.
 Si l'une de ces conclusions exige un champ du même nom dans
 `AIFoundationalValidation`, le raccord est conditionnel et échoue à l'exigence
 fondationnelle.
+
+#### Statut Lean non empirique
+
+La phase Lean non-v23 est désormais matérialisée par les modules ci-dessus.
+En particulier :
+
+```text
+ActiveClosureFoundationalRealization
+  réalise intrinsèquement l'orbite finie ;
+
+OpenClosureFoundationalRealization
+  réalise intrinsèquement chaque rang de l'orbite ouverte ;
+
+ActiveClosureUseGraphNonReduction
+  construit deux sémantiques licites au même graphe d'usage dont les traces de
+  transport exécutées diffèrent ;
+
+VisibleFactoredClosureNoGo
+  contient le no-go passif et un no-go factorisé portant sur les gaps,
+  réparations et preuves GapClosedBy de l'instance finie ;
+
+CertifiedInference
+  contient les équations de provenance et les sensibilités causales
+  observables ;
+
+ActiveClosureInterventions
+  définit des interventions dépendantes sur observation, gap, usage,
+  transport, requête, réponse et patch ; chaque intervention remplace un seul
+  maillon et recalcule les maillons aval sans cast non certifié ;
+
+LeanValidationCompleteness
+  fournit `AILeanNonV23Obligations`, qui exige des témoins atteignables de
+  non-trivialité sémantique et opérationnelle, les contrats locaux et bornés de
+  réponse, la décroissance interne de la mesure finie, les interventions
+  causales, les deux réalisations fondationnelles et les non-réductions ;
+
+AIFoundationalValidation
+  assemble les deux systèmes, leurs réalisations, le schéma causal commun,
+  les no-go, le run fini certifié et `AILeanNonV23Obligations`.
+```
+
+L'orbite ouverte expose en outre la forme exacte de la candidate au rang `n`,
+la correction connue de chaque entrée déjà apprise, leur conservation sous la
+réparation, l'injectivité des états par leur rang et l'absence de retour exact.
+Les certificats fini et ouvert transportent explicitement leurs preuves
+`ReachableFromInitial`; les mondes alternatifs de la fibre finie sont reliés à
+la même vue atteignable, et l'orbite ouverte porte le contrat local et borné de
+son empreinte de réponse.
+Cette clôture Lean ne constitue pas la campagne expérimentale v23 : les schémas
+de traces empiriques, le modèle appris, l'exécution statistique des
+interventions et les vérificateurs v23 restent les livrables des phases
+suivantes. La sémantique typée des interventions, elle, appartient déjà à la
+clôture Lean.
 
 ### 6.3 Théorèmes de causalité structurelle
 
@@ -3702,7 +3762,11 @@ Meta/AI/
   OpenActiveSemanticClosure.lean
   VisibleFactoredClosureNoGo.lean
   ActiveClosureFoundationalRealization.lean
+  OpenClosureFoundationalRealization.lean
+  ActiveClosureUseGraphNonReduction.lean
+  ActiveClosureInterventions.lean
   CertifiedInference.lean
+  LeanValidationCompleteness.lean
   EmpiricalTraceSchema.lean
   EmpiricalTraceVerifier.lean
   AIFoundationalValidation.lean
