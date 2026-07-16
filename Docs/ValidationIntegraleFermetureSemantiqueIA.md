@@ -128,6 +128,56 @@ un certificat Lean calculé depuis les traces ;
 une comparaison empirique indépendante et OOD scellée.
 ```
 
+### 0.3 Cible finale : successeur intégral de v22
+
+La cible finale n'est pas un simple test empirique v23, ni la seule
+concordance d'une petite instance Lean avec un environnement Python. Ce petit
+domaine fini est un jalon interne obligatoire : il fixe les types, les
+équations causales et les vérificateurs avant tout entraînement. Il ne constitue
+pas le livrable scientifique final.
+
+Le livrable final est le successeur intégral de v22. Il doit conserver au moins
+le même niveau de matérialité expérimentale :
+
+```text
+environnements exécutables ;
+modèles effectivement entraînés ;
+baselines appariées ;
+runs multi-seeds ;
+checkpoints et poids liés par hash ;
+traces brutes rejouables ;
+interventions causales ;
+évaluations OOD scellées ;
+certificats indépendamment vérifiables ;
+réplication du run et du nouvel entraînement.
+```
+
+Sa portée doit toutefois être plus forte que v22. La campagne doit démontrer
+empiriquement et certifier formellement la chaîne dynamique complète :
+
+```text
+gap détecté par l'agent
+→ usage autorisé
+→ transport preuve-pertinent
+→ requête dérivée
+→ réponse environnementale
+→ réparation intrinsèque
+→ état suivant
+→ conservation cumulative
+→ nouveau gap ou fermeture certifiée.
+```
+
+Elle doit en outre comparer causalement cette architecture aux classes passives
+et visibles factorisées définies dans le présent document, sur plusieurs
+budgets, plusieurs domaines et des familles OOD réellement absentes de
+l'entraînement.
+
+Les étapes formelles et le modèle fini ne peuvent donc jamais être présentés
+comme un remplacement de la campagne empirique. Inversement, la campagne ne
+peut pas commencer avant leur fermeture : ils constituent le contrat
+exécutable et falsifiable que tous les scripts, modèles, traces et certificats
+v23 devront réaliser exactement.
+
 ## 1. Nature exacte de la revendication
 
 ### 1.1 Ce qui doit être démontré
@@ -4070,6 +4120,10 @@ Il ne faut pas commencer par une nouvelle grande campagne GPU. Le premier
 jalon décisif est la concordance exhaustive entre une petite instance Lean et
 son exécution Python. Elle fixe la signification de chaque champ avant que
 l'apprentissage statistique puisse masquer une ambiguïté architecturale.
+
+Ce jalon n'est pas la cible finale. Une fois franchi, l'ordre ci-dessus doit
+aboutir à une campagne empirique v23 complète, successeur matériel de v22 et
+non à un seul test minimal, même concluant.
 
 ## 25. Audit interne de couverture
 
