@@ -1,0 +1,35 @@
+import Meta.Core.Specialization.Parity
+
+/-!
+# Compatibility facade for minimal parity separation
+
+Import `Meta.Core.Specialization.Parity` in new code.
+-/
+
+/- AXIOM_AUDIT_BEGIN -/
+#print axioms Meta.ClosedStabilityTheorem.ParityRegime
+#print axioms Meta.ClosedStabilityTheorem.ParityVisible
+#print axioms Meta.ClosedStabilityTheorem.parityProjection
+#print axioms Meta.ClosedStabilityTheorem.parityRegime_left_ne_right
+#print axioms Meta.ClosedStabilityTheorem.parityRegime_right_ne_left
+#print axioms Meta.ClosedStabilityTheorem.parityProjection_left_eq_right
+#print axioms Meta.ClosedStabilityTheorem.parityProjection_right_eq_left
+#print axioms Meta.ClosedStabilityTheorem.ParityRegimeRepair
+#print axioms Meta.ClosedStabilityTheorem.parityRegimeRepair
+#print axioms Meta.ClosedStabilityTheorem.parityStructuralTwoPole
+#print axioms Meta.ClosedStabilityTheorem.parityOperationalTwoPole
+#print axioms Meta.ClosedStabilityTheorem.parityOppositeStructuralTwoPole
+#print axioms Meta.ClosedStabilityTheorem.parityOppositeOperationalTwoPole
+#print axioms Meta.ClosedStabilityTheorem.parityOperationalTwoPole_sameVisible
+#print axioms Meta.ClosedStabilityTheorem.parityOperationalTwoPole_separated
+#print axioms Meta.ClosedStabilityTheorem.parityOppositeOperationalTwoPole_sameVisible
+#print axioms Meta.ClosedStabilityTheorem.parityOppositeOperationalTwoPole_separated
+#print axioms Meta.ClosedStabilityTheorem.parityStructuralTwoPole_refutes_shortPresentation
+#print axioms Meta.ClosedStabilityTheorem.parityOperationalTwoPole_refutes_shortPresentation
+#print axioms Meta.ClosedStabilityTheorem.parityOppositeStructuralTwoPole_refutes_shortPresentation
+#print axioms Meta.ClosedStabilityTheorem.parityOppositeOperationalTwoPole_refutes_shortPresentation
+#print axioms Meta.ClosedStabilityTheorem.parityOperationalTwoPole_not_contractible
+#print axioms Meta.ClosedStabilityTheorem.parityOppositeOperationalTwoPole_not_contractible
+#print axioms Meta.ClosedStabilityTheorem.parityOperationalTwoPole_noProjectiveReconstruction
+#print axioms Meta.ClosedStabilityTheorem.parityOppositeOperationalTwoPole_noProjectiveReconstruction
+/- AXIOM_AUDIT_END -/
