@@ -316,6 +316,144 @@ def stateAt (world : World) : Nat -> ClosedState
   | 0 => finiteSystem.initialState world
   | stage + 1 => finiteSystem.nextState (stateAt world stage)
 
+def candidateEqB (left right : Candidate) : Bool := left == right
+
+def observationEqB (left right : Observation) : Bool := left == right
+
+def repairHistoryEqB
+    (left right : List RepairRecord) : Bool := left == right
+
+def agentStateEqB (left right : AgentState) : Bool :=
+  candidateEqB left.candidate right.candidate &&
+    observationEqB left.observation right.observation &&
+    repairHistoryEqB left.history right.history
+
+instance agentStateBEq : BEq AgentState where
+  beq := agentStateEqB
+
+def optionToList {α : Type} : Option α -> List α
+  | none => []
+  | some value => [value]
+
+def gapsOfView (view : AgentState) : List (Gap view) :=
+  optionToList (gapAt view .first) ++
+    optionToList (gapAt view .second) ++
+    optionToList (gapAt view .third)
+
+def usesOfGap
+    {view : AgentState}
+    (gap : Gap view) : List (AuthorizedUse view gap) :=
+  match gap with
+  | ⟨_, .witnessedMismatch, evidence⟩ =>
+      [ { direction := .correctWitnessedMismatch
+          evidence := .mismatch evidence },
+        { direction := .inspectWitnessedMismatch
+          evidence := .inspectMismatch evidence } ]
+  | ⟨_, .unresolvedFiber, evidence⟩ =>
+      [ { direction := .resolveFiber
+          evidence := .fiber evidence },
+        { direction := .inspectFiber
+          evidence := .inspectFiber evidence } ]
+
+def transportWithFocus
+    {view : AgentState}
+    (gap : Gap view)
+    (use : AuthorizedUse view gap)
+    (focus : ReadingFocus) : AuthorizedTransport view gap use where
+  reading :=
+    { index := gap.index
+      indexEq := rfl
+      direction := use.direction
+      directionEq := rfl
+      focus := focus }
+  output :=
+    { requestedIndex := gap.index
+      requestedEq := rfl
+      informative := true }
+  evidence :=
+    { direction := use.direction
+      directionEq := rfl
+      informativeEq := rfl
+      reachesGap := rfl }
+
+def transportsOfUse
+    {view : AgentState}
+    (gap : Gap view)
+    (use : AuthorizedUse view gap) :
+    List (AuthorizedTransport view gap use) :=
+  [transportWithFocus gap use .candidate,
+    transportWithFocus gap use .evidence]
+
+def repairExamplesOfTransport
+    (view : AgentState)
+    (gap : Gap view)
+    (use : AuthorizedUse view gap)
+    (transport : AuthorizedTransport view gap use) :
+    List CertifiedExample :=
+  let revealQuery := @Query.reveal gap.index
+  let confirmQuery := @Query.confirm gap.index
+  [ repairExample view gap use transport revealQuery (.revealed .red)
+      (buildRepair view gap use transport revealQuery (.revealed .red)),
+    repairExample view gap use transport revealQuery (.revealed .green)
+      (buildRepair view gap use transport revealQuery (.revealed .green)),
+    repairExample view gap use transport revealQuery (.revealed .blue)
+      (buildRepair view gap use transport revealQuery (.revealed .blue)),
+    repairExample view gap use transport confirmQuery (.confirmed .red)
+      (buildRepair view gap use transport confirmQuery (.confirmed .red)),
+    repairExample view gap use transport confirmQuery (.confirmed .green)
+      (buildRepair view gap use transport confirmQuery (.confirmed .green)),
+    repairExample view gap use transport confirmQuery (.confirmed .blue)
+      (buildRepair view gap use transport confirmQuery (.confirmed .blue)) ]
+
+def reachableAgentStates : List AgentState :=
+  (allWorlds.flatMap fun world =>
+    [ (stateAt world 0).agent,
+      (stateAt world 1).agent,
+      (stateAt world 2).agent,
+      (stateAt world 3).agent ]).eraseDups
+
+def certifiableAgentStates : List AgentState :=
+  (reachableAgentStates ++
+    [ Interventions.observationIntervenedState0.agent,
+      FiniteInterventionMatrix.droppedHistoryState2.agent ]).eraseDups
+
+def semanticGapInputs : List CertifiedExample :=
+  certifiableAgentStates.flatMap fun view =>
+    match finiteSystem.detectGap view with
+    | .closed => []
+    | .open gap => [gapExample view gap]
+
+def semanticUseInputs : List CertifiedExample :=
+  certifiableAgentStates.flatMap fun view =>
+    (gapsOfView view).map fun gap =>
+      useExample view gap (finiteSystem.authorize view gap)
+
+def semanticTransportInputs : List CertifiedExample :=
+  certifiableAgentStates.flatMap fun view =>
+    (gapsOfView view).flatMap fun gap =>
+      (usesOfGap gap).map fun use =>
+        transportExample view gap use
+          (finiteSystem.executeTransport view gap use)
+
+def semanticQueryInputs : List CertifiedExample :=
+  certifiableAgentStates.flatMap fun view =>
+    (gapsOfView view).flatMap fun gap =>
+      (usesOfGap gap).flatMap fun use =>
+        (transportsOfUse gap use).map fun transport =>
+          queryExample view gap use transport
+            (finiteSystem.selectQuery transport)
+
+def semanticRepairInputs : List CertifiedExample :=
+  certifiableAgentStates.flatMap fun view =>
+    (gapsOfView view).flatMap fun gap =>
+      (usesOfGap gap).flatMap fun use =>
+        (transportsOfUse gap use).flatMap fun transport =>
+          repairExamplesOfTransport view gap use transport
+
+def semanticCertifiedInputs : List CertifiedExample :=
+  semanticGapInputs ++ semanticUseInputs ++ semanticTransportInputs ++
+    semanticQueryInputs ++ semanticRepairInputs
+
 def naturalCertifiedInputs : List CertifiedExample :=
   allWorlds.flatMap fun world =>
     naturalExamples (stateAt world 0) ++
@@ -350,4 +488,5 @@ end Meta
 #print axioms Meta.ActiveSemanticClosure.FiniteQuantized.naturalCertifiedInputs
 #print axioms Meta.ActiveSemanticClosure.FiniteQuantized.interventionCertifiedInputs
 #print axioms Meta.ActiveSemanticClosure.FiniteQuantized.certifiedInputs
+#print axioms Meta.ActiveSemanticClosure.FiniteQuantized.semanticCertifiedInputs
 /- AXIOM_AUDIT_END -/

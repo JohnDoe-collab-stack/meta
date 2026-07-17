@@ -41,7 +41,10 @@ python3 export_quantized_agent_v23.py \
   artifacts/development/quantized_checkpoint_v23.json \
   --out-lean ../../Meta/AI/QuantizedCertifiedAgent.lean
 
-lake build Meta.AI.QuantizedCertifiedAgent
+python3 certify_quantized_semantic_alignment_v23.py \
+  --out-lean ../../Meta/AI/QuantizedCertifiedAgentSemanticClosure.lean
+
+lake build Meta.AI.QuantizedCertifiedAgentSemanticClosure
 ```
 
 ## Empreintes
@@ -65,8 +68,17 @@ quantized_checkpoint_v23.json
 Meta/AI/QuantizedCertifiedAgent.lean
 26ea322a39dce56c04e346f5eb9a844d332796812e6b35ba10bec21ebd375208
 
-bundle trié des 95 modules QuantizedCertifiedAgent*.lean
+bundle trié des 95 modules QuantizedCertifiedAgent*.lean hors suffixe Semantic
 2362c6948ed488c628bec498383eff808f0199ec3910001425f16eb493e40b42
+
+certify_quantized_semantic_alignment_v23.py
+75c365a514ea4bd1337c94375e0e90d9fd2d4f3d7598bde135fc08a9815f7f65
+
+Meta/AI/FiniteQuantizedAgentSemantics.lean
+c41c9d18eed2157628ff476cb5ac967acf4b26d76d64f39020b153a16ac5e323
+
+bundle trié des 90 modules QuantizedCertifiedAgentSemantic*.lean
+57fb70a848829e18eabd8084047beaaccee03f24df34a94e781695090319e5ba
 ```
 
 ## Portée du certificat Lean
@@ -84,3 +96,13 @@ option locale de Lake. Les égalités calculatoires sont prouvées par réductio
 `rfl` ; `decide` ne traite que les propriétés booléennes de la trace. Le calcul
 n'utilise pas `native_decide`, car ce dernier introduirait un axiome généré
 incompatible avec le contrat constructif du dépôt.
+
+`SemanticallyClosedCertifiedRun` ajoute la fermeture qui n'était pas portée
+par le seul certificat d'inférence. Lean reconstruit d'abord, depuis les types
+dépendants du domaine fini, 40 états atteignables et 42 états certifiables.
+Il en dérive exactement 15 décisions de gap, 22 d'usage, 44 de transport, 88
+de requête et 528 de réparation. Chaque entrée des lots d'inférence est égale
+à l'entrée désignée par une référence sémantique, et chaque famille de
+références couvre tous ses indices, sans omission, duplication ou indice hors
+borne. Le paquet fondationnel importe ce certificat renforcé, pas seulement
+`ValidCertifiedRun`.

@@ -103,8 +103,15 @@ réification des poids, des 697 entrées et de la trace dans
 `Meta/AI/QuantizedCertifiedAgent.lean` et ses modules générés ;
 88 lots de huit obligations au plus, ordonnés dans quatre chaînes d'import
 qui bornent intrinsèquement la concurrence de compilation ;
-certificat `ValidCertifiedRun` lié à l'architecture et aux catalogues v23
-exacts, sans import d'un verdict JSON comme proposition.
+énumération Lean intrinsèque de 40 états atteignables et 42 états
+certifiables, puis reconstruction dépendante des 697 décisions sémantiques ;
+alignement exact, par 88 lots, de chaque entrée exportée sur une référence
+sémantique Lean bornée ;
+preuves de couverture sans omission ni duplication des cinq familles
+`15 + 22 + 44 + 88 + 528` ;
+certificat `SemanticallyClosedCertifiedRun` réunissant le
+`ValidCertifiedRun`, les alignements et l'exhaustivité sémantique, sans import
+d'un verdict JSON comme proposition.
 ```
 
 Ces calculs sont pour l'instant des validations de développement. Ils ne sont
