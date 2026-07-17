@@ -1,8 +1,8 @@
 # Standalone verification artifact
 
 This directory is an independent Lean 4 project. Its entry point is
-`Meta/LatentRepair/CertifiedLatentRepair.lean`; `Meta.lean` imports that entry
-point for whole-library builds.
+`Meta.lean`, which imports both the established latent-repair validation and the
+finite adaptive-repairability characterization.
 
 The proof artifact has three layers:
 
@@ -13,11 +13,35 @@ The proof artifact has three layers:
 3. `Meta/LatentRepair`: the publication-specific bridge from continuation
    aliasing to information necessity and from certified closure to restored
    local sufficiency, with exact finite/open certificates.
+4. `Meta/AdaptiveRepairability`: the finite public-environment
+   characterization: computable conflict measure, public repair trees,
+   adaptive no-go, operational equivalence, well-founded synthesis from
+   composable separators, exact-posterior compilation, four countermodels, and
+   an inhabited end-to-end instance.
 
 Build from this directory:
 
 ```bash
-lake build Meta.LatentRepair.CertifiedLatentRepair
+lake build Meta
+```
+
+The adaptive characterization can be checked alone with:
+
+```bash
+lake build Meta.AdaptiveRepairability.PositiveInstance
+```
+
+Its module order is:
+
+```text
+FiniteMeasure
+→ PublicTree
+→ OperationalCharacterization
+→ Synthesis
+→ ExactPosterior
+→ Countermodels
+→ Validation
+→ PositiveInstance
 ```
 
 Lean version: `leanprover/lean4:v4.29.0`.

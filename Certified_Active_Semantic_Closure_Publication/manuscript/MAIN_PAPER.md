@@ -1,9 +1,9 @@
 ---
 title: "Certified Online Repair of Action-Sufficient Latent Representations"
-subtitle: "Information Necessity, Active Semantic Closure, and Constructive Finite/Open Guarantees"
+subtitle: "Information Necessity, Adaptive Characterization, and Constructive Finite/Open Guarantees"
 authors: "Anonymous authors"
 date: "2026-07-17"
-version: "1.0.0"
+version: "1.1.0"
 submission: "Anonymous manuscript"
 bibliography: "../supplement/REFERENCES.bib"
 reference-section-title: "References"
@@ -23,7 +23,13 @@ information-necessity theorem: no controller factored through an aliased visible
 representation can be correct on both hidden situations. We then prove that
 compatible-world aliasing obstructs local semantic sufficiency, whereas
 certified gap closure restores target determinacy, epistemic correctness, and
-correctness in the actual world. Three exact finite repairs strictly shrink the
+correctness in the actual world. For explicitly finite deterministic public
+environments, we additionally prove an adaptive public no-go, characterize
+certified repairability by a global action-resolving public tree, and synthesize
+such a tree from sequentially composable pair separators by recursion on the
+computed number of action conflicts. Exact-posterior trees and four necessity
+countermodels are formalized, and a complete two-world instance establishes
+non-vacuity. Three exact finite repairs strictly shrink the
 compatible-world fiber, preserve earlier closures, and reach stable closure.
 An open realization over natural-number indices strictly reduces the current
 fiber and closes the current gap at every finite stage while never reaching
@@ -61,16 +67,18 @@ typed response. The response determines a candidate patch, an observation
 update, and a history record, all joined by provenance. The successor is the
 execution of this intrinsic repair; it is not an independent oracle.
 
-The paper makes five bounded claims.
+The paper makes six bounded claims.
 
 1. It proves generic information necessity under visible continuation aliasing.
 2. It proves a generic semantic bridge from compatible-world aliasing to
    insufficiency, and from certified closure to restored local sufficiency.
-3. It constructs a complete finite repair trajectory with strict fiber
+3. It characterizes repairability in the declared finite deterministic public
+   class and constructively synthesizes it from composable local separators.
+4. It constructs a complete finite repair trajectory with strict fiber
    reduction, cumulative preservation, termination, and stable closure.
-4. It constructs a cumulative open trajectory that closes every current gap,
+5. It constructs a cumulative open trajectory that closes every current gap,
    preserves the learned prefix, and makes progress at every finite stage.
-5. It connects the symbolic decisions to an exactly evaluated quantized agent
+6. It connects the symbolic decisions to an exactly evaluated quantized agent
    on a finite, explicitly reified catalogue.
 
 # 2. Related problem families
@@ -203,6 +211,66 @@ This theorem closes the missing logical bridge between “the current gap was
 closed” and “the repaired representation is locally sufficient for that
 continuation.” It does not identify semantic worlds or internal poles; it only
 proves equality of the task-relevant target on the remaining fiber.
+
+## 4.3 Adaptive repairability characterization
+
+The stronger finite result separates private semantic worlds from public
+strategy state. A `PublicRepairTree` is built only from a public state, an
+obligation, authorized queries, realizable public responses, and
+`PublicRepairStep` values. The world appears only in semantic execution, where
+it determines the response. Every step stores posterior soundness, retention
+of every compatible world producing the response, response provenance, frame
+preservation, strict-identity conservativity, transport coherence, and
+consistency.
+
+For a finite world list, `ActionConflict(s,g,w₁,w₂)` is coexistence in the
+public fiber plus disagreement of required actions. The executable measure
+`μAction(s,g)` counts such ordered conflicts in one fixed global pair list.
+
+**Theorem 4 (conflict measure).** `μAction(s,g)=0` exactly when the fiber at
+`s` is action-sufficient. If a posterior is included in the prior fiber and
+eliminates a selected conflicting pair, `μAction` strictly decreases.
+
+`PubliclyIndistinguishable` quantifies over the same public trees admitted by
+the positive definition. Equality of transcripts entails equality of their
+explicitly recorded terminal public states.
+
+**Theorem 5 (adaptive public no-go).** Two compatible worlds that require
+different actions and remain publicly indistinguishable under every admitted
+repair tree refute `CertifiedRepairableAt`.
+
+`UniformlyActionResolvableAt` contains one public tree whose every leaf is
+action-sufficient. `CertifiedRepairableAt` additionally closes every leaf with
+a public candidate, provenance, frame, identity, transport, and consistency
+certificate.
+
+**Theorem 6 (operational characterization).** Given a total public compiler
+that realizes a correct candidate on every nonempty homogeneous fiber,
+certified repairability is equivalent to uniform action resolvability.
+
+Pairwise separation only at the initial state is insufficient. A
+`ComposablePairSeparatingEpisode` eliminates its selected conflict on every
+leaf and returns the declared repair-domain invariant on every leaf.
+
+**Theorem 7 (constructive synthesis).** Composable adaptive pair separation,
+initial invariant validity, public-fiber nonemptiness, and total homogeneous
+decision realization construct a certified repairability witness. Each
+recursive continuation is accepted only after a derived strict decrease of
+`μAction`; no external rank or terminal bridge is supplied.
+
+For a canonical exact-response compiler, `GeneratedByExactCompiler` restricts
+the exactness claim to trees built by that compiler.
+
+**Theorem 8 (exact leaf posterior).** At every leaf of a compiler-generated
+tree, the represented public fiber is equivalent to the worlds following that
+leaf transcript.
+
+Four finite countermodels isolate the indispensable hypotheses: initial pair
+separation need not compose; a homogeneous fiber need not be expressible by
+the candidate language; a private-world policy invalidates a public no-go; and
+posterior inclusion alone need not preserve a protected frame. A two-world
+exact instance satisfies the complete interfaces and is closed by the generic
+synthesizer.
 
 # 5. Complete certified repair steps
 
@@ -349,17 +417,21 @@ claims require a separate experimental campaign.
 
 # 11. Scope of the solution
 
-The aggregate theorem
-`certifiedLatentRepairPublication` solves the stated repair problem on two
-formally explicit classes:
+The aggregate `certifiedAdaptiveClosurePublicationValidation` combines the
+earlier `certifiedLatentRepairPublication` with the adaptive characterization
+and its inhabited exact instance. The artifact covers a generic finite
+deterministic public class under explicit composable-separator and
+decision-realization interfaces, plus two formally explicit trajectory
+classes:
 
 - a closed finite task whose internal measure reaches stable sufficiency; and
 - a cumulative open task whose intrinsic data consume every nonterminal branch
   by closing the current gap and exposing the next fresh one.
 
-The reusable generic contribution covers information necessity and the
-aliasing/closure/sufficiency bridge for every active-closure system satisfying
-the declared constructive interfaces. Detection completeness, query
+The reusable generic contribution covers information necessity, the
+aliasing/closure/sufficiency bridge, the adaptive public no-go, the operational
+characterization, and well-founded public-strategy synthesis under their
+declared constructive interfaces. Detection completeness, query
 informativeness, strict reduction, and preservation are not asserted for an
 arbitrary user-supplied detector; they are proved for every stage of both
 published realizations. This boundary prevents an implementation law from being
@@ -375,8 +447,10 @@ or external benchmark superiority.
 Action-relevant aliasing is not resolved by relabeling a representation as
 “sufficient.” It creates a proof obligation: either the missing distinction is
 already accessible, it must be acquired, or simultaneous correctness is
-impossible. We formalized that trilemma and constructed the acquisition branch
-through a typed causal repair chain. The finite realization terminates with
+impossible. We formalized that trilemma, characterized when a public acquisition
+strategy exists in the declared finite class, and synthesized it from
+composable local separators. We also constructed the acquisition branch through
+a typed causal repair chain. The finite realization terminates with
 stable closure; the open realization closes every current gap while preserving
 all learned entries and continuing indefinitely. Certified closure is shown to
 restore the precise local sufficiency that aliasing had obstructed. Together

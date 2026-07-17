@@ -22,6 +22,13 @@ It combines the new generic aliasing-to-sufficiency theorems with exact finite
 and open realizations, the visible/passive no-go results, conservative
 foundational semantics, and the five-head quantized certificate.
 
+The finite adaptive characterization is aggregated by
+`certifiedAdaptiveClosurePublicationValidation` in
+[`artifact/Meta.lean`](artifact/Meta.lean). It adds an adaptive public no-go, an
+operational characterization by global repair trees, constructive synthesis
+from composable pair separators, exact leaf posteriors for compiler-generated
+trees, four hypothesis countermodels, and an inhabited two-world exact instance.
+
 The stricter release verdict is the independently typed checklist
 `plannedProblemResolutionAudit` in
 [`artifact/Meta/LatentRepair/ProblemResolutionAudit.lean`](artifact/Meta/LatentRepair/ProblemResolutionAudit.lean).
@@ -32,6 +39,13 @@ Its clause-by-clause interpretation, including the exact non-claims, is in
 
 - A generic visible-factored rule cannot be correct on two hidden situations
   with the same visible code and separated required continuations.
+- In the declared finite deterministic public class, certified repairability is
+  equivalent to a global action-resolving public tree, and composable local
+  separators synthesize such a tree by a strictly decreasing internal conflict
+  measure.
+- Adaptive public indistinguishability of an action-conflicting pair rules out
+  certified repairability; canonical exact-response trees represent their leaf
+  posteriors exactly.
 - Compatible-world target aliasing refutes fiber determinacy and known local
   correctness.
 - `GapClosedBy` constructively restores epistemic correctness, actual-world
@@ -56,6 +70,8 @@ external environments.
 manuscript/MAIN_PAPER.md              anonymous paper
 manuscript/RESUME_FRANCAIS.md         precise French summary
 specification/TARGET_PROBLEM.md        normative independent specification
+specification/ADAPTIVE_REPAIRABILITY_CHARACTERIZATION.md
+                                        finite characterization and proof map
 supplement/TECHNICAL_APPENDIX.md      definitions and theorem map
 supplement/CLAIM_EVIDENCE_MATRIX.md   every publication claim and its evidence
 supplement/PROBLEM_RESOLUTION_AUDIT.md source-problem clause-by-clause verdict
@@ -73,7 +89,7 @@ does not import the surrounding repository or any project-local dependency.
 
 ```bash
 cd artifact
-lake build Meta.LatentRepair.ProblemResolutionAudit Meta
+lake build Meta
 ```
 
 For the shorter structural check, excluding the expensive 88-batch quantized
@@ -86,6 +102,6 @@ declaration does not depend on any axioms. The source audit must also find no
 
 ## Submission status
 
-The scientific content is frozen as version 1.0.0 for anonymous review. Author,
+The scientific content is frozen as version 1.1.0 for anonymous review. Author,
 affiliation, venue formatting, and archival DOI are intentionally absent from
 this blind package and can be added without changing any theorem or claim.

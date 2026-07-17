@@ -26,6 +26,26 @@ simultanément :
 
 Donc, après fermeture, l’aliasing ne peut plus subsister à l’indice réparé.
 
+Le dossier contient maintenant aussi une caractérisation adaptative générale
+pour une classe explicitement finie, déterministe et publique. La stratégie ne
+reçoit jamais le monde réel : il intervient seulement dans l’exécution pour
+produire la réponse environnementale. Un no-go adaptatif prouve qu’une paire de
+mondes en conflit d’action, indiscernable par tous les arbres publics admis,
+interdit la réparabilité certifiée.
+
+Réciproquement, sous une interface totale de réalisation des candidats sur les
+fibres homogènes, la réparabilité certifiée est équivalente à l’existence d’un
+arbre public dont toutes les feuilles sont suffisantes pour l’action. Un
+synthétiseur construit cet arbre à partir d’épisodes séparateurs composables. Sa
+récursion est justifiée uniquement par la diminution du nombre calculé de
+paires en conflit ; aucun rang terminal externe n’est fourni.
+
+Un compilateur exact donne en outre l’égalité entre la fibre de chaque feuille
+générée et son posterior de transcription. Quatre contre-modèles formalisés
+montrent la nécessité de la composabilité, de l’expressivité du candidat, de la
+séparation public/privé et d’une frame explicite. Une instance exacte à deux
+mondes valide la chaîne complète et exclut toute vacuité du théorème.
+
 Chaque étape certifiée contient la chaîne complète : gap ouvert et typé,
 aliasing avant réparation, requête exactement sélectionnée et strictement
 informative, successeur dérivé de la réparation intrinsèque, réduction stricte
@@ -41,13 +61,14 @@ n’existe pas de clôture globale à un stade fini, mais chaque transition est
 effective et chaque gap courant est fermé.
 
 L’objet final
-`Meta.ActiveSemanticClosure.LatentRepair.certifiedLatentRepairPublication`
-assemble ces résultats avec les no-go visible et passif, la conservativité de
+`certifiedAdaptiveClosurePublicationValidation` assemble la publication
+latente antérieure, la caractérisation adaptative et son instance positive avec
+les no-go visible et passif, la conservativité de
 l’identité stricte, la cohérence constructive et l’agent quantifié à cinq têtes
 certifié sur 697 obligations réifiées.
 
 La portée est précise : le résultat est complet pour les systèmes publiés et
-générique pour le théorème de nécessité informationnelle et le pont
-fermeture-suffisance. Il ne revendique ni généralisation statistique hors
+générique pour la nécessité informationnelle, le pont fermeture-suffisance et
+la caractérisation finie sous ses hypothèses explicites. Il ne revendique ni généralisation statistique hors
 catalogue, ni robustesse à des réponses bruitées, ni supériorité sur un
 benchmark externe.

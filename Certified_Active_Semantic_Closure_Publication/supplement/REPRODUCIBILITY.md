@@ -16,7 +16,7 @@ From the package root:
 
 ```bash
 cd artifact
-lake build Meta.LatentRepair.ProblemResolutionAudit Meta
+lake build Meta
 ```
 
 This rebuilds the complete import closure, including all 88 numerical batches
@@ -40,6 +40,12 @@ lake build Meta.AI.OpenActiveSemanticClosure
 lake build Meta.AI.VisibleFactoredClosureNoGo
 lake build Meta.AI.CertifiedInference
 lake build Meta.AI.LeanValidationCompleteness
+lake build Meta.AdaptiveRepairability.FiniteMeasure
+lake build Meta.AdaptiveRepairability.OperationalCharacterization
+lake build Meta.AdaptiveRepairability.Synthesis
+lake build Meta.AdaptiveRepairability.ExactPosterior
+lake build Meta.AdaptiveRepairability.Countermodels
+lake build Meta.AdaptiveRepairability.PositiveInstance
 ```
 
 The final problem-audit target must still be built before accepting the
@@ -53,12 +59,18 @@ Run from `artifact`:
 ```bash
 test "$(rg -l 'AXIOM_AUDIT_BEGIN' Meta/LatentRepair/ProblemResolutionAudit.lean | wc -l)" -eq 1
 tail -n 4 Meta/LatentRepair/ProblemResolutionAudit.lean
-! rg -n '\b(sorry|admit|axiom)\b|Classical|propext|Quot\.sound' Meta/LatentRepair
+for file in Meta/AdaptiveRepairability/*.lean; do
+  test "$(rg -c 'AXIOM_AUDIT_BEGIN' "$file")" -eq 1
+  test "$(tail -n 1 "$file")" = '/- AXIOM_AUDIT_END -/'
+done
+! rg -n '\b(sorry|admit|axiom)\b|open Classical|Classical\.|propext|Quot\.sound' \
+  Meta/LatentRepair Meta/AdaptiveRepairability Meta.lean
 ```
 
-Inspect the build output for the ten publication declarations, the independent
-problem-audit object, and the `Meta.lean` entry point. Each must report that the
-declaration does not depend on any axioms.
+Inspect the build output for the established publication declarations, all
+adaptive-module audit declarations, the independent problem-audit object, and
+the `Meta.lean` entry point. Each must report that the declaration does not
+depend on any axioms.
 
 For the full copied source tree, distinguish comments/documentation from Lean
 dependencies. The authoritative check is the output of `#print axioms` on the
@@ -75,6 +87,13 @@ Meta.ActiveSemanticClosure.LatentRepair.openStrictFiberReductionAt
 Meta.ActiveSemanticClosure.LatentRepair.openCertifiedLatentRepairAt
 Meta.ActiveSemanticClosure.LatentRepair.certifiedLatentRepairPublication
 Meta.ActiveSemanticClosure.LatentRepair.plannedProblemResolutionAudit
+Meta.AdaptiveRepairability.actionConflictMeasure_eq_zero_iff
+Meta.AdaptiveRepairability.adaptivePublicNoGo
+Meta.AdaptiveRepairability.certifiedRepairable_iff_uniformlyActionResolvable
+Meta.AdaptiveRepairability.composableSeparability_implies_certifiedRepairable
+Meta.AdaptiveRepairability.exactGeneratedTree_leafPosterior
+Meta.AdaptiveRepairability.PositiveInstance.synthesizedCertifiedRepairability
+certifiedAdaptiveClosurePublicationValidation
 ```
 
 ## 6. Quantized checkpoint identity

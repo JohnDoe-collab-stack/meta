@@ -1,6 +1,6 @@
 # Artifact manifest
 
-Release: 1.0.0
+Release: 1.1.0
 Release date: 2026-07-17
 Packaging mode: standalone anonymous-review artifact
 
@@ -8,22 +8,25 @@ Packaging mode: standalone anonymous-review artifact
 
 | Component | Count | Role |
 |---|---:|---|
-| Lean source files under `artifact/Meta` | 236 | Complete formal artifact |
+| Lean source files under `artifact/Meta` | 245 | Complete formal artifact |
 | Core Lean modules | 22 | Relaxed use, projection, transport, dynamics |
 | Semantic Lean modules | 13 | Interpretation, soundness, conservativity, stability |
 | AI Lean modules | 200 | Closure systems, instances, no-go, quantized execution |
 | Numerical certificate batches | 88 | Exact quantized traces |
 | Semantic-alignment batches | 88 | Dependent-semantic input coverage |
 | Python files | 22 | Frozen development and experimental tooling |
-| Publication-specific Lean module | 1 | Aliasing-to-sufficiency solution and aggregate |
+| Latent-repair publication modules | 2 | Aliasing-to-sufficiency solution and problem audit |
+| Adaptive-repairability modules | 8 | Characterization, synthesis, exactness, countermodels, validation, instance |
 
 The top-level `Meta.lean` entry point and project configuration are additional
-to the 236 files counted below `Meta/`.
+to the 245 files counted below `Meta/`.
 
 ## Entrypoints
 
 - Formal publication theorem:
   `artifact/Meta/LatentRepair/CertifiedLatentRepair.lean`
+- Adaptive characterization and inhabited instance:
+  `artifact/Meta/AdaptiveRepairability/PositiveInstance.lean`
 - Whole-library import:
   `artifact/Meta.lean`
 - Manuscript: `manuscript/MAIN_PAPER.md`

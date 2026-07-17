@@ -16,10 +16,10 @@ The source problem asks for the following chain:
 9. visible-only and passive systems cannot guarantee the same outcome.
 ```
 
-The publication-specific module closes this chain with
-`CertifiedLatentRepairStep` and `CertifiedLatentRepairPublication`. The
-independent `PlannedProblemResolutionAudit` structure restates the full claimed
-scope as a kernel-checked checklist.
+The publication-specific modules close this chain with
+`CertifiedLatentRepairStep`, `CertifiedLatentRepairPublication`, and the finite
+adaptive-repairability characterization. The independent aggregate structures
+restate the full claimed scope as kernel-checked checklists.
 
 | Obligation | Formal object | Status |
 |---|---|---|
@@ -43,6 +43,16 @@ scope as a kernel-checked checklist.
 | Visible/passive obstruction | `aiClosureNoGoCertificate` | Constructive no-go package |
 | Final aggregation | `certifiedLatentRepairPublication` | Publication theorem |
 | Independent problem verdict | `plannedProblemResolutionAudit` | Axiom-free typed checklist |
+| Action-conflict nullity | `actionConflictMeasure_eq_zero_iff` | Generic finite theorem |
+| Action-conflict monotonicity | `actionConflictMeasure_monotone` | Generic finite theorem |
+| Uniform conflict decrease | `actionConflictMeasure_strictly_decreases` | Generic finite theorem |
+| Adaptive public obstruction | `adaptivePublicNoGo` | Generic theorem over public repair trees |
+| Operational characterization | `certifiedRepairable_iff_uniformlyActionResolvable` | Generic theorem under decision realization |
+| Strategy synthesis | `composableSeparability_implies_certifiedRepairable` | Well-founded constructive theorem |
+| Exact leaf posterior | `exactGeneratedTree_leafPosterior` | Compiler-generated trees only |
+| Necessity tests | four declarations in `Countermodels.lean` | Constructive finite countermodels |
+| Positive non-vacuity | `synthesizedCertifiedRepairability` | Exact two-world instance |
+| Full aggregation | `certifiedAdaptiveClosurePublicationValidation` | Axiom-free package entry point |
 
 ## B. Core definitions
 
@@ -129,6 +139,38 @@ Known correctness supplied by `GapClosedBy` gives target determinacy through
 `fiberDeterminateAt_of_knownCorrectAt`. Applying known correctness to the actual
 compatible world gives actual correctness. Hence the remaining fiber is locally
 action-sufficient at the repaired index.
+
+### C.4 Adaptive characterization and synthesis
+
+The public model fixes a complete duplicate-free world list and computes the
+ordered list of action conflicts. Filtering one fixed pair carrier avoids
+quotients. Nullity of its length is equivalent to action homogeneity of the
+fiber. Posterior inclusion gives non-increase; eliminating a supplied conflict
+gives strict decrease.
+
+A repair strategy is a `PublicRepairTree`. Its constructors receive public
+states, authorized queries, publicly realizable responses, and certified public
+steps; no constructor receives the semantic world. Execution uses a world only
+to compute its response. Since the transcript records its terminal public
+state, transcript equality yields terminal-state equality definitionally.
+
+The adaptive no-go applies an assumed indistinguishability proof to the same
+tree stored in a certified repairability witness. Both conflicting worlds are
+retained to the equal terminal public state, where leaf action sufficiency
+contradicts their required-action separation.
+
+For the positive direction, a composable separator returns one finite episode
+and proves both conflict elimination and invariant preservation on every leaf.
+`synthesizeActionResolvedTree` recursively grafts synthesized continuations on
+all leaves. The termination checker accepts each call from the derived strict
+decrease of `actionConflictMeasure`; no external rank is an input. Total
+homogeneous-decision realization then turns all action-sufficient leaves into
+certified local closures.
+
+`ExactPosteriorRepairComplete` fixes one canonical public response compiler.
+`GeneratedByExactCompiler` prevents arbitrary trees from inheriting its
+exactness. Induction over a generated tree proves that its terminal leaf fiber
+is exactly the recursively defined leaf reachability predicate.
 
 ### C.4 Open strict reduction
 

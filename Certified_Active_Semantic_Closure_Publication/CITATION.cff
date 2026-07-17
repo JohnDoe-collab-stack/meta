@@ -2,13 +2,14 @@ cff-version: 1.2.0
 message: "Please cite the archival version associated with this artifact."
 title: "Certified Online Repair of Action-Sufficient Latent Representations"
 type: software
-version: 1.0.0
+version: 1.1.0
 date-released: 2026-07-17
 authors:
   - family-names: "Anonymous"
     given-names: "Authors"
 abstract: >-
-  A constructive Lean 4 formalization of information necessity, active
-  semantic repair, finite closure, open-world progress, and exact quantized
-  execution for action-relevant latent aliasing.
+  A constructive Lean 4 formalization of information necessity, adaptive
+  public repairability, well-founded strategy synthesis, active semantic
+  repair, finite closure, open-world progress, and exact quantized execution
+  for action-relevant latent aliasing.
 license: "LicenseRef-All-Rights-Reserved"

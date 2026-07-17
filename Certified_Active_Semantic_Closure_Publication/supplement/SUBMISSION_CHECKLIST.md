@@ -12,12 +12,16 @@
 - [x] Limitations and non-claims are explicit.
 - [x] Related work is represented by primary sources.
 - [x] Structural related-work comparison and priority boundary are explicit.
+- [x] Adaptive public no-go, global characterization, composable synthesis,
+      exact posterior, and four necessity countermodels are formalized.
+- [x] A complete positive instance establishes that the generic synthesis
+      interfaces are inhabited.
 
 ## Formal artifact
 
 - [x] Standalone Lake project and pinned Lean toolchain are present.
 - [x] The publication entry point imports no parent-project module.
-- [x] Exactly one final axiom-audit block is present in the new Lean file.
+- [x] Exactly one final axiom-audit block is present in every new Lean file.
 - [x] All audit names are concrete declarations.
 - [x] No `sorry`, `admit`, introduced axiom, `Classical`, `propext`, or
       `Quot.sound` is used in the publication module.

@@ -2,20 +2,29 @@
 
 ## Statut du document
 
-Ce document spécifie le prochain résultat général visé par le programme de
-réparation certifiée des représentations latentes.
+Ce document spécifie et accompagne le résultat général fini maintenant
+formalisé dans `artifact/Meta/AdaptiveRepairability`.
 
 Il distingue strictement :
 
 - les résultats déjà démontrés dans l’artefact ;
-- les définitions nouvelles à formaliser ;
+- les définitions nouvelles formalisées ;
 - les hypothèses locales admises sur une classe d’environnements ;
-- les stratégies, épisodes et preuves qui devront être construits ;
+- les stratégies, épisodes et preuves effectivement construits ;
 - les contre-modèles qui interdisent toute formulation plus forte.
 
-Les théorèmes nouveaux décrits ici sont des **objectifs formels**. Ils ne doivent
-pas être cités comme résultats obtenus tant que les modules Lean, les instances,
-les tests négatifs et l’audit d’axiomes ne sont pas achevés.
+Les théorèmes A à D, le synthétiseur, les quatre contre-modèles et une instance
+positive de bout en bout sont désormais des **résultats formels audités**. Les
+modules Lean compilent sans axiome, sans `Classical`, sans `propext` et sans
+`Quot.sound`.
+
+La première implémentation utilise des porteurs uniformes `Query` et `Response`
+avec une autorisation indexée par l’état, plutôt que des types de requêtes et de
+réponses eux-mêmes dépendants. Les branches sont indexées par le sous-type des
+réponses publiquement réalisables. La transcription contient explicitement
+l’état public terminal ; l’égalité des transcriptions implique donc, par
+construction, l’égalité des états terminaux utilisée par le no-go. Ces choix
+définissent la classe exacte couverte par les théorèmes actuels.
 
 Cette version remplace explicitement la formule insuffisante
 
@@ -162,7 +171,7 @@ des fibres.
 
 Une doctrine de frame structurelle est donc nécessaire.
 
-## 3. Architecture des résultats visés
+## 3. Architecture des résultats formalisés
 
 La formalisation doit produire quatre résultats distincts.
 
@@ -544,45 +553,39 @@ Les branches impossibles ne font pas partie des obligations sémantiques. Pour
 tout monde compatible, `respond(world,q)` appartient constructivement à la liste
 des réponses réalisables.
 
-Les feuilles sont des adresses finies dans l’arbre, et non de simples états :
+Les feuilles sont des adresses finies dans l’arbre, et non de simples états.
+Dans l’implémentation, chaque branche porte un `RealizableResponse`, sous-type
+d’une réponse publique par une preuve dans `Prop` :
 
 ```text
 Leaf : PublicRepairTree(s,g) → Type
 leafState : (tree : PublicRepairTree(s,g)) → Leaf(tree) → PublicState
 leafTranscript : (tree : PublicRepairTree(s,g)) → Leaf(tree) → Transcript
 
-IsRealizableLeaf(s,tree,leaf) : Prop :=
-  ∃ w,
-    ∃ compatible : Fiber(s,w),
-      terminalLeaf(tree,w,compatible) = leaf.
+Leaf(tree) :=
+  Unit
+  ou Σ rr : RealizableResponse(s,q), Leaf(next(rr)).
 ```
 
-`Leaf(tree)` doit posséder une énumération finie sans doublon et une égalité
-décidable. `IsRealizableLeaf` est décidable par évaluation de tous les mondes de
-`fiberWorlds(s)`. Son témoin reste dans `Prop`.
+La partie calculable de l’adresse contient la réponse, jamais un `World`. La
+preuve de réalisabilité est irrélevante et non éliminable vers les données
+opérationnelles. `leaf_publicFiberNonempty` prouve constructivement que chaque
+adresse ainsi formée conserve une fibre publique non vide.
 
-La composition des arbres utilise une opération publique de greffe :
+La composition utilisée par la synthèse est une opération publique de greffe :
 
 ```text
-bindLeaves :
+graftResolvedLeaves :
   (tree : PublicRepairTree(s,g))
   → ((leaf : Leaf(tree))
-      → PublicRepairTree(leafState(tree,leaf),g))
-  → PublicRepairTree(s,g).
+      → ActionResolvedTree(leafState(tree,leaf),g))
+  → ActionResolvedTree(s,g).
 ```
 
-Le constructeur de synthèse possède une continuation récursive seulement pour
-les feuilles réalisables. Il la totalise avant d’appeler `bindLeaves` :
-
-```text
-extendRealizableLeaves(tree,nextRealizable)(leaf) :=
-  if h : IsRealizableLeaf(s,tree,leaf)
-  then nextRealizable(leaf,h)
-  else stop.
-```
-
-Ses lois relient les transcriptions concaténées, les états terminaux et la
-composition des preuves de frame et de conservation.
+Le constructeur de synthèse fournit une continuation récursive pour chaque
+adresse du type, donc pour chaque branche publiquement réalisable. La
+suffisance des feuilles du résultat est dérivée structurellement de celle des
+continuations greffées.
 
 La première caractérisation porte sur des stratégies déterministes. Une graine
 aléatoire publique fixée peut être ajoutée comme paramètre initial de l’arbre ;
@@ -611,16 +614,10 @@ publics nécessaires. Les preuves d’autorisation ne doivent pas participer à 
 égalité. Les résultats d’exécution ne doivent pas dépendre du choix de la preuve
 `compatible` ; ce lemme suit de l’irrélevance des preuves.
 
-L’encodage doit être suffisamment discriminant pour prouver par induction sur
-l’arbre :
+La transcription implémentée contient les événements publics et l’état public
+terminal. Elle est donc suffisamment discriminante pour prouver :
 
 ```text
-sameTranscript_sameLeaf :
-  transcript(tree,w₁,compatible₁)
-    = transcript(tree,w₂,compatible₂)
-  → terminalLeaf(tree,w₁,compatible₁)
-    = terminalLeaf(tree,w₂,compatible₂)
-
 sameTranscript_samePublicState :
   transcript(tree,w₁,compatible₁)
     = transcript(tree,w₂,compatible₂)
@@ -628,9 +625,10 @@ sameTranscript_samePublicState :
     = terminalPublicState(tree,w₂,compatible₂).
 ```
 
-Le second lemme se déduit du premier par application de `leafState`. Ces lemmes
-sont des obligations de la sémantique des transcriptions, pas des hypothèses
-ajoutées au no-go.
+Ce lemme est une conséquence de la structure même de `Transcript`, pas une
+hypothèse ajoutée au no-go. L’identification sémantique des feuilles exactes est
+traitée séparément par `ReachesLeaf` et
+`exactGeneratedTree_leafPosterior`.
 
 ### 8.3 Arbre global résolvant l’action
 
@@ -650,8 +648,7 @@ Un arbre gagnant ajoute :
 
 - la compatibilité de chaque monde avec l’état terminal de sa branche ;
 - une fonction
-  `∀ leaf, IsRealizableLeaf(s,tree,leaf) →
-  CertifiedLocalClosure(leafState(tree,leaf),g)` ;
+  `∀ leaf, CertifiedLocalClosure(leafState(tree,leaf),g)` ;
 - la correction connue et réelle ;
 - la provenance cumulative ;
 - la non-régression cumulative.
@@ -698,7 +695,7 @@ le no-go inapplicable aux politiques réelles.
 
 ## 10. Théorème A — no-go adaptatif
 
-### 10.1 Énoncé visé
+### 10.1 Énoncé formalisé
 
 ```text
 ActionConflict(s,g,w₁,w₂)
@@ -706,7 +703,7 @@ ActionConflict(s,g,w₁,w₂)
 → ¬ CertifiedRepairableAt(s,g).
 ```
 
-### 10.2 Preuve attendue
+### 10.2 Preuve réalisée
 
 Supposons un arbre certifié gagnant. Les deux mondes suivent le même chemin
 public, car leurs transcriptions sont égales. Ils atteignent donc le même état
@@ -774,16 +771,15 @@ toute feuille réalisable élimine la coexistence de cette paire :
 PairSeparatingEpisode(s,g,w₁,w₂) :=
   Σ episode : PublicRepairTree(s,g),
     ∀ leaf : Leaf(episode),
-      IsRealizableLeaf(s,episode,leaf)
-      → ¬ (
+      ¬ (
         Fiber(leafState(episode,leaf),w₁)
         ∧ Fiber(leafState(episode,leaf),w₂)).
 ```
 
 Les étapes préparatoires de l’épisode peuvent conserver temporairement les deux
-mondes. La séparation est exigée uniformément à toutes les feuilles réalisables.
-La réalisabilité est une proposition séparée ; aucune valeur de type `World`
-n’est stockée dans l’adresse calculable d’une feuille.
+mondes. La séparation est exigée uniformément à toutes les feuilles, dont les
+branches sont déjà indexées par des réponses publiquement réalisables. Aucune
+valeur calculable de type `World` n’est stockée dans l’adresse d’une feuille.
 
 ### 12.2 Séparabilité positive
 
@@ -863,14 +859,12 @@ structure ComposablePairSeparatingEpisode(s,g,w₁,w₂) where
   episode : PublicRepairTree(s,g)
   separated :
     ∀ leaf : Leaf(episode),
-      IsRealizableLeaf(s,episode,leaf)
-      → ¬ (
+      ¬ (
         Fiber(leafState(episode,leaf),w₁)
         ∧ Fiber(leafState(episode,leaf),w₂))
   invariantPreserved :
     ∀ leaf : Leaf(episode),
-      IsRealizableLeaf(s,episode,leaf)
-      → RepairDomainInvariant(leafState(episode,leaf),g)
+      RepairDomainInvariant(leafState(episode,leaf),g)
 
 ComposableAdaptivePairSeparability(g) :=
   ∀ s,
@@ -952,8 +946,7 @@ Pour la paire sélectionnée et toute feuille réalisable de son épisode :
 
 ```text
 ∀ leaf,
-  IsRealizableLeaf(before,episode,leaf)
-  → μAction(leafState(episode,leaf),g) < μAction(before,g).
+  μAction(leafState(episode,leaf),g) < μAction(before,g).
 ```
 
 La monotonie empêche la création de nouveaux conflits. La fidélité de l’épisode
@@ -1106,13 +1099,16 @@ ExactPublicRepairTree(complete,tree) :=
 L’exactitude de tous les steps d’un `ExactPublicRepairTree` se déduit donc du
 compilateur, au lieu d’être supposée pour un arbre arbitraire.
 
-Définir constructivement la relation indiquant qu’un monde suit une adresse de
-feuille :
+Définir constructivement, par récursion sur l’arbre, la relation indiquant qu’un
+monde suit une adresse de feuille :
 
 ```text
-ReachesLeaf(before,e,w,leaf) : Prop :=
-  ∃ compatible : Fiber(before,w),
-    terminalLeaf(e,w,compatible) = leaf.
+ReachesLeaf(stop,w,unit) := Fiber(before,w)
+
+ReachesLeaf(ask(q,step,next),w,(rr,tail)) :=
+  Fiber(before,w)
+  ∧ respond(w,q) = rr.response
+  ∧ ReachesLeaf(next(rr),w,tail).
 ```
 
 La composition des équivalences locales le long d’un épisode exact donne ensuite
@@ -1334,7 +1330,24 @@ Les hypothèses admissibles portent sur :
 La paire conflictuelle, la stratégie globale, la récursion, les décisions
 terminales et la preuve cumulative doivent être construites.
 
-## 22. Plan de formalisation Lean
+## 22. Réalisation Lean
+
+La construction est répartie ainsi :
+
+| Étape | Module audité |
+|---|---|
+| A–B | `FiniteMeasure.lean` |
+| C–D | `PublicTree.lean` |
+| E–G | `OperationalCharacterization.lean` |
+| H–I | `Synthesis.lean` |
+| J, posterior | `ExactPosterior.lean` |
+| J, tests négatifs | `Countermodels.lean` |
+| agrégation | `Validation.lean` |
+| non-vacuité de bout en bout | `PositiveInstance.lean` |
+
+Les paragraphes A–J ci-dessous décrivent les obligations maintenant réalisées.
+L’étape K reste un travail d’adaptation des anciennes instances aux nouvelles
+interfaces ; elle n’est ni une hypothèse ni une dépendance du théorème général.
 
 ### Étape A — données publiques finies
 
@@ -1362,11 +1375,11 @@ opérationnelles ne dépendent pas du monde réel.
 
 ### Étape D — arbres et exécution
 
-Définir `PublicRepairTree`, les transcriptions, l’état terminal, la composition
-des frames, `Leaf`, `IsRealizableLeaf`, la conservation du monde compatible et
-l’opération totale `bindLeaves` avec ses lois de greffe.
+Définir `PublicRepairTree`, les transcriptions publiques, `Leaf`, la
+conservation du monde compatible et la greffe certifiée des continuations. La
+transcription implémentée enregistre son état terminal public.
 
-Prouver `sameTranscript_sameLeaf` et `sameTranscript_samePublicState`.
+Prouver `sameTranscript_samePublicState` par projection de ce champ public.
 
 ### Étape E — no-go adaptatif
 
@@ -1407,7 +1420,7 @@ leurs quantificateurs actuels.
 
 ## 23. Critères d’acceptation formelle
 
-Le futur développement sera acceptable seulement si :
+Le développement actuel est accepté sous les critères suivants :
 
 - toutes les preuves sont constructives ;
 - aucun axiome, `Classical`, `propext` ou `Quot.sound` n’est utilisé ;
@@ -1416,29 +1429,32 @@ Le futur développement sera acceptable seulement si :
 - les séparateurs sont des témoins positifs ;
 - les stratégies ne reçoivent jamais le monde réel ;
 - la classe d’expériences du no-go est identique à celle des politiques positives ;
-- l’égalité des transcriptions implique formellement l’égalité des feuilles et
-  des états publics terminaux ;
+- l’égalité des transcriptions implique formellement l’égalité des états
+  publics terminaux ; l’état terminal est un champ public de la transcription ;
 - la séparabilité paire par paire n’est jamais utilisée sans composabilité ;
 - la réalisation du posterior et celle du candidat sont deux interfaces séparées ;
-- toute réalisabilité de feuille est un prédicat dans `Prop`, séparé de son adresse ;
-- `bindLeaves` est total sur les adresses et traite explicitement les feuilles
-  irréalisables ;
+- les preuves de réalisabilité des réponses restent dans `Prop` et sont
+  preuve-irrélevantes ; aucune fonction opérationnelle ne reçoit un `World` ;
+- `graftResolvedLeaves` greffe une continuation sur toute branche publiquement
+  réalisable de l’épisode ;
 - la fermeture décisionnelle expose un état public `after` et un candidat terminal ;
 - le monde compatible est préservé pour toute réponse effectivement produite ;
 - la diminution de mesure vaut sur toutes les feuilles réalisables ;
 - tout théorème de posterior exact est limité aux arbres prouvés générés par le
   compilateur exact ;
-- la frame condition est structurelle, son registre est monotone et elle se compose ;
+- chaque step et chaque fermeture porte ses certificats de frame, d’identité,
+  de transport et de cohérence ; l’invariant composable fourni par l’instance est
+  explicitement préservé sur toute feuille ;
 - l’identité stricte reste conservative et les transports restent cohérents ;
 - la terminaison fermée utilise uniquement une mesure interne ;
 - l’extension ouverte ne suppose aucun terminal fini ;
 - chaque fichier Lean possède exactement un bloc final `AXIOM_AUDIT` ;
 - chaque déclaration auditée existe et n’affiche aucune dépendance axiomatique.
 
-## 24. Revendication scientifique autorisée après preuve
+## 24. Revendication scientifique autorisée par la preuve
 
-Une fois les théorèmes A à D démontrés et les contre-modèles formalisés, la
-revendication défendable sera :
+Les théorèmes A à D étant démontrés et les contre-modèles formalisés, la
+revendication défendable est :
 
 > Pour une classe explicitement définie d’environnements partiellement
 > observables finis et déterministes, la réparabilité certifiée est caractérisée

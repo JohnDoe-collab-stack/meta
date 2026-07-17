@@ -61,17 +61,19 @@ established results. The release closes them as follows.
 | 10.12 Approximate robustness | Not claimed; strict catalogue margins are not a perturbation-region theorem |
 
 The seven clauses of the proposed theorem in source section 23 are therefore
-all realized for the published finite/open class. What is not proved is a
-single synthesis theorem extending those implementation-specific clauses to
-every POMDP, arbitrary learned representation, or arbitrary detector.
+all realized for the published finite/open class. Release 1.1.0 additionally
+proves a synthesis theorem for the explicitly declared finite deterministic
+public-environment interface under composable separation and decision-language
+adequacy. It does not extend those assumptions to every POMDP, arbitrary
+learned representation, or arbitrary detector.
 
 ## Independent kernel check
 
 The release check was run from `artifact`:
 
 ```text
-lake build Meta.LatentRepair.ProblemResolutionAudit Meta
-Build completed successfully (222 jobs).
+lake build Meta
+Build completed successfully (230 jobs).
 ```
 
 Lean reported:
@@ -79,6 +81,7 @@ Lean reported:
 ```text
 plannedProblemResolutionAudit does not depend on any axioms
 certifiedActiveSemanticClosurePublication does not depend on any axioms
+certifiedAdaptiveClosurePublicationValidation does not depend on any axioms
 ```
 
 The audit object contains the generic no-go and sufficiency bridges, all three

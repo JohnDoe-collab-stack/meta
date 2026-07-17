@@ -1,5 +1,5 @@
 name = "certified_active_semantic_closure"
-version = "1.0.0"
+version = "1.1.0"
 defaultTargets = ["Meta"]
 
 [[lean_lib]]
