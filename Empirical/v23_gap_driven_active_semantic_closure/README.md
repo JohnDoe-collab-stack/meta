@@ -92,6 +92,19 @@ no-go visible factorisé sur 30 actions et 900 contrôleurs ;
 optimum randomisé rationnel exact ;
 arbre adaptatif actif à 27 feuilles et capacité totale de 5 bits ;
 tests adversariaux des traces et certificats.
+agent certifiable à cinq têtes MLP, sans `NextHead` ni accès au monde privé ;
+quantification Int8/Int32 bit-exacte, arrondi ties-to-even et argmax canonique ;
+697 obligations locales exhaustives réparties entre gap, usage, transport,
+requête et réparation ;
+premier checkpoint admissible de développement à `(seed, update) = (0, 156)`,
+retrouvé par rejeu de toutes les mises à jour antérieures ;
+zéro erreur entière et marge stricte minimale égale à 1 ;
+réification des poids, des 697 entrées et de la trace dans
+`Meta/AI/QuantizedCertifiedAgent.lean` et ses modules générés ;
+88 lots de huit obligations au plus, ordonnés dans quatre chaînes d'import
+qui bornent intrinsèquement la concurrence de compilation ;
+certificat `ValidCertifiedRun` lié à l'architecture et aux catalogues v23
+exacts, sans import d'un verdict JSON comme proposition.
 ```
 
 Ces calculs sont pour l'instant des validations de développement. Ils ne sont
@@ -109,8 +122,13 @@ l'état final. Python matérialise la trace complète, la vérifie indépendamme
 et le comparateur échoue dès qu'un token du snapshot diffère.
 G2 scientifique exige encore l'exécution figée et hashée prescrite par G0.
 
-Restent ouverts : l'agent quantifié certifiable et sa réification Lean, les deux
+Restent ouverts : le gel scientifique G0 de l'agent certifiable, les deux
 domaines appris, le modèle et les baselines appariées, les certificats de
-causalité et de dynamique, les runs multi-seeds, les OOD scellés, le gel G0,
+causalité et de dynamique, les runs multi-seeds, les OOD scellés,
 les réplications et l'audit final G8. Aucun résultat appris v23 n'est donc
 revendiqué à ce stade.
+
+Le checkpoint suivi sous `artifacts/development/` est un artefact de
+développement reproductible. Il ferme l'implémentation de G3, mais ne devient
+un résultat scientifique de campagne qu'après le gel `timestamp+sha256`, le
+manifeste G0 et le rejeu externe prescrits par le protocole.

@@ -5,6 +5,7 @@ import Meta.AI.OpenClosureFoundationalRealization
 import Meta.AI.VisibleFactoredClosureNoGo
 import Meta.AI.FiniteInterventionMatrix
 import Meta.AI.LeanValidationCompleteness
+import Meta.AI.QuantizedCertifiedAgent
 
 /-!
 # Non-empirical foundational validation of active semantic closure
@@ -342,6 +343,12 @@ structure AIFoundationalValidation where
   finiteInterventions :
     FiniteInterventionMatrix.CompleteFiniteInterventionCertificate
   certifiedRun : AICertifiedRunCertificate
+  quantizedCertifiedRun :
+    Quantized.ValidCertifiedRun
+      FiniteQuantized.certifiableArchitecture
+      QuantizedCertified.quantizedModel
+      QuantizedCertified.exhaustiveCertifiedInputs
+      QuantizedCertified.certifiedRawTrace
   finiteIdentityConservative :
     RelaxedSemantics.StrictIdentityConservativity Foundational.closureSignature
   finiteSyntaxConsistent :
@@ -379,6 +386,7 @@ def aiFoundationalValidation : AIFoundationalValidation where
   finiteInterventions :=
     FiniteInterventionMatrix.completeFiniteInterventionCertificate
   certifiedRun := aiCertifiedRunCertificate
+  quantizedCertifiedRun := QuantizedCertified.validCertifiedRun
   finiteIdentityConservative := Foundational.closureIdentityConservativity
   finiteSyntaxConsistent := Foundational.closureSyntax_consistent
   finiteUseNotExactlyProjective := Foundational.initialClosureFiber_not_exactProjective
