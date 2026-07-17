@@ -435,8 +435,11 @@ Cette interface exprime l’adéquation du langage des candidats. Elle ne doit p
 être confondue avec la capacité de représenter une observation postérieure.
 
 `DecisionRealizationComplete` abrège l’existence constructive de
-`realizeHomogeneousDecision` pour tout état public satisfaisant
-`RepairDomainInvariant`, `PublicFiberNonempty` et `ActionSufficientAt`.
+`realizeHomogeneousDecision` pour tout état public `s` et toute obligation `g`
+satisfaisant seulement `PublicFiberNonempty(s)` et
+`ActionSufficientAt(s,g)`. Cette portée totale correspond exactement à la
+direction droite-gauche du théorème B ; elle ne suppose pas
+`RepairDomainInvariant` sur les feuilles d’un arbre arbitraire.
 
 ## 7. Étape publique de réparation
 
@@ -608,6 +611,27 @@ publics nécessaires. Les preuves d’autorisation ne doivent pas participer à 
 égalité. Les résultats d’exécution ne doivent pas dépendre du choix de la preuve
 `compatible` ; ce lemme suit de l’irrélevance des preuves.
 
+L’encodage doit être suffisamment discriminant pour prouver par induction sur
+l’arbre :
+
+```text
+sameTranscript_sameLeaf :
+  transcript(tree,w₁,compatible₁)
+    = transcript(tree,w₂,compatible₂)
+  → terminalLeaf(tree,w₁,compatible₁)
+    = terminalLeaf(tree,w₂,compatible₂)
+
+sameTranscript_samePublicState :
+  transcript(tree,w₁,compatible₁)
+    = transcript(tree,w₂,compatible₂)
+  → terminalPublicState(tree,w₁,compatible₁)
+    = terminalPublicState(tree,w₂,compatible₂).
+```
+
+Le second lemme se déduit du premier par application de `leafState`. Ces lemmes
+sont des obligations de la sémantique des transcriptions, pas des hypothèses
+ajoutées au no-go.
+
 ### 8.3 Arbre global résolvant l’action
 
 ```text
@@ -665,7 +689,8 @@ PubliclyIndistinguishable(s,g,w₁,w₂) :=
 
 Puisque les mises à jour sont publiques et déterministes relativement aux
 réponses, l’égalité des transcriptions force l’égalité des chemins, des états
-publics terminaux et des décisions publiques.
+publics terminaux et des décisions publiques par
+`sameTranscript_sameLeaf` et `sameTranscript_samePublicState`.
 
 La relation doit quantifier les mêmes arbres que ceux admis dans
 `CertifiedRepairableAt`. Utiliser une classe d’expériences plus pauvre rendrait
@@ -827,19 +852,37 @@ Cette propriété affirme que tout nouvel état admissible possède les séparat
 locaux requis. Elle interdit de déduire abusivement la séparabilité future de la
 seule séparabilité initiale.
 
-### 13.3 Fermeture de l’invariant
+### 13.3 Séparabilité composable
 
-Chaque feuille d’un épisode séparateur doit préserver l’invariant :
+La persistance existentielle seule ne garantit pas que l’épisode séparateur
+choisi préserve l’invariant. L’épisode et sa preuve de fermeture doivent être
+fournis dans le même objet positif :
 
 ```text
-RepairDomainInvariant(before,g)
-→ ∀ leaf,
-    IsRealizableLeaf(before,episode,leaf)
-    → RepairDomainInvariant(leafState(episode,leaf),g).
+structure ComposablePairSeparatingEpisode(s,g,w₁,w₂) where
+  episode : PublicRepairTree(s,g)
+  separated :
+    ∀ leaf : Leaf(episode),
+      IsRealizableLeaf(s,episode,leaf)
+      → ¬ (
+        Fiber(leafState(episode,leaf),w₁)
+        ∧ Fiber(leafState(episode,leaf),w₂))
+  invariantPreserved :
+    ∀ leaf : Leaf(episode),
+      IsRealizableLeaf(s,episode,leaf)
+      → RepairDomainInvariant(leafState(episode,leaf),g)
+
+ComposableAdaptivePairSeparability(g) :=
+  ∀ s,
+    RepairDomainInvariant(s,g)
+    → ∀ w₁ w₂,
+      ActionConflict(s,g,w₁,w₂)
+      → ComposablePairSeparatingEpisode(s,g,w₁,w₂).
 ```
 
-La combinaison de la séparabilité persistante et de cette fermeture constitue
-la composabilité séquentielle nécessaire au théorème de synthèse.
+Cette propriété implique `PersistentAdaptivePairSeparability`, mais sa réciproque
+n’est pas utilisée. Elle constitue la composabilité séquentielle exacte requise
+par le théorème de synthèse.
 
 Une instance peut établir cette propriété parce que :
 
@@ -928,16 +971,15 @@ Pour l’état initial `s` et l’obligation `g` :
 1. `RepairDomainInvariant(s,g)` ;
 2. l’univers des mondes est explicitement fini ;
 3. les conflits sont décidables et énumérables ;
-4. `PersistentAdaptivePairSeparability(g)` ;
-5. toutes les feuilles séparatrices préservent l’invariant ;
-6. les étapes sont publiques et conservent tout monde compatible donnant la
+4. `ComposableAdaptivePairSeparability(g)` ;
+5. les étapes sont publiques et conservent tout monde compatible donnant la
    transcription observée ;
-7. les fibres postérieures sont incluses dans les fibres antérieures ;
-8. `Required(g,·)` reste stable ;
-9. la doctrine de frame se compose ;
-10. les steps et fermetures décisionnelles sont conservatifs pour l’identité
+6. les fibres postérieures sont incluses dans les fibres antérieures ;
+7. `Required(g,·)` reste stable ;
+8. la doctrine de frame se compose ;
+9. les steps et fermetures décisionnelles sont conservatifs pour l’identité
     stricte, cohérents pour les transports et logiquement consistants ;
-11. les fibres homogènes non vides possèdent une réalisation décisionnelle.
+10. les fibres homogènes non vides possèdent une réalisation décisionnelle.
 
 ### 15.2 Construction
 
@@ -964,7 +1006,7 @@ pour toute branche réalisable.
 
 ```text
 FinitePublicEnvironment
-→ PersistentAdaptivePairSeparability(g)
+→ ComposableAdaptivePairSeparability(g)
 → LawfulFiberRepair
 → DecisionRealizationComplete
 → CompositionalFrameLaw
@@ -975,8 +1017,8 @@ FinitePublicEnvironment
 ```
 
 Le théorème ne conclut pas à partir de la seule
-`AdaptivePairSeparability(s,g)`. La persistance et la fermeture de l’invariant
-sont des hypothèses visibles et auditables.
+`AdaptivePairSeparability(s,g)`. L’épisode choisi et sa fermeture de l’invariant
+sont réunis dans une hypothèse positive visible et auditable.
 
 ## 16. Théorème D — posterior exact
 
@@ -998,9 +1040,11 @@ Fiber(step.after,w)
 ↔ ExactResponsePosterior(before,q,r,w).
 ```
 
-`ExactPosteriorRepairComplete` abrège l’existence de `realizeResponse` pour toute
-requête autorisée et toute réponse figurant dans `realizableResponses`, ainsi que
-la preuve de cette équivalence pour tout monde.
+`ExactPosteriorRepairComplete` porte un compilateur canonique `realizeResponse`
+défini pour toute requête autorisée et toute réponse figurant dans
+`realizableResponses`, ainsi que la preuve de cette équivalence pour tout monde.
+L’interface fixe ce compilateur ; elle ne prétend pas que tout
+`PublicRepairStep` arbitraire est exact.
 
 La réalisabilité de la réponse reste une proposition :
 
@@ -1036,6 +1080,32 @@ l’état public. Celui-ci reçoit seulement une preuve d’appartenance à la l
 publique calculée. La partie calculable du step dépend de `before`, `g`, `q` et
 `r`, jamais du monde réel d’exécution.
 
+Un arbre exact doit ensuite certifier que chacun de ses steps est précisément
+produit par ce compilateur canonique :
+
+```text
+GeneratedByExactCompiler(complete,tree) :=
+  propriété inductive telle que
+
+  GeneratedByExactCompiler(complete,stop)
+
+  GeneratedByExactCompiler(complete,ask q authorization step next)
+  ↔
+    (∀ r membership,
+      step(r,membership)
+      = complete.realizeResponse(
+          before,g,q,authorization,r,membership))
+    ∧ (∀ r membership,
+      GeneratedByExactCompiler(
+        complete,next(r,membership))).
+
+ExactPublicRepairTree(complete,tree) :=
+  GeneratedByExactCompiler(complete,tree).
+```
+
+L’exactitude de tous les steps d’un `ExactPublicRepairTree` se déduit donc du
+compilateur, au lieu d’être supposée pour un arbre arbitraire.
+
 Définir constructivement la relation indiquant qu’un monde suit une adresse de
 feuille :
 
@@ -1045,10 +1115,12 @@ ReachesLeaf(before,e,w,leaf) : Prop :=
     terminalLeaf(e,w,compatible) = leaf.
 ```
 
-La composition des équivalences locales le long d’un épisode donne ensuite le
-posterior exact de chaque feuille :
+La composition des équivalences locales le long d’un épisode exact donne ensuite
+le posterior exact de chaque feuille :
 
 ```text
+ExactPublicRepairTree(complete,e)
+→
 Fiber(leafState(e,leaf),w)
 ↔ ReachesLeaf(before,e,w,leaf).
 ```
@@ -1060,13 +1132,30 @@ Cette loi composée implique constructivement :
 - l’élimination conjointe de deux mondes dont les transcriptions diffèrent ;
 - la diminution de `μAction` pour toute paire séparée.
 
-Le premier corollaire Lean raisonnable est :
+Pour que l’épisode séparateur choisi soit à la fois composable et exact, définir :
+
+```text
+structure ExactComposablePairSeparatingEpisode
+    (complete,s,g,w₁,w₂) where
+  composable : ComposablePairSeparatingEpisode(s,g,w₁,w₂)
+  generated :
+    ExactPublicRepairTree(complete,composable.episode)
+
+ExactComposableAdaptivePairSeparability(complete,g) :=
+  ∀ s,
+    RepairDomainInvariant(s,g)
+    → ∀ w₁ w₂,
+      ActionConflict(s,g,w₁,w₂)
+      → ExactComposablePairSeparatingEpisode(complete,s,g,w₁,w₂).
+```
+
+Le premier corollaire Lean raisonnable est alors :
 
 ```text
 FinitePublicEnvironment
 ∧ RepairDomainInvariant(s,g)
-∧ ExactPosteriorRepairComplete
-∧ PersistentAdaptivePairSeparability(g)
+∧ (Σ complete : ExactPosteriorRepairComplete,
+    ExactComposableAdaptivePairSeparability(complete,g))
 ∧ DecisionRealizationComplete
 ∧ CompositionalFrameLaw
 ∧ LogicalConservativity
@@ -1277,6 +1366,8 @@ Définir `PublicRepairTree`, les transcriptions, l’état terminal, la composit
 des frames, `Leaf`, `IsRealizableLeaf`, la conservation du monde compatible et
 l’opération totale `bindLeaves` avec ses lois de greffe.
 
+Prouver `sameTranscript_sameLeaf` et `sameTranscript_samePublicState`.
+
 ### Étape E — no-go adaptatif
 
 Prouver le théorème A pour exactement la même classe d’arbres publics que celle
@@ -1304,8 +1395,10 @@ diminution sur chaque feuille réalisable avant tout appel récursif.
 
 ### Étape J — posterior exact et contre-modèles
 
-Instancier la complétude exacte, puis formaliser les quatre contre-modèles. Un
-énoncé naïf réintroduit ultérieurement doit échouer sur au moins l’un d’eux.
+Instancier la complétude exacte, définir `GeneratedByExactCompiler`, prouver
+l’exactitude des feuilles des arbres générés, puis formaliser les quatre
+contre-modèles. Un énoncé naïf réintroduit ultérieurement doit échouer sur au
+moins l’un d’eux.
 
 ### Étape K — instances existantes
 
@@ -1323,6 +1416,8 @@ Le futur développement sera acceptable seulement si :
 - les séparateurs sont des témoins positifs ;
 - les stratégies ne reçoivent jamais le monde réel ;
 - la classe d’expériences du no-go est identique à celle des politiques positives ;
+- l’égalité des transcriptions implique formellement l’égalité des feuilles et
+  des états publics terminaux ;
 - la séparabilité paire par paire n’est jamais utilisée sans composabilité ;
 - la réalisation du posterior et celle du candidat sont deux interfaces séparées ;
 - toute réalisabilité de feuille est un prédicat dans `Prop`, séparé de son adresse ;
@@ -1331,6 +1426,8 @@ Le futur développement sera acceptable seulement si :
 - la fermeture décisionnelle expose un état public `after` et un candidat terminal ;
 - le monde compatible est préservé pour toute réponse effectivement produite ;
 - la diminution de mesure vaut sur toutes les feuilles réalisables ;
+- tout théorème de posterior exact est limité aux arbres prouvés générés par le
+  compilateur exact ;
 - la frame condition est structurelle, son registre est monotone et elle se compose ;
 - l’identité stricte reste conservative et les transports restent cohérents ;
 - la terminaison fermée utilise uniquement une mesure interne ;
