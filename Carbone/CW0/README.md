@@ -23,6 +23,8 @@ Le fichier principal est
 [`Lean/CarbonWorld.lean`](./Lean/CarbonWorld.lean).
 Le raccord générique au Core est dans
 [`Lean/CoreAdapter.lean`](./Lean/CoreAdapter.lean).
+Le premier témoin concret fermé est dans
+[`Lean/ConcreteTwoPhase.lean`](./Lean/ConcreteTwoPhase.lean).
 
 Validation exécutée :
 
@@ -37,7 +39,7 @@ n'affiche aucun axiome.
 
 Le type `CarbonWorld` porte une famille de pas causaux sur ses seuls états
 admissibles. Il ne fournit aucun successeur extérieur. L'adaptateur générique
-réalise maintenant :
+et le témoin concret réalisent maintenant :
 
 ```text
 CarbonWorld.Point
@@ -46,8 +48,14 @@ CarbonWorld.Point
 ```
 
 Il prend comme entrée un `CarbonCoreAtlas` dont le pôle formé courant est la
-source courante. La prochaine tranche doit construire un premier atlas fini
-concret ; l'adaptateur ne suppose aucun état futur.
+source courante. `ConcreteTwoPhase` habite cet atlas : ses organisations et sa
+branche bilatérale sont finies, tandis que la liste d'histoire reste
+volontairement non bornée. La réparation alterne les deux squelettes, conserve
+l'environnement et l'inventaire total, puis ajoute un enregistrement interne.
+
+Ce témoin valide l'architecture et la calculabilité du pas. Il ne constitue
+pas une cinétique chimique : aucune énergie d'activation, géométrie, loi de
+vitesse ou donnée empirique n'y est encore encodée.
 
 La paire de squelettes incluse dans le fichier Lean est un témoin structurel
 fini de non-injectivité de la projection. Elle n'est pas une affirmation de
@@ -62,6 +70,11 @@ CarbonWorld.step_totalInventory
 CarbonWorld.step_history.
 CarbonCoreAtlas.toGapRepairAlgebra
 CarbonCoreAtlas.coreNext_source_eq_worldStep.
+twoPhaseCoreAtlas
+twoPhaseCoreStep_organization
+twoPhaseCoreStep_history
+twoPhaseInitialCoreStep_preservesInventory
+twoPhaseInitialCoreStep_changesOrganization.
 ```
 
 `step` ne figure pas dans les données de `CarbonWorld`. Il est défini depuis
