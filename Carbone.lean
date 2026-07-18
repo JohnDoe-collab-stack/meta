@@ -1,4 +1,4 @@
-import Carbone.CW1.Lean.ActiveMaintenanceBoundary
+import Carbone.CW1.Lean.ValenceCompletion
 
 /- AXIOM_AUDIT_BEGIN -/
 #print axioms Meta.Carbone.CW0.carbonProjectionObstruction
@@ -26,4 +26,11 @@ import Carbone.CW1.Lean.ActiveMaintenanceBoundary
 #print axioms Meta.Carbone.CW1.twoPhaseResourceCoupledMaintenance
 #print axioms Meta.Carbone.CW1.twoPhase_step_energyBalance
 #print axioms Meta.Carbone.CW1.twoPhase_energyDissipated_eq_requested
+#print axioms Meta.Carbone.CW1.chainSkeleton_implicitHydrogenProfile
+#print axioms Meta.Carbone.CW1.bridgedSkeleton_implicitHydrogenProfile
+#print axioms Meta.Carbone.CW1.chainSkeleton_neutralValenceInventory
+#print axioms Meta.Carbone.CW1.bridgedSkeleton_neutralValenceInventory
+#print axioms Meta.Carbone.CW1.chainConnectedCertificate
+#print axioms Meta.Carbone.CW1.bridgedConnectedCertificate
+#print axioms Meta.Carbone.CW1.c2h6oConstitutionalIsomerWitness
 /- AXIOM_AUDIT_END -/

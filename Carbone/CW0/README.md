@@ -105,6 +105,7 @@ indexée par leur phase et certifiée égale à la configuration Lean ; les atom
 liaisons et inventaires ne sont plus dupliqués sous forme de littéraux JSON.
 
 La tranche suivante est documentée dans
-[`../CW1/README.md`](../CW1/README.md). Elle ajoute une maintenance formelle et
-une mémoire d'un bit effectivement lue dans la topologie des liaisons, sans
-revendiquer encore une maintenance physico-chimique active.
+[`../CW1/README.md`](../CW1/README.md). Elle ajoute une maintenance formelle,
+une mémoire d'un bit effectivement lue dans la topologie des liaisons et une
+complétion de valence qui identifie le cas statique C₂H₆O. Elle ne transforme
+pas pour autant la bascule abstraite en réaction physico-chimique admissible.

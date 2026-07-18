@@ -390,7 +390,7 @@ Le programme doit progresser par niveaux qui ne sont pas interchangeables.
 | Niveau | Objet construit | Revendication permise |
 |---|---|---|
 | `CW0` | état carboné fini, projection et dynamique intrinsèque | dynamique carbonée formelle |
-| `CW1` | maintenance et mémoire matérielle | fermeture organisationnelle formelle |
+| `CW1` | maintenance, mémoire et sémantique structurale de valence | fermeture organisationnelle formelle dans un fragment chimique déclaré |
 | `CW2` | reproduction et hérédité | lignée carbonée formelle |
 | `CW3` | variation et sélection | évolution carbonée formelle |
 | `CW4` | raccord à des mesures ou données réelles | modèle carboné empiriquement testé |
@@ -489,9 +489,25 @@ porte nécessaire vers `CW1-beta` et sa première instance sont formalisées dan
 [`CW1/Lean/ActiveMaintenanceBoundary.lean`](./CW1/Lean/ActiveMaintenanceBoundary.lean).
 Le témoin porte désormais une demande, une entrée et une dissipation d'énergie
 strictement positives avec bilan ouvert exact. Ces jetons restent sans unité
-physique et la demande atomique demeure nulle. La prochaine construction doit
-donc ajouter un flux matériel explicite et équilibré. Elle doit précéder toute
-revendication de reproduction `CW2`.
+physique et la demande atomique demeure nulle.
+
+`CW1-gamma`, dans
+[`CW1/Lean/ValenceCompletion.lean`](./CW1/Lean/ValenceCompletion.lean), remplace
+le simple surnom « carbone » des deux graphes par une première sémantique
+chimique exécutable. Pour le fragment neutre H/C/N/O, les ordres de liaison
+déterminent la valence explicite et le nombre d'hydrogènes implicites. Le graphe
+C-C-O est complété en CH₃-CH₂-OH, le graphe C-O-C en CH₃-O-CH₃, et Lean prouve
+constructivement que les deux inventaires sont C₂H₆O tandis que leurs liaisons
+restent distinctes. Ces résultats concordent avec les entrées publiques du
+[NIST pour l'éthanol](https://webbook.nist.gov/cgi/cbook.cgi?ID=C64175&Mask=200)
+et du [NIST pour l'éther diméthylique](https://webbook.nist.gov/cgi/cbook.cgi?ID=C115106&Mask=200),
+qui donnent la même formule et des connectivités InChI différentes.
+
+Ce raccord valide la représentation statique de ce cas ; il ne valide pas la
+bascule comme réaction. Deux lignes de travail restent donc séparées : élargir
+le test statique à un corpus moléculaire externe gelé, et remplacer la bascule
+dynamique abstraite par un flux matériel explicite, équilibré et mécanistique.
+Cette seconde ligne doit précéder toute revendication de reproduction `CW2`.
 
 ## 12. Séparation des responsabilités
 
