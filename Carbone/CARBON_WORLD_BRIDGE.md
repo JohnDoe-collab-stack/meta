@@ -485,12 +485,13 @@ du Core et celui du monde porte sur le point dépendant complet.
 `CW1-alpha`, dans
 [`CW1/Lean/MaintenanceMemory.lean`](./CW1/Lean/MaintenanceMemory.lean), ajoute
 un contrat positif de maintenance et une mémoire topologique binaire. La
-porte nécessaire vers `CW1-beta` est formalisée dans
+porte nécessaire vers `CW1-beta` et sa première instance sont formalisées dans
 [`CW1/Lean/ActiveMaintenanceBoundary.lean`](./CW1/Lean/ActiveMaintenanceBoundary.lean).
-Elle prouve que le témoin actuel, dont les demandes de ressources et d'énergie
-sont nulles, n'est pas une maintenance active. La prochaine construction doit
-donc ajouter un flux interne explicite de prise, dissipation et renouvellement.
-Elle doit précéder toute revendication de reproduction `CW2`.
+Le témoin porte désormais une demande, une entrée et une dissipation d'énergie
+strictement positives avec bilan ouvert exact. Ces jetons restent sans unité
+physique et la demande atomique demeure nulle. La prochaine construction doit
+donc ajouter un flux matériel explicite et équilibré. Elle doit précéder toute
+revendication de reproduction `CW2`.
 
 ## 12. Séparation des responsabilités
 

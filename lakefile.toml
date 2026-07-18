@@ -15,4 +15,8 @@ name = "Carbone"
 
 [[lean_exe]]
 name = "export_two_phase"
-root = "Carbone.CW0.Lean.ExportTwoPhase"
+root = "Carbone.CW0.Lean.ExportTwoPhaseMain"
+
+[[lean_exe]]
+name = "export_cw1_energy"
+root = "Carbone.CW1.Lean.ExportEnergyMain"

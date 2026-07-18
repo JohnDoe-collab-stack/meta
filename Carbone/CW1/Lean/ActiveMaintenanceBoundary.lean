@@ -1,15 +1,16 @@
 import Carbone.CW1.Lean.MaintenanceMemory
 
 /-!
-# CW1-beta boundary: nonzero intrinsic maintenance demand
+# CW1-beta: intrinsic open energy throughput
 
-`CW1-alpha` preserves structure and carries a topology bit, but its concrete
-interaction requests no resource and no energy.  This module makes that limit
-formal.  It defines a positive necessary gate for resource-coupled maintenance
-and proves that the current two-phase witness cannot cross it.
+`CW1-alpha` preserves structure and carries a topology bit.  This module adds
+a positive gate for resource-coupled maintenance, then crosses its energy
+branch with an explicit stationary throughput: one energy token enters, is
+requested and dissipated, while one available token remains in the local
+environment.
 
-Crossing the gate would still not establish physical maintenance: an extended
-world must also represent effective uptake, dissipation and replenishment.
+This establishes an active flow inside the formal model.  It does not identify
+the abstract tokens with a physical energy scale or chemical mechanism.
 -/
 
 namespace Meta
@@ -83,6 +84,33 @@ structure ResourceCoupledMaintenance (world : CarbonWorld)
     extends CarbonMaintenance world where
   demandAt : (point : world.Point) -> NonzeroMaintenanceDemand world point
 
+/-!
+The energy branch is stronger: its positive inflow is stored in the repair,
+whose balance and equality between dissipation and causal demand are already
+intrinsic fields of `CarbonWorld`.
+-/
+structure EnergyThroughputMaintenance (world : CarbonWorld)
+    extends CarbonMaintenance world where
+  requestedEnergyPositive :
+    (point : world.Point) ->
+      0 < CarbonWorld.requestedEnergyAt world point
+  energyInflowPositive :
+    (point : world.Point) -> 0 < (world.repairAt point).energyInflow
+
+namespace EnergyThroughputMaintenance
+
+/-- Every positive energy throughput crosses the general demand gate. -/
+def toResourceCoupledMaintenance
+    {world : CarbonWorld}
+    (throughput : EnergyThroughputMaintenance world) :
+    ResourceCoupledMaintenance world where
+  toCarbonMaintenance := throughput.toCarbonMaintenance
+  demandAt := fun point =>
+    NonzeroMaintenanceDemand.energy
+      (throughput.requestedEnergyPositive point)
+
+end EnergyThroughputMaintenance
+
 /-- The concrete two-phase interaction requests no atomic resource. -/
 theorem twoPhase_requestedResourcesAt_zero
     (point : twoPhaseWorld.Point) :
@@ -93,36 +121,65 @@ theorem twoPhase_requestedResourcesAt_zero
   | generated phase history =>
       cases phase <;> rfl
 
-/-- The concrete two-phase interaction requests no energy. -/
-theorem twoPhase_requestedEnergyAt_zero
+/-- Every concrete two-phase interaction requests one energy token. -/
+theorem twoPhase_requestedEnergyAt_one
     (point : twoPhaseWorld.Point) :
-    CarbonWorld.requestedEnergyAt twoPhaseWorld point = 0 := by
+    CarbonWorld.requestedEnergyAt twoPhaseWorld point = 1 := by
   rcases point with ⟨source, admissible⟩
   cases admissible with
   | generated phase history =>
       cases phase <;> rfl
 
-/-- No admissible point of the current witness has a nonzero maintenance demand. -/
-theorem twoPhase_no_nonzeroMaintenanceDemand
+/-- Every repair receives one explicit energy token from the open boundary. -/
+theorem twoPhase_energyInflow_one
     (point : twoPhaseWorld.Point) :
-    NonzeroMaintenanceDemand twoPhaseWorld point -> False := by
-  intro demand
-  cases demand with
-  | energy positive =>
-      rw [twoPhase_requestedEnergyAt_zero point] at positive
-      exact Nat.not_lt_zero 0 positive
-  | resources positive =>
-      rw [twoPhase_requestedResourcesAt_zero point] at positive
-      exact AtomInventory.zero_not_hasPositive positive
+    (twoPhaseWorld.repairAt point).energyInflow = 1 := by
+  rcases point with ⟨source, admissible⟩
+  cases admissible with
+  | generated phase history =>
+      cases phase <;> rfl
 
-/-- `CW0`/`CW1-alpha` cannot be mislabeled as resource-coupled maintenance. -/
-theorem twoPhase_not_resourceCoupledMaintenance :
-    ResourceCoupledMaintenance twoPhaseWorld -> False := by
-  intro maintenance
-  exact
-    twoPhase_no_nonzeroMaintenanceDemand
-      twoPhaseWorld.initialPoint
-      (maintenance.demandAt twoPhaseWorld.initialPoint)
+/-- Every repair dissipates the one token requested by its interaction. -/
+theorem twoPhase_energyDissipated_one
+    (point : twoPhaseWorld.Point) :
+    (twoPhaseWorld.repairAt point).energyDissipated = 1 := by
+  rcases point with ⟨source, admissible⟩
+  cases admissible with
+  | generated phase history =>
+      cases phase <;> rfl
+
+/-- The concrete witness has positive, balanced energy throughput at every step. -/
+def twoPhaseEnergyThroughputMaintenance :
+    EnergyThroughputMaintenance twoPhaseWorld where
+  toCarbonMaintenance := twoPhaseMaintenance
+  requestedEnergyPositive := by
+    intro point
+    rw [twoPhase_requestedEnergyAt_one point]
+    exact Nat.zero_lt_succ 0
+  energyInflowPositive := by
+    intro point
+    rw [twoPhase_energyInflow_one point]
+    exact Nat.zero_lt_succ 0
+
+def twoPhaseResourceCoupledMaintenance :
+    ResourceCoupledMaintenance twoPhaseWorld :=
+  twoPhaseEnergyThroughputMaintenance.toResourceCoupledMaintenance
+
+/-- The executed world step satisfies the stationary open-energy ledger. -/
+theorem twoPhase_step_energyBalance
+    (point : twoPhaseWorld.Point) :
+    point.1.environment.energyTokens +
+          (twoPhaseWorld.repairAt point).energyInflow =
+      (twoPhaseWorld.step point).1.environment.energyTokens +
+        (twoPhaseWorld.repairAt point).energyDissipated :=
+  twoPhaseWorld.step_energyBalance point
+
+/-- Dissipation is definitionally tied to the causal interaction demand. -/
+theorem twoPhase_energyDissipated_eq_requested
+    (point : twoPhaseWorld.Point) :
+    (twoPhaseWorld.repairAt point).energyDissipated =
+      CarbonWorld.requestedEnergyAt twoPhaseWorld point :=
+  twoPhaseWorld.repairAt_energyDissipated_eq_requested point
 
 end CW1
 end Carbone
@@ -132,8 +189,13 @@ end Meta
 #print axioms Meta.Carbone.CW1.AtomInventory.zero_not_hasPositive
 #print axioms Meta.Carbone.CW1.CarbonWorld.requestedResourcesAt
 #print axioms Meta.Carbone.CW1.CarbonWorld.requestedEnergyAt
+#print axioms Meta.Carbone.CW1.EnergyThroughputMaintenance.toResourceCoupledMaintenance
 #print axioms Meta.Carbone.CW1.twoPhase_requestedResourcesAt_zero
-#print axioms Meta.Carbone.CW1.twoPhase_requestedEnergyAt_zero
-#print axioms Meta.Carbone.CW1.twoPhase_no_nonzeroMaintenanceDemand
-#print axioms Meta.Carbone.CW1.twoPhase_not_resourceCoupledMaintenance
+#print axioms Meta.Carbone.CW1.twoPhase_requestedEnergyAt_one
+#print axioms Meta.Carbone.CW1.twoPhase_energyInflow_one
+#print axioms Meta.Carbone.CW1.twoPhase_energyDissipated_one
+#print axioms Meta.Carbone.CW1.twoPhaseEnergyThroughputMaintenance
+#print axioms Meta.Carbone.CW1.twoPhaseResourceCoupledMaintenance
+#print axioms Meta.Carbone.CW1.twoPhase_step_energyBalance
+#print axioms Meta.Carbone.CW1.twoPhase_energyDissipated_eq_requested
 /- AXIOM_AUDIT_END -/

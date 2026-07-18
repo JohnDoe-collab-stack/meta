@@ -1,12 +1,18 @@
-# CW1-alpha — Maintenance et mémoire matérielle structurelles
+# CW1-beta — Maintenance, mémoire et débit énergétique formels
 
 ## Statut
 
 `CW1-alpha` ajoute au monde constructif `CW0` un premier témoin de maintenance
 et de mémoire portée par l'organisation carbonée. Son implémentation est dans
 [`Lean/MaintenanceMemory.lean`](./Lean/MaintenanceMemory.lean). La frontière
-vers une maintenance active est formalisée séparément dans
+vers une maintenance active puis son instance énergétique sont formalisées dans
 [`Lean/ActiveMaintenanceBoundary.lean`](./Lean/ActiveMaintenanceBoundary.lean).
+
+`CW1-beta` représente maintenant un système ouvert à débit stationnaire : à
+chaque pas, une unité abstraite d'énergie entre, une unité est demandée et
+dissipée, tandis que le stock local disponible reste égal à un. L'entrée, la
+dissipation et leur bilan sont portés par la réponse puis par la réparation ;
+ils ne sont pas ajoutés après l'exécution.
 
 La revendication démontrée est strictement formelle :
 
@@ -39,9 +45,15 @@ twoPhaseCore_read_updates
 twoPhaseCore_two_steps_organization
 twoPhaseCore_read_two_steps
 twoPhase_requestedResourcesAt_zero
-twoPhase_requestedEnergyAt_zero
-twoPhase_no_nonzeroMaintenanceDemand
-twoPhase_not_resourceCoupledMaintenance
+twoPhase_requestedEnergyAt_one
+twoPhase_energyInflow_one
+twoPhase_energyDissipated_one
+twoPhaseEnergyThroughputMaintenance
+twoPhaseResourceCoupledMaintenance
+twoPhase_step_energyBalance
+twoPhase_energyDissipated_eq_requested
+CertifiedTwoPhaseEnergyFlowExport.fields_eq_lean
+writeTwoPhaseEnergyKernel
 ```
 
 La même projection visible correspond ainsi à deux valeurs de mémoire
@@ -51,23 +63,23 @@ ajoutée comme hypothèse terminale.
 
 ## Portée exacte
 
-Ce témoin établit une **mémoire matérielle structurelle dans le modèle**. Il ne
-prouve pas encore :
+Ce témoin établit une **mémoire matérielle structurelle et un débit énergétique
+actif dans le modèle**. Il ne prouve pas encore :
 
 - une mémoire moléculaire physiquement réalisée ;
-- une maintenance active consommant des ressources ou dissipant de l'énergie ;
+- une unité physique pour les jetons d'énergie ;
+- un mécanisme chimique produisant l'entrée ou la dissipation ;
+- une prise de matière, puisque la demande atomique reste nulle ;
 - une cinétique ou une stabilité thermodynamique ;
 - une reproduction, une transmission à des descendants ou une hérédité ;
 - une variation ou une sélection.
 
-L'environnement du témoin reste constant et la bascule entre les deux
-topologies est encore la réponse causale définie par `CW0`. La porte
-`ResourceCoupledMaintenance` exige une demande intrinsèque non nulle à chaque
-état admissible. Le témoin actuel est constructivement prouvé incapable de
-l'habiter, puisque toutes ses demandes valent zéro.
+Le stock de l'environnement reste constant parce que l'entrée et la
+dissipation sont égales. La bascule entre les deux topologies reste la réponse
+causale définie par `CW0`. L'export exécutable distinct se trouve dans
+[`exports/energy-throughput-v1`](./exports/energy-throughput-v1/README.md) ;
+l'export historique `CW0` reste inchangé octet pour octet.
 
-La prochaine étape honnête est donc une nouvelle instance `CW1-beta`, avec une
-ontologie positive de prise de ressources, dissipation et renouvellement. Une
-simple demande non nulle ne suffira pas : le flux effectivement exécuté devra
-être relié à la réponse et à la réparation avant d'introduire une unité
-reproductrice `CW2`.
+La prochaine étape honnête est un flux matériel positif — prise et rejet
+d'atomes ou composants avec bilan — avant d'introduire une unité reproductrice
+`CW2`.

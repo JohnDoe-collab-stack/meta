@@ -61,7 +61,10 @@ Il prend comme entrée un `CarbonCoreAtlas` dont le pôle formé courant est la
 source courante. `ConcreteTwoPhase` habite cet atlas : ses organisations et sa
 branche bilatérale sont finies, tandis que la liste d'histoire reste
 volontairement non bornée. La réparation alterne les deux squelettes, conserve
-l'environnement et l'inventaire total, puis ajoute un enregistrement interne.
+le stock de l'environnement et l'inventaire total, puis ajoute un
+enregistrement interne. La couche `CW1-beta` enrichit la réponse et la
+réparation d'un bilan ouvert explicite : une unité abstraite entre et une unité
+est dissipée à chaque pas.
 
 Ce témoin valide l'architecture et la calculabilité du pas. Il ne constitue
 pas une cinétique chimique : aucune énergie d'activation, géométrie, loi de
@@ -77,6 +80,8 @@ réactivité chimique ou d'évolution physique.
 carbonProjectionObstruction
 CarbonWorld.step_eq_executeRepair
 CarbonWorld.step_totalInventory
+CarbonWorld.step_energyBalance
+CarbonWorld.repairAt_energyDissipated_eq_requested
 CarbonWorld.step_history.
 CarbonCoreAtlas.toGapRepairAlgebra
 CarbonCoreAtlas.coreNext_eq_worldStep.

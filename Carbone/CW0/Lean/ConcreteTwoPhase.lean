@@ -86,7 +86,7 @@ def twoPhaseInteraction
       (twoPhaseGap phase history) where
   tag := twoPhaseTag phase
   requestedResources := AtomInventory.zero
-  requestedEnergy := 0
+  requestedEnergy := 1
   resourcesAvailable :=
     ⟨ Nat.zero_le _
     , Nat.zero_le _
@@ -94,7 +94,7 @@ def twoPhaseInteraction
     , Nat.zero_le _
     , Nat.zero_le _
     , Nat.zero_le _ ⟩
-  energyAvailable := Nat.zero_le _
+  energyAvailable := Nat.le_refl 1
 
 def twoPhaseResponse
     (phase : TwoPhase)
@@ -107,6 +107,10 @@ def twoPhaseResponse
   afterEnvironment := twoPhaseEnvironment
   inventoryBalanced := by
     cases phase <;> rfl
+  energyInflow := 1
+  energyDissipated := 1
+  energyDissipated_eq_requested := rfl
+  energyBalanced := rfl
   energyNonincreasing := Nat.le_refl _
 
 def twoPhaseCausalStep

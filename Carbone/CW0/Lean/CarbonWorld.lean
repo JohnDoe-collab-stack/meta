@@ -244,15 +244,22 @@ structure CarbonInteraction
 structure CarbonResponse
     (source : WorldState)
     {gap : CarbonGap source}
-    (_interaction : CarbonInteraction source gap) where
+    (interaction : CarbonInteraction source gap) where
   tag : Nat
   afterOrganization : CarbonOrganization
   afterEnvironment : CarbonEnvironment
   inventoryBalanced :
     totalInventory source =
-      AtomInventory.add
+    AtomInventory.add
         afterOrganization.configuration.inventory
         afterEnvironment.resources
+  energyInflow : Nat
+  energyDissipated : Nat
+  energyDissipated_eq_requested :
+    energyDissipated = interaction.requestedEnergy
+  energyBalanced :
+    source.environment.energyTokens + energyInflow =
+      afterEnvironment.energyTokens + energyDissipated
   energyNonincreasing :
     afterEnvironment.energyTokens <= source.environment.energyTokens
 
@@ -274,6 +281,11 @@ structure CarbonRepair (source : WorldState) where
       AtomInventory.add
         afterOrganization.configuration.inventory
         afterEnvironment.resources
+  energyInflow : Nat
+  energyDissipated : Nat
+  energyBalanced :
+    source.environment.energyTokens + energyInflow =
+      afterEnvironment.energyTokens + energyDissipated
   energyNonincreasing :
     afterEnvironment.energyTokens <= source.environment.energyTokens
 
@@ -285,6 +297,9 @@ def repairOfCausalStep
   afterEnvironment := causalStep.response.afterEnvironment
   record := causalStep.record
   inventoryBalanced := causalStep.response.inventoryBalanced
+  energyInflow := causalStep.response.energyInflow
+  energyDissipated := causalStep.response.energyDissipated
+  energyBalanced := causalStep.response.energyBalanced
   energyNonincreasing := causalStep.response.energyNonincreasing
 
 def executeRepair
@@ -339,6 +354,24 @@ theorem step_totalInventory
     totalInventory (world.step point).1 = totalInventory point.1 := by
   exact (world.repairAt point).inventoryBalanced.symm
 
+/-- The executed step preserves the open-system energy ledger of its response. -/
+theorem step_energyBalance
+    (world : CarbonWorld)
+    (point : world.Point) :
+    point.1.environment.energyTokens + (world.repairAt point).energyInflow =
+      (world.step point).1.environment.energyTokens +
+        (world.repairAt point).energyDissipated := by
+  exact (world.repairAt point).energyBalanced
+
+/-- The repair dissipates exactly the energy requested by its causal interaction. -/
+theorem repairAt_energyDissipated_eq_requested
+    (world : CarbonWorld)
+    (point : world.Point) :
+    (world.repairAt point).energyDissipated =
+      (world.causalStepAt point.1 point.2).interaction.requestedEnergy := by
+  exact
+    (world.causalStepAt point.1 point.2).response.energyDissipated_eq_requested
+
 theorem step_history
     (world : CarbonWorld)
     (point : world.Point) :
@@ -358,5 +391,7 @@ end Meta
 #print axioms Meta.Carbone.CW0.carbonProjectionObstruction
 #print axioms Meta.Carbone.CW0.CarbonWorld.step_eq_executeRepair
 #print axioms Meta.Carbone.CW0.CarbonWorld.step_totalInventory
+#print axioms Meta.Carbone.CW0.CarbonWorld.step_energyBalance
+#print axioms Meta.Carbone.CW0.CarbonWorld.repairAt_energyDissipated_eq_requested
 #print axioms Meta.Carbone.CW0.CarbonWorld.step_history
 /- AXIOM_AUDIT_END -/

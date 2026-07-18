@@ -4,6 +4,8 @@ import Carbone.CW1.Lean.ActiveMaintenanceBoundary
 #print axioms Meta.Carbone.CW0.carbonProjectionObstruction
 #print axioms Meta.Carbone.CW0.CarbonWorld.step_eq_executeRepair
 #print axioms Meta.Carbone.CW0.CarbonWorld.step_totalInventory
+#print axioms Meta.Carbone.CW0.CarbonWorld.step_energyBalance
+#print axioms Meta.Carbone.CW0.CarbonWorld.repairAt_energyDissipated_eq_requested
 #print axioms Meta.Carbone.CW0.CarbonCoreAtlas.toGapRepairAlgebra
 #print axioms Meta.Carbone.CW0.CarbonCoreAtlas.coreNext_eq_worldStep
 #print axioms Meta.Carbone.CW0.twoPhaseCoreAtlas
@@ -19,6 +21,9 @@ import Carbone.CW1.Lean.ActiveMaintenanceBoundary
 #print axioms Meta.Carbone.CW1.twoPhaseCore_read_updates
 #print axioms Meta.Carbone.CW1.twoPhaseCore_two_steps_organization
 #print axioms Meta.Carbone.CW1.twoPhase_requestedResourcesAt_zero
-#print axioms Meta.Carbone.CW1.twoPhase_requestedEnergyAt_zero
-#print axioms Meta.Carbone.CW1.twoPhase_not_resourceCoupledMaintenance
+#print axioms Meta.Carbone.CW1.twoPhase_requestedEnergyAt_one
+#print axioms Meta.Carbone.CW1.twoPhaseEnergyThroughputMaintenance
+#print axioms Meta.Carbone.CW1.twoPhaseResourceCoupledMaintenance
+#print axioms Meta.Carbone.CW1.twoPhase_step_energyBalance
+#print axioms Meta.Carbone.CW1.twoPhase_energyDissipated_eq_requested
 /- AXIOM_AUDIT_END -/

@@ -261,13 +261,6 @@ end CW0
 end Carbone
 end Meta
 
-def main (arguments : List String) : IO UInt32 := do
-  match arguments with
-  | path :: _remaining =>
-      Meta.Carbone.CW0.writeTwoPhaseKernel path
-      pure 0
-  | [] => pure 2
-
 /- AXIOM_AUDIT_BEGIN -/
 #print axioms Meta.Carbone.CW0.elementJsonName
 #print axioms Meta.Carbone.CW0.writeNat
@@ -279,5 +272,4 @@ def main (arguments : List String) : IO UInt32 := do
 #print axioms Meta.Carbone.CW0.writeTwoPhaseTransitionTail
 #print axioms Meta.Carbone.CW0.writeTwoPhaseTransitions
 #print axioms Meta.Carbone.CW0.writeTwoPhaseKernel
-#print axioms main
 /- AXIOM_AUDIT_END -/
