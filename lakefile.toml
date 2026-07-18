@@ -12,3 +12,7 @@ name = "Meta"
 
 [[lean_lib]]
 name = "Carbone"
+
+[[lean_exe]]
+name = "export_two_phase"
+root = "Carbone.CW0.Lean.ExportTwoPhase"

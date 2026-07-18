@@ -1,4 +1,4 @@
-import Carbone.CW0.Lean.ConcreteTwoPhase
+import Carbone.CW0.Lean.FiniteKernel
 
 /- AXIOM_AUDIT_BEGIN -/
 #print axioms Meta.Carbone.CW0.carbonProjectionObstruction
@@ -9,4 +9,6 @@ import Carbone.CW0.Lean.ConcreteTwoPhase
 #print axioms Meta.Carbone.CW0.twoPhaseCoreAtlas
 #print axioms Meta.Carbone.CW0.twoPhaseCoreStep_organization
 #print axioms Meta.Carbone.CW0.twoPhaseInitialCoreStep_preservesInventory
+#print axioms Meta.Carbone.CW0.twoPhaseKernel_commutes
+#print axioms Meta.Carbone.CW0.twoPhaseKernel_two_steps
 /- AXIOM_AUDIT_END -/

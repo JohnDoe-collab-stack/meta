@@ -25,6 +25,15 @@ Le raccord générique au Core est dans
 [`Lean/CoreAdapter.lean`](./Lean/CoreAdapter.lean).
 Le premier témoin concret fermé est dans
 [`Lean/ConcreteTwoPhase.lean`](./Lean/ConcreteTwoPhase.lean).
+Son noyau observationnel fini est dans
+[`Lean/FiniteKernel.lean`](./Lean/FiniteKernel.lean) et son protocole de
+simulation dans [`SIMULATION_PROTOCOL.md`](./SIMULATION_PROTOCOL.md).
+L'export JSON canonique est produit par
+[`Lean/ExportTwoPhase.lean`](./Lean/ExportTwoPhase.lean).
+L'interprète exact minimal est
+[`python/simulate_two_phase.py`](./python/simulate_two_phase.py).
+Le premier run figé et ses limites sont consignés dans
+[`reports/CONFORMANCE.md`](./reports/CONFORMANCE.md).
 
 Validation exécutée :
 
@@ -75,6 +84,8 @@ twoPhaseCoreStep_organization
 twoPhaseCoreStep_history
 twoPhaseInitialCoreStep_preservesInventory
 twoPhaseInitialCoreStep_changesOrganization.
+twoPhaseKernel_commutes
+twoPhaseKernel_two_steps.
 ```
 
 `step` ne figure pas dans les données de `CarbonWorld`. Il est défini depuis
