@@ -46,6 +46,7 @@ lake build Meta.AdaptiveRepairability.Synthesis
 lake build Meta.AdaptiveRepairability.ExactPosterior
 lake build Meta.AdaptiveRepairability.Countermodels
 lake build Meta.AdaptiveRepairability.PositiveInstance
+lake build Meta.AdaptiveRepairability.LegacyInstanceAdapters
 ```
 
 The final problem-audit target must still be built before accepting the
@@ -93,6 +94,9 @@ Meta.AdaptiveRepairability.certifiedRepairable_iff_uniformlyActionResolvable
 Meta.AdaptiveRepairability.composableSeparability_implies_certifiedRepairable
 Meta.AdaptiveRepairability.exactGeneratedTree_leafPosterior
 Meta.AdaptiveRepairability.PositiveInstance.synthesizedCertifiedRepairability
+Meta.AdaptiveRepairability.LegacyInstanceAdapters.finiteCompatibilityExact
+Meta.AdaptiveRepairability.LegacyInstanceAdapters.openCompatibilityExact
+Meta.AdaptiveRepairability.LegacyInstanceAdapters.legacyAdaptiveIntegration
 certifiedAdaptiveClosurePublicationValidation
 ```
 

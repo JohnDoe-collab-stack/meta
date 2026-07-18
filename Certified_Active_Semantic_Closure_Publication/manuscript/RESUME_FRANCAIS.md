@@ -46,6 +46,16 @@ montrent la nécessité de la composabilité, de l’expressivité du candidat, 
 séparation public/privé et d’une frame explicite. Une instance exacte à deux
 mondes valide la chaîne complète et exclut toute vacuité du théorème.
 
+Les anciennes réalisations ne restent plus seulement juxtaposées à cette
+caractérisation. Trois adaptateurs relient exactement les trois réparations
+finies au protocole public binaire, et `openLegacyAdapterAt` effectue la même
+liaison pour tout stade naturel du système ouvert. L’équivalence de
+compatibilité est prouvée avant la réponse et sur les deux postérieurs, les
+réponses et actions sont alignées et séparées, le certificat historique est
+conservé, et les états réels successifs se raccordent. Cette liaison porte sur
+les deux mondes du certificat d’aliasing ; elle ne réduit pas l’espace complet
+des mondes à deux éléments.
+
 Chaque étape certifiée contient la chaîne complète : gap ouvert et typé,
 aliasing avant réparation, requête exactement sélectionnée et strictement
 informative, successeur dérivé de la réparation intrinsèque, réduction stricte
@@ -63,6 +73,7 @@ effective et chaque gap courant est fermé.
 L’objet final
 `certifiedAdaptiveClosurePublicationValidation` assemble la publication
 latente antérieure, la caractérisation adaptative et son instance positive avec
+les adaptateurs exacts des trajectoires finie et ouverte, ainsi qu’avec
 les no-go visible et passif, la conservativité de
 l’identité stricte, la cohérence constructive et l’agent quantifié à cinq têtes
 certifié sur 697 obligations réifiées.

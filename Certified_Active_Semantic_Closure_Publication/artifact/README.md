@@ -17,7 +17,8 @@ The proof artifact has three layers:
    characterization: computable conflict measure, public repair trees,
    adaptive no-go, operational equivalence, well-founded synthesis from
    composable separators, exact-posterior compilation, four countermodels, and
-   an inhabited end-to-end instance.
+   an inhabited end-to-end instance, followed by exact adapters for the
+   previously published finite and open trajectories.
 
 Build from this directory:
 
@@ -28,7 +29,7 @@ lake build Meta
 The adaptive characterization can be checked alone with:
 
 ```bash
-lake build Meta.AdaptiveRepairability.PositiveInstance
+lake build Meta.AdaptiveRepairability.LegacyInstanceAdapters
 ```
 
 Its module order is:
@@ -42,6 +43,7 @@ FiniteMeasure
 → Countermodels
 → Validation
 → PositiveInstance
+→ LegacyInstanceAdapters
 ```
 
 Lean version: `leanprover/lean4:v4.29.0`.

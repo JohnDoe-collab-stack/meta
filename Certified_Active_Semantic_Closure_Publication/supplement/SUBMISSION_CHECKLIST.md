@@ -16,6 +16,8 @@
       exact posterior, and four necessity countermodels are formalized.
 - [x] A complete positive instance establishes that the generic synthesis
       interfaces are inhabited.
+- [x] Exact adapters connect the three finite repairs and every open stage to
+      the public binary protocol without enlarging their quantifiers.
 
 ## Formal artifact
 

@@ -52,6 +52,9 @@ restate the full claimed scope as kernel-checked checklists.
 | Exact leaf posterior | `exactGeneratedTree_leafPosterior` | Compiler-generated trees only |
 | Necessity tests | four declarations in `Countermodels.lean` | Constructive finite countermodels |
 | Positive non-vacuity | `synthesizedCertifiedRepairability` | Exact two-world instance |
+| Finite legacy adapters | `finiteLegacyAdapter0/1/2` | Exact certified aliasing pair at each finite step |
+| Open legacy adapters | `openLegacyAdapterAt` | Every natural stage, exact two-completion slice |
+| Sequential legacy integration | `legacyAdaptiveIntegration` | Three finite links and all open successor links |
 | Full aggregation | `certifiedAdaptiveClosurePublicationValidation` | Axiom-free package entry point |
 
 ## B. Core definitions

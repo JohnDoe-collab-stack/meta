@@ -35,7 +35,8 @@ the intended claim boundary.
 | C27 | Compiler-generated trees represent the exact posterior at every leaf | `exactGeneratedTree_leafPosterior` | Trees carrying `GeneratedByExactCompiler` for a supplied exact compiler | Does not assert exactness of arbitrary repair trees |
 | C28 | The characterization hypotheses are independently necessary | four declarations in `Countermodels.lean` | Explicit finite countermodels for non-composability, candidate inexpressivity, private-world leakage, and frame regression | Countermodels isolate assumptions; they are not benchmark environments |
 | C29 | The generic synthesis theorem is inhabited end to end | `synthesizedCertifiedRepairability`, `exactInstanceCertifiedRepairable` | Explicit two-world deterministic public environment | Demonstrates non-vacuity, not empirical scale |
-| C30 | Established and adaptive results coexist in one axiom-free package | `certifiedAdaptiveClosurePublicationValidation` | Aggregate of the prior publication validation, the new generic characterization, and the positive instance | Aggregation does not enlarge any component quantifier |
+| C30 | Established and adaptive results coexist in one axiom-free package | `certifiedAdaptiveClosurePublicationValidation` | Aggregate of the prior publication validation, the new generic characterization, the positive instance, and the legacy adapters | Aggregation does not enlarge any component quantifier |
+| C31 | Every published finite repair and every open stage is connected to the public binary protocol on its certified aliasing pair | `finiteLegacyAdapter0`, `finiteLegacyAdapter1`, `finiteLegacyAdapter2`, `openLegacyAdapterAt`, `legacyAdaptiveIntegration` | Three exact finite steps and all `stage : Nat`; exact compatibility on the two-world slice before and on both response posteriors | Does not collapse the complete finite or infinite legacy world space to two worlds |
 
 ## Evidence hierarchy
 

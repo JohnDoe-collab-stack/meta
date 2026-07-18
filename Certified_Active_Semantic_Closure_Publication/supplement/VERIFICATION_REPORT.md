@@ -1,6 +1,6 @@
 # Release verification report
 
-Release: 1.1.0
+Release: 1.2.0
 Verification date: 2026-07-18
 Environment: x86_64 Linux/WSL
 
@@ -24,7 +24,7 @@ Publication target:
 
 ```text
 lake build Meta
-Build completed successfully (230 jobs).
+Build completed successfully (231 jobs).
 ```
 
 The manifest has an empty package list. Every project import begins with
@@ -63,7 +63,7 @@ reports:
 plannedProblemResolutionAudit does not depend on any axioms.
 ```
 
-Each of the eight modules under `Meta/AdaptiveRepairability` contains exactly
+Each of the nine modules under `Meta/AdaptiveRepairability` contains exactly
 one final `AXIOM_AUDIT` block. Their audited declarations include:
 
 ```text
@@ -78,6 +78,16 @@ exactGeneratedTree_leafPosterior
 adaptiveRepairabilityFormalValidation
 synthesizedCertifiedRepairability
 exactInstanceCertifiedRepairable
+alternateState1_rightCompatible
+alternateState2_rightCompatible
+alternateState3_rightCompatible
+finiteCompatibilityExact
+finiteLegacyAdapter0
+finiteLegacyAdapter1
+finiteLegacyAdapter2
+openCompatibilityExact
+openLegacyAdapterAt
+legacyAdaptiveIntegration
 ```
 
 All report “does not depend on any axioms.” The four countermodel aggregates
@@ -101,23 +111,24 @@ c1ffd7382f5e02206e2ee81c5e4fabc918381a7254ec33bdc61610e1e8b3628f  artifact/Meta/
 1b1d4170629eab37f205fb2730efff8497dbd4c8cb2427946420d785fc70c43f  artifact/Meta/AdaptiveRepairability/Countermodels.lean
 209a77fd211598bb8576a02e15cc204c5267c337975e128f17c10d7ea7db0d85  artifact/Meta/AdaptiveRepairability/Validation.lean
 aa30259cdedc1e56c2aae0e0b31c20e16a021e987cded73b5221827fd79f7692  artifact/Meta/AdaptiveRepairability/PositiveInstance.lean
-195c2f32f3d2cd66c626ecb543a210d5ad4dd760ddcaa573b0c2f02dc61b23c8  artifact/Meta.lean
-af51b26e20b4cbbaae568125de7fe4931223cc50119411c12c93a7eaa3233233  artifact/lakefile.toml
+0349cbb5d67cec466c5ee9377fd046871a825d953283d789fc61596dd0f1df11  artifact/Meta/AdaptiveRepairability/LegacyInstanceAdapters.lean
+60174b45913987883b7c82b2344adbb75d3dcfc999cce03cc57cb7418b5f0ed8  artifact/Meta.lean
+52a542d4b5f29b3cdf93d524a044d3137f9e2383b8ef70fe244b0b9cdbfc53c4  artifact/lakefile.toml
 651c8accb402b0c071cd336e9d3dc0a55516b1bfb434ddc4801f14936785b1d2  artifact/lean-toolchain
-a5a2cf3be8c97730fff9032a26d496e2504728cec1fe0995b845805dc5f2453f  manuscript/MAIN_PAPER.md
+fa349e748a580c71c4ab4259a74bfc457b5db819be8581002707c380dcd47c46  manuscript/MAIN_PAPER.md
 16a625dc3638bda0fb24f7ed61b8c7c294c706591dccd160d74e2181f0d344c0  artifact/Empirical/v23_gap_driven_active_semantic_closure/artifacts/development/quantized_checkpoint_v23.json
 ```
 
 ## Inventory result
 
-The release contains 297 source/documentation/configuration files when `.lake`
-build products are excluded, including 245 Lean modules below `artifact/Meta`,
+The release contains 298 source/documentation/configuration files when `.lake`
+build products are excluded, including 246 Lean modules below `artifact/Meta`,
 88 numerical batches, 88 semantic-alignment batches, and 22 frozen Python
-files. Source size excluding `.lake` is approximately 2.77 MiB.
+files. Source size excluding `.lake` is approximately 2.80 MiB.
 
 ## Verdict
 
-Accepted for anonymous formal-artifact submission as release 1.1.0. The formal
+Accepted for anonymous formal-artifact submission as release 1.2.0. The formal
 claims in the normative claim–evidence matrix, adaptive characterization, and
 problem-resolution audit are build-verified.
 This verdict is for the exact generic/exact scope stated there, not for the

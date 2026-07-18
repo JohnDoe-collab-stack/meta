@@ -28,6 +28,9 @@ The finite adaptive characterization is aggregated by
 operational characterization by global repair trees, constructive synthesis
 from composable pair separators, exact leaf posteriors for compiler-generated
 trees, four hypothesis countermodels, and an inhabited two-world exact instance.
+The same binary interface is now connected constructively to all three
+published finite repairs and to every natural stage of the published open
+orbit by exact public-fiber adapters.
 
 The stricter release verdict is the independently typed checklist
 `plannedProblemResolutionAudit` in
@@ -57,6 +60,10 @@ Its clause-by-clause interpretation, including the exact non-claims, is in
   makes a strictly informative query, eliminates a compatible completion,
   closes the current gap, preserves all learned entries, and makes an effective
   transition. No finite stage is globally closed.
+- The two-world public protocol represents exactly the certified aliasing pair
+  before and after each published finite repair and every open repair stage;
+  response, required action, actual successor, legacy closure, and sequential
+  linkage are carried by `legacyAdaptiveIntegration`.
 - A five-head Int8/Int32 agent is exhaustively checked on 697 reified semantic
   obligations in 88 batches with exact arithmetic and strict winning margins.
 
@@ -102,6 +109,6 @@ declaration does not depend on any axioms. The source audit must also find no
 
 ## Submission status
 
-The scientific content is frozen as version 1.1.0 for anonymous review. Author,
+The scientific content is frozen as version 1.2.0 for anonymous review. Author,
 affiliation, venue formatting, and archival DOI are intentionally absent from
 this blind package and can be added without changing any theorem or claim.

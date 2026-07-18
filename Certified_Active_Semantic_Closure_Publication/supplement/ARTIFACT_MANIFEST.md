@@ -1,14 +1,14 @@
 # Artifact manifest
 
-Release: 1.1.0
-Release date: 2026-07-17
+Release: 1.2.0
+Release date: 2026-07-18
 Packaging mode: standalone anonymous-review artifact
 
 ## Source inventory
 
 | Component | Count | Role |
 |---|---:|---|
-| Lean source files under `artifact/Meta` | 245 | Complete formal artifact |
+| Lean source files under `artifact/Meta` | 246 | Complete formal artifact |
 | Core Lean modules | 22 | Relaxed use, projection, transport, dynamics |
 | Semantic Lean modules | 13 | Interpretation, soundness, conservativity, stability |
 | AI Lean modules | 200 | Closure systems, instances, no-go, quantized execution |
@@ -16,10 +16,10 @@ Packaging mode: standalone anonymous-review artifact
 | Semantic-alignment batches | 88 | Dependent-semantic input coverage |
 | Python files | 22 | Frozen development and experimental tooling |
 | Latent-repair publication modules | 2 | Aliasing-to-sufficiency solution and problem audit |
-| Adaptive-repairability modules | 8 | Characterization, synthesis, exactness, countermodels, validation, instance |
+| Adaptive-repairability modules | 9 | Characterization, synthesis, exactness, countermodels, validation, instance, legacy adapters |
 
 The top-level `Meta.lean` entry point and project configuration are additional
-to the 245 files counted below `Meta/`.
+to the 246 files counted below `Meta/`.
 
 ## Entrypoints
 
@@ -27,6 +27,8 @@ to the 245 files counted below `Meta/`.
   `artifact/Meta/LatentRepair/CertifiedLatentRepair.lean`
 - Adaptive characterization and inhabited instance:
   `artifact/Meta/AdaptiveRepairability/PositiveInstance.lean`
+- Exact finite/open instance integration:
+  `artifact/Meta/AdaptiveRepairability/LegacyInstanceAdapters.lean`
 - Whole-library import:
   `artifact/Meta.lean`
 - Manuscript: `manuscript/MAIN_PAPER.md`

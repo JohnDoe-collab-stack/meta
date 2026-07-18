@@ -2,8 +2,8 @@
 title: "Certified Online Repair of Action-Sufficient Latent Representations"
 subtitle: "Information Necessity, Adaptive Characterization, and Constructive Finite/Open Guarantees"
 authors: "Anonymous authors"
-date: "2026-07-17"
-version: "1.1.0"
+date: "2026-07-18"
+version: "1.2.0"
 submission: "Anonymous manuscript"
 bibliography: "../supplement/REFERENCES.bib"
 reference-section-title: "References"
@@ -271,6 +271,20 @@ the candidate language; a private-world policy invalidates a public no-go; and
 posterior inclusion alone need not preserve a protected frame. A two-world
 exact instance satisfies the complete interfaces and is closed by the generic
 synthesizer.
+
+The published finite and open realizations are also connected back to this
+interface. A `BinaryPublicFiberAdapter` maps the binary protocol’s initial and
+two response states to legacy public views and proves exact compatibility on
+the two worlds already carried by the corresponding aliasing certificate. It
+also aligns the selected responses and required actions, retains the legacy
+`CertifiedLatentRepairStep`, and carries the public repairability witness.
+
+**Theorem 9 (legacy-instance integration).** Each of the three finite repair
+steps admits such an exact binary-slice adapter, and every natural stage of the
+open orbit admits one for its two completion worlds. The finite adapters join
+at their actual successor states, and the open adapter at stage `n` joins the
+adapter at stage `n+1`. This theorem does not identify the complete 27-world
+finite domain or the infinite Boolean-stream space with a binary universe.
 
 # 5. Complete certified repair steps
 

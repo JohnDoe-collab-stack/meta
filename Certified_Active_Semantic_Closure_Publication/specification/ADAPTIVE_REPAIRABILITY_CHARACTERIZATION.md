@@ -1344,10 +1344,12 @@ La construction est répartie ainsi :
 | J, tests négatifs | `Countermodels.lean` |
 | agrégation | `Validation.lean` |
 | non-vacuité de bout en bout | `PositiveInstance.lean` |
+| K, instances publiées | `LegacyInstanceAdapters.lean` |
 
-Les paragraphes A–J ci-dessous décrivent les obligations maintenant réalisées.
-L’étape K reste un travail d’adaptation des anciennes instances aux nouvelles
-interfaces ; elle n’est ni une hypothèse ni une dépendance du théorème général.
+Les paragraphes A–K ci-dessous décrivent les obligations maintenant réalisées.
+L’étape K n’est ni une hypothèse ni une dépendance du théorème général : elle
+prouve séparément que les instances déjà publiées habitent l’interface sur les
+deux mondes exacts de chacun de leurs certificats d’aliasing.
 
 ### Étape A — données publiques finies
 
@@ -1415,8 +1417,31 @@ moins l’un d’eux.
 
 ### Étape K — instances existantes
 
-Relier les systèmes fini et ouvert publiés aux nouvelles interfaces sans élargir
-leurs quantificateurs actuels.
+Les systèmes fini et ouvert publiés sont reliés aux nouvelles interfaces sans
+élargir leurs quantificateurs actuels. `BinaryPublicFiberAdapter` enregistre :
+
+- les deux mondes de l’ancien certificat et leurs trois états publics
+  `initial`, `observedLeft`, `observedRight` ;
+- l’équivalence exacte de compatibilité sur ce sous-fibre avant et après chaque
+  réponse ;
+- l’égalité des réponses et des actions requises avec leurs lectures dans
+  l’ancien système ;
+- la séparation constructive des deux réponses et des deux actions ;
+- le certificat historique `CertifiedLatentRepairStep` et le témoin de
+  réparabilité publique ;
+- l’égalité entre la branche réelle et l’ancien successeur, puis la continuité
+  séquentielle entre adaptateurs.
+
+`finiteLegacyAdapter0`, `finiteLegacyAdapter1` et `finiteLegacyAdapter2`
+couvrent exactement les trois réparations finies. `openLegacyAdapterAt stage`
+couvre tout `stage : Nat` en utilisant les deux complétions déjà présentes dans
+le certificat ouvert. `legacyAdaptiveIntegration` assemble ces objets et leurs
+liaisons successives.
+
+Cette adaptation n’affirme pas que l’espace fini complet de 27 mondes, ni
+l’espace infini des flux booléens, est isomorphe à un univers binaire. Elle
+prouve uniquement l’exactitude du sous-fibre à deux mondes qui porte chaque
+obstruction et chaque requête discriminante publiée.
 
 ## 23. Critères d’acceptation formelle
 

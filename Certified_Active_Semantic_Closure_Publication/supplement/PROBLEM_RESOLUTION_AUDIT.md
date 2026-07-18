@@ -61,10 +61,12 @@ established results. The release closes them as follows.
 | 10.12 Approximate robustness | Not claimed; strict catalogue margins are not a perturbation-region theorem |
 
 The seven clauses of the proposed theorem in source section 23 are therefore
-all realized for the published finite/open class. Release 1.1.0 additionally
+all realized for the published finite/open class. Release 1.2.0 additionally
 proves a synthesis theorem for the explicitly declared finite deterministic
 public-environment interface under composable separation and decision-language
-adequacy. It does not extend those assumptions to every POMDP, arbitrary
+adequacy, and connects the exact finite/open aliasing witnesses to that public
+interface through certified two-world-slice adapters. It does not extend those
+assumptions to every POMDP, arbitrary
 learned representation, or arbitrary detector.
 
 ## Independent kernel check
@@ -73,7 +75,7 @@ The release check was run from `artifact`:
 
 ```text
 lake build Meta
-Build completed successfully (230 jobs).
+Build completed successfully (231 jobs).
 ```
 
 Lean reported:
@@ -87,7 +89,8 @@ certifiedAdaptiveClosurePublicationValidation does not depend on any axioms
 The audit object contains the generic no-go and sufficiency bridges, all three
 finite steps, finite non-regression/termination/stasis, all-stage open
 closure/non-regression/progress, the passive/visible obstruction, foundational
-validation, and exact quantized semantic refinement.
+validation, exact finite/open adaptive adapters, and exact quantized semantic
+refinement.
 
 ## Publication claim boundary
 
