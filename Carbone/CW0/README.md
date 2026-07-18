@@ -10,7 +10,8 @@ nécessaires avant le raccord complet au Core :
 
 ```text
 inventaire atomique avec présence positive de carbone ;
-configuration et organisation carbonées finies ;
+configuration et organisation carbonées finies avec toutes les liaisons
+intrinsèquement certifiées entre deux indices atomiques distincts ;
 environnement et histoire ;
 projection vers un visible d'inventaire ;
 obstruction projective concrète ;
@@ -41,8 +42,8 @@ Validation exécutée :
 lake build Carbone
 ```
 
-La bibliothèque compile. L'audit final des quatre déclarations principales
-n'affiche aucun axiome.
+La bibliothèque compile. Les audits finaux des déclarations principales
+n'affichent aucun axiome.
 
 ## Limite actuelle
 
@@ -78,7 +79,7 @@ CarbonWorld.step_eq_executeRepair
 CarbonWorld.step_totalInventory
 CarbonWorld.step_history.
 CarbonCoreAtlas.toGapRepairAlgebra
-CarbonCoreAtlas.coreNext_source_eq_worldStep.
+CarbonCoreAtlas.coreNext_eq_worldStep.
 twoPhaseCoreAtlas
 twoPhaseCoreStep_organization
 twoPhaseCoreStep_history
@@ -86,8 +87,14 @@ twoPhaseInitialCoreStep_preservesInventory
 twoPhaseInitialCoreStep_changesOrganization.
 twoPhaseKernel_commutes
 twoPhaseKernel_two_steps.
+CertifiedTwoPhaseStateExport.fields_eq_lean
+writeTwoPhaseState_eq_certifiedWriter.
 ```
 
 `step` ne figure pas dans les données de `CarbonWorld`. Il est défini depuis
 `causalStepAt`, `repairOfCausalStep` et `executeRepair`. Le bilan conserve
-l'inventaire combiné de l'organisation et de son environnement.
+l'inventaire combiné de l'organisation et de son environnement. L'égalité
+`coreNext_eq_worldStep` porte sur le point dépendant complet, témoin
+d'admissibilité compris. Les états JSON sont encodés depuis une charge utile
+indexée par leur phase et certifiée égale à la configuration Lean ; les atomes,
+liaisons et inventaires ne sont plus dupliqués sous forme de littéraux JSON.

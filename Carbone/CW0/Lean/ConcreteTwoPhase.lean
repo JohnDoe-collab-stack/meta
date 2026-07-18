@@ -272,8 +272,7 @@ def twoPhaseRealizesAt
 def twoPhaseCanonicalRepairAt
     (point : twoPhaseWorld.Point) :
     CanonicalRepairAt twoPhaseWorld point where
-  repair := twoPhaseWorld.repairAt point
-  repair_eq := rfl
+  token := ()
 
 def twoPhaseLocalRecovery
     (point : twoPhaseWorld.Point) :
@@ -347,6 +346,12 @@ def twoPhaseGapRepairAlgebra :
     GapRepairAlgebra twoPhaseIntrinsicFamily :=
   twoPhaseCoreAtlas.toGapRepairAlgebra
 
+/-- Concrete specialization of complete point equality, including admissibility data. -/
+theorem twoPhaseCoreNext_eq_worldStep
+    (point : twoPhaseWorld.Point) :
+    twoPhaseGapRepairAlgebra.next point = twoPhaseWorld.step point :=
+  twoPhaseCoreAtlas.coreNext_eq_worldStep point
+
 theorem twoPhaseCoreStep_organization
     (phase : TwoPhase)
     (history : List HistoryRecord) :
@@ -384,9 +389,8 @@ theorem twoPhaseInitialCoreStep_preservesInventory :
         (twoPhaseGapRepairAlgebra.next twoPhaseWorld.initialPoint).1 =
         totalInventory (twoPhaseWorld.step twoPhaseWorld.initialPoint).1 :=
       congrArg
-        totalInventory
-        (twoPhaseCoreAtlas.coreNext_source_eq_worldStep
-          twoPhaseWorld.initialPoint)
+        (fun point : twoPhaseWorld.Point => totalInventory point.1)
+        (twoPhaseCoreNext_eq_worldStep twoPhaseWorld.initialPoint)
     _ = totalInventory twoPhaseWorld.initialPoint.1 :=
       twoPhaseWorld.step_totalInventory twoPhaseWorld.initialPoint
     _ = totalInventory twoPhaseWorld.initial := rfl
@@ -404,6 +408,7 @@ end Meta
 
 /- AXIOM_AUDIT_BEGIN -/
 #print axioms Meta.Carbone.CW0.twoPhaseCoreAtlas
+#print axioms Meta.Carbone.CW0.twoPhaseCoreNext_eq_worldStep
 #print axioms Meta.Carbone.CW0.twoPhaseCoreStep_organization
 #print axioms Meta.Carbone.CW0.twoPhaseCoreStep_history
 #print axioms Meta.Carbone.CW0.twoPhaseInitialCoreStep_preservesInventory

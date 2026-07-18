@@ -103,11 +103,19 @@ def BondWellFormed
   bond.right < configuration.atoms.length ∧
   (bond.left = bond.right -> False)
 
+/-- Every stored bond has two distinct endpoints inside the atom list. -/
+def BondsWellFormed
+    (configuration : CarbonConfiguration) : Prop :=
+  (bond : BondRecord) ->
+    bond ∈ configuration.bonds ->
+      configuration.BondWellFormed bond
+
 end CarbonConfiguration
 
 structure CarbonOrganization where
   configuration : CarbonConfiguration
   carbonPresent : configuration.ContainsCarbon
+  bondsWellFormed : configuration.BondsWellFormed
 
 abbrev CarbonVisible := AtomInventory
 
@@ -131,12 +139,46 @@ def chainOrganization : CarbonOrganization where
   carbonPresent := by
     change 0 < 2
     exact Nat.zero_lt_succ 1
+  bondsWellFormed := by
+    intro bond membership
+    cases membership with
+    | head =>
+        exact
+          ⟨ Nat.zero_lt_succ 2
+          , Nat.succ_lt_succ (Nat.zero_lt_succ 1)
+          , fun equality => Nat.noConfusion equality ⟩
+    | tail _ membership =>
+        cases membership with
+        | head =>
+            exact
+              ⟨ Nat.succ_lt_succ (Nat.zero_lt_succ 1)
+              , Nat.lt_succ_self 2
+              , fun equality =>
+                  Nat.noConfusion (Nat.succ.inj equality) ⟩
+        | tail _ impossible => nomatch impossible
 
 def bridgedOrganization : CarbonOrganization where
   configuration := bridgedSkeleton
   carbonPresent := by
     change 0 < 2
     exact Nat.zero_lt_succ 1
+  bondsWellFormed := by
+    intro bond membership
+    cases membership with
+    | head =>
+        exact
+          ⟨ Nat.zero_lt_succ 2
+          , Nat.lt_succ_self 2
+          , fun equality => Nat.noConfusion equality ⟩
+    | tail _ membership =>
+        cases membership with
+        | head =>
+            exact
+              ⟨ Nat.succ_lt_succ (Nat.zero_lt_succ 1)
+              , Nat.lt_succ_self 2
+              , fun equality =>
+                  Nat.noConfusion (Nat.succ.inj equality) ⟩
+        | tail _ impossible => nomatch impossible
 
 theorem chainOrganization_ne_bridgedOrganization :
     chainOrganization = bridgedOrganization -> False := by
@@ -311,6 +353,8 @@ end Carbone
 end Meta
 
 /- AXIOM_AUDIT_BEGIN -/
+#print axioms Meta.Carbone.CW0.chainOrganization
+#print axioms Meta.Carbone.CW0.bridgedOrganization
 #print axioms Meta.Carbone.CW0.carbonProjectionObstruction
 #print axioms Meta.Carbone.CW0.CarbonWorld.step_eq_executeRepair
 #print axioms Meta.Carbone.CW0.CarbonWorld.step_totalInventory
