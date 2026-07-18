@@ -469,7 +469,7 @@ Avant cela, le projet décrit les conditions de possibilité d'une évolution
 carbonée. Après cela, il en possède une instance formelle. Seules des données
 réelles peuvent ensuite établir que cette instance réalise un système physique.
 
-## 11. Prochaine construction
+## 11. État de la construction
 
 La première tranche `CW0-alpha` est désormais implémentée dans
 [`CW0/Lean/CarbonWorld.lean`](./CW0/Lean/CarbonWorld.lean). Elle définit
@@ -477,13 +477,20 @@ l'interface positive `CarbonWorld`, une obstruction projective carbonée, le
 bilan système–environnement et un successeur entièrement dérivé d'un pas
 causal et de sa réparation.
 
-La prochaine tranche de `CW0` doit construire l'adaptateur vers
-`IntrinsicDynamicReturnFamily`, le pont positif réponse–réparation, puis
-`GapRepairAlgebra`, sans ajouter de second successeur.
+La suite de `CW0-alpha` construit maintenant l'adaptateur vers
+`IntrinsicDynamicReturnFamily`, le pont positif réponse–réparation et
+`GapRepairAlgebra`, sans ajouter de second successeur. L'égalité entre le pas
+du Core et celui du monde porte sur le point dépendant complet.
 
-Cette étape doit précéder tout exemple spectaculaire. Elle déterminera si le
-raccord exploite réellement le cadre ou se contente de renommer une dynamique
-extérieure.
+`CW1-alpha`, dans
+[`CW1/Lean/MaintenanceMemory.lean`](./CW1/Lean/MaintenanceMemory.lean), ajoute
+un contrat positif de maintenance et une mémoire topologique binaire. La
+porte nécessaire vers `CW1-beta` est formalisée dans
+[`CW1/Lean/ActiveMaintenanceBoundary.lean`](./CW1/Lean/ActiveMaintenanceBoundary.lean).
+Elle prouve que le témoin actuel, dont les demandes de ressources et d'énergie
+sont nulles, n'est pas une maintenance active. La prochaine construction doit
+donc ajouter un flux interne explicite de prise, dissipation et renouvellement.
+Elle doit précéder toute revendication de reproduction `CW2`.
 
 ## 12. Séparation des responsabilités
 

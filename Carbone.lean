@@ -1,4 +1,4 @@
-import Carbone.CW0.Lean.FiniteKernel
+import Carbone.CW1.Lean.ActiveMaintenanceBoundary
 
 /- AXIOM_AUDIT_BEGIN -/
 #print axioms Meta.Carbone.CW0.carbonProjectionObstruction
@@ -12,4 +12,13 @@ import Carbone.CW0.Lean.FiniteKernel
 #print axioms Meta.Carbone.CW0.twoPhaseInitialCoreStep_preservesInventory
 #print axioms Meta.Carbone.CW0.twoPhaseKernel_commutes
 #print axioms Meta.Carbone.CW0.twoPhaseKernel_two_steps
+#print axioms Meta.Carbone.CW1.twoPhaseMaintenance
+#print axioms Meta.Carbone.CW1.twoPhaseMaterialMemory
+#print axioms Meta.Carbone.CW1.twoPhaseMemory_sameProjection
+#print axioms Meta.Carbone.CW1.twoPhaseMemory_reads_separated
+#print axioms Meta.Carbone.CW1.twoPhaseCore_read_updates
+#print axioms Meta.Carbone.CW1.twoPhaseCore_two_steps_organization
+#print axioms Meta.Carbone.CW1.twoPhase_requestedResourcesAt_zero
+#print axioms Meta.Carbone.CW1.twoPhase_requestedEnergyAt_zero
+#print axioms Meta.Carbone.CW1.twoPhase_not_resourceCoupledMaintenance
 /- AXIOM_AUDIT_END -/

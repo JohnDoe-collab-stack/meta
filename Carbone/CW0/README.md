@@ -98,3 +98,8 @@ l'inventaire combiné de l'organisation et de son environnement. L'égalité
 d'admissibilité compris. Les états JSON sont encodés depuis une charge utile
 indexée par leur phase et certifiée égale à la configuration Lean ; les atomes,
 liaisons et inventaires ne sont plus dupliqués sous forme de littéraux JSON.
+
+La tranche suivante est documentée dans
+[`../CW1/README.md`](../CW1/README.md). Elle ajoute une maintenance formelle et
+une mémoire d'un bit effectivement lue dans la topologie des liaisons, sans
+revendiquer encore une maintenance physico-chimique active.
