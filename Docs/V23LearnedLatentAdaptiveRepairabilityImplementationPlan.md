@@ -129,6 +129,55 @@ un checkpoint de developpement et une trace certifiee
 Le niveau fini et le checkpoint certifiable autorisent la campagne. Ils ne la
 remplacent pas.
 
+### 1.4 Seuil d'un resultat fondamental
+
+La qualification du resultat suit une echelle cumulative. Aucun niveau ne peut
+etre saute :
+
+```text
+F0 — theorie abstraite :
+  definitions, stabilite, non-projectivite et synthese constructives ;
+
+F1 — realisation symbolique :
+  instance fermee et orbite ouverte non triviales, sans apprentissage ;
+
+F2 — realisation latente certifiable :
+  poids appris, activations cachees, politique publique et toutes branches
+  finies recalculees et prouvees dans Lean ;
+
+F3 — necessite causale :
+  interventions, mediation, absence de bypass, conservation cumulative et
+  no-go apparies ;
+
+F4 — portee empirique :
+  deux domaines appris, multi-seeds, OOD scelles, baselines fortes et analyse
+  statistique preregistree ;
+
+F5 — robustesse scientifique :
+  replication independante, audit externe, comparaison aux cadres concurrents
+  et absence d'explication plus faible dans les classes concurrentes
+  preregistrees compatible avec les observations.
+```
+
+Les termes publics autorises sont :
+
+```text
+apres F0 : theorie constructive ;
+apres F1 : theorie habitee ;
+apres F2 : instance latente apprise certifiee dans le domaine fini ;
+apres F3 : mecanisme causal certifie dans la classe testee ;
+apres F4 : resultat empirique generalise dans les domaines preregistres ;
+apres F5 : candidat defendable a un resultat fondamental pour l'IA.
+```
+
+Le terme « game changer » ne devient scientifiquement defendable qu'apres F5.
+Il reste alors une conclusion soumise a la reception, a la comparaison
+bibliographique et a la replication, pas un champ booleen du certificat.
+
+Le seuil est conjonctif. Une preuve Lean parfaite sans agent appris reste a F1.
+Un benchmark performant sans chaine causale reste sous F3. Une campagne
+multi-seeds sans replication independante reste sous F5.
+
 ## 2. Etat de depart et lacune exacte
 
 ### 2.1 Elements deja disponibles
@@ -196,6 +245,47 @@ transition
 latent appris
   = activations cachees calculees depuis les poids, pas etiquette semantique.
 ```
+
+### 2.3 Deux realisations apprises obligatoires
+
+Le mot « appris » recouvre deux objets distincts qui doivent tous deux etre
+livres.
+
+#### Agent certifiable fini
+
+Il fournit :
+
+```text
+arithmetique quantifiee exacte ;
+enumeration exhaustive des entrees ;
+preuve de toutes les decisions locales ;
+arbre public complet ;
+certificat Lean de reparabilite adaptative.
+```
+
+Son role est la certitude calculatoire. Sa taille finie et son encodage structurel
+ne constituent pas une preuve de scaling ou de generalisation.
+
+#### Agent appris de campagne
+
+Il fournit :
+
+```text
+encodage depuis les observations brutes ;
+etat latent persistant ou recurrent ;
+tetes causales gap/use/transport/query/repair ;
+apprentissage sur les domaines perceptuel et symbolique ;
+evaluation multi-seeds et OOD ;
+interventions et baselines appariees.
+```
+
+Son role est la validite empirique. Ses metriques ne remplacent pas le
+certificat fini.
+
+Les deux agents doivent partager le meme contrat causal et le meme schema de
+trace. Ils peuvent differer en taille et en poids, mais le rapport doit prouver
+champ par champ que leurs operations realisent les memes types semantiques. Une
+ressemblance architecturale non documentee n'est pas un raccord.
 
 ## 3. Source canonique et architecture du depot
 
@@ -466,6 +556,64 @@ latent naturel, du latent neutralise et du latent croise. Au niveau fini Lean,
 le calcul quantifie doit verifier les interventions discretes exactes sur le
 catalogue preregistre. Une correlation entre latent et classe ne suffit pas.
 
+### 4.6 Activation cachee, mediateur appris et etat latent persistant
+
+Le document distingue trois niveaux :
+
+```text
+activation cachee :
+  vecteur interne d'une tete pour une decision locale ;
+
+mediateur appris :
+  activation dont le role causal entre une entree et une sortie est etabli ;
+
+etat latent persistant :
+  representation apprise z_t qui resume l'etat accessible, traverse plusieurs
+  decisions, est modifiee par l'information acquise et conditionne z_(t+1).
+```
+
+Le checkpoint certifiable actuel peut etablir une famille de cinq mediateurs
+appris. Il ne doit etre decrit comme un unique etat latent persistant que si le
+code possede effectivement un backbone ou un etat partage consomme par les cinq
+tetes et transmis entre les pas.
+
+La campagne complete doit donc choisir et geler l'une des deux formulations :
+
+```text
+Formulation M — famille de mediateurs :
+  zGap, zUse, zTransport, zQuery, zRepair restent distincts ;
+  la revendication porte sur une chaine de mediations apprises ;
+
+Formulation S — etat latent partage :
+  z_t = encoder(observation_t, memoire_t, candidat_t) ;
+  les tetes causales lisent z_t ;
+  repair_t met a jour memoire/candidat ;
+  z_(t+1) est recalcule depuis l'etat repare ;
+  la revendication porte sur une dynamique latente persistante.
+```
+
+La cible maximale exige la formulation S pour l'agent de campagne. La
+formulation M reste acceptable pour l'agent fini certifiable, a condition de ne
+pas lui attribuer une persistance qu'il ne calcule pas.
+
+Pour S, les obligations supplementaires sont :
+
+```text
+z_t est calcule depuis les seules donnees publiques ;
+les cinq decisions sont conditionnees par z_t ;
+la reponse autorisee modifie z_(t+1) sur au moins un episode ;
+une intervention sur z_t modifie un descendant preregistre ;
+la memoire reparee est lisible dans z_(t+1) sans contenir le monde prive ;
+les certificats anterieurs restent recuperables ou semantiquement verifies ;
+deux histoires publiques distinctes peuvent produire des etats latents
+distincts meme sous la meme observation instantanee ;
+le modele sans recurrence/memoire ne realise pas la meme conservation sous le
+controle apparie.
+```
+
+Cette distinction est bloquante. Le projet echoue s'il rebaptise apres coup une
+activation locale en etat latent dynamique.
+
 ## 5. Frontiere publique et monde prive
 
 ### 5.1 Etat public v23
@@ -589,6 +737,43 @@ response
 Elle ne peut pas etre definie par une table copiant l'etat terminal attendu,
 sauf pour le niveau A de conformance. Le certificat final du modele appris doit
 executer les poids appris.
+
+### 6.4 Table d'alignement unique des objets
+
+Avant l'implementation Lean du pont, une table executable doit fixer la
+correspondance suivante. Chaque cellule finale pointe vers un type ou une
+fonction existante, jamais vers une description libre :
+
+| Concept | Python v23 | Trace brute | Lean quantifie | AdaptiveRepairability | Semantique fondationnelle |
+|---|---|---|---|---|---|
+| monde prive | `WorldState` | identifiant reserve au verificateur | monde de reference | `FiniteActionModel.World` | interpretation semantique |
+| etat public | vue, candidat, memoire, stade | `before_state` | etat encode certifie | `FiniteActionModel.State` | contexte courant |
+| latent | hidden(s) ou `z_t` | activations reifiees | `QuantizedHiddenEvaluation` | donnee de politique | lecture contextuelle apprise |
+| gap | sortie gap decodee | gap predit/utilise/reference | gap certifie | conflit et choix d'episode | certificat contextuel |
+| usage | sortie use | usage execute | usage certifie | autorisation publique | `HasUse` non contractif |
+| transport | sortie transport | transport execute | transport certifie | donnee de politique | transport compositionnel |
+| requete | sortie query | requete executee | requete certifiee | `Query` autorisee | lecture demandee |
+| reponse | environnement | reponse recue | reponse verifiee | `RealizableResponse` | information acquise |
+| repair | sortie repair | patch execute | repair certifie | `PublicRepairStep` | reparation intrinseque |
+| successeur | execution du repair | `after_state` | transition certifiee | etat de branche | `GapRepairAlgebra.next` |
+| fermeture | evaluateur independant | preuves brutes recalculees | predicat prouve | feuille suffisante | predicat admissible ferme |
+
+Le fichier de mapping genere doit etre verifie dans les deux sens :
+
+```text
+objet Python encode
+→ objet Lean decode
+→ reencodage Python canonique
+= objet initial ;
+
+objet Lean canonique
+→ serialisation
+→ decodage Lean
+= objet initial.
+```
+
+Une divergence de mapping bloque L2-L5. Elle ne peut pas etre reparee par un
+cast non prouve ou par une normalisation silencieuse du verificateur.
 
 ## 7. Politique publique issue du modele
 
@@ -730,7 +915,7 @@ Le cas impossible d'une fibre declaree homogene alors qu'elle contient deux
 actions distinctes doit etre elimine par `ActionSufficientAt`, pas par une
 decision privee.
 
-## 9. Raccord fondationnel intrinsèque
+## 9. Raccord fondationnel intrinseque
 
 ### 9.1 Une seule dynamique sous plusieurs vues
 
@@ -854,6 +1039,81 @@ non-representabilite par une egalite projetee exacte.
 Pour la non-reduction, il faut produire deux interpretations ou modes ayant le
 meme graphe d'usage pertinent mais des transports ou lectures semantiques
 distincts. Une simple asymetrie de relation ne suffit pas a elle seule.
+
+### 9.7 Stabilite dynamique propre au projet
+
+La stabilite visee n'est ni :
+
+- l'immobilite de l'etat ;
+- la convergence numerique des poids ;
+- un point fixe global ;
+- la seule absence de contradiction ;
+- la seule terminaison d'un episode ;
+- la conservation du meme graphe de transitions.
+
+Elle est la preservation d'une architecture de lois pendant que le contenu du
+gap, le contexte et le droit de transport changent.
+
+Le certificat cible doit porter au moins :
+
+```lean
+structure V23DynamicStabilityCertificate where
+  strictIdentityPreserved : ...
+  currentGapTyped : ...
+  currentUseAuthorizedByGap : ...
+  currentTransportRealizesUse : ...
+  repairCausesNext : ...
+  nextContextDerivedFromRepair : ...
+  previousCertificatesPreserved : ...
+  nextGapRecomputed : ...
+  roundTripCoherent : ...
+  transportCompositionCoherent : ...
+  adaptiveBranchCoherent : ...
+```
+
+Les ellipses doivent etre remplacees par des types complets dans Lean.
+
+La loi centrale de stabilite est :
+
+```text
+avant :
+  identite stricte
+  + separation
+  + coordination
+  + usage autorise
+  + transport
+  + memoire certifiee ;
+
+reparation :
+  ferme le gap courant
+  + produit le contexte suivant ;
+
+apres :
+  identite stricte preservee
+  + certificats anterieurs preserves
+  + nouvelle coordination calculee
+  + nouveau droit de transport calcule
+  + lois de composition preservees.
+```
+
+Le systeme est donc stable parce qu'il peut changer de regime local sans
+contracter ses poles ni perdre les lois qui rendent le changement licite.
+
+Les preuves suivantes sont obligatoires :
+
+```text
+au moins un contexte change reellement ;
+au moins un gap courant disparait ;
+au moins un nouveau gap ou statut ferme est recalcule ;
+au moins un usage disponible change avec le contexte ;
+au moins une lecture anterieure reste transportable apres la reparation ;
+aucune egalite interne nouvelle n'est introduite pour justifier le transport ;
+le cycle bilateral recompose la donnee source pertinente ;
+l'arbre adaptatif et la dynamique fondationnelle atteignent le meme successeur.
+```
+
+Cette conjonction distingue la stabilite du projet d'une simple fermeture de
+fibre, d'une relation dirigee ou d'une execution correcte sur une trace.
 
 ## 10. Causalite complete
 
@@ -1019,6 +1279,57 @@ instance ouverte :
 La famille ouverte ne doit pas etre tronquee par un `rank`, une `windowFor` ou
 une borne terminale externe.
 
+### 11.4 Stabilite exacte et stabilite empirique
+
+L'agent fini certifiable satisfait des lois exactes. L'agent de campagne
+satisfait une realisation empirique de ces lois. Les deux statuts doivent rester
+separes.
+
+Les obligations dures n'admettent aucune moyenne compensatoire :
+
+```text
+aucun acces au monde prive par la politique ;
+aucune requete hors autorisation ;
+aucun repair hors type ;
+aucun next independant du repair execute ;
+aucune suppression silencieuse d'un certificat anterieur ;
+aucune consultation de l'OOD avant scellement ;
+aucune divergence de hash ou de provenance ;
+aucun verdict invalide accepte par le verificateur.
+```
+
+Une seule violation invalide le run concerne.
+
+Les obligations statistiques utilisent les seuils geles par le protocole :
+
+```text
+precision du gap ;
+precision des mediateurs ;
+fermeture locale et globale ;
+persistance cumulative ;
+effets des interventions ;
+generalisation IID/OOD ;
+comparaison aux baselines ;
+stabilite sur horizons longs.
+```
+
+Le rapport doit publier la distribution par seed, domaine, horizon, type de gap
+et intervention. Une moyenne globale ne peut pas cacher un sous-groupe ou une
+branche dont la fermeture regresse.
+
+La notion empirique cible est une relation de simulation auditee :
+
+```text
+trace du modele appris
+→ decodage dans le schema causal
+→ verification de chaque loi dure
+→ mesure des lois statistiques
+→ classification pass/fail selon le protocole gele.
+```
+
+Elle n'est pas une preuve que le modele continu satisfait universellement les
+theoremes du modele fini.
+
 ## 12. No-go et comparateurs apparies
 
 ### 12.1 No-go formels
@@ -1065,6 +1376,95 @@ performance portent separement sur les architectures apprises appariees.
 Un oracle peut etre inclus uniquement comme plafond. Il doit etre marque comme
 recevant une information privee supplementaire et ne peut pas servir a prouver
 la superiorite a capacite comparable.
+
+### 12.4 Audit de non-reduction aux cadres concurrents
+
+Une nouveaute de vocabulaire n'est pas un resultat fondamental. Le rapport doit
+donc comparer explicitement la construction a des familles capables de decrire
+une partie du mecanisme :
+
+```text
+POMDP et mise a jour de croyance ;
+apprentissage actif et valeur de l'information ;
+controle adaptatif ;
+agents recurrents avec memoire ;
+world models ;
+RAG et usage d'outils ;
+self-correction et critique interne ;
+CEGAR/CEGIS et raffinement par contre-exemple ;
+systemes de transitions, preordres et categories ;
+active inference ;
+politiques bayesiennes de requete.
+```
+
+Pour chaque famille, l'audit doit choisir l'une des conclusions suivantes :
+
+```text
+A — traduction fidele construite :
+  le mecanisme du projet est une instance de ce cadre ;
+  le rapport identifie alors exactement quel theoreme nouveau reste acquis ;
+
+B — traduction partielle :
+  le cadre represente la dynamique mais pas une loi precise
+  (usage non identitaire, transport admissible, provenance, stabilite,
+  non-reduction semantique ou certification constructive) ;
+
+C — separation formelle :
+  une classe explicitement definie du cadre ne peut pas realiser une propriete
+  que l'instance active realise, sous frontiere d'information appariee.
+```
+
+Il est interdit de conclure C depuis l'absence d'une fonctionnalite dans une
+implementation particuliere. La classe concurrente, ses ressources et sa
+frontiere d'information doivent etre definies avant la preuve ou l'experience.
+
+Le resultat maximal n'exige pas que tous les cadres concurrents soient
+incapables d'encoder le systeme. Il exige de montrer que la conjonction suivante
+est mathematiquement et operationnellement substantielle :
+
+```text
+separation sans contraction
++ usage local non identitaire
++ transport compositionnel
++ gap causalement generateur de requete
++ reparation intrinseque
++ conservation cumulative
++ stabilite sous changement de contexte
++ strategie publique gagnante
++ certification constructive
++ instance latente apprise.
+```
+
+Si un cadre existant fournit deja cette conjonction et les memes resultats, la
+revendication doit etre reformulee comme un nouveau raccord, une nouvelle preuve
+ou une nouvelle instance certifiee, et non comme une rupture fondationnelle.
+
+### 12.5 Baselines fortes obligatoires
+
+Au-dela des classes passives et visible-factorisees des no-go exacts, la
+campagne doit inclure des adversaires empiriques capables d'apprentissage
+actif :
+
+```text
+politique recurrente end-to-end sans gap type ;
+politique active avec budget de requetes identique ;
+belief-state agent avec mise a jour explicite ;
+agent a memoire et outil/retrieval ;
+agent utilisant le meme backbone mais sans usage/transport intermediaires ;
+agent utilisant le meme backbone et une tete next directe ;
+oracle d'information comme plafond separe.
+```
+
+Ces baselines recoivent les memes donnees d'entrainement, observations,
+reponses autorisees, budgets de parametres, calcul et selection. Leur echec ne
+prouve pas un no-go universel, mais il est necessaire pour exclure que le gain
+provienne seulement de l'activite, de la recurrence ou d'un budget superieur.
+
+Le resultat causal principal echoue si une baseline avec `next` direct contourne
+les mediateurs et atteint les memes criteres de fermeture, conservation,
+generalisation et robustesse sous interventions avec des ressources appariees.
+Dans ce cas, la theorie formelle reste valide, mais l'hypothese d'avantage
+architectural propre a v23 est refutee.
 
 ## 13. Liaison checkpoint, inference, latents et traces
 
@@ -1131,6 +1531,44 @@ Le generateur Lean n'ecrit que des donnees. Lean recalcule :
 Un champ JSON `valid`, `closed`, `causal` ou `certified` n'est jamais importe
 comme proposition.
 
+### 13.4 Registre de preuves et de revendications
+
+Le bundle final doit contenir un registre machine-readable distinct des traces.
+Chaque entree porte :
+
+```text
+claim_id ;
+texte exact de la revendication ;
+niveau F0-F5 requis ;
+portes L et G requises ;
+types de preuves admis ;
+noms des theoremes Lean ;
+scripts producteurs ;
+scripts verificateurs independants ;
+identifiants de runs ;
+hashes des entrees et sorties ;
+baselines concernees ;
+interventions concernees ;
+statut pass/fail/non-execute ;
+limitations et non-revendications.
+```
+
+Le registre est genere depuis des donnees de provenance, puis audite contre le
+depot. Il ne peut pas declarer `pass` si un theoreme, un run, une intervention
+ou une replication requis manque.
+
+Trois classes de preuves sont separees :
+
+```text
+exacte : theorem Lean ou enumeration exhaustive ;
+causale empirique : intervention preregistree et controle apparie ;
+statistique : estimation multi-seeds avec incertitude et multiplicite geree.
+```
+
+Une revendication composite doit lister toutes ses classes. Un resultat
+statistique ne peut pas satisfaire une exigence exacte, et une preuve exacte
+sur le domaine fini ne peut pas satisfaire une exigence de generalisation.
+
 ## 14. Suite de declarations Lean requises
 
 Les noms pourront etre ajustes, mais la couverture ne pourra pas etre reduite.
@@ -1149,6 +1587,11 @@ v23TransportHiddenAlignment
 v23QueryHiddenAlignment
 v23RepairHiddenAlignment
 v23AllHiddenAlignments
+V23LearnedMediatorFamily
+V23PersistentLatentState
+v23PersistentLatent_public
+v23PersistentLatent_responseSensitive
+v23PersistentLatent_preservesCertifiedMemory
 ```
 
 ### 14.2 Politique publique
@@ -1210,6 +1653,8 @@ V23AdaptiveFoundationalAlignment
 v23AdaptiveFoundationalAlignment
 v23LearnedUseGraphSemanticNonReduction
 v23LearnedTransitionGraphSemanticNonReduction
+V23DynamicStabilityCertificate
+v23DynamicStabilityCertificate
 ```
 
 ### 14.6 Causalite, interventions et no-go
@@ -1238,6 +1683,25 @@ Le premier paquet certifie l'agent fini appris. Le second rattache les artefacts
 formels aux identifiants figes de la campagne sans transformer les resultats
 statistiques en theoremes.
 
+### 14.8 Registre auditable
+
+```text
+V23ClaimLevel
+V23EvidenceKind
+V23ClaimRequirement
+V23ClaimEvidence
+V23ClaimRegistry
+v23ClaimRegistry
+v23ClaimRegistry_pathsExist
+v23ClaimRegistry_exactEvidenceTyped
+v23ClaimRegistry_noMissingRequirement
+```
+
+Lean peut certifier la coherence interne des entrees exactes du registre. Un
+verificateur externe controle les chemins, hashes, runs et artefacts
+statistiques. Le registre ne transforme pas la replication ou la litterature en
+objets prouves par le noyau Lean.
+
 ## 15. Anti-trivialite obligatoire
 
 ### 15.1 Types interdits pour le resultat principal
@@ -1249,6 +1713,7 @@ Dans l'instance finale, les objets suivants ne peuvent etre `Unit`, `PUnit`,
 World
 PublicState
 LearnedLatent
+PersistentLatentState
 Gap
 Use
 Transport
@@ -1260,6 +1725,8 @@ DecisionProvenance
 DecisionFrame
 TransportCoherence
 CumulativeInvariant
+AdaptiveFoundationalAlignment
+DynamicStabilityCertificate
 ```
 
 ### 15.2 Aliases semantiques interdits
@@ -1276,6 +1743,8 @@ Repair := Candidate ;
 next := valeur terminale attendue ;
 latent := etiquette semantique ;
 latent := one-hot du monde prive ;
+latent := logits ou classe finale renommes ;
+persistentLatent := tuple des cinq activations locales d'un seul pas ;
 policy := lecture d'une trace de reference ;
 winningTree := branche du seul monde actuel.
 ```
@@ -1366,7 +1835,9 @@ Ces portes completent G0-G8 ; elles ne les remplacent pas.
 - aucune activation n'est importee comme verdict fiable ;
 - les activations appartiennent au modele appris qui produit les decisions ;
 - une intervention latente exacte modifie au moins une sortie et son descendant
-  attendu.
+  attendu ;
+- l'agent fini est qualifie de famille de mediateurs tant qu'aucun etat partage
+  n'est calcule.
 
 ### L2 - Politique publique
 
@@ -1397,7 +1868,9 @@ Ces portes completent G0-G8 ; elles ne les remplacent pas.
 - le transport appris respecte identites, composition et associativite ;
 - la reparation fondationnelle produit exactement la transition publique ;
 - un usage asymetrique appris refute la representabilite projective exacte ;
-- les non-reductions aux graphes d'usage et de transition sont etablies.
+- les non-reductions aux graphes d'usage et de transition sont etablies ;
+- `V23DynamicStabilityCertificate` preserve les lois sous changement reel de
+  contexte et de gap.
 
 ### L6 - Strategie gagnante
 
@@ -1430,17 +1903,32 @@ Ces portes completent G0-G8 ; elles ne les remplacent pas.
 ### L10 - Integration de campagne
 
 - checkpoint, latents, traces et certificat partagent une provenance gelee ;
+- l'agent de campagne porte un etat latent persistant recalcule apres repair ;
+- cet etat est teste sur les deux domaines appris et sous interventions ;
 - le bundle Lean se reconstruit depuis les donnees figees ;
 - les falsificateurs detectent toutes les mutations preenregistrees ;
 - le rapport distingue developpement, preuve exacte et resultat statistique.
 
-### L11 - Cloture maximale
+### L11 - Cloture technique maximale
 
 - L0-L10 sont fermes ;
 - G0-G8 sont fermes ;
 - evaluation et entrainement sont repliques ;
 - aucun incident ni run echoue n'a ete supprime ;
 - l'audit externe peut reproduire chaque revendication depuis les sources.
+
+### L12 - Seuil de revendication fondamentale
+
+- F0-F5 sont fermes sans saut de niveau ;
+- les baselines actives fortes et appariees sont executees ;
+- aucune tete `next` directe n'egale la fermeture, la conservation et la
+  robustesse causale du systeme complet sous le critere preregistre ;
+- l'audit de traduction vers les cadres concurrents est publie ;
+- toute traduction fidele identifie honnetement ce qui reste nouveau ;
+- l'evaluation et l'entrainement sont reproduits independamment ;
+- le registre preuve-revendication ne contient aucun prerequis manquant ;
+- la formulation publique reste bornee aux classes et domaines effectivement
+  verifies.
 
 ## 18. Ordre d'implementation bloque
 
@@ -1549,12 +2037,26 @@ Critere de sortie : L9.
 2. reconstruire poids, latents et traces ;
 3. compiler le certificat Lean final ;
 4. executer tous les falsificateurs ;
-5. executer la campagne apprise complete ;
-6. ouvrir les OOD seulement apres scellement ;
-7. repliquer evaluation et entrainement ;
-8. produire la matrice preuve-revendication.
+5. construire et entrainer l'agent a etat latent persistant ;
+6. executer la campagne apprise complete ;
+7. ouvrir les OOD seulement apres scellement ;
+8. executer les replications prescrites par G8 ;
+9. produire la matrice preuve-revendication.
 
 Criteres de sortie : L10, L11 et G0-G8.
+
+### Phase 11 - Audit de portee fondamentale
+
+1. executer les baselines actives, recurrentes et belief-state fortes ;
+2. tester la tete `next` directe appariee ;
+3. construire l'audit de traduction vers les cadres concurrents ;
+4. identifier les equivalences, inclusions et separations reellement obtenues ;
+5. auditer la replication independante produite a G8 ;
+6. generer et verifier le registre preuve-revendication ;
+7. rediger les formulations publiques permises pour F0-F5 ;
+8. soumettre le bundle a un audit externe reproductible.
+
+Critere de sortie : L12.
 
 ## 19. Matrice minimale de tracabilite
 
@@ -1562,8 +2064,10 @@ Criteres de sortie : L10, L11 et G0-G8.
 |---|---|---|---|---|---|
 | latent appris exact | poids + entree | activation quantifiee | Lean/Python bit-exact | mutation hidden | L1 |
 | latent causal | hidden naturel/intervenu | decodeur de tete | mediation exacte | clamp/permutation hidden | L1/L7 |
+| etat latent persistant | observation + memoire | backbone/recurrent | dynamique z_t → z_(t+1) | reset/permutation memoire | L10/G6 |
 | politique publique | etat public | cinq tetes | non-interference Lean | fuite monde | L2 |
 | raccord fondationnel | meme pas calcule | vues adaptative et relaxee | egalites d'alignement | divergence de vue | L5 |
+| stabilite dynamique | contexte + gap + memoire | repair puis recomposition | certificat de stabilite | regression/context swap | L5/L8 |
 | gap causal | latent gap | decode gap | correction locale | suppression/permutation | L7/G5 |
 | usage causal | gap | tete use | autorisation typee | suppression/permutation | L7/G5 |
 | transport causal | usage | tete transport | coherence | suppression/permutation | L5/L7/G5 |
@@ -1576,6 +2080,7 @@ Criteres de sortie : L10, L11 et G0-G8.
 | impossibilite factorisee | visible commun | classe factorisee | no-go exact | budget apparie | L9/G4 |
 | generalisation | runs scelles | metriques | analyse preregistree | OOD | G7 |
 | reproductibilite | bundle fige | rejeu | audit externe | mutation hash | L10/G8 |
+| portee fondamentale | preuves + runs + litterature | audit de traduction | registre de revendications | explication concurrente | L12 |
 
 Chaque ligne doit pointer vers des chemins, identifiants de run, noms de
 theoremes et hashes effectifs dans le rapport final.
@@ -1677,7 +2182,25 @@ survient :
     usages et transports qui les autorisent ;
 27. la non-projectivite est affirmee sans etre derivee d'un usage appris
     asymetrique ;
-28. la semantique est reduite au seul graphe d'usage ou de transition.
+28. la semantique est reduite au seul graphe d'usage ou de transition ;
+29. une famille de mediateurs locaux est presentee comme un etat latent
+    persistant sans backbone partage ni recurrence ;
+30. une tete `next` directe appariee contourne la chaine sans perte mesuree ;
+31. aucune baseline active, recurrente ou belief-state forte n'est comparee ;
+32. la stabilite est reduite a la terminaison, a un point fixe ou a la seule
+    preservation de la fibre ;
+33. les vues adaptative et fondationnelle atteignent des successeurs seulement
+    isomorphes mais sans egalite d'alignement prouvee ;
+34. le registre de revendications accepte une preuve finie comme preuve de
+    generalisation ;
+35. l'agent fini et l'agent de campagne n'utilisent pas le meme contrat causal
+    ou le meme schema de trace ;
+36. une revendication F5 est publiee avant replication independante et audit
+    des cadres concurrents ;
+37. une activation cachee est qualifiee de causale sans intervention sur cette
+    activation et recalcul de ses descendants ;
+38. le rapport omet une traduction fidele vers un cadre existant qui expliquerait
+    les memes resultats avec des hypotheses plus faibles.
 
 ## 22. Definition de termine
 
@@ -1701,7 +2224,10 @@ sources et protocole figes
 → interventions
 → campagne multi-domaines multi-seeds
 → OOD scelles
+→ baselines actives fortes et appariees
 → replication
+→ audit de traduction vers les cadres concurrents
+→ registre preuve-revendication complet
 → certificat et rapport reproductibles.
 ```
 
@@ -1712,6 +2238,10 @@ Le paquet final doit permettre trois audits independants :
 3. audit scientifique, reproduisant la campagne et ses analyses statistiques.
 
 Aucun de ces audits ne remplace les deux autres.
+
+La cloture technique correspond a L11. La revendication d'un candidat a un
+resultat fondamental exige en plus L12. Le depot peut donc etre techniquement
+ferme tout en conservant un verdict scientifique negatif sur la portee maximale.
 
 ## 23. Ordre de travail immediat
 
