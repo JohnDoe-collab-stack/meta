@@ -9,3 +9,6 @@ rev = "master"
 
 [[lean_lib]]
 name = "Meta"
+
+[[lean_lib]]
+name = "Carbone"
