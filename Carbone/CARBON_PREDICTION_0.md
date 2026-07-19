@@ -184,10 +184,11 @@ oléfinations sur plusieurs paires de substrats. Elles ont toutefois des coûts
 ontologiques différents : métaux et halogènes, aromaticité, soufre,
 stéréochimie ou nombre insuffisant de substrats.
 
-L'audit de métadonnées `CP0-DATA-M0` a depuis retenu le jeu AIChemEco d'amides
-comme unique candidat à l'audit des entrées. Ce choix intermédiaire ne qualifie
-ni ses structures, ni ses réponses, ni un découpage dynamique. Le choix final
-reste une sortie de `CP0-DATA-I0`, pas une préférence narrative.
+L'audit de métadonnées `CP0-DATA-M0` a retenu le jeu AIChemEco d'amides. L'audit
+des entrées `CP0-DATA-I0` a ensuite établi une cible rendement complète et un
+découpage bilatéral sans ouvrir les valeurs. Le verdict de faisabilité est
+`GO-DYNAMIC`, avec extension ontologique obligatoire. Ce verdict qualifie le
+test, pas la performance du cadre.
 
 ### 4.4 Porte `CP0-DATA`
 
@@ -722,28 +723,32 @@ système carboné évolue.
 
 ## 18. Prochaine action autorisée
 
-L'inspecteur **de métadonnées seulement** et
-`Carbone/CP0/DATASET_AUDIT.md` sont maintenant produits. `CP0-DATA-M0` rend le
-verdict intermédiaire `GO-INPUT-AUDIT` pour le jeu AIChemEco, sans avoir ouvert
-de ligne réactionnelle, de produit ou de valeur cible.
-
-La prochaine action n'est toujours pas d'écrire le producteur. Elle est de
-construire `CP0-DATA-I0`, l'audit des structures d'entrée, rôles, conditions,
-identités et groupes du seul candidat retenu. Les cibles doivent rester
-inaccessibles ; seuls leur statut de présence agrégé et leur hash scellé sont
-autorisés.
-
-Cette seconde porte recommandera exactement un des verdicts suivants :
+Les deux portes de données sont maintenant terminées :
 
 ```text
-GO-DYNAMIC     : une famille et une cible peuvent être gelées ;
-GO-STATIC-ONLY : CP0-S est possible mais aucun test dynamique propre ne l'est ;
-NO-GO          : les entrées du candidat ne peuvent être qualifiées sans
-                 imputation ou élargissement non borné.
+CP0-DATA-M0 = GO-INPUT-AUDIT
+CP0-DATA-I0 = GO-DYNAMIC, EXTENSION_REQUIRED
+CP0-ONTOLOGY-1 = QUALIFIED_INPUT_IMPORT_194_OF_194
 ```
 
-Rapport intermédiaire :
-[`CP0-DATA-M0`](./CP0/DATASET_AUDIT.md).
+La cible gelée est le rendement en pourcentage du produit désiré. Le test
+bilatéral contient 2 317 lignes et 30 paires dont les amines et les acides sont
+absents de construction. Les valeurs restent non décodées.
+
+Le protocole cible et l'écart ontologique sont préenregistrés. La couche
+moléculaire de `CP0-ONTOLOGY-1` compile constructivement et importe les
+194 espèces sans collision : 222 fragments, 2 539 atomes et 2 587 liaisons.
+La prochaine action est l'import sans cible des conditions et quantités, puis
+la représentation Core de l'organisation complète. Aucun producteur ne doit
+être ajusté sur les cibles tenues à l'écart.
+
+Rapports :
+
+- [`CP0-DATA-M0`](./CP0/DATASET_AUDIT.md) ;
+- [`CP0-DATA-I0`](./CP0/INPUT_AUDIT.md) ;
+- [`CP0-TARGET-0`](./CP0/TARGET_PROTOCOL.md) ;
+- [`CP0-ONTOLOGY-0`](./CP0/ONTOLOGY_GAP.md) ;
+- [`CP0-ONTOLOGY-1`](./CP0/CANONICAL_IMPORT.md).
 
 ## 19. Sources normatives de départ
 

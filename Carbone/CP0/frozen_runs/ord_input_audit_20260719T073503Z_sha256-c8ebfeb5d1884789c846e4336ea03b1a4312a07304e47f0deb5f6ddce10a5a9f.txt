@@ -1,0 +1,27 @@
+command: /tmp/cp0_input_audit_venv_20260719/bin/python /mnt/c/users/frederick/documents/meta/Carbone/CP0/frozen_runs/ord_input_audit_20260719T073503Z_sha256-c8ebfeb5d1884789c846e4336ea03b1a4312a07304e47f0deb5f6ddce10a5a9f.py --source-pb-gz /tmp/ord_dataset-47eaacc46c3a4487bbdf99adb1a15e41_ddb0d25770c80a0a6fcf9948c26e1c8f828cb8ad.pb.gz --ord-schema-python-root /tmp/cp0_ord_schema_runtime_aeda34931 --out-jsonl /mnt/c/users/frederick/documents/meta/Carbone/CP0/frozen_runs/ord_input_audit_20260719T073503Z_sha256-c8ebfeb5d1884789c846e4336ea03b1a4312a07304e47f0deb5f6ddce10a5a9f.jsonl --out-txt /mnt/c/users/frederick/documents/meta/Carbone/CP0/frozen_runs/ord_input_audit_20260719T073503Z_sha256-c8ebfeb5d1884789c846e4336ea03b1a4312a07304e47f0deb5f6ddce10a5a9f.txt --out-manifest-csv-gz /mnt/c/users/frederick/documents/meta/Carbone/CP0/frozen_runs/ord_input_manifest_20260719T073503Z_sha256-c8ebfeb5d1884789c846e4336ea03b1a4312a07304e47f0deb5f6ddce10a5a9f.csv.gz --out-dependencies-json /mnt/c/users/frederick/documents/meta/Carbone/CP0/frozen_runs/ord_input_dependencies_20260719T073503Z_sha256-c8ebfeb5d1884789c846e4336ea03b1a4312a07304e47f0deb5f6ddce10a5a9f.json --run-suffix 20260719T073503Z_sha256-c8ebfeb5d1884789c846e4336ea03b1a4312a07304e47f0deb5f6ddce10a5a9f --script-sha256 c8ebfeb5d1884789c846e4336ea03b1a4312a07304e47f0deb5f6ddce10a5a9f --frozen-run
+script_sha256: c8ebfeb5d1884789c846e4336ea03b1a4312a07304e47f0deb5f6ddce10a5a9f
+source_sha256: 103c485fc009ee66f525c140611c8596d31f0673cdbb2ec16ec497ea44a58f6f
+manifest_sha256: da963892cf8caebf3ad5983773b866a13333260869805542b16d0be1aa01cb9b
+retrieved_run_at_utc: 2026-07-19T07:35:04+00:00
+ord_data_commit: ddb0d25770c80a0a6fcf9948c26e1c8f828cb8ad
+ord_schema_commit: aeda34931f3a25497dccde0f68aa789b5830962b
+product_structures_decoded: 0
+target_numeric_values_decoded: 0
+reaction_identifiers_decoded: 0
+reactions: 47015
+amines: 70
+acids: 66
+pairs: 632
+semantic_conditions: 94
+label_conditions: 95
+complete_yield_envelopes: 47015
+split_rows: {"construction": 17318, "excluded_cross": 25939, "held_out_test": 2317, "selection": 1441}
+split_pairs: {"construction": 242, "excluded_cross": 341, "held_out_test": 30, "selection": 19}
+verdict: GO-DYNAMIC
+target: desired_product_yield_percentage
+ontology_status: EXTENSION_REQUIRED
+
+interpretation:
+Le corpus passe la porte de faisabilite dynamique, pas le test predictif.
+Les valeurs de rendement et structures produit restent non decodees.
+Le fragment CW1 doit etre etendu avant de representer toutes les entrees.

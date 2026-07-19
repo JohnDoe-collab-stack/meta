@@ -1,4 +1,7 @@
 import Carbone.CW1.Lean.ValenceCompletion
+import Carbone.CP0.Lean.InputOntology
+import Carbone.CP0.Lean.CanonicalImport
+import Carbone.CP0.Lean.ImportedSpecies
 
 /- AXIOM_AUDIT_BEGIN -/
 #print axioms Meta.Carbone.CW0.carbonProjectionObstruction
@@ -33,4 +36,11 @@ import Carbone.CW1.Lean.ValenceCompletion
 #print axioms Meta.Carbone.CW1.chainConnectedCertificate
 #print axioms Meta.Carbone.CW1.bridgedConnectedCertificate
 #print axioms Meta.Carbone.CW1.c2h6oConstitutionalIsomerWitness
+#print axioms Meta.Carbone.CP0.singletonCarbonGraph_connected
+#print axioms Meta.Carbone.CP0.singletonCarbonMolecule
+#print axioms Meta.Carbone.CP0.singletonCarbonSpecies
+#print axioms Meta.Carbone.CP0.singletonCarbonMixture
+#print axioms Meta.Carbone.CP0.singletonCarbonMolecule_hasCarbon
+#print axioms Meta.Carbone.CP0.CanonicalImport.fragmentValid
+#print axioms Meta.Carbone.CP0.CanonicalImport.validatedSpeciesImport
 /- AXIOM_AUDIT_END -/

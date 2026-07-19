@@ -41,6 +41,10 @@ Documents opérationnels :
 - [contrat expérimental et formel CARBON_REFERENCE_0](./CARBON_REFERENCE_0.md) ;
 - [plan du premier test prédictif tenu à l'écart CARBON_PREDICTION_0](./CARBON_PREDICTION_0.md) ;
 - [audit de métadonnées et paquet reproductible CP0-DATA-M0](./CP0/DATASET_AUDIT.md) ;
+- [audit des entrées et split bilatéral CP0-DATA-I0](./CP0/INPUT_AUDIT.md) ;
+- [protocole de rendement tenu à l'écart CP0-TARGET-0](./CP0/TARGET_PROTOCOL.md) ;
+- [écart ontologique à fermer CP0-ONTOLOGY-0](./CP0/ONTOLOGY_GAP.md) ;
+- [import canonique et certificat 194/194 CP0-ONTOLOGY-1](./CP0/CANONICAL_IMPORT.md) ;
 - [paquet de provenance et verdict CR0-G0](./CR0_G0/README.md) ;
 - [passation du premier pilote miroir](./CR0_G0/LAB_HANDOFF.md).
 

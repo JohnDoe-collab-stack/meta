@@ -1,5 +1,10 @@
 # CP0-DATA-M0 — audit de métadonnées ORD
 
+> Mise à jour : la porte suivante `CP0-DATA-I0` est terminée avec le verdict
+> `GO-DYNAMIC`, cible rendement complète et extension ontologique requise. Voir
+> [`INPUT_AUDIT`](./INPUT_AUDIT.md). Le présent document reste le rapport
+> historique de sélection par métadonnées.
+
 ## 1. Décision
 
 Audit exécuté le 19 juillet 2026 :
