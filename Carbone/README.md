@@ -39,6 +39,8 @@ Documents opérationnels :
 - [maintenance, débit et complétion de valence CW1-gamma](./CW1/README.md) ;
 - [audit des systèmes carbonés candidats](./CANDIDATE_SYSTEMS.md) ;
 - [contrat expérimental et formel CARBON_REFERENCE_0](./CARBON_REFERENCE_0.md) ;
+- [plan du premier test prédictif tenu à l'écart CARBON_PREDICTION_0](./CARBON_PREDICTION_0.md) ;
+- [audit de métadonnées et paquet reproductible CP0-DATA-M0](./CP0/DATASET_AUDIT.md) ;
 - [paquet de provenance et verdict CR0-G0](./CR0_G0/README.md) ;
 - [passation du premier pilote miroir](./CR0_G0/LAB_HANDOFF.md).
 

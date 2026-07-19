@@ -137,3 +137,5 @@ abstraite. Il consiste à élargir la complétion à un petit corpus moléculair
 gelé, puis à comparer automatiquement formule et connectivité calculées à des
 références externes. Une dynamique ne deviendra chimique qu'après ajout d'une
 transformation avec bilan de matière, mécanisme et domaine de conditions.
+Le protocole de qualification statique puis de prédiction dynamique est fixé
+dans [`CARBON_PREDICTION_0`](../CARBON_PREDICTION_0.md).
