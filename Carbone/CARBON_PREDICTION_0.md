@@ -733,6 +733,7 @@ CP0-ONTOLOGY-2 = QUALIFIED_ENVIRONMENT_IMPORT_94_OF_94
 CP0-PRODUCER-C0 = CONTRACT_QUALIFIED
 CP0-TARGET-T1 = SYNTHETIC_READER_QUALIFIED
 CP0-TARGET-T2 = SYNTHETIC_TARGET_READER_FROZEN
+CP0-EMPIRICAL-0 = NO-GO-C0-BIR-SELECTION
 ```
 
 La cible gelée est le rendement en pourcentage du produit désiré. Le test
@@ -747,9 +748,14 @@ contre I0 et résout 46 211 entrées uniques en organisations sans hash de
 dataset. `CP0-PRODUCER-C0` fixe la projection admissible, une sortie rationnelle
 bornée avec abstention et la chaîne causale finie du producteur. `T1`–`T2`
 qualifient et gèlent le lecteur sur six lignes synthétiques et 22 rejets, sans
-ouvrir une seule valeur réelle. La prochaine action est de geler l'environnement
-des baselines et le harnais commun avant d'ouvrir `construction` seulement à
-`T3`. Aucun producteur ne doit être ajusté sur les cibles tenues à l'écart.
+ouvrir une seule valeur réelle. L'environnement des baselines et le harnais
+commun ont ensuite été gelés avant `T3`. Aucun producteur ne reçoit les cibles
+tenues à l'écart comme variables d'entrée.
+
+`T3`–`T5` ont ensuite été exécutés. La première règle C0-BIR obtient une MAE de
+18,5021 sur `selection`, contre 14,5908 pour les voisins moléculaires B2. Elle
+est donc réfutée comme candidate compétitive. Le test final reste scellé ;
+aucune revendication positive n'est autorisée.
 
 Rapports :
 
@@ -759,7 +765,8 @@ Rapports :
 - [`CP0-ONTOLOGY-0`](./CP0/ONTOLOGY_GAP.md) ;
 - [`CP0-ONTOLOGY-1`](./CP0/CANONICAL_IMPORT.md) ;
 - [`CP0-ONTOLOGY-2`](./CP0/ENVIRONMENT_IMPORT.md) ;
-- [`CP0-PRODUCER-C0` et `CP0-TARGET-T2`](./CP0/PRODUCER_CONTRACT.md).
+- [`CP0-PRODUCER-C0` et `CP0-TARGET-T2`](./CP0/PRODUCER_CONTRACT.md) ;
+- [`CP0-EMPIRICAL-0`](./CP0/EMPIRICAL_RESULT_0.md).
 
 ## 19. Sources normatives de départ
 

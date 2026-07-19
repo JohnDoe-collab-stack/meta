@@ -1,0 +1,30 @@
+command: Carbone/CP0/frozen_runs/cp0_empirical_comparison_20260719T100749Z_sha256-c3b517d2f9d3793a830ef0387316d17948744a7afd36d29f437387883dcbfcaf.py --mode construction-cv --source-pb-gz /tmp/ord_dataset-47eaacc46c3a4487bbdf99adb1a15e41_ddb0d25770c80a0a6fcf9948c26e1c8f828cb8ad.pb.gz --i0-manifest-csv-gz Carbone/CP0/frozen_runs/ord_input_manifest_20260719T073503Z_sha256-c8ebfeb5d1884789c846e4336ea03b1a4312a07304e47f0deb5f6ddce10a5a9f.csv.gz --ord-schema-python-root /tmp/cp0_ord_schema_runtime_aeda34931 --construction-targets-csv-gz Carbone/CP0/frozen_runs/cp0_construction_targets_20260719T095919Z_sha256-4bdec976e5920568e9d0ea401ded8ff85bc6bdecb3257d3acb05b220694c07a2.csv.gz --include-b4 --out-predictions-csv-gz Carbone/CP0/frozen_runs/cp0_construction_cv_predictions_20260719T100749Z_sha256-c3b517d2f9d3793a830ef0387316d17948744a7afd36d29f437387883dcbfcaf.csv.gz --out-jsonl Carbone/CP0/frozen_runs/cp0_construction_cv_20260719T100749Z_sha256-c3b517d2f9d3793a830ef0387316d17948744a7afd36d29f437387883dcbfcaf.jsonl --out-txt Carbone/CP0/frozen_runs/cp0_construction_cv_20260719T100749Z_sha256-c3b517d2f9d3793a830ef0387316d17948744a7afd36d29f437387883dcbfcaf.txt --out-dependencies-json Carbone/CP0/frozen_runs/cp0_construction_cv_dependencies_20260719T100749Z_sha256-c3b517d2f9d3793a830ef0387316d17948744a7afd36d29f437387883dcbfcaf.json --run-suffix 20260719T100749Z_sha256-c3b517d2f9d3793a830ef0387316d17948744a7afd36d29f437387883dcbfcaf --script-sha256 c3b517d2f9d3793a830ef0387316d17948744a7afd36d29f437387883dcbfcaf --frozen-run
+script_sha256: c3b517d2f9d3793a830ef0387316d17948744a7afd36d29f437387883dcbfcaf
+mode: construction-cv
+run_at_utc: 2026-07-19T10:07:50.359478+00:00
+train_groups: 12353
+evaluation_groups: 170
+selection_targets_opened: false
+held_out_test_targets_opened: false
+predictions_csv_gz_sha256: 4f96897a5baf9cc5fcbd5c8c4a3b945bfd43888f2abdac11953d3c90fbedbb94
+B4 max_features=0.25,min_samples_leaf=1 MAE=16.91900736 RMSE=19.99150552 Spearman=0.69926173
+B4 max_features=0.25,min_samples_leaf=2 MAE=16.97465196 RMSE=19.82936165 Spearman=0.72817948
+B4 max_features=0.25,min_samples_leaf=5 MAE=17.45621335 RMSE=20.16960264 Spearman=0.78418305
+C0-BIR alpha=10 MAE=17.45649738 RMSE=21.11954172 Spearman=0.70638587
+B2 k=1 MAE=18.18648439 RMSE=24.48933340 Spearman=0.58458786
+B2 k=5 MAE=18.22658357 RMSE=22.06154138 Spearman=0.63137011
+B2 k=3 MAE=18.78756773 RMSE=23.39681039 Spearman=0.61164624
+B4 max_features=sqrt,min_samples_leaf=1 MAE=18.89056431 RMSE=22.50752924 Spearman=0.62500962
+B2 k=10 MAE=19.07997390 RMSE=22.83711195 Spearman=0.59492187
+C0-BIR alpha=1 MAE=19.14593044 RMSE=22.93625215 Spearman=0.71512358
+C0-BIR alpha=0.1 MAE=19.25589887 RMSE=22.56099572 Spearman=0.72535682
+C0-BIR alpha=100 MAE=19.41876066 RMSE=22.77664733 Spearman=0.58258580
+B1 condition_mean MAE=20.16903258 RMSE=23.49194176 Spearman=0.50163850
+B4 max_features=sqrt,min_samples_leaf=2 MAE=20.21769497 RMSE=25.23148666 Spearman=0.80253907
+B3 alpha=100 MAE=20.24391209 RMSE=24.99388079 Spearman=0.44639906
+B3 alpha=10 MAE=20.26814819 RMSE=25.01294093 Spearman=0.44622074
+B3 alpha=1 MAE=20.27059410 RMSE=25.01489385 Spearman=0.44625494
+B3 alpha=0.1 MAE=20.27083892 RMSE=25.01508962 Spearman=0.44625494
+B4 max_features=sqrt,min_samples_leaf=5 MAE=20.52879445 RMSE=25.70817341 Spearman=0.78892410
+B0 global_mean MAE=22.32366246 RMSE=27.37636258 Spearman=0.00000000
+verdict: CP0_EMPIRICAL_COMPARISON_COMPLETED

@@ -47,6 +47,7 @@ Documents opérationnels :
 - [import canonique et certificat 194/194 CP0-ONTOLOGY-1](./CP0/CANONICAL_IMPORT.md) ;
 - [organisation sans cible et certificat 94/94 CP0-ONTOLOGY-2](./CP0/ENVIRONMENT_IMPORT.md) ;
 - [contrat du producteur et lecteur de cible gelé CP0-PRODUCER-C0/T2](./CP0/PRODUCER_CONTRACT.md) ;
+- [première réfutation numérique CP0-EMPIRICAL-0](./CP0/EMPIRICAL_RESULT_0.md) ;
 - [paquet de provenance et verdict CR0-G0](./CR0_G0/README.md) ;
 - [passation du premier pilote miroir](./CR0_G0/LAB_HANDOFF.md).
 

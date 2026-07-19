@@ -186,12 +186,9 @@ contraindre la forme d'un producteur, représenter exactement sa sortie et lire
 une future cible sans ouvrir le test scellé. C'est une infrastructure nécessaire
 à une comparaison loyale, pas un résultat scientifique sur le carbone.
 
-On ne sait toujours pas produire le rendement à partir du cadre. La prochaine
-porte empirique demeure donc réfutable : après gel de l'environnement RDKit et
-scikit-learn et d'un harnais commun cadre/baselines, `T3` ouvrira seulement les
-cibles `construction`. Un échec à construire une règle intrinsèque, ou une
-absence d'amélioration de deux points de MAE sur la meilleure baseline au test
-final, donnera le `NO-GO-PREDICTION` préenregistré.
-
-Jusqu'à cette ouverture explicite, toute affirmation de performance est
-interdite.
+Une première opérationnalisation, C0-BIR, a depuis été ajustée sur
+`construction` et évaluée sur `selection`. Elle obtient 18,5021 de MAE contre
+14,5908 pour la meilleure baseline et reçoit donc le verdict
+`NO-GO-C0-BIR-SELECTION`. Le protocole, les chiffres et leurs limites sont
+consignés dans [`EMPIRICAL_RESULT_0`](./EMPIRICAL_RESULT_0.md). Le test final
+reste scellé.

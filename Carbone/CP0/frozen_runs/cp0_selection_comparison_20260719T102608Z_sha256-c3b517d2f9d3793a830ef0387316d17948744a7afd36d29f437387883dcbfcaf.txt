@@ -1,0 +1,30 @@
+command: Carbone/CP0/frozen_runs/cp0_empirical_comparison_20260719T102608Z_sha256-c3b517d2f9d3793a830ef0387316d17948744a7afd36d29f437387883dcbfcaf.py --mode selection-eval --source-pb-gz /tmp/ord_dataset-47eaacc46c3a4487bbdf99adb1a15e41_ddb0d25770c80a0a6fcf9948c26e1c8f828cb8ad.pb.gz --i0-manifest-csv-gz Carbone/CP0/frozen_runs/ord_input_manifest_20260719T073503Z_sha256-c8ebfeb5d1884789c846e4336ea03b1a4312a07304e47f0deb5f6ddce10a5a9f.csv.gz --ord-schema-python-root /tmp/cp0_ord_schema_runtime_aeda34931 --construction-targets-csv-gz Carbone/CP0/frozen_runs/cp0_construction_targets_20260719T095919Z_sha256-4bdec976e5920568e9d0ea401ded8ff85bc6bdecb3257d3acb05b220694c07a2.csv.gz --selection-targets-csv-gz Carbone/CP0/frozen_runs/cp0_selection_targets_20260719T102545Z_sha256-4bdec976e5920568e9d0ea401ded8ff85bc6bdecb3257d3acb05b220694c07a2.csv.gz --selection-targets-sha256 0aa64bf2d7030229cb32993c8f0f24b0768b109225ae9398021b1b0a17923f8e --include-b4 --out-predictions-csv-gz Carbone/CP0/frozen_runs/cp0_selection_predictions_20260719T102608Z_sha256-c3b517d2f9d3793a830ef0387316d17948744a7afd36d29f437387883dcbfcaf.csv.gz --out-jsonl Carbone/CP0/frozen_runs/cp0_selection_comparison_20260719T102608Z_sha256-c3b517d2f9d3793a830ef0387316d17948744a7afd36d29f437387883dcbfcaf.jsonl --out-txt Carbone/CP0/frozen_runs/cp0_selection_comparison_20260719T102608Z_sha256-c3b517d2f9d3793a830ef0387316d17948744a7afd36d29f437387883dcbfcaf.txt --out-dependencies-json Carbone/CP0/frozen_runs/cp0_selection_comparison_dependencies_20260719T102608Z_sha256-c3b517d2f9d3793a830ef0387316d17948744a7afd36d29f437387883dcbfcaf.json --run-suffix 20260719T102608Z_sha256-c3b517d2f9d3793a830ef0387316d17948744a7afd36d29f437387883dcbfcaf --script-sha256 c3b517d2f9d3793a830ef0387316d17948744a7afd36d29f437387883dcbfcaf --frozen-run
+script_sha256: c3b517d2f9d3793a830ef0387316d17948744a7afd36d29f437387883dcbfcaf
+mode: selection-eval
+run_at_utc: 2026-07-19T10:26:09.010966+00:00
+train_groups: 17130
+evaluation_groups: 1428
+selection_targets_opened: true
+held_out_test_targets_opened: false
+predictions_csv_gz_sha256: 6d6bd24589d87480c04ed549a872f50c32d126820c1ac62b410545618893938e
+B4 max_features=0.25,min_samples_leaf=1 MAE=14.94441643 RMSE=20.29954993 Spearman=0.71074716
+B4 max_features=0.25,min_samples_leaf=2 MAE=15.19832412 RMSE=20.32685406 Spearman=0.70146770
+B2 k=3 MAE=15.21869902 RMSE=20.30980732 Spearman=0.72899960
+B2 k=5 MAE=15.36331142 RMSE=20.53590775 Spearman=0.71041661
+B4 max_features=0.25,min_samples_leaf=5 MAE=15.47305253 RMSE=20.54471147 Spearman=0.68573923
+B2 k=10 MAE=15.54707137 RMSE=20.83059890 Spearman=0.68697216
+B4 max_features=sqrt,min_samples_leaf=1 MAE=15.85448093 RMSE=19.96090346 Spearman=0.71417947
+B2 k=1 MAE=16.14660984 RMSE=22.79337679 Spearman=0.69854701
+B3 alpha=0.1 MAE=16.89639589 RMSE=21.56387962 Spearman=0.65743564
+B3 alpha=1 MAE=16.89650802 RMSE=21.56380932 Spearman=0.65743098
+B3 alpha=10 MAE=16.89762887 RMSE=21.56310968 Spearman=0.65744328
+B3 alpha=100 MAE=16.90933672 RMSE=21.55644069 Spearman=0.65756640
+B1 condition_mean MAE=17.76706934 RMSE=22.13763469 Spearman=0.63039872
+C0-BIR alpha=100 MAE=18.50213433 RMSE=23.95889983 Spearman=0.59197873
+C0-BIR alpha=1 MAE=19.58849418 RMSE=25.50663805 Spearman=0.53549754
+C0-BIR alpha=0.1 MAE=19.61664205 RMSE=25.53805296 Spearman=0.53325147
+C0-BIR alpha=10 MAE=20.05063710 RMSE=26.00521600 Spearman=0.52902300
+B4 max_features=sqrt,min_samples_leaf=2 MAE=21.83100412 RMSE=24.83487531 Spearman=0.64685003
+B4 max_features=sqrt,min_samples_leaf=5 MAE=22.46372378 RMSE=25.44987435 Spearman=0.61657279
+B0 global_mean MAE=25.56128600 RMSE=28.74813099 Spearman=0.00000000
+verdict: CP0_EMPIRICAL_COMPARISON_COMPLETED

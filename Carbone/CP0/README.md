@@ -4,7 +4,7 @@
 
 Les portes `CP0-DATA-M0`, `CP0-DATA-I0`, l'import moléculaire
 `CP0-ONTOLOGY-1`, l'organisation d'entrée `CP0-ONTOLOGY-2`, le contrat
-`CP0-PRODUCER-C0` et les portes synthétiques `T1`–`T2` sont terminés au 19
+`CP0-PRODUCER-C0` et les portes empiriques `T1`–`T5` sont terminés au 19
 juillet 2026.
 
 ```text
@@ -12,7 +12,7 @@ verdict M0               = GO-INPUT-AUDIT
 verdict I0               = GO-DYNAMIC
 candidat                 = ord_dataset-47eaacc46c3a4487bbdf99adb1a15e41
 réactions déclarées      = 47 015
-rendements décodés        = 0
+rendements réels ouverts  = 18 759 lignes, construction + selection
 structures produit lues   = 0
 test tenu à l'écart       = 2 317 lignes, 30 paires
 import moléculaire        = 194 / 194, zéro collision
@@ -24,11 +24,15 @@ statut organisation entrée = QUALIFIED
 statut contrat producteur  = CONTRACT_QUALIFIED
 statut lecteur cible T1    = SYNTHETIC_READER_QUALIFIED
 statut gel cible T2        = SYNTHETIC_TARGET_READER_FROZEN
-rendements réels lus par T2 = 0
+statut empirique C0-BIR     = NO-GO-C0-BIR-SELECTION
+MAE meilleure baseline     = 14,59081197
+MAE C0-BIR                 = 18,50213433
+held_out_test ouvert        = non
 ```
 
-Ce résultat qualifie un test dynamique et sa cible. Il ne mesure encore aucune
-performance et ne démontre aucune prédiction.
+Le premier résultat empirique est maintenant mesuré : la règle C0-BIR est
+dominée de 3,91132236 points de MAE sur `selection`. C'est une réfutation de
+cette candidate, pas une réfutation du cadre général.
 
 ## Documents
 
@@ -47,6 +51,8 @@ performance et ne démontre aucune prédiction.
   94 environnements et la résolution sans hash de l'entrée complète ;
 - [`PRODUCER_CONTRACT`](./PRODUCER_CONTRACT.md) fixe l'interface intrinsèque du
   producteur, sa chaîne causale et le lecteur de cible gelé `T2` ;
+- [`EMPIRICAL_RESULT_0`](./EMPIRICAL_RESULT_0.md) consigne le premier NO-GO
+  numérique sur `selection`, les baselines et tous les artefacts figés ;
 - [`Lean/InputOntology`](./Lean/InputOntology.lean) implémente le premier noyau
   positif et constructif de cette extension ;
 - [`Lean/CanonicalImport`](./Lean/CanonicalImport.lean) définit le vérificateur
@@ -82,11 +88,7 @@ donc absents de cette phase.
 
 ## Prochaine action autorisée
 
-Le contrat positif, l'audit synthétique et son gel sont achevés. Avant `T3`, il
-faut figer les wheels et hashes RDKit/scikit-learn ainsi qu'un harnais commun
-aux méthodes du cadre et aux baselines. `T3` pourra alors ouvrir uniquement
-`construction`, jamais `held_out_test`, pour construire la première loi de
-rendement réellement testable.
-
-Les rendements de `held_out_test` et les structures produit restent interdits.
-Aucune prédiction empirique n'a encore été produite.
+`T3`–`T5` ont produit et réfuté C0-BIR sur `selection`. Le test final reste
+scellé parce qu'une candidate déjà dominée ne justifie pas sa consommation. La
+prochaine action utile est une nouvelle hypothèse mécanistique intrinsèque,
+distincte de C0-BIR et préenregistrée avant toute utilisation du test final.

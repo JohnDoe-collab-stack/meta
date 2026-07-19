@@ -182,17 +182,23 @@ un tel modèle appartient aux baselines.
 ```text
 T1 — implémenter et tester le lecteur de cible sur données synthétiques — terminé ;
 T2 — geler son script, ses hashes et les checks [0,100] — terminé ;
-T3 — ouvrir construction seulement ;
-T4 — ajuster le cadre et les baselines dans les familles autorisées ;
-T5 — ouvrir selection et choisir une version ;
+T3 — ouvrir construction seulement — terminé, 17 130 groupes ;
+T4 — ajuster le cadre et les baselines dans les familles autorisées — terminé ;
+T5 — ouvrir selection et choisir une version — terminé, NO-GO C0-BIR ;
 T6 — geler prédictions test, code et environnement ;
 T7 — ouvrir held_out_test une seule fois dans le vérificateur ;
 T8 — publier le verdict sans réajustement.
 ```
 
 Le rapport normatif de `T1`–`T2`, ses 22 rejets synthétiques et ses empreintes
-sont consignés dans [`PRODUCER_CONTRACT`](./PRODUCER_CONTRACT.md). Avant `T3`,
-les wheels RDKit/scikit-learn et le harnais de comparaison doivent être gelés.
+sont consignés dans [`PRODUCER_CONTRACT`](./PRODUCER_CONTRACT.md). Les wheels
+RDKit/scikit-learn et le harnais de comparaison ont été gelés avant `T3`.
+
+Le résultat de `T3`–`T5` est consigné dans
+[`EMPIRICAL_RESULT_0`](./EMPIRICAL_RESULT_0.md). C0-BIR obtient 18,5021 de MAE
+contre 14,5908 pour B2 sur `selection`. `T6`–`T8` ne sont pas exécutés : le
+test final reste scellé pour ne pas le consommer avec une candidate déjà
+réfutée.
 
 ## 10. Interprétation autorisée
 

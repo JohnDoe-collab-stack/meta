@@ -20,6 +20,8 @@ ord_environment_import_v3.py  domaines 70 amines / 66 acides, rendu Lean imbriqu
 ord_environment_import_v4.py  constructeurs explicites, parenthésage Option incomplet ;
 ord_environment_import_v5.py  rendu Lean compilable, run normatif 94/94 ;
 cp0_target_reader_v1.py  lecteur strict et audit synthétique normatif T1–T2.
+cp0_empirical_comparison_v1.py  comparaison initiale C0-BIR/B0–B4 ; B2 supersédé ;
+cp0_empirical_comparison_v2.py  départage B2 indépendant de la cible, run normatif B0–B3/C0.
 ```
 
 Le run normatif I0 est la copie `ord_input_audit_20260719T073503Z_...py`
@@ -40,3 +42,13 @@ Le run normatif du lecteur de cible synthétique est la copie
 Il vérifie 6 lignes positives, 5 groupes et 22/22 rejets sans ouvrir la source
 ORD, le manifest I0 ni une cible réelle. Ses seuls modes réels sont
 `construction` et `selection` ; aucun mode `held_out_test` n'est disponible.
+
+La v1 a pour hash
+`c3b517d2f9d3793a830ef0387316d17948744a7afd36d29f437387883dcbfcaf`.
+Ses copies `20260719T100749Z_...` et `20260719T102608Z_...` produisent le
+contrôle bilatéral et les forêts B4 de selection. Son départage B2 par cible est
+supersédé. La v2, hash
+`ede5dde8c86e3e0c5b4d62e80df41c270f27431598e413e300449752b626ba24`,
+produit les valeurs normatives B0–B3/C0-BIR sous `20260719T110304Z_...`.
+C0-BIR n'utilise les hash que comme clés de résolution ; ses variables sont
+calculées à partir des graphes et des environnements positifs.

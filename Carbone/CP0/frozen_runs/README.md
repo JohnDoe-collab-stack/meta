@@ -19,6 +19,21 @@ CP0-ONTOLOGY-2 import des environnements
 
 CP0-TARGET-T2 lecteur et audit synthétiques
   20260719T094729Z_sha256-4bdec976...
+
+CP0-TARGET-T3 cibles construction
+  20260719T095919Z_sha256-4bdec976...
+
+CP0-EMPIRICAL-0 contrôle construction
+  20260719T100749Z_sha256-c3b517d2...
+
+CP0-TARGET-T5 cibles selection
+  20260719T102545Z_sha256-4bdec976...
+
+CP0-EMPIRICAL-0 comparaison selection
+  20260719T102608Z_sha256-c3b517d2...
+
+CP0-EMPIRICAL-0 correction B2 et audit selection
+  20260719T110304Z_sha256-ede5dde8...
 ```
 
 ## Run supersédé, conservé
@@ -52,6 +67,13 @@ Le run `4bdec976...` est normatif pour `T2`. Il a exécuté une copie figée du
 lecteur sous CPython 3.10.12, produit cinq groupes synthétiques déterministes et
 rejeté 22/22 cas négatifs. Son rapport atteste que ni la source ORD réelle, ni
 le manifest I0, ni une valeur cible réelle n'ont été ouverts.
+
+Les runs suivants ouvrent uniquement `construction`, puis `selection`. Le
+contrôle interne donne B4=16,9190 et C0-BIR=17,4565 de MAE. La comparaison de
+selection corrigée donne B2=14,5908, B4=14,9444 et C0-BIR=18,5021, soit le
+verdict `NO-GO-C0-BIR-SELECTION`. Le B2 de la v1 est supersédé parce que ses
+égalités de similarité étaient départagées par la cible ; la v2 utilise les
+identités moléculaires. Aucun run de ce dossier n'ouvre `held_out_test`.
 
 Les nouvelles expériences doivent créer de nouveaux fichiers. Aucun run
 historique ne doit être réexécuté vers les mêmes chemins ni modifié.
