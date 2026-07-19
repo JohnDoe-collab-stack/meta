@@ -34,6 +34,9 @@ CP0-EMPIRICAL-0 comparaison selection
 
 CP0-EMPIRICAL-0 correction B2 et audit selection
   20260719T110304Z_sha256-ede5dde8...
+
+CP0-EMPIRICAL-1 centres réactifs, construction et selection
+  20260719T114249Z_sha256-5848ca30...
 ```
 
 ## Run supersédé, conservé
@@ -77,3 +80,10 @@ identités moléculaires. Aucun run de ce dossier n'ouvre `held_out_test`.
 
 Les nouvelles expériences doivent créer de nouveaux fichiers. Aucun run
 historique ne doit être réexécuté vers les mêmes chemins ni modifié.
+
+Le run `5848ca30...` détecte exactement un N réactif dans 70/70 amines et un
+carbone carboxylique dans 66/66 acides. C1 centre seul obtient 14,7821 de MAE
+contre B2=14,5908. C2 local–global atteint 13,6389, mais son gain de 0,9519 est
+inférieur au seuil et l'IC 95 % `[-2,5417 ; +0,6898]` contient zéro. La
+configuration C2 est explicitement marquée comme choisie sur `selection` déjà
+ouvert ; le verdict protocolaire est un NO-GO et `held_out_test` reste scellé.

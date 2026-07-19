@@ -1,0 +1,57 @@
+command: Carbone/CP0/frozen_runs/cp0_reactive_center_comparison_20260719T114249Z_sha256-5848ca3045b40993416ee38dbea6adf372ea108d9953fafb106fa5ac93882296.py --mode selection-eval --base-script Carbone/CP0/frozen_runs/cp0_empirical_comparison_20260719T110304Z_sha256-ede5dde8c86e3e0c5b4d62e80df41c270f27431598e413e300449752b626ba24.py --source-pb-gz /tmp/ord_dataset-47eaacc46c3a4487bbdf99adb1a15e41_ddb0d25770c80a0a6fcf9948c26e1c8f828cb8ad.pb.gz --i0-manifest-csv-gz Carbone/CP0/frozen_runs/ord_input_manifest_20260719T073503Z_sha256-c8ebfeb5d1884789c846e4336ea03b1a4312a07304e47f0deb5f6ddce10a5a9f.csv.gz --ord-schema-python-root /tmp/cp0_ord_schema_runtime_aeda34931 --construction-targets-csv-gz Carbone/CP0/frozen_runs/cp0_construction_targets_20260719T095919Z_sha256-4bdec976e5920568e9d0ea401ded8ff85bc6bdecb3257d3acb05b220694c07a2.csv.gz --selection-targets-csv-gz Carbone/CP0/frozen_runs/cp0_selection_targets_20260719T102545Z_sha256-4bdec976e5920568e9d0ea401ded8ff85bc6bdecb3257d3acb05b220694c07a2.csv.gz --selection-targets-sha256 0aa64bf2d7030229cb32993c8f0f24b0768b109225ae9398021b1b0a17923f8e --out-predictions-csv-gz Carbone/CP0/frozen_runs/cp0_reactive_center_selection_predictions_20260719T114249Z_sha256-5848ca3045b40993416ee38dbea6adf372ea108d9953fafb106fa5ac93882296.csv.gz --out-jsonl Carbone/CP0/frozen_runs/cp0_reactive_center_selection_comparison_20260719T114249Z_sha256-5848ca3045b40993416ee38dbea6adf372ea108d9953fafb106fa5ac93882296.jsonl --out-txt Carbone/CP0/frozen_runs/cp0_reactive_center_selection_comparison_20260719T114249Z_sha256-5848ca3045b40993416ee38dbea6adf372ea108d9953fafb106fa5ac93882296.txt --out-dependencies-json Carbone/CP0/frozen_runs/cp0_reactive_center_selection_dependencies_20260719T114249Z_sha256-5848ca3045b40993416ee38dbea6adf372ea108d9953fafb106fa5ac93882296.json --run-suffix 20260719T114249Z_sha256-5848ca3045b40993416ee38dbea6adf372ea108d9953fafb106fa5ac93882296 --script-sha256 5848ca3045b40993416ee38dbea6adf372ea108d9953fafb106fa5ac93882296 --frozen-run
+script_sha256: 5848ca3045b40993416ee38dbea6adf372ea108d9953fafb106fa5ac93882296
+base_script_sha256: ede5dde8c86e3e0c5b4d62e80df41c270f27431598e413e300449752b626ba24
+mode: selection-eval
+run_at_utc: 2026-07-19T11:44:42.082102+00:00
+train_groups: 17130
+evaluation_groups: 1428
+selection_targets_opened: true
+held_out_test_targets_opened: false
+predictions_csv_gz_sha256: 9c513d8f26c09c34feb777bf263836f5bf202bc3e22f8650e8eb345cbac628d2
+C2-MS-REPAIR global_k=1,local_radius=3,local_pair=mean,local_k=10,local_weight=0.6 MAE=13.63890761 RMSE=18.97460637 Spearman=0.74482374
+B2 k=3 MAE=14.59081197 RMSE=19.78201794 Spearman=0.74881028
+C1-RC-KNN radius=3,pair=geometric,k=10 MAE=14.78209735 RMSE=19.80161048 Spearman=0.71887874
+C1-RC-KNN radius=3,pair=mean,k=10 MAE=14.84300342 RMSE=19.87829254 Spearman=0.71593664
+C1-RC-KNN radius=3,pair=mean,k=5 MAE=14.95866106 RMSE=20.36585118 Spearman=0.72161830
+C1-RC-KNN radius=3,pair=geometric,k=5 MAE=15.00725014 RMSE=20.41482088 Spearman=0.72025597
+C1-RC-KNN radius=2,pair=mean,k=5 MAE=15.06799426 RMSE=20.45044836 Spearman=0.71575271
+C1-RC-KNN radius=2,pair=geometric,k=5 MAE=15.10172854 RMSE=20.50132466 Spearman=0.71411439
+B2 k=5 MAE=15.47628284 RMSE=20.79736809 Spearman=0.70380359
+C1-RC-KNN radius=2,pair=geometric,k=10 MAE=15.49567549 RMSE=20.52332921 Spearman=0.69380118
+C1-RC-KNN radius=2,pair=mean,k=10 MAE=15.52010931 RMSE=20.55227310 Spearman=0.69157935
+B2 k=10 MAE=15.54077714 RMSE=20.80772909 Spearman=0.68774927
+C1-RC-KNN radius=3,pair=bottleneck,k=5 MAE=15.73734603 RMSE=21.40952939 Spearman=0.68514355
+C1-RC-KNN radius=3,pair=bottleneck,k=10 MAE=15.82992332 RMSE=21.09208620 Spearman=0.68060927
+C1-RC-KNN radius=2,pair=bottleneck,k=5 MAE=15.83912637 RMSE=21.56978226 Spearman=0.68138134
+C1-RC-KNN radius=1,pair=bottleneck,k=5 MAE=16.09858000 RMSE=21.44865646 Spearman=0.68371119
+C1-RC-KNN radius=2,pair=bottleneck,k=10 MAE=16.10577170 RMSE=21.42528152 Spearman=0.66600612
+B2 k=1 MAE=16.10667977 RMSE=22.72672497 Spearman=0.70212131
+C1-RC-KNN radius=1,pair=mean,k=5 MAE=16.10693085 RMSE=21.40653774 Spearman=0.68461837
+C1-RC-KNN radius=1,pair=geometric,k=5 MAE=16.10787340 RMSE=21.41312922 Spearman=0.68431723
+C1-RC-KNN radius=2,pair=mean,k=3 MAE=16.15373088 RMSE=21.68439615 Spearman=0.68730090
+C1-RC-KNN radius=2,pair=geometric,k=3 MAE=16.18876559 RMSE=21.76595855 Spearman=0.68515642
+C1-RC-KNN radius=1,pair=bottleneck,k=10 MAE=16.26926782 RMSE=21.42301908 Spearman=0.67620609
+C1-RC-KNN radius=3,pair=geometric,k=3 MAE=16.35763942 RMSE=21.87251800 Spearman=0.68371944
+C1-RC-KNN radius=1,pair=geometric,k=10 MAE=16.44414897 RMSE=21.55560443 Spearman=0.67164182
+C1-RC-KNN radius=1,pair=mean,k=10 MAE=16.52721456 RMSE=21.63468912 Spearman=0.66943342
+C1-RC-KNN radius=3,pair=mean,k=3 MAE=16.56323719 RMSE=22.08985408 Spearman=0.68493934
+C1-RC-KNN radius=2,pair=bottleneck,k=3 MAE=16.96996907 RMSE=23.16050997 Spearman=0.64830473
+C1-RC-KNN radius=3,pair=bottleneck,k=3 MAE=17.41856951 RMSE=23.45830425 Spearman=0.64214765
+B1 condition_mean MAE=17.76706934 RMSE=22.13763469 Spearman=0.63039872
+C1-RC-KNN radius=1,pair=bottleneck,k=3 MAE=18.10701257 RMSE=23.68780539 Spearman=0.62785933
+C1-RC-KNN radius=1,pair=geometric,k=3 MAE=18.14364064 RMSE=23.68030619 Spearman=0.62674809
+C1-RC-KNN radius=1,pair=mean,k=3 MAE=18.14382643 RMSE=23.67666411 Spearman=0.62678140
+C1-RC-KNN radius=3,pair=mean,k=1 MAE=19.64858673 RMSE=27.19575207 Spearman=0.59001596
+C1-RC-KNN radius=3,pair=geometric,k=1 MAE=19.73733164 RMSE=27.34855317 Spearman=0.58416093
+C1-RC-KNN radius=3,pair=bottleneck,k=1 MAE=21.55825054 RMSE=30.23590047 Spearman=0.47737685
+C1-RC-KNN radius=2,pair=geometric,k=1 MAE=22.29960885 RMSE=30.86810050 Spearman=0.45153817
+C1-RC-KNN radius=2,pair=mean,k=1 MAE=22.29960885 RMSE=30.86810050 Spearman=0.45153817
+C1-RC-KNN radius=2,pair=bottleneck,k=1 MAE=22.36898164 RMSE=31.12295157 Spearman=0.45791401
+C1-RC-KNN radius=1,pair=bottleneck,k=1 MAE=22.37442102 RMSE=30.49125641 Spearman=0.48615247
+C1-RC-KNN radius=1,pair=geometric,k=1 MAE=22.46727663 RMSE=30.58046409 Spearman=0.48095834
+C1-RC-KNN radius=1,pair=mean,k=1 MAE=22.46727663 RMSE=30.58046409 Spearman=0.48095722
+B0 global_mean MAE=25.56128600 RMSE=28.74813099 Spearman=0.00000000
+c1_minus_baseline_mae: 0.19128538
+c2_minus_baseline_mae: -0.95190435
+c2_difference_ci95: [-2.54173868, 0.68983065]
+verdict: NO-GO-PROTOCOL-C2-MS-REPAIR-SELECTION

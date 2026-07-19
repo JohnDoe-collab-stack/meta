@@ -1,0 +1,57 @@
+command: Carbone/CP0/frozen_runs/cp0_reactive_center_comparison_20260719T114249Z_sha256-5848ca3045b40993416ee38dbea6adf372ea108d9953fafb106fa5ac93882296.py --mode construction-cv --base-script Carbone/CP0/frozen_runs/cp0_empirical_comparison_20260719T110304Z_sha256-ede5dde8c86e3e0c5b4d62e80df41c270f27431598e413e300449752b626ba24.py --source-pb-gz /tmp/ord_dataset-47eaacc46c3a4487bbdf99adb1a15e41_ddb0d25770c80a0a6fcf9948c26e1c8f828cb8ad.pb.gz --i0-manifest-csv-gz Carbone/CP0/frozen_runs/ord_input_manifest_20260719T073503Z_sha256-c8ebfeb5d1884789c846e4336ea03b1a4312a07304e47f0deb5f6ddce10a5a9f.csv.gz --ord-schema-python-root /tmp/cp0_ord_schema_runtime_aeda34931 --construction-targets-csv-gz Carbone/CP0/frozen_runs/cp0_construction_targets_20260719T095919Z_sha256-4bdec976e5920568e9d0ea401ded8ff85bc6bdecb3257d3acb05b220694c07a2.csv.gz --out-predictions-csv-gz Carbone/CP0/frozen_runs/cp0_reactive_center_construction_predictions_20260719T114249Z_sha256-5848ca3045b40993416ee38dbea6adf372ea108d9953fafb106fa5ac93882296.csv.gz --out-jsonl Carbone/CP0/frozen_runs/cp0_reactive_center_construction_comparison_20260719T114249Z_sha256-5848ca3045b40993416ee38dbea6adf372ea108d9953fafb106fa5ac93882296.jsonl --out-txt Carbone/CP0/frozen_runs/cp0_reactive_center_construction_comparison_20260719T114249Z_sha256-5848ca3045b40993416ee38dbea6adf372ea108d9953fafb106fa5ac93882296.txt --out-dependencies-json Carbone/CP0/frozen_runs/cp0_reactive_center_construction_dependencies_20260719T114249Z_sha256-5848ca3045b40993416ee38dbea6adf372ea108d9953fafb106fa5ac93882296.json --run-suffix 20260719T114249Z_sha256-5848ca3045b40993416ee38dbea6adf372ea108d9953fafb106fa5ac93882296 --script-sha256 5848ca3045b40993416ee38dbea6adf372ea108d9953fafb106fa5ac93882296 --frozen-run
+script_sha256: 5848ca3045b40993416ee38dbea6adf372ea108d9953fafb106fa5ac93882296
+base_script_sha256: ede5dde8c86e3e0c5b4d62e80df41c270f27431598e413e300449752b626ba24
+mode: construction-cv
+run_at_utc: 2026-07-19T11:43:21.599137+00:00
+train_groups: 12353
+evaluation_groups: 170
+selection_targets_opened: false
+held_out_test_targets_opened: false
+predictions_csv_gz_sha256: 83c2514234af93a7a59a58c02b56fc0dc8793e407df1d711ce8f811600c3c01d
+B2 k=1 MAE=18.18648439 RMSE=24.48933340 Spearman=0.58458786
+B2 k=5 MAE=18.27885452 RMSE=22.08549142 Spearman=0.62779416
+B2 k=10 MAE=18.36476004 RMSE=22.03337286 Spearman=0.62996074
+B2 k=3 MAE=18.78756773 RMSE=23.39681039 Spearman=0.61164624
+B1 condition_mean MAE=20.16903258 RMSE=23.49194176 Spearman=0.50163850
+C2-MS-REPAIR global_k=1,local_radius=3,local_pair=mean,local_k=10,local_weight=0.6 MAE=21.10081269 RMSE=25.38223769 Spearman=0.51747974
+B0 global_mean MAE=22.32366246 RMSE=27.37636258 Spearman=0.00000000
+C1-RC-KNN radius=2,pair=mean,k=10 MAE=25.21255750 RMSE=29.97111226 Spearman=0.28941079
+C1-RC-KNN radius=3,pair=geometric,k=10 MAE=25.40627938 RMSE=30.15434999 Spearman=0.28679967
+C1-RC-KNN radius=2,pair=geometric,k=10 MAE=25.43445327 RMSE=30.13753331 Spearman=0.28589591
+C1-RC-KNN radius=3,pair=mean,k=10 MAE=25.91797539 RMSE=30.59598023 Spearman=0.27912995
+C1-RC-KNN radius=3,pair=geometric,k=5 MAE=27.37173202 RMSE=35.41525682 Spearman=0.12892569
+C1-RC-KNN radius=2,pair=geometric,k=5 MAE=27.77760095 RMSE=35.62214424 Spearman=0.12301219
+C1-RC-KNN radius=2,pair=mean,k=5 MAE=27.84015439 RMSE=35.72005469 Spearman=0.10469037
+C1-RC-KNN radius=3,pair=bottleneck,k=10 MAE=28.22308882 RMSE=32.99643860 Spearman=0.22604506
+C1-RC-KNN radius=2,pair=bottleneck,k=10 MAE=28.22308882 RMSE=32.99643860 Spearman=0.22604506
+C1-RC-KNN radius=1,pair=bottleneck,k=10 MAE=28.22308882 RMSE=32.99643860 Spearman=0.22604506
+C1-RC-KNN radius=1,pair=geometric,k=10 MAE=28.22308882 RMSE=32.99643860 Spearman=0.22604506
+C1-RC-KNN radius=1,pair=mean,k=10 MAE=28.22308882 RMSE=32.99643860 Spearman=0.22604506
+C1-RC-KNN radius=2,pair=mean,k=3 MAE=28.70369170 RMSE=38.07165509 Spearman=0.02179396
+C1-RC-KNN radius=2,pair=geometric,k=3 MAE=28.81539189 RMSE=38.10363228 Spearman=0.02724092
+C1-RC-KNN radius=3,pair=mean,k=5 MAE=29.16716178 RMSE=36.71443362 Spearman=0.09183017
+C1-RC-KNN radius=1,pair=bottleneck,k=3 MAE=29.68489022 RMSE=38.52575511 Spearman=0.02140958
+C1-RC-KNN radius=1,pair=geometric,k=3 MAE=29.68489022 RMSE=38.52575511 Spearman=0.02140958
+C1-RC-KNN radius=1,pair=mean,k=3 MAE=29.68489022 RMSE=38.52575511 Spearman=0.02140958
+C1-RC-KNN radius=2,pair=bottleneck,k=3 MAE=29.68489022 RMSE=38.52575511 Spearman=0.02140958
+C1-RC-KNN radius=3,pair=bottleneck,k=3 MAE=29.68489022 RMSE=38.52575511 Spearman=0.02140958
+C1-RC-KNN radius=3,pair=geometric,k=3 MAE=29.92311170 RMSE=38.75806472 Spearman=0.03631023
+C1-RC-KNN radius=3,pair=mean,k=3 MAE=30.87672927 RMSE=39.31057636 Spearman=-0.00283218
+C1-RC-KNN radius=1,pair=bottleneck,k=5 MAE=31.33464400 RMSE=38.46338547 Spearman=0.07115600
+C1-RC-KNN radius=1,pair=geometric,k=5 MAE=31.33464400 RMSE=38.46338547 Spearman=0.07115600
+C1-RC-KNN radius=1,pair=mean,k=5 MAE=31.33464400 RMSE=38.46338547 Spearman=0.07115600
+C1-RC-KNN radius=2,pair=bottleneck,k=5 MAE=31.33464400 RMSE=38.46338547 Spearman=0.07115600
+C1-RC-KNN radius=3,pair=bottleneck,k=5 MAE=31.33464400 RMSE=38.46338547 Spearman=0.07115600
+C1-RC-KNN radius=2,pair=geometric,k=1 MAE=31.62013600 RMSE=42.24256656 Spearman=-0.08256076
+C1-RC-KNN radius=2,pair=mean,k=1 MAE=31.62013600 RMSE=42.24256656 Spearman=-0.08256076
+C1-RC-KNN radius=3,pair=geometric,k=1 MAE=32.88276162 RMSE=43.41821932 Spearman=-0.05401045
+C1-RC-KNN radius=3,pair=mean,k=1 MAE=32.88276162 RMSE=43.41821932 Spearman=-0.05401045
+C1-RC-KNN radius=1,pair=bottleneck,k=1 MAE=35.65511577 RMSE=43.83634628 Spearman=0.12823115
+C1-RC-KNN radius=1,pair=geometric,k=1 MAE=35.65511577 RMSE=43.83634628 Spearman=0.12823115
+C1-RC-KNN radius=1,pair=mean,k=1 MAE=35.65511577 RMSE=43.83634628 Spearman=0.12823115
+C1-RC-KNN radius=2,pair=bottleneck,k=1 MAE=35.65511577 RMSE=43.83634628 Spearman=0.12800788
+C1-RC-KNN radius=3,pair=bottleneck,k=1 MAE=35.65511577 RMSE=43.83634628 Spearman=0.12802223
+c1_minus_baseline_mae: 7.02607311
+c2_minus_baseline_mae: 2.91432830
+c2_difference_ci95: [0.80817554, 5.54599893]
+verdict: C1_CONSTRUCTION_CV_COMPLETED

@@ -25,14 +25,23 @@ statut contrat producteur  = CONTRACT_QUALIFIED
 statut lecteur cible T1    = SYNTHETIC_READER_QUALIFIED
 statut gel cible T2        = SYNTHETIC_TARGET_READER_FROZEN
 statut empirique C0-BIR     = NO-GO-C0-BIR-SELECTION
+statut empirique C1 centre   = NO-GO-C1-RC-KNN-SELECTION
+statut protocolaire C2       = NO-GO-PROTOCOL-C2-MS-REPAIR-SELECTION
 MAE meilleure baseline     = 14,59081197
 MAE C0-BIR                 = 18,50213433
+MAE C1 centre seul          = 14,78209735
+MAE C2 local–global         = 13,63890761, signal développement seulement
 held_out_test ouvert        = non
 ```
 
 Le premier résultat empirique est maintenant mesuré : la règle C0-BIR est
 dominée de 3,91132236 points de MAE sur `selection`. C'est une réfutation de
 cette candidate, pas une réfutation du cadre général.
+
+La candidate C1 fondée uniquement sur les voisinages des centres réactifs
+arrive à 0,19128538 point de B2. Le diagnostic C2 local–global obtient une MAE
+ponctuelle meilleure de 0,95190435 point, mais échoue au seuil de deux points
+et son intervalle bootstrap contient zéro. Le test final reste fermé.
 
 ## Documents
 
@@ -53,6 +62,8 @@ cette candidate, pas une réfutation du cadre général.
   producteur, sa chaîne causale et le lecteur de cible gelé `T2` ;
 - [`EMPIRICAL_RESULT_0`](./EMPIRICAL_RESULT_0.md) consigne le premier NO-GO
   numérique sur `selection`, les baselines et tous les artefacts figés ;
+- [`EMPIRICAL_RESULT_1`](./EMPIRICAL_RESULT_1.md) teste les centres réactifs,
+  mesure le signal multiscalaire et consigne son NO-GO protocolaire ;
 - [`Lean/InputOntology`](./Lean/InputOntology.lean) implémente le premier noyau
   positif et constructif de cette extension ;
 - [`Lean/CanonicalImport`](./Lean/CanonicalImport.lean) définit le vérificateur
@@ -88,7 +99,9 @@ donc absents de cette phase.
 
 ## Prochaine action autorisée
 
-`T3`–`T5` ont produit et réfuté C0-BIR sur `selection`. Le test final reste
-scellé parce qu'une candidate déjà dominée ne justifie pas sa consommation. La
-prochaine action utile est une nouvelle hypothèse mécanistique intrinsèque,
-distincte de C0-BIR et préenregistrée avant toute utilisation du test final.
+`T3`–`T5` ont réfuté C0-BIR. C1 et C2 ont ensuite utilisé `selection` comme
+domaine de développement déjà ouvert. C2 donne un signal local–global, mais ne
+franchit ni la marge de deux points ni l'intervalle de confiance. Le test final
+reste scellé. La prochaine action utile est une fonction mécanistique
+intrinsèque portant explicitement attaque, activation, stérique et réponse au
+milieu, gelée avant toute utilisation du test final.

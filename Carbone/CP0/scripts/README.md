@@ -22,6 +22,7 @@ ord_environment_import_v5.py  rendu Lean compilable, run normatif 94/94 ;
 cp0_target_reader_v1.py  lecteur strict et audit synthétique normatif T1–T2.
 cp0_empirical_comparison_v1.py  comparaison initiale C0-BIR/B0–B4 ; B2 supersédé ;
 cp0_empirical_comparison_v2.py  départage B2 indépendant de la cible, run normatif B0–B3/C0.
+cp0_reactive_center_comparison_v1.py  C1 centres réactifs et diagnostic C2 multiscalaire.
 ```
 
 Le run normatif I0 est la copie `ord_input_audit_20260719T073503Z_...py`
@@ -52,3 +53,10 @@ supersédé. La v2, hash
 produit les valeurs normatives B0–B3/C0-BIR sous `20260719T110304Z_...`.
 C0-BIR n'utilise les hash que comme clés de résolution ; ses variables sont
 calculées à partir des graphes et des environnements positifs.
+
+La comparaison des centres réactifs a pour hash
+`5848ca3045b40993416ee38dbea6adf372ea108d9953fafb106fa5ac93882296`.
+Sa copie `20260719T114249Z_...` reproduit B2, évalue C1 sans empreinte globale,
+puis C2 avec un mélange local–global déclaré comme choisi sur `selection` déjà
+ouvert. Le verdict est `NO-GO-PROTOCOL-C2-MS-REPAIR-SELECTION` ; aucun rendement
+`held_out_test` n'est ouvert.
