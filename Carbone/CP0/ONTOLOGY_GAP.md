@@ -6,8 +6,9 @@
 > [`ImportedSpecies.lean`](./Lean/ImportedSpecies.lean) certifie 194/194
 > espèces, sans axiome ni collision. `CP0-ONTOLOGY-2` importe aussi les
 > quantités et 94 environnements, vérifie les 47 015 liens au manifest I0 et
-> résout une organisation d'entrée sans clé de dataset. O7, le producteur issu
-> du Core, reste ouvert.
+> résout une organisation d'entrée sans clé de dataset. Le contrat positif O7
+> est maintenant fixé dans [`ProducerContract.lean`](./Lean/ProducerContract.lean) ;
+> son instanciation en loi chimique reste ouverte.
 
 ## 1. Décision
 
@@ -141,7 +142,8 @@ O5 — calculer les invariants et auditer l'idempotence canonique — terminé ;
 O6 — couvrir les 194 identités d'entrée ou s'abstenir explicitement — 194/194 ;
 O6b — importer quantités, rôles, protocole et conditions — 94/94, terminé ;
 O6c — résoudre l'organisation complète sans hash ni cible — terminé ;
-O7 — définir le producteur de réponse du Core — non commencé.
+O7a — fixer l'interface intrinsèque et la chaîne causale du producteur — terminé ;
+O7b — instancier cette interface par une loi chimique ajustable — non commencé.
 ```
 
 Le GO ontologique exige une couverture de 194/194 identités et zéro collision
@@ -150,4 +152,6 @@ postérieure du test.
 
 Les rapports normatifs et la distinction entre preuve Lean et audits externes
 sont consignés dans [`CANONICAL_IMPORT.md`](./CANONICAL_IMPORT.md) et
-[`ENVIRONMENT_IMPORT.md`](./ENVIRONMENT_IMPORT.md).
+[`ENVIRONMENT_IMPORT.md`](./ENVIRONMENT_IMPORT.md). Le contrat et sa limite
+empirique sont consignés dans
+[`PRODUCER_CONTRACT.md`](./PRODUCER_CONTRACT.md).

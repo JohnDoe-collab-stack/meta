@@ -4,6 +4,7 @@ import Carbone.CP0.Lean.CanonicalImport
 import Carbone.CP0.Lean.ImportedSpecies
 import Carbone.CP0.Lean.EnvironmentImport
 import Carbone.CP0.Lean.ImportedEnvironments
+import Carbone.CP0.Lean.ProducerContract
 
 /- AXIOM_AUDIT_BEGIN -/
 #print axioms Meta.Carbone.CW0.carbonProjectionObstruction
@@ -49,4 +50,7 @@ import Carbone.CP0.Lean.ImportedEnvironments
 #print axioms Meta.Carbone.CP0.EnvironmentImport.resolveImportedInput?
 #print axioms Meta.Carbone.CP0.EnvironmentImport.knownInputOrganization_resolves
 #print axioms Meta.Carbone.CP0.EnvironmentImport.knownInputProjection_resolves
+#print axioms Meta.Carbone.CP0.ProducerContract.CoreYieldProducer
+#print axioms Meta.Carbone.CP0.ProducerContract.run_eq_executeRepair
+#print axioms Meta.Carbone.CP0.ProducerContract.syntheticProducer_runs_through_repair
 /- AXIOM_AUDIT_END -/

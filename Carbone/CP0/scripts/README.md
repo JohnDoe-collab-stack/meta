@@ -18,7 +18,8 @@ ord_environment_import_v1.py  premier smoke-test des 94 environnements ;
 ord_environment_import_v2.py  traçage exact du hash de reaction_id ;
 ord_environment_import_v3.py  domaines 70 amines / 66 acides, rendu Lean imbriqué invalide ;
 ord_environment_import_v4.py  constructeurs explicites, parenthésage Option incomplet ;
-ord_environment_import_v5.py  rendu Lean compilable, run normatif 94/94.
+ord_environment_import_v5.py  rendu Lean compilable, run normatif 94/94 ;
+cp0_target_reader_v1.py  lecteur strict et audit synthétique normatif T1–T2.
 ```
 
 Le run normatif I0 est la copie `ord_input_audit_20260719T073503Z_...py`
@@ -32,3 +33,10 @@ Le run normatif d'import moléculaire est la copie
 Le run normatif d'import des environnements est la copie
 `ord_environment_import_20260719T091321Z_...py`. Son hash est
 `ba12c0482fd4a541d77cc4e90232a8ccf53e298feafaae30d547db53a1d65e37`.
+
+Le run normatif du lecteur de cible synthétique est la copie
+`cp0_target_reader_20260719T094729Z_...py`. Son hash est
+`4bdec976e5920568e9d0ea401ded8ff85bc6bdecb3257d3acb05b220694c07a2`.
+Il vérifie 6 lignes positives, 5 groupes et 22/22 rejets sans ouvrir la source
+ORD, le manifest I0 ni une cible réelle. Ses seuls modes réels sont
+`construction` et `selection` ; aucun mode `held_out_test` n'est disponible.

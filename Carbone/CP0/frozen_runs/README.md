@@ -16,6 +16,9 @@ CP0-ONTOLOGY-1 import moléculaire
 
 CP0-ONTOLOGY-2 import des environnements
   20260719T091321Z_sha256-ba12c048...
+
+CP0-TARGET-T2 lecteur et audit synthétiques
+  20260719T094729Z_sha256-4bdec976...
 ```
 
 ## Run supersédé, conservé
@@ -44,6 +47,11 @@ exports préparatoires d'environnement ont établi les mêmes comptes ; le run
 compile et certifie aussi les domaines 70 amines / 66 acides. Les deux exports
 Lean invalides sont archivés octet pour octet sous l'extension `.lean.failed` ;
 ils ne sont pas présentés comme des sources compilables.
+
+Le run `4bdec976...` est normatif pour `T2`. Il a exécuté une copie figée du
+lecteur sous CPython 3.10.12, produit cinq groupes synthétiques déterministes et
+rejeté 22/22 cas négatifs. Son rapport atteste que ni la source ORD réelle, ni
+le manifest I0, ni une valeur cible réelle n'ont été ouverts.
 
 Les nouvelles expériences doivent créer de nouveaux fichiers. Aucun run
 historique ne doit être réexécuté vers les mêmes chemins ni modifié.

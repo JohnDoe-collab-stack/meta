@@ -2,7 +2,8 @@
 
 ## 1. Statut
 
-Préenregistrement sans ouverture des valeurs — 19 juillet 2026.
+Préenregistrement et gel du lecteur synthétique, sans ouverture des valeurs
+réelles — 19 juillet 2026.
 
 ```text
 cible      = pourcentage de rendement du produit désiré
@@ -13,9 +14,9 @@ métrique   = MAE en points de pourcentage, agrégée par entrée unique
 
 L'entrée sans cible est maintenant implémentée par `CP0-ONTOLOGY-2` : 47 015
 lignes concordent avec le manifest I0 et leurs domaines appartiennent aux 194
-espèces et 94 environnements certifiés. Aucun rendement n'a été décodé. La
-prochaine étape de ce protocole est donc `T1`, pas l'ouverture de
-`construction`.
+espèces et 94 environnements certifiés. Le contrat du producteur, `T1` et `T2`
+sont achevés sans décoder de rendement réel. Le lecteur figé n'expose que les
+modes `construction` et `selection` ; il n'offre aucun mode `held_out_test`.
 
 La présence de 47 015 valeurs est établie par enveloppe protobuf. Leur contenu
 et leur distribution restent inconnus du pipeline réalisé.
@@ -179,8 +180,8 @@ un tel modèle appartient aux baselines.
 ## 9. Ordre d'ouverture
 
 ```text
-T1 — implémenter et tester le lecteur de cible sur données synthétiques ;
-T2 — geler son script, ses hashes et les checks [0,100] ;
+T1 — implémenter et tester le lecteur de cible sur données synthétiques — terminé ;
+T2 — geler son script, ses hashes et les checks [0,100] — terminé ;
 T3 — ouvrir construction seulement ;
 T4 — ajuster le cadre et les baselines dans les familles autorisées ;
 T5 — ouvrir selection et choisir une version ;
@@ -188,6 +189,10 @@ T6 — geler prédictions test, code et environnement ;
 T7 — ouvrir held_out_test une seule fois dans le vérificateur ;
 T8 — publier le verdict sans réajustement.
 ```
+
+Le rapport normatif de `T1`–`T2`, ses 22 rejets synthétiques et ses empreintes
+sont consignés dans [`PRODUCER_CONTRACT`](./PRODUCER_CONTRACT.md). Avant `T3`,
+les wheels RDKit/scikit-learn et le harnais de comparaison doivent être gelés.
 
 ## 10. Interprétation autorisée
 

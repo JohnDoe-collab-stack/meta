@@ -118,14 +118,12 @@ Il est maintenant possible de calculer, pour toute ligne admise du corpus, une
 entrée intrinsèque complète et sans cible. Cela ferme le problème de
 représentation des entrées de `CP0-R`.
 
-Il reste à définir avant toute ouverture de rendement :
-
-1. le contrat du producteur issu du Core et la projection admissible de
-   `InputOrganization` ;
-2. un lecteur de cible testé uniquement sur données synthétiques (`T1`) ;
-3. le gel de ce lecteur et de ses contrôles `[0, 100]` (`T2`) ;
-4. seulement ensuite l'ouverture de `construction`, jamais de
-   `held_out_test`.
+Le contrat du producteur, la projection admissible de `InputOrganization`, le
+lecteur synthétique `T1` et son gel `T2` sont maintenant terminés et documentés
+dans [`PRODUCER_CONTRACT`](./PRODUCER_CONTRACT.md). Ils n'ont ouvert aucune
+cible réelle. La prochaine porte consiste à geler l'environnement des
+baselines et le harnais commun, puis à ouvrir seulement `construction` à `T3`,
+jamais `held_out_test`.
 
 Cette porte établit la calculabilité et l'intégrité de l'entrée. Elle n'établit
 pas encore que le cadre explique la chimie ni qu'il bat une baseline.

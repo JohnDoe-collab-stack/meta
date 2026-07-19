@@ -27,7 +27,9 @@ observés, puis résout l'entrée complète sans conserver leurs hash de lookup.
 - [`EnvironmentImport.lean`](./EnvironmentImport.lean), langage positif des
   quantités, protocoles et conditions, résolution et projection sans clé ;
 - [`ImportedEnvironments.lean`](./ImportedEnvironments.lean), export généré,
-  domaines amine/acide et certificats constructifs 94/94.
+  domaines amine/acide et certificats constructifs 94/94 ;
+- [`ProducerContract.lean`](./ProducerContract.lean), projection intrinsèque,
+  sortie rationnelle bornée et chaîne causale finie du futur producteur.
 
 ## Validation
 
@@ -42,5 +44,7 @@ avec identifiants et graphes uniques. `validatedInputDomainImport` réduit à 94
 environnements valides, 70 amines et 66 acides uniques, tous reliés aux espèces
 importées. `knownInputOrganization_resolves` et
 `knownInputProjection_resolves` vérifient le chemin calculable jusqu'à une
-entrée intrinsèque. La prochaine étape est le contrat du producteur Core, pas
-une nouvelle extension opportuniste des données.
+entrée intrinsèque. `run_eq_executeRepair` vérifie que la prédiction ne peut
+être émise qu'au terme de la chaîne gap–interaction–réponse–réparation. Le
+producteur synthétique à 50 % ne teste que cette plomberie : aucune loi
+chimique ni aucun paramètre appris n'est encore défini.

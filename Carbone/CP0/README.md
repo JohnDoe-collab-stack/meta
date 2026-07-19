@@ -3,8 +3,9 @@
 ## Statut
 
 Les portes `CP0-DATA-M0`, `CP0-DATA-I0`, l'import moléculaire
-`CP0-ONTOLOGY-1` et l'organisation d'entrée `CP0-ONTOLOGY-2` sont terminées au
-19 juillet 2026.
+`CP0-ONTOLOGY-1`, l'organisation d'entrée `CP0-ONTOLOGY-2`, le contrat
+`CP0-PRODUCER-C0` et les portes synthétiques `T1`–`T2` sont terminés au 19
+juillet 2026.
 
 ```text
 verdict M0               = GO-INPUT-AUDIT
@@ -20,6 +21,10 @@ liens manifest I0         = 47 015 / 47 015
 entrées uniques résolubles = 46 211
 statut ontologie espèces  = QUALIFIED
 statut organisation entrée = QUALIFIED
+statut contrat producteur  = CONTRACT_QUALIFIED
+statut lecteur cible T1    = SYNTHETIC_READER_QUALIFIED
+statut gel cible T2        = SYNTHETIC_TARGET_READER_FROZEN
+rendements réels lus par T2 = 0
 ```
 
 Ce résultat qualifie un test dynamique et sa cible. Il ne mesure encore aucune
@@ -40,6 +45,8 @@ performance et ne démontre aucune prédiction.
   invariants constructifs et ses limites ;
 - [`ENVIRONMENT_IMPORT`](./ENVIRONMENT_IMPORT.md) consigne les quantités, les
   94 environnements et la résolution sans hash de l'entrée complète ;
+- [`PRODUCER_CONTRACT`](./PRODUCER_CONTRACT.md) fixe l'interface intrinsèque du
+  producteur, sa chaîne causale et le lecteur de cible gelé `T2` ;
 - [`Lean/InputOntology`](./Lean/InputOntology.lean) implémente le premier noyau
   positif et constructif de cette extension ;
 - [`Lean/CanonicalImport`](./Lean/CanonicalImport.lean) définit le vérificateur
@@ -49,6 +56,9 @@ performance et ne démontre aucune prédiction.
   qualification et la projection, et
   [`Lean/ImportedEnvironments`](./Lean/ImportedEnvironments.lean) porte les 94
   environnements certifiés ;
+- [`Lean/ProducerContract`](./Lean/ProducerContract.lean) impose la projection
+  sans clé, le rendement rationnel borné et la chaîne
+  gap–interaction–réponse–réparation ;
 - [`ord_metadata_audit.py`](./scripts/ord_metadata_audit.py) est l'inspecteur
   canonique de métadonnées ;
 - [`frozen_runs`](./frozen_runs/) contient le script exécuté, la réponse source
@@ -72,15 +82,11 @@ donc absents de cette phase.
 
 ## Prochaine action autorisée
 
-L'entrée complète est maintenant résoluble dans Lean sans hash de dataset ni
-cible. La suite est :
-
-1. fixer le contrat du producteur issu du Core à partir de `InputOrganization`
-   et geler la projection admissible ;
-2. implémenter et tester le lecteur de rendement sur données synthétiques
-   seulement (`T1`) ;
-3. geler ce lecteur et ses contrôles (`T2`) ;
-4. seulement ensuite ouvrir `construction`, ajuster les méthodes autorisées et
-   conserver `held_out_test` scellé.
+Le contrat positif, l'audit synthétique et son gel sont achevés. Avant `T3`, il
+faut figer les wheels et hashes RDKit/scikit-learn ainsi qu'un harnais commun
+aux méthodes du cadre et aux baselines. `T3` pourra alors ouvrir uniquement
+`construction`, jamais `held_out_test`, pour construire la première loi de
+rendement réellement testable.
 
 Les rendements de `held_out_test` et les structures produit restent interdits.
+Aucune prédiction empirique n'a encore été produite.

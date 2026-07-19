@@ -730,6 +730,9 @@ CP0-DATA-M0 = GO-INPUT-AUDIT
 CP0-DATA-I0 = GO-DYNAMIC, EXTENSION_REQUIRED
 CP0-ONTOLOGY-1 = QUALIFIED_INPUT_IMPORT_194_OF_194
 CP0-ONTOLOGY-2 = QUALIFIED_ENVIRONMENT_IMPORT_94_OF_94
+CP0-PRODUCER-C0 = CONTRACT_QUALIFIED
+CP0-TARGET-T1 = SYNTHETIC_READER_QUALIFIED
+CP0-TARGET-T2 = SYNTHETIC_TARGET_READER_FROZEN
 ```
 
 La cible gelée est le rendement en pourcentage du produit désiré. Le test
@@ -741,9 +744,12 @@ moléculaire de `CP0-ONTOLOGY-1` compile constructivement et importe les
 194 espèces sans collision : 222 fragments, 2 539 atomes et 2 587 liaisons.
 `CP0-ONTOLOGY-2` ajoute 94 environnements certifiés, vérifie les 47 015 lignes
 contre I0 et résout 46 211 entrées uniques en organisations sans hash de
-dataset. La prochaine action est de fixer le contrat du producteur Core et de
-réaliser `T1`–`T2` sur des cibles synthétiques. Aucun producteur ne doit être
-ajusté sur les cibles tenues à l'écart.
+dataset. `CP0-PRODUCER-C0` fixe la projection admissible, une sortie rationnelle
+bornée avec abstention et la chaîne causale finie du producteur. `T1`–`T2`
+qualifient et gèlent le lecteur sur six lignes synthétiques et 22 rejets, sans
+ouvrir une seule valeur réelle. La prochaine action est de geler l'environnement
+des baselines et le harnais commun avant d'ouvrir `construction` seulement à
+`T3`. Aucun producteur ne doit être ajusté sur les cibles tenues à l'écart.
 
 Rapports :
 
@@ -752,7 +758,8 @@ Rapports :
 - [`CP0-TARGET-0`](./CP0/TARGET_PROTOCOL.md) ;
 - [`CP0-ONTOLOGY-0`](./CP0/ONTOLOGY_GAP.md) ;
 - [`CP0-ONTOLOGY-1`](./CP0/CANONICAL_IMPORT.md) ;
-- [`CP0-ONTOLOGY-2`](./CP0/ENVIRONMENT_IMPORT.md).
+- [`CP0-ONTOLOGY-2`](./CP0/ENVIRONMENT_IMPORT.md) ;
+- [`CP0-PRODUCER-C0` et `CP0-TARGET-T2`](./CP0/PRODUCER_CONTRACT.md).
 
 ## 19. Sources normatives de départ
 
