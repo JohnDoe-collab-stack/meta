@@ -11,6 +11,12 @@ unité test = paire amine–acide entièrement absente de construction
 métrique   = MAE en points de pourcentage, agrégée par entrée unique
 ```
 
+L'entrée sans cible est maintenant implémentée par `CP0-ONTOLOGY-2` : 47 015
+lignes concordent avec le manifest I0 et leurs domaines appartiennent aux 194
+espèces et 94 environnements certifiés. Aucun rendement n'a été décodé. La
+prochaine étape de ce protocole est donc `T1`, pas l'ouverture de
+`construction`.
+
 La présence de 47 015 valeurs est établie par enveloppe protobuf. Leur contenu
 et leur distribution restent inconnus du pipeline réalisé.
 

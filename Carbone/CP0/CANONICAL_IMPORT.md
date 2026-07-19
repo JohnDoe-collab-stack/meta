@@ -102,29 +102,35 @@ conformément à leur absence dans l'audit I0.
 Suffixe commun :
 
 ```text
-20260719T080146Z_sha256-0efd910c53dddb4014752533035a70268cfe03e637afe5323c91ccb74e874344
+20260719T085207Z_sha256-df6b9ce0236f0ae755fdf17d125ecf4c56b53e6fd67d1da3007190fd69ff5f84
 ```
 
 ```text
-script Python  0efd910c53dddb4014752533035a70268cfe03e637afe5323c91ccb74e874344
-rapport JSONL  a06008eb42a3405046e93cad73a6f2baa9ab242deb0e50ae948430b4b5e0803c
-rapport texte  dc2891d29061ff341b31e97c3a626a5ada6775c668be3f7fc5a59253941ca7ed
-export Lean    afaeea1eb4537042d9183c50f8e6ee9222202bbd700348ebd0000cb47cfef9cd
-dépendances    1db1caec76b147bd3a63776adb9c69c489790622c0e0aa3257d7206c479c8fde
+script Python  df6b9ce0236f0ae755fdf17d125ecf4c56b53e6fd67d1da3007190fd69ff5f84
+rapport JSONL  2c41eb07050636d3e056ff6d6ed7705625a3e53f0f606bcc146a67885eaa5449
+rapport texte  9bc623615b48253dc040ee78484487dcc7ddd6701f7c79942ed2125318b1bd4c
+export Lean    116f6a2a28b9cae7b7d8e02b338937e93df9cc3e4f219baee1e77c29c63a8872
+dépendances    cea25e4d47005a3f5e8263bcdae37788450c4e49e62275b9ed074d7f938f0b59
 ```
 
 La copie stable `Lean/ImportedSpecies.lean` est octet pour octet identique à
 l'export Lean figé.
 
+Le run `20260719T080146Z_sha256-0efd910c...` est conservé mais supersédé. Son
+audit externe des 194 molécules était valide, cependant son rendu imbriqué des
+records et listes était syntaxiquement invalide dans Lean. Le run normatif
+ci-dessus produit les mêmes graphes au moyen de constructeurs explicites et
+compile réellement avec les preuves `rfl` et l'audit sans axiome.
+
 ## Limite et prochaine porte
 
-La couche moléculaire d'entrée est désormais totale sur ce corpus. Restent à
-construire, sans ouvrir le test tenu à l'écart :
-
-1. l'import canonique des conditions et quantités autorisées ;
-2. la représentation Core de l'organisation complète amine–acide–environnement ;
-3. un producteur de rendement déterminé uniquement sur la construction ;
-4. la comparaison aux baselines selon `TARGET_PROTOCOL`.
+La couche moléculaire d'entrée est désormais totale sur ce corpus. L'import
+canonique des conditions et quantités et la résolution de l'organisation
+amine–acide–environnement sont documentés dans
+[`ENVIRONMENT_IMPORT.md`](./ENVIRONMENT_IMPORT.md). Restent à construire, sans
+ouvrir le test tenu à l'écart, le contrat du producteur issu du Core, son
+lecteur de cible synthétique, puis les étapes d'ouverture prévues par
+`TARGET_PROTOCOL`.
 
 Cette étape démontre la calculabilité structurelle des 194 espèces dans le
 cadre. Elle ne démontre ni une transformation chimique, ni un rendement, ni la

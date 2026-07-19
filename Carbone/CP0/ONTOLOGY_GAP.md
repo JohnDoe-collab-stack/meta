@@ -4,8 +4,10 @@
 > [`InputOntology.lean`](./Lean/InputOntology.lean) définit le langage,
 > [`CanonicalImport.lean`](./Lean/CanonicalImport.lean) son vérificateur et
 > [`ImportedSpecies.lean`](./Lean/ImportedSpecies.lean) certifie 194/194
-> espèces, sans axiome ni collision. Les conditions et quantités ligne par
-> ligne restent à importer avant O7.
+> espèces, sans axiome ni collision. `CP0-ONTOLOGY-2` importe aussi les
+> quantités et 94 environnements, vérifie les 47 015 liens au manifest I0 et
+> résout une organisation d'entrée sans clé de dataset. O7, le producteur issu
+> du Core, reste ouvert.
 
 ## 1. Décision
 
@@ -137,12 +139,15 @@ O3 — écrire l'importeur Python vers une forme canonique sans cible — termin
 O4 — exporter un micro-corpus positif et négatif vers Lean — terminé ;
 O5 — calculer les invariants et auditer l'idempotence canonique — terminé ;
 O6 — couvrir les 194 identités d'entrée ou s'abstenir explicitement — 194/194 ;
-O7 — seulement ensuite définir le producteur de réponse du Core.
+O6b — importer quantités, rôles, protocole et conditions — 94/94, terminé ;
+O6c — résoudre l'organisation complète sans hash ni cible — terminé ;
+O7 — définir le producteur de réponse du Core — non commencé.
 ```
 
 Le GO ontologique exige une couverture de 194/194 identités et zéro collision
 canonique. Une couverture partielle ne peut être réparée par exclusion
 postérieure du test.
 
-Le rapport normatif et la distinction entre preuve Lean et audit externe RDKit
-sont consignés dans [`CANONICAL_IMPORT.md`](./CANONICAL_IMPORT.md).
+Les rapports normatifs et la distinction entre preuve Lean et audits externes
+sont consignés dans [`CANONICAL_IMPORT.md`](./CANONICAL_IMPORT.md) et
+[`ENVIRONMENT_IMPORT.md`](./ENVIRONMENT_IMPORT.md).

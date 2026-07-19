@@ -2,8 +2,9 @@
 
 ## Statut
 
-Les portes `CP0-DATA-M0`, `CP0-DATA-I0` et l'import moléculaire
-`CP0-ONTOLOGY-1` sont terminés au 19 juillet 2026.
+Les portes `CP0-DATA-M0`, `CP0-DATA-I0`, l'import moléculaire
+`CP0-ONTOLOGY-1` et l'organisation d'entrée `CP0-ONTOLOGY-2` sont terminées au
+19 juillet 2026.
 
 ```text
 verdict M0               = GO-INPUT-AUDIT
@@ -14,7 +15,11 @@ rendements décodés        = 0
 structures produit lues   = 0
 test tenu à l'écart       = 2 317 lignes, 30 paires
 import moléculaire        = 194 / 194, zéro collision
+import environnements     = 94 / 94, zéro collision de contenu
+liens manifest I0         = 47 015 / 47 015
+entrées uniques résolubles = 46 211
 statut ontologie espèces  = QUALIFIED
+statut organisation entrée = QUALIFIED
 ```
 
 Ce résultat qualifie un test dynamique et sa cible. Il ne mesure encore aucune
@@ -33,11 +38,17 @@ performance et ne démontre aucune prédiction.
 - [`ONTOLOGY_GAP`](./ONTOLOGY_GAP.md) fixe l'extension minimale imposée à CW1 ;
 - [`CANONICAL_IMPORT`](./CANONICAL_IMPORT.md) consigne l'import 194/194, ses
   invariants constructifs et ses limites ;
+- [`ENVIRONMENT_IMPORT`](./ENVIRONMENT_IMPORT.md) consigne les quantités, les
+  94 environnements et la résolution sans hash de l'entrée complète ;
 - [`Lean/InputOntology`](./Lean/InputOntology.lean) implémente le premier noyau
   positif et constructif de cette extension ;
 - [`Lean/CanonicalImport`](./Lean/CanonicalImport.lean) définit le vérificateur
   calculable et [`Lean/ImportedSpecies`](./Lean/ImportedSpecies.lean) porte les
   194 certificats ;
+- [`Lean/EnvironmentImport`](./Lean/EnvironmentImport.lean) définit la
+  qualification et la projection, et
+  [`Lean/ImportedEnvironments`](./Lean/ImportedEnvironments.lean) porte les 94
+  environnements certifiés ;
 - [`ord_metadata_audit.py`](./scripts/ord_metadata_audit.py) est l'inspecteur
   canonique de métadonnées ;
 - [`frozen_runs`](./frozen_runs/) contient le script exécuté, la réponse source
@@ -61,12 +72,15 @@ donc absents de cette phase.
 
 ## Prochaine action autorisée
 
-Poursuivre `CP0-ONTOLOGY-1` par l'import canonique des conditions et quantités,
-sans ouvrir les cibles. La couche moléculaire O1–O6 est qualifiée. La suite est :
+L'entrée complète est maintenant résoluble dans Lean sans hash de dataset ni
+cible. La suite est :
 
-1. conditions et quantités vers Lean ;
-2. état Core amine–acide–environnement ;
-3. producteur de rendement construit sans le test ;
-4. seulement ensuite, comparaison préenregistrée aux baselines.
+1. fixer le contrat du producteur issu du Core à partir de `InputOrganization`
+   et geler la projection admissible ;
+2. implémenter et tester le lecteur de rendement sur données synthétiques
+   seulement (`T1`) ;
+3. geler ce lecteur et ses contrôles (`T2`) ;
+4. seulement ensuite ouvrir `construction`, ajuster les méthodes autorisées et
+   conserver `held_out_test` scellé.
 
 Les rendements de `held_out_test` et les structures produit restent interdits.

@@ -1,7 +1,7 @@
 # Scripts CP0
 
 Règle d'immuabilité : chaque variante ayant produit un résultat est conservée.
-Ne modifier aucun de ces fichiers ; créer `v4`, `v5`, etc.
+Ne modifier aucun de ces fichiers ; créer une nouvelle version.
 
 ```text
 ord_metadata_audit.py  audit M0 exécuté sous copie figée ;
@@ -10,13 +10,25 @@ ord_input_audit_v2.py  smoke-test avec cache moléculaire ;
 ord_input_audit_v3.py  correction charge atomique/nette, premier run scientifique ;
 ord_input_audit_v4.py  check float32 et borne CW1 explicite, run normatif I0.
 ord_canonical_import_v1.py  smoke initial, sans marquage des centres potentiels ;
-ord_canonical_import_v2.py  centres assignés/non assignés, run normatif 194/194.
+ord_canonical_import_v2.py  centres assignés/non assignés, audit externe 194/194 ;
+ord_canonical_import_v3.py  essai de séparateurs explicites, rendu Lean invalide ;
+ord_canonical_import_v4.py  constructeurs Lean explicites, limites par défaut insuffisantes ;
+ord_canonical_import_v5.py  constructeurs et budgets Lean explicites, run normatif 194/194 ;
+ord_environment_import_v1.py  premier smoke-test des 94 environnements ;
+ord_environment_import_v2.py  traçage exact du hash de reaction_id ;
+ord_environment_import_v3.py  domaines 70 amines / 66 acides, rendu Lean imbriqué invalide ;
+ord_environment_import_v4.py  constructeurs explicites, parenthésage Option incomplet ;
+ord_environment_import_v5.py  rendu Lean compilable, run normatif 94/94.
 ```
 
 Le run normatif I0 est la copie `ord_input_audit_20260719T073503Z_...py`
 conservée dans [`frozen_runs`](../frozen_runs/). Son hash est
 `c8ebfeb5d1884789c846e4336ea03b1a4312a07304e47f0deb5f6ddce10a5a9f`.
 
-Le run normatif d'import est la copie
-`ord_canonical_import_20260719T080146Z_...py`. Son hash est
-`0efd910c53dddb4014752533035a70268cfe03e637afe5323c91ccb74e874344`.
+Le run normatif d'import moléculaire est la copie
+`ord_canonical_import_20260719T085207Z_...py`. Son hash est
+`df6b9ce0236f0ae755fdf17d125ecf4c56b53e6fd67d1da3007190fd69ff5f84`.
+
+Le run normatif d'import des environnements est la copie
+`ord_environment_import_20260719T091321Z_...py`. Son hash est
+`ba12c0482fd4a541d77cc4e90232a8ccf53e298feafaae30d547db53a1d65e37`.

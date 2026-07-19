@@ -2,6 +2,8 @@ import Carbone.CW1.Lean.ValenceCompletion
 import Carbone.CP0.Lean.InputOntology
 import Carbone.CP0.Lean.CanonicalImport
 import Carbone.CP0.Lean.ImportedSpecies
+import Carbone.CP0.Lean.EnvironmentImport
+import Carbone.CP0.Lean.ImportedEnvironments
 
 /- AXIOM_AUDIT_BEGIN -/
 #print axioms Meta.Carbone.CW0.carbonProjectionObstruction
@@ -43,4 +45,8 @@ import Carbone.CP0.Lean.ImportedSpecies
 #print axioms Meta.Carbone.CP0.singletonCarbonMolecule_hasCarbon
 #print axioms Meta.Carbone.CP0.CanonicalImport.fragmentValid
 #print axioms Meta.Carbone.CP0.CanonicalImport.validatedSpeciesImport
+#print axioms Meta.Carbone.CP0.EnvironmentImport.validatedInputDomainImport
+#print axioms Meta.Carbone.CP0.EnvironmentImport.resolveImportedInput?
+#print axioms Meta.Carbone.CP0.EnvironmentImport.knownInputOrganization_resolves
+#print axioms Meta.Carbone.CP0.EnvironmentImport.knownInputProjection_resolves
 /- AXIOM_AUDIT_END -/
