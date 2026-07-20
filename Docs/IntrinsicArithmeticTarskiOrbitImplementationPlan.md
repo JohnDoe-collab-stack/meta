@@ -50,7 +50,9 @@ G2 fermee : semantique Nat et substitution capture-avoiding ;
 G3 fermee : coupleur local, decodeurs, round-trips et quotation injective ;
 G4 fermee : substitution diagonale totale sur les codes ;
 G5 ouverte : langage PR positif et relation d'execution construits,
-             programme PR de substitution diagonale encore a construire ;
+             addition, doublement, coupleur, controle, parite, moitie et
+             deux composantes du decoupleur deja internalises,
+             programme PR de substitution encore a construire ;
 G6-G10 non fermees.
 ```
 
@@ -222,6 +224,9 @@ Meta/Tarski/BareArithmetic/Substitution.lean
 Meta/Tarski/BareArithmetic/Coding.lean
 Meta/Tarski/BareArithmetic/CodeSubstitution.lean
 Meta/Tarski/BareArithmetic/PrimitiveRecursive.lean
+Meta/Tarski/BareArithmetic/PrimitiveRecursiveArithmetic.lean
+Meta/Tarski/BareArithmetic/PrimitiveRecursiveControl.lean
+Meta/Tarski/BareArithmetic/PrimitiveRecursiveUnpair.lean
 Meta/Tarski/BareArithmetic/Representability.lean
 Meta/Tarski/BareArithmetic/Diagonal.lean
 Meta/Tarski/BareArithmetic/Patch.lean
@@ -550,10 +555,10 @@ inductive PRFunction : Nat -> Type
   | primitiveRecursion
 ```
 
-Il doit fournir :
+Il doit fournir une semantique positive et le programme principal :
 
 ```lean
-def PRFunction.evaluate
+inductive PRFunction.Evaluates
 def diagonalSubstitutionPR : PRFunction 1
 ```
 
@@ -561,8 +566,8 @@ et prouver :
 
 ```lean
 theorem diagonalSubstitutionPR_correct (code : Nat) :
-  diagonalSubstitutionPR.evaluate ![code] =
-    diagonalSubstitutionCode code
+  PRFunction.Evaluates diagonalSubstitutionPR ![code]
+    (diagonalSubstitutionCode code)
 ```
 
 Si le coupleur, le decodeur ou la recursion bornee demandent des fonctions
