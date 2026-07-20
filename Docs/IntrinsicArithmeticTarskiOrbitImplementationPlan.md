@@ -52,6 +52,7 @@ G4 fermee : substitution diagonale totale sur les codes ;
 G5 ouverte : langage PR positif et relation d'execution construits,
              addition, doublement, coupleur, controle, parite, moitie et
              deux composantes du decoupleur deja internalises,
+             arithmetique de comparaison et traces couplees internalisees,
              programme PR de substitution encore a construire ;
 G6-G10 non fermees.
 ```
@@ -227,6 +228,8 @@ Meta/Tarski/BareArithmetic/PrimitiveRecursive.lean
 Meta/Tarski/BareArithmetic/PrimitiveRecursiveArithmetic.lean
 Meta/Tarski/BareArithmetic/PrimitiveRecursiveControl.lean
 Meta/Tarski/BareArithmetic/PrimitiveRecursiveUnpair.lean
+Meta/Tarski/BareArithmetic/PrimitiveRecursiveComparison.lean
+Meta/Tarski/BareArithmetic/PrimitiveRecursiveTrace.lean
 Meta/Tarski/BareArithmetic/Representability.lean
 Meta/Tarski/BareArithmetic/Diagonal.lean
 Meta/Tarski/BareArithmetic/Patch.lean
@@ -577,18 +580,21 @@ preuve acceptable.
 
 ### 10.2 Choix de representation des sequences
 
-Avant l'implementation, fixer dans le code une seule methode :
+La methode retenue est la seconde :
 
 ```text
-option recommandee : fonction beta de Goedel avec preuve constructive
-d'encodage de toute sequence finie ;
+traces de calcul bornees, stockees du resultat le plus recent au plus ancien
+par des `natPair result history` imbriques ;
 
-option alternative : traces de calcul bornees codees par le coupleur local,
-avec une formule arithmetique verifiant chaque transition.
+acces a un sous-code par iteration PR de `unpairRight`, puis lecture par
+`unpairLeft` ;
+
+compilation ulterieure de la trace et de chaque transition en formule
+arithmetique a G6.
 ```
 
-Le choix doit etre documente dans `PrimitiveRecursive.lean`. Il est interdit de
-melanger deux encodages en laissant leur equivalence comme obligation future.
+Ce choix est realise dans `PrimitiveRecursiveTrace.lean`. La fonction beta
+n'est pas utilisee et aucune equivalence entre deux encodages n'est requise.
 
 ### Porte G5
 

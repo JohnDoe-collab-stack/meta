@@ -52,7 +52,7 @@ import Meta.Tarski.ReferentialOrder
 import Meta.Tarski.DynamicReturn
 import Meta.Tarski.DynamicRelaxedUsage
 import Meta.Tarski.GenericPatchOrbit
-import Meta.Tarski.BareArithmetic.PrimitiveRecursiveUnpair
+import Meta.Tarski.BareArithmetic.PrimitiveRecursiveTrace
 import Meta.Tarski.ConstructivePatchModel
 import Meta.Tarski.ConstructivePatchOrbit
 import Meta.Beth.ImplicitExplicit
