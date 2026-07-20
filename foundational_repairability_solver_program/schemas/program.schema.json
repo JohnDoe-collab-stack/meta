@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:certified-repairability:program-schema:1",
+  "title": "Constructive repairability implementation program",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "program_version",
+    "status",
+    "scope",
+    "constructive_constraints",
+    "decisions",
+    "work_packages",
+    "gates"
+  ],
+  "properties": {
+    "schema": {
+      "const": "constructive-repairability-program/1"
+    },
+    "program_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "status": {
+      "enum": ["specification", "implementation", "verification", "publication_ready"]
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["core", "extensions", "non_claims"],
+      "properties": {
+        "core": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "extensions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "non_claims": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "constructive_constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "axioms_allowed",
+        "classical_allowed",
+        "propext_allowed",
+        "quot_sound_allowed",
+        "external_termination_bridge_allowed",
+        "axiom_audit_required"
+      ],
+      "properties": {
+        "axioms_allowed": {"const": false},
+        "classical_allowed": {"const": false},
+        "propext_allowed": {"const": false},
+        "quot_sound_allowed": {"const": false},
+        "external_termination_bridge_allowed": {"const": false},
+        "axiom_audit_required": {"const": true}
+      }
+    },
+    "decisions": {
+      "type": "object",
+      "additionalProperties": {"type": ["string", "number", "boolean", "array", "object"]},
+      "required": [
+        "primary_characterization",
+        "solver_outcomes",
+        "state_representation",
+        "primary_cost",
+        "learned_trust_boundary"
+      ]
+    },
+    "work_packages": {
+      "type": "array",
+      "minItems": 16,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "status", "depends_on", "exit_gate"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^WP[0-9]{2}$"},
+          "name": {"type": "string", "minLength": 1},
+          "status": {"enum": ["not_started", "in_progress", "blocked", "passed", "failed"]},
+          "depends_on": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {"type": "string", "pattern": "^WP[0-9]{2}$"}
+          },
+          "exit_gate": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "gates": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "status", "evidence"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "status": {"enum": ["not_started", "in_progress", "blocked", "passed", "failed"]},
+          "evidence": {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1}
+          }
+        }
+      }
+    }
+  }
+}
