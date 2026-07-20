@@ -53,6 +53,7 @@ G5 ouverte : langage PR positif et relation d'execution construits,
              addition, doublement, coupleur, controle, parite, moitie et
              deux composantes du decoupleur deja internalises,
              arithmetique de comparaison et traces couplees internalisees,
+             constructeurs de codes et code des numeraux internalises,
              programme PR de substitution encore a construire ;
 G6-G10 non fermees.
 ```
@@ -230,6 +231,7 @@ Meta/Tarski/BareArithmetic/PrimitiveRecursiveControl.lean
 Meta/Tarski/BareArithmetic/PrimitiveRecursiveUnpair.lean
 Meta/Tarski/BareArithmetic/PrimitiveRecursiveComparison.lean
 Meta/Tarski/BareArithmetic/PrimitiveRecursiveTrace.lean
+Meta/Tarski/BareArithmetic/PrimitiveRecursiveSyntaxCoding.lean
 Meta/Tarski/BareArithmetic/Representability.lean
 Meta/Tarski/BareArithmetic/Diagonal.lean
 Meta/Tarski/BareArithmetic/Patch.lean
