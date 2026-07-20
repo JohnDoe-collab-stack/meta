@@ -23,6 +23,9 @@ conservent donc trois états distincts : `PASS`, `FAIL` et `NOT_RUN`.
 
 ## Démarrage
 
+Voir d’abord `INSTALLATION.md` pour la procédure complète CPU/CUDA, les
+vérifications et le dépannage.
+
 ~~~bash
 cd v23_full_campaign_implementation
 python3 -m v23.cli preflight
@@ -30,6 +33,10 @@ python3 -m v23.cli smoke --out-dir /tmp/v23_smoke
 python3 -m unittest discover -s tests -v
 lake build
 ~~~
+
+Pour les smoke-tests CUDA isolés sur une machine de moins de 20 Gio, suivre
+`CUDA_SMOKE.md`. Ce profil ne réduit pas les exigences de la campagne
+scientifique.
 
 Pour une exécution scientifique, ne lancez jamais directement le script de
 travail. Le wrapper crée une copie figée portant le timestamp UTC et le SHA-256,

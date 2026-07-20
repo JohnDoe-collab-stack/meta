@@ -40,6 +40,14 @@ Vérifications locales obtenues :
 - agent certifiable : 697/697 décisions Int8/Int32, zéro erreur, marges
   strictes et replay indépendant identique ;
 - wrapper figé : exécution achevée, hashes et marqueur final présents.
+- environnement smoke isolé : `torch 2.5.1+cu121`, CUDA 12.1 et cuDNN 9.1 ;
+- RTX 4070 détectée par PyTorch, calcul tensoriel CUDA et six couples de
+  benchmark domaine/taille exécutés ;
+- entraînement CUDA supervisé exécuté, branche causale exécutée avec tirage
+  discret déterministe sur CPU et gradients/logits sur CUDA ;
+- replay causal de même seed : métriques et `state_dict` bit-à-bit identiques ;
+- smoke causal batch 64 : perte non nulle, 57 tenseurs et 124 369 éléments de
+  gradient non nuls.
 
 Ces smokes démontrent l’exécutabilité du logiciel. Ils ne sont pas les résultats
 confirmatoires de la campagne.
@@ -63,21 +71,26 @@ percée avant ces exécutions.
 
 ## Préflight scientifique de cette machine
 
-Échec volontaire et correct :
+Le profil smoke CUDA fonctionne. Le préflight scientifique reste en échec
+volontaire et correct :
 
-- PyTorch installé en build CPU (`2.10.0+cpu`) ;
-- CUDA indisponible dans l’environnement Python ;
+- l’installation Python utilisateur reste en build CPU (`2.10.0+cpu`), tandis
+  que `.venv-smoke-cuda` fournit `torch 2.5.1+cu121` avec CUDA disponible ;
+- la RTX 4070 expose 12 Gio, sous le minimum confirmatoire de 20 Gio ;
 - ONNX et ONNX Runtime absents ;
-- environ 47 Go libres, contre environ 18,7 To exigés par la règle de marge
+- environ 40 Go libres, contre environ 18,7 To exigés par la règle de marge
   1,5× appliquée à l’estimation complète actuelle ;
 - aucun digest d’image OCI fourni par `V23_OCI_IMAGE_DIGEST` ;
 - `CUBLAS_WORKSPACE_CONFIG` non fixé pour le déterminisme CUDA.
 - benchmark matériel et affectation exhaustive des cellules non encore gelés
   dans `configs/smoke_benchmark.json` et `configs/resource_assignments.json`.
 
-Le code refuse donc d’y démarrer une campagne finale. Les tests CPU et les
-preuves Lean restent valides ; le résultat scientifique complet nécessite une
-machine/environnement satisfaisant le préflight.
+Le code refuse donc d’y démarrer une campagne finale. Le profil v2 de tirage
+déterministe est explicitement limité aux runs `smoke` : son adoption dans une
+campagne confirmatoire demanderait une nouvelle variante figée et un audit du
+protocole. Les tests CPU/CUDA et les preuves Lean restent valides ; le résultat
+scientifique complet nécessite une machine et un environnement satisfaisant le
+préflight.
 
 ## Décision encore humaine
 
