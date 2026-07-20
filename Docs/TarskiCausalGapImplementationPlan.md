@@ -46,13 +46,15 @@ Meta/Tarski/ConstructivePatchModel.lean
 
 ## Suite normative
 
-Le plan actif est :
+Les plans actifs sont desormais :
 
 ```text
-Docs/ConstructiveTarskiOrbitAndFoundationPlan.md
+Docs/IntrinsicArithmeticTarskiOrbitImplementationPlan.md
+Docs/TarskiVisibleCausalNonRecurrenceImplementationPlan.md
 ```
 
-Il exige d'abord la theorie exacte de l'orbite du modele ferme, puis une
-instance arithmetique utilisant les vrais types syntaxiques et la vraie
-semantique de Foundation. Aucun patch semantique externe ne constitue une
-solution de remplacement.
+Le premier remplace l'ancrage historique dans Foundation par un micro-noyau
+arithmetique autonome. Le second internalise une memoire positive des vrais
+`AlgorithmStep` syntaxiques et vise la recurrence visible avec non-retour
+causal. Aucun des deux ne recree le patch semantique arbitraire retire par la
+presente notice.

@@ -52,6 +52,7 @@ import Meta.Tarski.ReferentialOrder
 import Meta.Tarski.DynamicReturn
 import Meta.Tarski.DynamicRelaxedUsage
 import Meta.Tarski.GenericPatchOrbit
+import Meta.Tarski.VisibleCausalRecurrence
 import Meta.Tarski.BareArithmetic.PrimitiveRecursiveSyntaxCoding
 import Meta.Tarski.ConstructivePatchModel
 import Meta.Tarski.ConstructivePatchOrbit
@@ -86,6 +87,7 @@ import Meta.Synthesis.TarskiBethBellGap
 #print axioms Meta.ActiveSemanticClosure.Validation.aiFoundationalValidation
 #print axioms Meta.TarskiDynamicRelaxedUsage.tarskiDynamicRelaxedUsageSynthesis
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.genericPatchOrbitTheorem
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.genericVisibleCausalNonRecurrenceTheorem
 #print axioms Meta.ConstructivePatchModel.constructiveTarskiClosedSystem
 #print axioms Meta.ConstructivePatchModel.constructiveTarskiOrbitTheorem
 #print axioms Meta.ClosedStabilityTheorem.IdentityOfUseCell
