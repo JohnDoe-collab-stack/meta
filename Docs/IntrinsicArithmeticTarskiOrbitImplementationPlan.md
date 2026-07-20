@@ -44,31 +44,47 @@ arithmetique. Il ne doit pas etre suppose ou incorpore dans la grammaire.
 ### 0.1 Etat d'execution au 20 juillet 2026
 
 ```text
-G0 fermee : prototypes fixed/closed retires de Meta.lean ;
-G1 fermee : syntaxe nue et scoping positif ;
-G2 fermee : semantique Nat et substitution capture-avoiding ;
-G3 fermee : coupleur local, decodeurs, round-trips et quotation injective ;
-G4 fermee : substitution diagonale totale sur les codes ;
-G5 ouverte : langage PR positif et relation d'execution construits,
-             addition, doublement, coupleur, controle, parite, moitie et
-             deux composantes du decoupleur deja internalises,
-             arithmetique de comparaison et traces couplees internalisees,
-             constructeurs de codes et code des numeraux internalises,
-             programme PR de substitution encore a construire ;
-G6-G10 non fermees.
+G0 fermee  : prototypes fixed/closed absents de Meta.lean ;
+G1 fermee  : syntaxe nue et scoping positif ;
+G2 fermee  : semantique Nat et substitution capture-avoiding ;
+G3 fermee  : coupleur local, decodeurs, round-trips et quotation injective ;
+G4 fermee  : substitution diagonale totale sur les codes ;
+G5 fermee  : machine a piles avec profondeur de De Bruijn, entierement
+             compilee dans le langage PR positif ;
+G6 fermee  : compilateur PR vers formules arithmetiques et specification
+             biconditionnelle de chaque graphe ;
+G7 fermee  : diagonaliseur construit par auto-substitution representee ;
+G8 fermee  : patch syntaxique, accord local et preservation ;
+G9 fermee  : contexte patchable ferme et deux packages d'orbite generiques ;
+G10 fermee : certificats syntaxiques, semantiques et dynamiques non triviaux.
 ```
+
+La valeur terminale est :
+
+```lean
+Meta.BareArithmeticTarski.bareArithmeticTarskiClosedSystem
+```
+
+Elle est importee par `Meta.lean`. Le build global passe et chacun de ses
+constituants principaux est annonce par Lean comme ne dependant d'aucun axiome.
 
 Un premier essai avec l'appariement de Mathlib a ete rejete par l'audit parce
 qu'il faisait remonter `propext`, `Classical.choice` et `Quot.sound`. Le module
 `Coding.lean` utilise desormais un coupleur et un decoupleur locaux, dont tous
 les audits sont vides.
 
-La semantique du langage PR est actuellement une relation inductive positive
-`PRFunction.Evaluates`. Un evaluateur mutuellement recursif teste pendant
-l'implementation a ete rejete parce que son equationneur faisait remonter
-`propext`. Fermer G5 demande donc de construire le programme de substitution,
-puis de prouver existence, fonctionnalite et correction de son execution sans
-reintroduire cet evaluateur impropre.
+La semantique positive du langage PR est la relation inductive
+`PRFunction.Evaluates`. Un evaluateur structural total a finalement ete defini
+et sa correction ainsi que l'unicite de l'evaluation ont ete prouvees sans
+extensionnalite propositionnelle. Il sert a verifier les programmes ; la
+formule arithmetique represente toujours la relation positive d'execution.
+
+Une premiere table de traces qui ne transportait pas la profondeur sous les
+quantificateurs a ete explicitement rejetee pour la diagonalisation. Elle est
+conservee sous le nom
+`quantifierBlindDiagonalSubstitutionPrototype`, uniquement comme
+infrastructure de comparaison. Le diagonaliseur final utilise la machine a
+piles capture-avoiding et son theoreme de commutation exact avec la syntaxe.
 
 ## 1. Etat actuel et decision de conservation
 
@@ -232,6 +248,11 @@ Meta/Tarski/BareArithmetic/PrimitiveRecursiveUnpair.lean
 Meta/Tarski/BareArithmetic/PrimitiveRecursiveComparison.lean
 Meta/Tarski/BareArithmetic/PrimitiveRecursiveTrace.lean
 Meta/Tarski/BareArithmetic/PrimitiveRecursiveSyntaxCoding.lean
+Meta/Tarski/BareArithmetic/PrimitiveRecursiveEvaluation.lean
+Meta/Tarski/BareArithmetic/PrimitiveRecursiveCodeSubstitution.lean
+Meta/Tarski/BareArithmetic/SubstitutionMachine.lean
+Meta/Tarski/BareArithmetic/PrimitiveRecursiveSubstitutionMachine.lean
+Meta/Tarski/BareArithmetic/ArithmeticFormulaTools.lean
 Meta/Tarski/BareArithmetic/Representability.lean
 Meta/Tarski/BareArithmetic/Diagonal.lean
 Meta/Tarski/BareArithmetic/Patch.lean
@@ -256,13 +277,17 @@ Syntax
     CodeSubstitution
           |
           v
-  PrimitiveRecursive
+  PrimitiveRecursive --> ArithmeticFormulaTools --> Representability
           |
           v
-   Representability
+  PR arithmetic, controle, decouplage, comparaison et codage syntaxique
           |
           v
-       Diagonal
+  evaluation PR --> machine de substitution --> programme PR de la machine
+          |                                      |
+          +-------------------+------------------+
+                              v
+                           Diagonal
           |
           v
         Patch
@@ -582,27 +607,30 @@ preuve acceptable.
 
 ### 10.2 Choix de representation des sequences
 
-La methode retenue est la seconde :
+La methode finale combine deux representations positives :
 
 ```text
-traces de calcul bornees, stockees du resultat le plus recent au plus ancien
-par des `natPair result history` imbriques ;
+une pile de taches codee par `natPair`, dont chaque tache de parcours transporte
+explicitement la profondeur de De Bruijn ;
 
-acces a un sous-code par iteration PR de `unpairRight`, puis lecture par
-`unpairLeft` ;
+une iteration primitive recursive de l'etat de machine, avec un cout structurel
+prouve suffisant sur tout code de formule authentique ;
 
-compilation ulterieure de la trace et de chaque transition en formule
-arithmetique a G6.
+des suites beta existentialement quantifiees pour representer en arithmetique
+la branche de recursion primitive du compilateur generique.
 ```
 
-Ce choix est realise dans `PrimitiveRecursiveTrace.lean`. La fonction beta
-n'est pas utilisee et aucune equivalence entre deux encodages n'est requise.
+La machine est definie dans `SubstitutionMachine.lean`, puis reconstruite terme
+par terme dans le langage PR par
+`PrimitiveRecursiveSubstitutionMachine.lean`. Le lemme beta utilise par la
+representabilite vient de Mathlib et son propre audit d'axiomes est vide.
 
 ### Porte G5
 
 ```text
-diagonalSubstitutionPR est une donnee positive fermee ;
-son evaluation est egale a diagonalSubstitutionCode pour tout Nat ;
+captureAvoidingDiagonalSubstitution est une donnee positive fermee ;
+sur tout code de formule, son evaluation est exactement le code de la
+substitution capture-avoiding ;
 toutes les fonctions auxiliaires sont internes au langage PR.
 ```
 
@@ -621,19 +649,19 @@ theorem PRFunction.graphFormula_spec
     (inputs : Fin arity -> Nat)
     (output : Nat) :
     HoldsGraph (f.graphFormula) inputs output <->
-      output = f.evaluate inputs
+      PRFunction.Evaluates f inputs output
 ```
 
 La direction existence et la direction fonctionnalite sont toutes deux
 obligatoires. Le diagonaliseur utilisera au minimum :
 
 ```lean
-def diagonalSubstitutionGraph : RawFormula :=
-  diagonalSubstitutionPR.graphFormula
+def diagonalSubstitutionGraph : ArithmeticGraph 1 :=
+  PRFunction.captureAvoidingDiagonalSubstitution.graphFormula
 
-theorem diagonalSubstitutionGraph_spec (input output : Nat) :
-  HoldsBinary diagonalSubstitutionGraph input output <->
-    output = diagonalSubstitutionCode input
+theorem diagonalSubstitutionGraph_code (formula : RawFormula) (output : Nat) :
+  diagonalSubstitutionGraph.Holds [formula.code] output <->
+    output = (formula.instantiateNumeral formula.code).code
 ```
 
 La formule de graphe ne doit utiliser que les constructeurs de `RawFormula` et
@@ -903,8 +931,8 @@ toutes les sorties indiquent "does not depend on any axioms".
 | Substitution syntaxique | `Substitution` | `instantiateTerm`, `instantiateNumeral` | G2 |
 | Codage de Goedel calculable | `Coding` | `code`, `decodeFormula`, `quote` | G3 |
 | Substitution sur les codes | `CodeSubstitution` | `substituteCode` | G4 |
-| Diagonalisation primitive recursive | `PrimitiveRecursive` | `diagonalSubstitutionPR` | G5 |
-| Representabilite arithmetique | `Representability` | `diagonalSubstitutionGraph_spec` | G6 |
+| Diagonalisation primitive recursive | `PrimitiveRecursiveSubstitutionMachine` | `captureAvoidingDiagonalSubstitution` | G5 |
+| Representabilite arithmetique | `Representability` + `Diagonal` | `graphFormula_spec`, `diagonalSubstitutionGraph_code` | G6 |
 | Lemme diagonal construit | `Diagonal` | `diagonal`, `diagonal_spec` | G7 |
 | Patch syntaxique | `Patch` | `patch`, `patch_agrees_at`, `patch_preserves_off_index` | G8 |
 | Contexte patchable ferme | `ClosedOrbit` | `bareArithmeticPatchableContext` | G9 |

@@ -53,7 +53,7 @@ import Meta.Tarski.DynamicReturn
 import Meta.Tarski.DynamicRelaxedUsage
 import Meta.Tarski.GenericPatchOrbit
 import Meta.Tarski.VisibleCausalRecurrence
-import Meta.Tarski.BareArithmetic.PrimitiveRecursiveSyntaxCoding
+import Meta.Tarski.BareArithmetic.ClosedOrbit
 import Meta.Tarski.ConstructivePatchModel
 import Meta.Tarski.ConstructivePatchOrbit
 import Meta.Beth.ImplicitExplicit
@@ -88,6 +88,12 @@ import Meta.Synthesis.TarskiBethBellGap
 #print axioms Meta.TarskiDynamicRelaxedUsage.tarskiDynamicRelaxedUsageSynthesis
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.genericPatchOrbitTheorem
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.genericVisibleCausalNonRecurrenceTheorem
+#print axioms Meta.BareArithmeticTarski.bareArithmeticTarskiContext
+#print axioms Meta.BareArithmeticTarski.bareArithmeticPatchableContext
+#print axioms Meta.BareArithmeticTarski.bareArithmeticGenericPatchOrbitTheorem
+#print axioms Meta.BareArithmeticTarski.bareArithmeticVisibleCausalNonRecurrenceTheorem
+#print axioms Meta.BareArithmeticTarski.bareArithmeticNontriviality
+#print axioms Meta.BareArithmeticTarski.bareArithmeticTarskiClosedSystem
 #print axioms Meta.ConstructivePatchModel.constructiveTarskiClosedSystem
 #print axioms Meta.ConstructivePatchModel.constructiveTarskiOrbitTheorem
 #print axioms Meta.ClosedStabilityTheorem.IdentityOfUseCell

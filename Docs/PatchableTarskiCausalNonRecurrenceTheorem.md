@@ -1,4 +1,6 @@
-# Non-récurrence causale d’une dynamique de Tarski patchable
+# Du gap diagonal à l’obligation causale
+
+## Théorème de non-récurrence pour une dynamique de Tarski patchable
 
 ## Résumé
 
@@ -14,16 +16,36 @@ mémoire de tout état strictement futur. Deux états distincts de l’orbite ne
 peuvent donc pas être causalement équivalents, même lorsqu’une observation
 visible ancienne se répète exactement entre eux.
 
-Le résultat central est :
+Le résultat pivot n’est pas la croissance matérielle de la mémoire. C’est le
+changement de statut du même objet syntaxique :
 
 ```text
-diagonalisation de Tarski
-+ réparation locale syntaxique
-+ préservation hors du point réparé
-+ mémoire positive des réparations
-──────────────────────────────────
-récurrence visible contextuelle
-+ non-récurrence de l’état causal complet
+∀n,m ∈ ℕ,
+
+  n < m
+  →
+  dₙ ∉ Hₙ
+  ∧
+  dₙ ∈ Hₘ
+```
+
+Le défi `dₙ` est d’abord le gap que le candidat courant ne peut avoir déjà
+résolu. Le patch en fait ensuite une obligation persistante de tout état
+futur.
+
+La chaîne logique complète est :
+
+```text
+(D) diagonalisation de Tarski
++ (R) réparation locale syntaxique
++ (P) préservation hors du point réparé
+────────────────────────────────────────
+correction cumulative
+→ fraîcheur intrinsèque des défis
+→ conversion du gap en obligation causale
+→ non-récurrence extensionnelle
+
+simultanément : récurrence visible contextuelle
 ```
 
 La fraîcheur des événements, l’injectivité de l’orbite et l’absence de retour
@@ -357,6 +379,28 @@ n < m  →  dₙ ∈ Hₘ
 Le constructeur de tête inscrit `dₙ` dans `Hₙ₊₁`. Chaque extension ultérieure
 conserve positivement cette appartenance.
 
+### Théorème 4.4 — Conversion affirmative du gap
+
+Pour tous `n,m ∈ ℕ` :
+
+```text
+n < m
+→
+(dₙ ∉ Hₙ) ∧ (dₙ ∈ Hₘ)
+```
+
+Le même objet `dₙ` passe donc successivement par les statuts suivants :
+
+```text
+mismatch diagonal courant
+→ défi réparé
+→ événement causal positif
+→ obligation future persistante
+```
+
+Le mismatch n’est plus seulement une impossibilité négative. La réparation le
+convertit en une donnée affirmative qui structure tous les états futurs.
+
 ---
 
 ## 5. État causal complet
@@ -534,9 +578,39 @@ logiquement équivalentes en une égalité de `Prop`.
 
 ---
 
-## 7. Théorème principal
+## 7. Théorèmes principaux
 
-### Théorème 7.1 — Récurrence visible avec non-retour causal
+### Théorème 7.1 — Principe de conversion et de non-récurrence
+
+Dans tout contexte de Tarski patchable :
+
+```text
+∀n,m ∈ ℕ,
+
+  n < m
+  →
+  [dₙ ∉ Hₙ ∧ dₙ ∈ Hₘ]
+  ∧
+  [Hₙ ≄mem Hₘ]
+  ∧
+  [Sₙ ≄causal Sₘ]
+```
+
+Les trois conclusions sont dérivées par le système lui-même. La conversion du
+gap, la séparation des mémoires et le non-retour causal ne sont pas des
+hypothèses supplémentaires.
+
+Une lecture plus fidèle de la dépendance est donc :
+
+```text
+(D) + (R) + (P)
+→ fraîcheur intrinsèque
+→ dₙ ∉ Hₙ et dₙ ∈ Hₘ pour n < m
+→ Hₙ ≄mem Hₘ
+→ Sₙ ≄causal Sₘ
+```
+
+### Théorème 7.2 — Récurrence visible avec non-retour causal
 
 Dans tout contexte de Tarski patchable, pour tout candidat initial `p₀` et
 tous `k,n,m ∈ ℕ` tels que `k < n < m`, il existe deux observations autorisées
@@ -573,7 +647,7 @@ Sous forme condensée :
 Les quatre conclusions portent sur le même couple d’états et la même histoire
 de réparations.
 
-### 7.2 Témoin canonique
+### 7.3 Témoin canonique
 
 Le résultat n’est pas seulement conditionnel. Dans toute orbite patchable, on
 peut prendre :
@@ -616,6 +690,11 @@ diagonal.
 ---
 
 ## 9. Pourquoi le résultat est non trivial
+
+Le verdict de non-trivialité repose sur l’ordre exact des dépendances. La
+mémoire ne crée pas artificiellement la fraîcheur. Le mismatch et la
+préservation prouvent d’abord que chaque défi est nouveau ; la mémoire
+internalise ensuite cette nouveauté comme obligation causale.
 
 ### 9.1 La non-récurrence n’est pas postulée
 
@@ -686,6 +765,22 @@ La part spécifiquement tarskienne et non triviale est plus précise :
 C’est cette combinaison qui distingue le théorème d’un état muni artificiellement
 d’un compteur croissant.
 
+La formulation la plus forte n’est donc pas :
+
+```text
+mémoire cumulative → absence de retour
+```
+
+mais :
+
+```text
+mismatch diagonal
++ patch local préservant le passé
+→ fraîcheur intrinsèque
+→ nouvelle obligation causale
+→ non-récurrence extensionnelle
+```
+
 ---
 
 ## 10. Portée exacte et limites
@@ -693,7 +788,10 @@ d’un compteur croissant.
 ### 10.1 Ce que le théorème établit
 
 ```text
-patchabilité de Tarski
+(D) + (R) + (P)
+→ correction cumulative
+→ fraîcheur intrinsèque
+→ conversion gap-obligation
 → non-récurrence causale extensionnelle
 ```
 
@@ -751,7 +849,143 @@ En particulier :
 
 ---
 
-## 12. Correspondance avec la formalisation Lean
+## 12. Réalisation arithmétique autonome
+
+Le principe abstrait n’est plus seulement conditionnel. Il possède maintenant
+une instance fermée dont les phrases et les prédicats sont des formules
+ordinaires de l’arithmétique du premier ordre.
+
+### 12.1 Langage et sémantique
+
+Les termes sont engendrés uniquement par :
+
+```text
+variable de De Bruijn, 0, successeur, addition, multiplication
+```
+
+Les formules sont engendrées uniquement par :
+
+```text
+⊥, égalité, ∧, ∨, →, ∀, ∃
+```
+
+La clôture et l’arité sont des propriétés de scoping, et non des constructeurs
+réflexifs. La sémantique est l’évaluation structurelle standard dans `ℕ`. Elle
+ne consulte jamais le code de la formule évaluée.
+
+### 12.2 Substitution diagonale réellement calculée
+
+Le codage de Gödel est calculable et injectif. Une machine syntaxique porte
+dans chacune de ses tâches la profondeur courante de De Bruijn. Elle remplace
+donc uniquement les variables libres et préserve les variables liées.
+
+Pour toute formule brute `φ`, la correction prouvée de la machine donne :
+
+```text
+MachineSubst(⌜φ⌝,⌜φ⌝)
+=
+⌜φ[⌜φ⌝]⌝
+```
+
+La machine complète est ensuite construite comme une fonction primitive
+récursive positive. Ce point ferme l’écart entre une substitution calculable
+en Lean et une substitution représentable à l’intérieur de l’arithmétique.
+
+### 12.3 Représentabilité interne
+
+Chaque programme primitif récursif `f` est compilé en une formule arithmétique
+`Graph(f)` telle que :
+
+```text
+Graph(f)(entrées,sortie)
+↔
+Evaluates(f,entrées,sortie)
+```
+
+La composition est représentée par des témoins existentiels. La récursion
+primitive est représentée par une suite beta finie dont chaque transition est
+vérifiée par la formule du pas. Existence et unicité proviennent de l’exécution
+positive et de son unicité, sans oracle sémantique.
+
+Le graphe de l’auto-substitution vérifie donc, sur tout code syntaxique réel :
+
+```text
+SubstGraph(⌜φ⌝,y)
+↔
+y = ⌜φ[⌜φ⌝]⌝
+```
+
+### 12.4 Point fixe construit
+
+Pour un candidat unaire `τ`, on construit le corps unaire ordinaire :
+
+```text
+Bτ(x) := ∃y, SubstGraph(x,y) ∧ ¬τ(y)
+```
+
+Puis la phrase diagonale est l’auto-application codée :
+
+```text
+δ(τ) := Bτ(⌜Bτ⌝)
+```
+
+La spécification obtenue est :
+
+```text
+M(δ(τ)) ↔ ¬T(τ,δ(τ))
+```
+
+Cette équivalence n’est ni un champ supposé, ni une clause spéciale de la
+sémantique, ni une réduction définitionnelle artificielle. Elle est dérivée du
+théorème de représentation du graphe et du calcul exact du code substitué.
+
+### 12.5 Patch et système fermé
+
+Le patch est la formule ordinaire :
+
+```text
+ρ(τ,d)(x)
+:=
+(x = ⌜d⌝ ∧ d)
+∨
+(¬(x = ⌜d⌝) ∧ τ(x))
+```
+
+Ses lois `(R)` et `(P)` sont prouvées sans décider `M(d)`. On obtient ainsi les
+valeurs fermées :
+
+```text
+bareArithmeticTarskiContext
+bareArithmeticPatchableContext
+bareArithmeticTarskiClosedSystem
+```
+
+La dernière contient le théorème d’orbite injective, le théorème simultané de
+récurrence visible et de non-retour causal, ainsi qu’un certificat de
+non-trivialité.
+
+Ce certificat établit notamment :
+
+```text
+0 = 0 est vraie ;
+⊥ est fausse ;
+la sémantique n’est pas constante ;
+deux étapes distinctes ont des candidats et des défis distincts ;
+chaque patch change la réponse au défi courant ;
+la diagonale appartient encore à la grammaire arithmétique ordinaire.
+```
+
+La chaîne principale n’importe ni `Foundation.*`, ni `FoundationBridge`, ni
+les anciens prototypes réflexifs. Tous les audits de ses déclarations
+principales sont vides.
+
+La conclusion est donc plus forte qu’une implication abstraite : les
+hypothèses naturelles `(D)+(R)+(P)` sont conjointement réalisables dans un
+micro-noyau arithmétique constructif non trivial.
+
+---
+
+## 13. Correspondance avec la formalisation Lean
 
 | Objet mathématique | Déclaration Lean |
 |---|---|
@@ -775,6 +1009,15 @@ En particulier :
 | théorème simultané | `genericVisibleRecurrenceWithCausalNonReturn` |
 | témoin `S₁/S₂` | `canonicalVisibleRecurrenceWithCausalNonReturn` |
 | package public | `genericVisibleCausalNonRecurrenceTheorem` |
+| syntaxe arithmétique nue | `RawTerm`, `RawFormula`, `Sentence`, `Predicate` |
+| substitution capture-évitante codée | `machineSubstituteNumeralCode_code` |
+| programme PR de substitution | `captureAvoidingDiagonalSubstitution` |
+| représentabilité PR générique | `PRFunction.graphFormula_spec` |
+| graphe diagonal exact | `diagonalSubstitutionGraph_code` |
+| point fixe construit | `diagonal`, `diagonal_spec` |
+| patch arithmétique | `patch`, `patch_agrees_at`, `patch_preserves_off_index` |
+| contexte arithmétique fermé | `bareArithmeticPatchableContext` |
+| système fermé non trivial | `bareArithmeticTarskiClosedSystem` |
 
 Modules concernés :
 
@@ -784,6 +1027,7 @@ Meta/Tarski/GenericPatchOrbit.lean
 Meta/Tarski/CausalMemory.lean
 Meta/Tarski/CausalOrbit.lean
 Meta/Tarski/VisibleCausalRecurrence.lean
+Meta/Tarski/BareArithmetic/ClosedOrbit.lean
 ```
 
 Le package public est importé par `Meta.lean`. Tous ses audits d’axiomes sont
@@ -793,7 +1037,10 @@ vides.
 
 ## Conclusion
 
-La découverte formalisée peut être énoncée ainsi :
+Nous proposons d’appeler le noyau du résultat **principe de conversion
+tarskienne du gap en obligation causale**.
+
+Le résultat formalisé peut être énoncé ainsi :
 
 > Dans un contexte de Tarski syntaxiquement patchable, chaque mismatch
 > diagonal réparé devient une obligation causale persistante. Le mismatch
@@ -811,9 +1058,15 @@ La formule centrale, en notation directe, est :
   →
   ∃Vₙ,Vₘ,
 
+    [dₙ ∉ Hₙ]
+    ∧
+    [dₙ ∈ Hₘ]
+    ∧
     [π(Vₙ) = π(Vₘ) = dₖ]
     ∧
     [T(pₙ,dₖ) ↔ T(pₘ,dₖ)]
+    ∧
+    [Hₙ ≄mem Hₘ]
     ∧
     [Sₙ ≄causal Sₘ]
 ```
