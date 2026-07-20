@@ -318,19 +318,19 @@ def tarskiRealizedAdd
     TarskiRealizedCausalNat patchable initial :=
   CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.add left right
 
-/-! ## Visible natural projection -/
+/-! ## Canonical natural coordinate -/
 
-/-- Forget the Tarski causal state, memory, gaps, and contextual events while
-retaining the additive natural value of the realized causal word. -/
-def tarskiNaturalProjection
+/-- Read the canonical additive natural coordinate of a realized Tarski causal
+object. -/
+def tarskiNaturalCoordinate
     (patchable : PatchableArithmeticTarskiContext.{u, v})
     (initial : patchable.context.Predicate)
     (realized : TarskiRealizedCausalNat patchable initial) :
     Nat :=
-  CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalProjection
+  CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalCoordinate
     realized
 
-/-- Canonically realize a visible natural value in the Tarski causal orbit. -/
+/-- Canonically realize a natural coordinate in the Tarski causal orbit. -/
 def tarskiNaturalEmbedding
     (patchable : PatchableArithmeticTarskiContext.{u, v})
     (initial : patchable.context.Predicate)
@@ -339,41 +339,41 @@ def tarskiNaturalEmbedding
   CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalEmbedding
     number
 
-/-- The visible projection preserves realized Tarski zero. -/
-theorem tarskiNaturalProjection_zero
+/-- The canonical coordinate preserves realized Tarski zero. -/
+theorem tarskiNaturalCoordinate_zero
     (patchable : PatchableArithmeticTarskiContext.{u, v})
     (initial : patchable.context.Predicate) :
-    tarskiNaturalProjection
+    tarskiNaturalCoordinate
         patchable initial (tarskiRealizedZero patchable initial) =
       0 :=
-  CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalProjection_zero
+  CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalCoordinate_zero
 
-/-- The visible projection preserves realized Tarski successor. -/
-theorem tarskiNaturalProjection_succ
+/-- The canonical coordinate preserves realized Tarski successor. -/
+theorem tarskiNaturalCoordinate_succ
     (patchable : PatchableArithmeticTarskiContext.{u, v})
     (initial : patchable.context.Predicate)
     (realized : TarskiRealizedCausalNat patchable initial) :
-    tarskiNaturalProjection
+    tarskiNaturalCoordinate
         patchable initial
         (tarskiRealizedSucc patchable initial realized) =
-      Nat.succ (tarskiNaturalProjection patchable initial realized) :=
-  CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalProjection_succ
+      Nat.succ (tarskiNaturalCoordinate patchable initial realized) :=
+  CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalCoordinate_succ
     realized
 
-/-- The visible projection preserves realized Tarski addition. -/
-theorem tarskiNaturalProjection_add
+/-- The canonical coordinate preserves realized Tarski addition. -/
+theorem tarskiNaturalCoordinate_add
     (patchable : PatchableArithmeticTarskiContext.{u, v})
     (initial : patchable.context.Predicate)
     (left right : TarskiRealizedCausalNat patchable initial) :
-    tarskiNaturalProjection
+    tarskiNaturalCoordinate
         patchable initial
         (tarskiRealizedAdd patchable initial left right) =
-      tarskiNaturalProjection patchable initial left +
-        tarskiNaturalProjection patchable initial right :=
-  CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalProjection_add
+      tarskiNaturalCoordinate patchable initial left +
+        tarskiNaturalCoordinate patchable initial right :=
+  CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalCoordinate_add
     left right
 
-/-- The visible natural projection is bijective on the realized carrier. -/
+/-- The canonical natural coordinate is bijective on the realized carrier. -/
 def tarskiNaturalEquivalence
     (patchable : PatchableArithmeticTarskiContext.{u, v})
     (initial : patchable.context.Predicate) :
@@ -528,24 +528,24 @@ structure TarskiCausalAdditiveRealizationTheorem
         (tarskiAccumulatingCausalSystem patchable initial).eval
           left.state
           right.word
-  naturalProjectionZero :
-    tarskiNaturalProjection
+  naturalCoordinateZero :
+    tarskiNaturalCoordinate
         patchable initial (tarskiRealizedZero patchable initial) =
       0
-  naturalProjectionSuccessor :
+  naturalCoordinateSuccessor :
     (realized : TarskiRealizedCausalNat patchable initial) ->
-      tarskiNaturalProjection
+      tarskiNaturalCoordinate
           patchable initial
           (tarskiRealizedSucc patchable initial realized) =
-        Nat.succ (tarskiNaturalProjection patchable initial realized)
-  naturalProjectionAdditive :
+        Nat.succ (tarskiNaturalCoordinate patchable initial realized)
+  naturalCoordinateAdditive :
     (left right : TarskiRealizedCausalNat patchable initial) ->
-      tarskiNaturalProjection
+      tarskiNaturalCoordinate
           patchable initial
           (tarskiRealizedAdd patchable initial left right) =
-        tarskiNaturalProjection patchable initial left +
-          tarskiNaturalProjection patchable initial right
-  naturalProjectionEquivalence :
+        tarskiNaturalCoordinate patchable initial left +
+          tarskiNaturalCoordinate patchable initial right
+  naturalCoordinateEquivalence :
     CausalAdditive.CausalWord.ConstructiveEquivalence
       (TarskiRealizedCausalNat patchable initial)
       Nat
@@ -586,12 +586,12 @@ def tarskiCausalAdditiveRealizationTheorem
   actionAdditive := causalWordState_add patchable initial
   actionFaithful := causalWordState_causallyFaithful patchable initial
   realizedStateAdditive := tarskiRealizedAdd_state patchable initial
-  naturalProjectionZero := tarskiNaturalProjection_zero patchable initial
-  naturalProjectionSuccessor :=
-    tarskiNaturalProjection_succ patchable initial
-  naturalProjectionAdditive :=
-    tarskiNaturalProjection_add patchable initial
-  naturalProjectionEquivalence :=
+  naturalCoordinateZero := tarskiNaturalCoordinate_zero patchable initial
+  naturalCoordinateSuccessor :=
+    tarskiNaturalCoordinate_succ patchable initial
+  naturalCoordinateAdditive :=
+    tarskiNaturalCoordinate_add patchable initial
+  naturalCoordinateEquivalence :=
     tarskiNaturalEquivalence patchable initial
   realizedAssociative := tarskiRealizedAdd_associative patchable initial
   realizedCommutative := tarskiRealizedAdd_commutative patchable initial
@@ -612,8 +612,8 @@ end Meta
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.causalWordState_add
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.causalWordState_causallyFaithful
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiRealizedAdd_state
-#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiNaturalProjection
-#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiNaturalProjection_add
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiNaturalCoordinate
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiNaturalCoordinate_add
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiNaturalEquivalence
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiRealizedState_causallyFaithful
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiCausalAdditiveRealizationTheorem

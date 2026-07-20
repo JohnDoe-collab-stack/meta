@@ -15,6 +15,7 @@ mismatch diagonal
 ───────────────────────────────────────────
 fraîcheur intrinsèque des gaps
 → mémoire causale strictement enrichie
+→ individuation intrinsèque des états réalisés
 → absence de contraction d’un chemin non vide
 → addition par composition des chemins
 → action additive fidèle du pas causal
@@ -1621,6 +1622,7 @@ La mémoire sépare toutes les compositions positives.
 La composition des chemins définit l’addition.
 L’évaluation transforme cette addition en composition de transitions.
 Tarski empêche toute contraction de cette représentation additive.
+Chaque gap devenu mémoire individue l’état futur par rapport à son passé.
 L’objet naturel causal est ainsi réalisé fidèlement dans les états complets.
 ```
 
@@ -1637,7 +1639,226 @@ dans une dynamique causale à mémoire cumulative.
 
 ---
 
-## 23. Coordonnée naturelle canonique
+## 23. Identité et individuation établies dans le Core
+
+Cette section ne pose aucune structure supplémentaire. Elle rassemble les
+critères d’identité et les témoins d’individuation déjà construits dans :
+
+```text
+Meta/Core/CausalAdditive.lean
+```
+
+### 23.1 Critères d’identité de l’objet réalisé
+
+Fixons un système à mémoire cumulative, un état initial `S₀` et deux objets :
+
+```text
+x y : RealizedCausalNat(S₀)
+```
+
+Le Core établit d’abord que le mot détermine l’objet réalisé :
+
+```text
+word(x) = word(y)
+→ x = y
+```
+
+C’est le théorème `RealizedCausalNat.ext_word`, obtenu à partir de :
+
+```text
+embed₀(word(x)) = x
+```
+
+Le résultat causal essentiel est ensuite :
+
+```text
+state(x) ≃ₘ state(y)
+→ word(x) = word(y)
+```
+
+C’est `RealizedCausalNat.memoryEquivalent_determines_word`. En le composant
+avec `ext_word`, le Core fournit directement :
+
+```text
+state(x) ≃ₘ state(y)
+→ x = y
+```
+
+C’est `RealizedCausalNat.memoryEquivalent_determines`.
+
+Enfin, l’égalité brute des états détermine elle aussi le mot :
+
+```text
+state(x) = state(y)
+→ word(x) = word(y)
+```
+
+C’est `RealizedCausalNat.state_eq_determines_word`. Avec `ext_word`, elle
+donne :
+
+```text
+state(x) = state(y)
+→ x = y
+```
+
+Les implications réciproques sont immédiates par congruence et réflexivité.
+Sur le porteur réalisé issu de `S₀`, les critères sont donc exacts :
+
+```text
+x = y  ↔  word(x) = word(y)
+
+x = y  ↔  state(x) ≃ₘ state(y)
+
+x = y  ↔  state(x) = state(y)
+```
+
+Le premier critère vient du paquet réalisé. Les deux suivants utilisent la
+fidélité de l’évaluation imposée par la mémoire cumulative.
+
+### 23.2 Témoin intrinsèque d’individuation
+
+Fixons un état `S` et un mot causal non vide `w` :
+
+```text
+w ≠ 0ᶜ
+T := eval(S,w)
+d := gap(S)
+```
+
+Le Core établit les quatre propriétés suivantes :
+
+```text
+¬Memory(S,d)
+```
+
+par le champ structurel `gap_absent` ;
+
+```text
+Memory(T,d)
+```
+
+par `remembers_source_gap_of_nonzero` ;
+
+```text
+¬(S ≃ₘ T)
+```
+
+par `no_memoryEquivalent_forward_of_nonzero` ;
+
+```text
+gap(S) ≠ gap(T)
+```
+
+par `source_gap_ne_target_gap_of_nonzero`.
+
+Le gap `d` est donc le témoin explicite qui individue la source de son futur.
+Il est absent de la mémoire source et présent dans la mémoire cible. Il n’est
+ni choisi par un oracle de fraîcheur ni obtenu depuis un rang extérieur : il
+est le mismatch propre à `S` que le chemin positif transforme en mémoire.
+
+L’orientation inverse de la non-équivalence est également prouvée :
+
+```text
+¬(T ≃ₘ S)
+```
+
+par `no_memoryEquivalent_backward_of_nonzero`.
+
+### 23.3 Individuation de toute paire de réalisations distinctes
+
+Pour deux mots `u` et `v`, `CausalWord.compare` construit l’un des trois cas :
+
+```text
+u = v
+
+ou
+
+∃w, w ≠ 0ᶜ ∧ v = u +ᶜ w
+
+ou
+
+∃w, w ≠ 0ᶜ ∧ u = v +ᶜ w
+```
+
+Sous l’hypothèse `u ≠ v`, le premier cas est impossible. Dans le deuxième,
+posons :
+
+```text
+Sᵤ := eval(S₀,u)
+Sᵥ := eval(S₀,v) = eval(Sᵤ,w)
+dᵤ := gap(Sᵤ)
+```
+
+Alors :
+
+```text
+¬Memory(Sᵤ,dᵤ)
+Memory(Sᵥ,dᵤ)
+```
+
+Dans le troisième cas, le même résultat vaut en échangeant `u` et `v`.
+Ainsi, toute paire distincte de réalisations possède un séparateur produit
+par la position causalement antérieure de la paire.
+
+Cette individuation est antérieure à `Nat`. L’orientation utilisée est celle
+du préfixe causal et le témoin est un gap du système. Aucun nombre naturel ne
+sert à distinguer les états.
+
+### 23.4 Relèvement à l’identité causale tarskienne
+
+Dans l’instance tarskienne, `CausallyEquivalent` préserve le comportement
+visible ponctuel et contient une équivalence extensionnelle de mémoire. La
+fonction `abstractMemoryEquivalentOfTarski` transporte cette dernière vers
+la notion abstraite du Core.
+
+On obtient alors :
+
+```text
+state(x) ≃c state(y)
+→ word(x) = word(y)
+```
+
+par `tarskiRealizedState_causallyDeterminesWord`, puis :
+
+```text
+state(x) ≃c state(y)
+→ x = y
+```
+
+par `tarskiRealizedState_causallyFaithful`.
+
+Avec la réflexivité de `CausallyEquivalent`, le critère exact sur l’orbite
+tarskienne réalisée est :
+
+```text
+x = y  ↔  state(x) ≃c state(y)
+```
+
+### 23.5 Portée exacte
+
+Le Core prouve donc deux résultats complémentaires :
+
+```text
+identité
+= la mémoire extensionnelle de l’état réalisé détermine son mot
+  et son objet réalisé complet
+
+individuation
+= tout chemin positif transforme le gap de sa source
+  en témoin mémoriel qui sépare sa cible de cette source
+```
+
+Ces résultats concernent l’orbite réalisée depuis une origine fixée. Ils ne
+supposent ni que `gap` soit injective sur tout le type des états, ni que toute
+observation visible soit injective. La question d’une observation visible
+non injective reste séparée et a été délimitée au §18.
+
+La coordonnée naturelle de la section suivante est construite après cette
+individuation causale. Elle la recode bijectivement ; elle ne la produit pas.
+
+---
+
+## 24. Coordonnée naturelle canonique
 
 L’objet naturel classique fournit une coordonnée canonique par la composition :
 
@@ -1733,11 +1954,11 @@ distincte et d’une théorie concrète.
 
 ---
 
-## 24. Statut formel
+## 25. Statut formel
 
 Le résultat est réparti entre trois fichiers Lean.
 
-### 24.1 Noyau causal sans Nat
+### 25.1 Noyau causal sans Nat
 
 ```text
 Meta/Core/CausalAdditive.lean
@@ -1767,13 +1988,20 @@ Les déclarations principales auditées comprennent :
 CausalWord.add_commutative
 AccumulatingCausalSystem.wordAction_add_at
 AccumulatingCausalSystem.wordAction_pointwise_faithful
+AccumulatingCausalSystem.remembers_source_gap_of_nonzero
+AccumulatingCausalSystem.no_memoryEquivalent_forward_of_nonzero
+AccumulatingCausalSystem.no_memoryEquivalent_backward_of_nonzero
 AccumulatingCausalSystem.eval_faithful
+AccumulatingCausalSystem.source_gap_ne_target_gap_of_nonzero
 RealizedCausalNat.state_add
+RealizedCausalNat.ext_word
+RealizedCausalNat.memoryEquivalent_determines_word
 RealizedCausalNat.memoryEquivalent_determines
+RealizedCausalNat.state_eq_determines_word
 RealizedCausalNat.no_positive_absorption
 ```
 
-### 24.2 Identification finale à Nat
+### 25.2 Identification finale à Nat
 
 ```text
 Meta/Core/CausalAdditiveNat.lean
@@ -1794,20 +2022,18 @@ toNat(u +ᶜ v) = toNat(u) + toNat(v)
 ofNat(n + m) = ofNat(n) +ᶜ ofNat(m)
 ```
 
-Ce fichier définit également la coordonnée de l’objet réalisé. Les identifiants
-Lean conservent le nom technique `naturalProjection`, mais
-`naturalEquivalence` prouve qu’il s’agit d’une coordonnée bijective :
+Ce fichier définit également la coordonnée bijective de l’objet réalisé :
 
 ```text
-RealizedCausalNat.naturalProjection
+RealizedCausalNat.naturalCoordinate
 RealizedCausalNat.naturalEmbedding
-RealizedCausalNat.naturalProjection_zero
-RealizedCausalNat.naturalProjection_succ
-RealizedCausalNat.naturalProjection_add
+RealizedCausalNat.naturalCoordinate_zero
+RealizedCausalNat.naturalCoordinate_succ
+RealizedCausalNat.naturalCoordinate_add
 RealizedCausalNat.naturalEquivalence
 ```
 
-### 24.3 Instance tarskienne fermée
+### 25.3 Instance tarskienne fermée
 
 ```text
 Meta/Tarski/CausalAdditiveRealization.lean
@@ -1821,9 +2047,11 @@ tarskiAccumulatingCausalSystem
 tarskiCausalTransportStructure
 tarskiWordAction
 TarskiRealizedCausalNat
-tarskiNaturalProjection
+tarskiNaturalCoordinate
 tarskiNaturalEmbedding
 tarskiNaturalEquivalence
+tarskiRealizedState_causallyDeterminesWord
+tarskiRealizedState_causallyFaithful
 tarskiCausalAdditiveRealizationTheorem
 ```
 
@@ -1832,7 +2060,7 @@ l’additivité de l’orbite, les lois de l’objet réalisé, sa fidélité ca
 complète, la non-absorption de tout incrément positif, les trois lois de la
 coordonnée naturelle et son équivalence constructive avec `Nat`.
 
-### 24.4 Audit constructif
+### 25.4 Audit constructif
 
 La cible :
 

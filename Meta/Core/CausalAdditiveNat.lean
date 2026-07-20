@@ -95,7 +95,7 @@ def equivalence : ConstructiveEquivalence CausalWord Nat where
 
 end CausalWord
 
-/-! ## Visible natural projection of the realized causal object -/
+/-! ## Canonical natural coordinate of the realized causal object -/
 
 namespace AccumulatingCausalSystem.RealizedCausalNat
 
@@ -104,9 +104,9 @@ variable {Gap : Type v}
 variable {system : AccumulatingCausalSystem State Gap}
 variable {initial : State}
 
-/-- Forget the realized state and its causal memory, retaining the additive
-natural value carried by its causal word. -/
-def naturalProjection
+/-- Read the canonical additive natural coordinate carried by the causal word
+of a realized object. -/
+def naturalCoordinate
     (realizedNat : RealizedCausalNat system initial) :
     Nat :=
   CausalWord.toNat realizedNat.word
@@ -117,55 +117,55 @@ def naturalEmbedding
     RealizedCausalNat system initial :=
   embed (CausalWord.ofNat number)
 
-/-- Visible natural projection preserves realized zero. -/
-theorem naturalProjection_zero :
-    naturalProjection (zero : RealizedCausalNat system initial) = 0 :=
+/-- The canonical natural coordinate preserves realized zero. -/
+theorem naturalCoordinate_zero :
+    naturalCoordinate (zero : RealizedCausalNat system initial) = 0 :=
   rfl
 
-/-- Visible natural projection preserves realized successor. -/
-theorem naturalProjection_succ
+/-- The canonical natural coordinate preserves realized successor. -/
+theorem naturalCoordinate_succ
     (realizedNat : RealizedCausalNat system initial) :
-    naturalProjection (succ realizedNat) =
-      Nat.succ (naturalProjection realizedNat) :=
+    naturalCoordinate (succ realizedNat) =
+      Nat.succ (naturalCoordinate realizedNat) :=
   rfl
 
-/-- Visible natural projection preserves realized addition. -/
-theorem naturalProjection_add
+/-- The canonical natural coordinate preserves realized addition. -/
+theorem naturalCoordinate_add
     (left right : RealizedCausalNat system initial) :
-    naturalProjection (add left right) =
-      naturalProjection left + naturalProjection right :=
+    naturalCoordinate (add left right) =
+      naturalCoordinate left + naturalCoordinate right :=
   CausalWord.toNat_add left.word right.word
 
-/-- Projecting a canonically embedded natural returns that natural. -/
-theorem naturalProjection_naturalEmbedding
+/-- Reading the coordinate of a canonically embedded natural returns it. -/
+theorem naturalCoordinate_naturalEmbedding
     (number : Nat) :
-    naturalProjection
+    naturalCoordinate
         (naturalEmbedding number : RealizedCausalNat system initial) =
       number :=
   CausalWord.toNat_ofNat number
 
-/-- Re-embedding the visible natural value recovers the complete realized
-object; the projection forgets fields but does not identify orbit elements. -/
-theorem naturalEmbedding_naturalProjection
+/-- Re-embedding the natural coordinate recovers the complete realized
+object, so the coordinate identifies no two realized orbit elements. -/
+theorem naturalEmbedding_naturalCoordinate
     (realizedNat : RealizedCausalNat system initial) :
-    naturalEmbedding (naturalProjection realizedNat) = realizedNat := by
+    naturalEmbedding (naturalCoordinate realizedNat) = realizedNat := by
   calc
-    naturalEmbedding (naturalProjection realizedNat) =
+    naturalEmbedding (naturalCoordinate realizedNat) =
         embed (CausalWord.ofNat (CausalWord.toNat realizedNat.word)) := rfl
     _ = embed realizedNat.word :=
       congrArg embed (CausalWord.ofNat_toNat realizedNat.word)
     _ = realizedNat := embed_word realizedNat
 
-/-- The visible natural projection is a constructive equivalence on the
-realized additive carrier, although it forgets its causal presentation. -/
+/-- The canonical natural coordinate is a constructive equivalence on the
+realized additive carrier. -/
 def naturalEquivalence :
     CausalWord.ConstructiveEquivalence
       (RealizedCausalNat system initial)
       Nat where
-  toFun := naturalProjection
+  toFun := naturalCoordinate
   invFun := naturalEmbedding
-  left_inv := naturalEmbedding_naturalProjection
-  right_inv := naturalProjection_naturalEmbedding
+  left_inv := naturalEmbedding_naturalCoordinate
+  right_inv := naturalCoordinate_naturalEmbedding
 
 end AccumulatingCausalSystem.RealizedCausalNat
 end CausalAdditive
@@ -175,7 +175,7 @@ end Meta
 #print axioms Meta.CausalAdditive.CausalWord.equivalence
 #print axioms Meta.CausalAdditive.CausalWord.toNat_add
 #print axioms Meta.CausalAdditive.CausalWord.ofNat_add
-#print axioms Meta.CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalProjection
-#print axioms Meta.CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalProjection_add
+#print axioms Meta.CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalCoordinate
+#print axioms Meta.CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalCoordinate_add
 #print axioms Meta.CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalEquivalence
 /- AXIOM_AUDIT_END -/
