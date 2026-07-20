@@ -1,0 +1,32 @@
+command: /usr/bin/python3 /mnt/c/users/frederick/documents/meta/Carbone/CP0/frozen_runs/ord_metadata_audit_20260719T065806Z_sha256-9121cdb235feb3b6fc368b017f51c41a487a8ecb90793fb2d1a8269a59582c7e.py --out-jsonl /mnt/c/users/frederick/documents/meta/Carbone/CP0/frozen_runs/ord_metadata_audit_20260719T065806Z_sha256-9121cdb235feb3b6fc368b017f51c41a487a8ecb90793fb2d1a8269a59582c7e.jsonl --out-txt /mnt/c/users/frederick/documents/meta/Carbone/CP0/frozen_runs/ord_metadata_audit_20260719T065806Z_sha256-9121cdb235feb3b6fc368b017f51c41a487a8ecb90793fb2d1a8269a59582c7e.txt --out-source-json /mnt/c/users/frederick/documents/meta/Carbone/CP0/frozen_runs/ord_metadata_source_20260719T065806Z_sha256-9121cdb235feb3b6fc368b017f51c41a487a8ecb90793fb2d1a8269a59582c7e.json --run-suffix 20260719T065806Z_sha256-9121cdb235feb3b6fc368b017f51c41a487a8ecb90793fb2d1a8269a59582c7e --script-sha256 9121cdb235feb3b6fc368b017f51c41a487a8ecb90793fb2d1a8269a59582c7e --ord-interface-commit 8cafe295517a45cc9317c5e5a686dfc4b352522d --ord-data-commit ddb0d25770c80a0a6fcf9948c26e1c8f828cb8ad --ord-schema-commit aeda34931f3a25497dccde0f68aa789b5830962b --frozen-run
+script_sha256: 9121cdb235feb3b6fc368b017f51c41a487a8ecb90793fb2d1a8269a59582c7e
+source_sha256: 6953cdfbaaeba94f281f8bfad1c62fc32cc4fc553cd03dc12d63eecdfe84ed4c
+retrieved_at_utc: 2026-07-19T06:58:07+00:00
+source_url: https://open-reaction-database.org/api/datasets
+source_content_type: application/json
+dataset_count: 550
+allowed_fields: dataset_id,description,name,num_reactions,submitted_at
+ord_interface_commit: 8cafe295517a45cc9317c5e5a686dfc4b352522d
+ord_data_commit: ddb0d25770c80a0a6fcf9948c26e1c8f828cb8ad
+ord_schema_commit: aeda34931f3a25497dccde0f68aa789b5830962b
+target_rows_opened: 0
+reaction_rows_opened: 0
+product_rows_opened: 0
+verdict: GO-INPUT-AUDIT
+recommended_dataset_id: ord_dataset-47eaacc46c3a4487bbdf99adb1a15e41
+recommended_num_reactions: 47015
+
+candidate_decisions:
+01 ord_dataset-47eaacc46c3a4487bbdf99adb1a15e41 ADVANCE_INPUT_AUDIT n=47015
+02 ord_dataset-805ad863feef48579d95d86a728035f4 RESERVE_TOO_FEW_SUBSTRATE_IDENTITIES n=50688
+03 ord_dataset-dc0249930af34d17a3c76881a762aebf RESERVE_SPARSE_PAIRINGS n=136
+04 ord_dataset-c703268ea43a4c7e802c6048b6166b34 RESERVE_SMALL_IDENTITY_SET n=120
+05 ord_dataset-1ec2807f02fa4beda27d2a81b86eb843 REJECT_NO_SUBSTRATE_HOLDOUT n=1227
+06 ord_dataset-5c9a10329a8a48968d18879a48bb8ab2 RESERVE_ONTOLOGY_COMPLEX n=9632
+07 ord_dataset-c5b00523487a4211a194160edf45e9ab RESERVE_STEREOCHEMISTRY_COMPLEX n=1430
+08 ord_dataset-7acd6ad2bf4d4cff841cad008ab726d5 RESERVE_FIXED_ACID_CORE n=960
+
+interpretation:
+Le candidat prioritaire passe uniquement la porte des metadonnees.
+Le verdict autorise l'audit des entrees et interdit encore l'entrainement,
+la lecture des cibles de test et toute revendication predictive.

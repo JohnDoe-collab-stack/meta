@@ -1,0 +1,35 @@
+2026-05-14 11:59:23 CMD: /home/frederick/anaconda3/envs/llama3/bin/python -u /mnt/c/Users/frederick/Documents/forU2read/Empirical/aslmt/runs/snapshots/aslmt_v22_perceptual_localglobal_dynamic_infinite_20260510_013011_c338ee97f453/falsify_v22_bridge_verifier.py --cert-jsonl /mnt/c/Users/frederick/Documents/forU2read/Empirical/aslmt/runs/aslmt_v22_perceptual_localglobal_dynamic_infinite_20260510_013011_c338ee97f453/cert_bridge_v22_20260510_013011_c338ee97f453_n8_z8_seed0.jsonl --out-json /mnt/c/Users/frederick/Documents/forU2read/Empirical/aslmt/runs/aslmt_v22_perceptual_localglobal_dynamic_infinite_20260510_013011_c338ee97f453/falsification_bridge_v22_20260510_013011_c338ee97f453_n8_z8_seed0.json
+2026-05-14 11:59:23 {
+2026-05-14 11:59:23   "mutations": {
+2026-05-14 11:59:23     "break_dynamic_elimination_count": {
+2026-05-14 11:59:23       "rejected": true,
+2026-05-14 11:59:23       "violation_count": 1
+2026-05-14 11:59:23     },
+2026-05-14 11:59:23     "break_lean_schema_domain": {
+2026-05-14 11:59:23       "rejected": true,
+2026-05-14 11:59:23       "violation_count": 1
+2026-05-14 11:59:23     },
+2026-05-14 11:59:23     "claim_global_exhaustion": {
+2026-05-14 11:59:23       "rejected": true,
+2026-05-14 11:59:23       "violation_count": 1
+2026-05-14 11:59:23     },
+2026-05-14 11:59:23     "erase_dimension_negative_control": {
+2026-05-14 11:59:23       "rejected": true,
+2026-05-14 11:59:23       "violation_count": 1
+2026-05-14 11:59:23     },
+2026-05-14 11:59:23     "hide_infinite_scope": {
+2026-05-14 11:59:23       "rejected": true,
+2026-05-14 11:59:23       "violation_count": 1
+2026-05-14 11:59:23     },
+2026-05-14 11:59:23     "lower_z_accuracy": {
+2026-05-14 11:59:23       "rejected": true,
+2026-05-14 11:59:23       "violation_count": 1
+2026-05-14 11:59:23     },
+2026-05-14 11:59:23     "turn_baseline_into_success": {
+2026-05-14 11:59:23       "rejected": true,
+2026-05-14 11:59:23       "violation_count": 1
+2026-05-14 11:59:23     }
+2026-05-14 11:59:23   },
+2026-05-14 11:59:23   "ok": true
+2026-05-14 11:59:23 }
+2026-05-14 11:59:23 RC=0

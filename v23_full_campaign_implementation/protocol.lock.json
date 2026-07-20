@@ -1,0 +1,26 @@
+{
+  "campaign": "certified-active-semantic-closure-v23",
+  "implementation_contract": "v23.1",
+  "implementation_program_sha256": "90472ce6247f7153940013db297eb83deeea7111157acf201bc0480218b77316",
+  "original_protocol_sha256": "1fbd5b299d7e81620db1dcb2b940a02462c7098d79efc7b233f765a879b2861f",
+  "python": ">=3.10,<3.13",
+  "seeds": {
+    "final": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "tuning": [100, 101, 102],
+    "replication_training": [10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+    "finite_reference": 230000,
+    "iid_validation": 231000,
+    "structural_validation": 232000,
+    "iid_test": 233000,
+    "sealed_ood": 234000,
+    "interventions": 235000,
+    "replication_evaluation": 236000
+  },
+  "dependencies": {
+    "cryptography": ">=43,<50",
+    "numpy": ">=2,<3",
+    "onnx": ">=1.17,<2",
+    "onnxruntime": ">=1.20,<2",
+    "torch": ">=2.4,<3"
+  }
+}

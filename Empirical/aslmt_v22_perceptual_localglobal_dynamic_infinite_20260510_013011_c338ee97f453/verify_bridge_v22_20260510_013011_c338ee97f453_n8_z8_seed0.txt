@@ -1,0 +1,20 @@
+2026-05-14 11:59:23 CMD: /home/frederick/anaconda3/envs/llama3/bin/python -u /mnt/c/Users/frederick/Documents/forU2read/Empirical/aslmt/runs/snapshots/aslmt_v22_perceptual_localglobal_dynamic_infinite_20260510_013011_c338ee97f453/verify_bridge_aslmt_v22.py --cert-jsonl /mnt/c/Users/frederick/Documents/forU2read/Empirical/aslmt/runs/aslmt_v22_perceptual_localglobal_dynamic_infinite_20260510_013011_c338ee97f453/cert_bridge_v22_20260510_013011_c338ee97f453_n8_z8_seed0.jsonl --out-json /mnt/c/Users/frederick/Documents/forU2read/Empirical/aslmt/runs/aslmt_v22_perceptual_localglobal_dynamic_infinite_20260510_013011_c338ee97f453/verify_bridge_v22_20260510_013011_c338ee97f453_n8_z8_seed0.json --violations-jsonl /mnt/c/Users/frederick/Documents/forU2read/Empirical/aslmt/runs/aslmt_v22_perceptual_localglobal_dynamic_infinite_20260510_013011_c338ee97f453/violations_bridge_v22_20260510_013011_c338ee97f453_n8_z8_seed0.jsonl
+2026-05-14 11:59:23 {
+2026-05-14 11:59:23   "kinds": {
+2026-05-14 11:59:23     "dimension_negative_control": 1,
+2026-05-14 11:59:23     "dynamic_context_bridge": 1,
+2026-05-14 11:59:23     "dynamic_infinite_zero_elimination_schema": 1,
+2026-05-14 11:59:23     "filtered_prefix_level": 4,
+2026-05-14 11:59:23     "infinite_schema_bridge": 1,
+2026-05-14 11:59:23     "infinite_schema_contract": 1,
+2026-05-14 11:59:23     "local_global_bridge": 2,
+2026-05-14 11:59:23     "local_global_infinite_cover_schema": 1,
+2026-05-14 11:59:23     "perceptual_learning_gate": 2,
+2026-05-14 11:59:23     "pointwise_finite_separation_basis_schema": 2,
+2026-05-14 11:59:23     "v22_bridge_metadata": 1
+2026-05-14 11:59:23   },
+2026-05-14 11:59:23   "meaning": "ok=True means v22 passed perceptual learning, negative controls, local-global bridge, dynamic finite-context scope, and the Lean-aligned infinite local-window schema.",
+2026-05-14 11:59:23   "ok": true,
+2026-05-14 11:59:23   "violation_count": 0
+2026-05-14 11:59:23 }
+2026-05-14 11:59:23 RC=0

@@ -1,0 +1,26 @@
+{
+  "command": "Carbone/CP0/frozen_runs/cp0_empirical_comparison_20260719T110304Z_sha256-ede5dde8c86e3e0c5b4d62e80df41c270f27431598e413e300449752b626ba24.py --mode selection-eval --source-pb-gz /tmp/ord_dataset-47eaacc46c3a4487bbdf99adb1a15e41_ddb0d25770c80a0a6fcf9948c26e1c8f828cb8ad.pb.gz --i0-manifest-csv-gz Carbone/CP0/frozen_runs/ord_input_manifest_20260719T073503Z_sha256-c8ebfeb5d1884789c846e4336ea03b1a4312a07304e47f0deb5f6ddce10a5a9f.csv.gz --ord-schema-python-root /tmp/cp0_ord_schema_runtime_aeda34931 --construction-targets-csv-gz Carbone/CP0/frozen_runs/cp0_construction_targets_20260719T095919Z_sha256-4bdec976e5920568e9d0ea401ded8ff85bc6bdecb3257d3acb05b220694c07a2.csv.gz --selection-targets-csv-gz Carbone/CP0/frozen_runs/cp0_selection_targets_20260719T102545Z_sha256-4bdec976e5920568e9d0ea401ded8ff85bc6bdecb3257d3acb05b220694c07a2.csv.gz --selection-targets-sha256 0aa64bf2d7030229cb32993c8f0f24b0768b109225ae9398021b1b0a17923f8e --out-predictions-csv-gz Carbone/CP0/frozen_runs/cp0_selection_v2_predictions_20260719T110304Z_sha256-ede5dde8c86e3e0c5b4d62e80df41c270f27431598e413e300449752b626ba24.csv.gz --out-jsonl Carbone/CP0/frozen_runs/cp0_selection_v2_comparison_20260719T110304Z_sha256-ede5dde8c86e3e0c5b4d62e80df41c270f27431598e413e300449752b626ba24.jsonl --out-txt Carbone/CP0/frozen_runs/cp0_selection_v2_comparison_20260719T110304Z_sha256-ede5dde8c86e3e0c5b4d62e80df41c270f27431598e413e300449752b626ba24.txt --out-dependencies-json Carbone/CP0/frozen_runs/cp0_selection_v2_comparison_dependencies_20260719T110304Z_sha256-ede5dde8c86e3e0c5b4d62e80df41c270f27431598e413e300449752b626ba24.json --run-suffix 20260719T110304Z_sha256-ede5dde8c86e3e0c5b4d62e80df41c270f27431598e413e300449752b626ba24 --script-sha256 ede5dde8c86e3e0c5b4d62e80df41c270f27431598e413e300449752b626ba24 --frozen-run",
+  "construction_targets_sha256": "9f9c80b1f3fd21e5dcea70b258a4a3c6d57cbe196dca4a42f0d3781d87f9e26b",
+  "distributions": {
+    "joblib": "1.5.2",
+    "numpy": "2.2.6",
+    "rdkit": "2026.3.4",
+    "scikit-learn": "1.7.2",
+    "scipy": "1.15.3",
+    "threadpoolctl": "3.6.0"
+  },
+  "i0_manifest_sha256": "da963892cf8caebf3ad5983773b866a13333260869805542b16d0be1aa01cb9b",
+  "python_version": "3.10.12",
+  "reaction_pb2_sha256": "1ed2befa91faf00e76e9fd1ef555bf0da51c69a0085e5d7dd4db6418751bdd9c",
+  "script_sha256": "ede5dde8c86e3e0c5b4d62e80df41c270f27431598e413e300449752b626ba24",
+  "selection_targets_sha256": "0aa64bf2d7030229cb32993c8f0f24b0768b109225ae9398021b1b0a17923f8e",
+  "source_sha256": "103c485fc009ee66f525c140611c8596d31f0673cdbb2ec16ec497ea44a58f6f",
+  "wheel_sha256": {
+    "joblib-1.5.2-py3-none-any.whl": "4e1f0bdbb987e6d843c70cf43714cb276623def372df3c22fe5266b2670bc241",
+    "numpy-2.2.6-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "fc7b73d02efb0e18c000e9ad8b83480dfcd5dfd11065997ed4c6747470ae8915",
+    "rdkit-2026.3.4-cp310-cp310-manylinux_2_28_x86_64.whl": "974830cdcdb95f825fc1038824af0031e7ac537e526485a5f30e58260d03bc39",
+    "scikit_learn-1.7.2-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": "7a58814265dfc52b3295b1900cfb5701589d30a8bb026c7540f1e9d3499d5ec8",
+    "scipy-1.15.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "9e2abc762b0811e09a0d3258abee2d98e0c703eee49464ce0069590846f31d40",
+    "threadpoolctl-3.6.0-py3-none-any.whl": "43a0b8fd5a2928500110039e43a5eed8480b918967083ea48dc3ab9f13c4a7fb"
+  }
+}

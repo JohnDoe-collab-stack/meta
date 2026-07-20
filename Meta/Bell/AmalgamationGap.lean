@@ -1,5 +1,5 @@
 import Meta.Bell.ContextAmalgamation
-import Meta.Core.ReferentialLength
+import Meta.Core.ProjectiveCore
 
 /-!
 # Bell amalgamation gap

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "v23-run-manifest.schema.json",
+  "type": "object",
+  "required": ["schema", "command", "source_sha256", "started_utc", "profile"],
+  "properties": {
+    "schema": {"const": "v23-frozen-run-1"},
+    "command": {"type": "array", "items": {"type": "string"}},
+    "source_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "started_utc": {"type": "string"},
+    "profile": {"type": "string"}
+  }
+}

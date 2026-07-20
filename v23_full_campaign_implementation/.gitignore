@@ -1,0 +1,12 @@
+.lake/
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv-smoke-cuda/
+*.egg-info/
+runs/
+snapshots/
+*.pt
+*.onnx
+*.npz
+*.aesgcm

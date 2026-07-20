@@ -1,0 +1,19 @@
+command: /usr/bin/python3 Carbone/CW0/python/frozen/simulate_two_phase_20260718T133206Z_sha256-45a74a0e3f3473d760d360c2689db334acca89aafac98e0482206c09a7be08f3.py --kernel Carbone/CW0/exports/two-phase-v1/kernel.json --expected-kernel-sha256 34bfc418c7afea9c23c14311a203b351ae19846e54df1568f2f476436fbfeea6 --expected-script-sha256 45a74a0e3f3473d760d360c2689db334acca89aafac98e0482206c09a7be08f3 --initial chain --steps 16 --out-jsonl Carbone/CW0/runs/reference/run_20260718T133206Z_sha256-45a74a0e3f3473d760d360c2689db334acca89aafac98e0482206c09a7be08f3.jsonl --out-txt Carbone/CW0/runs/reference/run_20260718T133206Z_sha256-45a74a0e3f3473d760d360c2689db334acca89aafac98e0482206c09a7be08f3.txt
+script_sha256: 45a74a0e3f3473d760d360c2689db334acca89aafac98e0482206c09a7be08f3
+kernel_sha256: 34bfc418c7afea9c23c14311a203b351ae19846e54df1568f2f476436fbfeea6
+status: FINITE_PHASE_EXPORT_CONFORMANT
+validation_level: SIM0_PLUS_PHASE_CONFORMANCE_NOT_SIM1
+schema_version: cw0-two-phase-v1
+authority_theorem: Meta.Carbone.CW0.twoPhaseKernel_commutes
+states_total: 2
+states_checked: 2
+divergences: 0
+initial_state_id: 0
+steps: 16
+observations: 17
+seed: none_deterministic
+python: 3.10.12
+platform: Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.35
+started_utc: 2026-07-18T13:32:32.277560+00:00
+finished_utc: 2026-07-18T13:32:32.304184+00:00
+scope: finite phase quotient only; no chemistry or empirical validation

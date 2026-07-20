@@ -1,0 +1,4 @@
+ok=False
+lines=64
+violations=1024
+props_count={"cue_gate": 1024}

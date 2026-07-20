@@ -1,0 +1,4 @@
+ok=True
+lines=64
+violations=0
+props_count={}

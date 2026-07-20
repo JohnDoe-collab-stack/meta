@@ -1,0 +1,91 @@
+{
+  "schema": "constructive-repairability-program/1",
+  "program_version": "1.0.0",
+  "status": "specification",
+  "scope": {
+    "core": [
+      "finite deterministic public repair games",
+      "constructive winning fixed point",
+      "positive winning or losing certificate",
+      "soundness and completeness for finite public trees",
+      "explicit preservation of the actual world and prior closures"
+    ],
+    "extensions": [
+      "worst-case cost optimality",
+      "certified transfer from learned latent proposals",
+      "finite adversarial response relations",
+      "finite rational probabilistic responses",
+      "certified finite abstractions of continuous systems"
+    ],
+    "non_claims": [
+      "universal repairability of latent representations",
+      "novelty of reachability games or active sensing",
+      "unconditional correctness of neural networks",
+      "general solution of partial observability",
+      "historical impact before external adoption"
+    ]
+  },
+  "constructive_constraints": {
+    "axioms_allowed": false,
+    "classical_allowed": false,
+    "propext_allowed": false,
+    "quot_sound_allowed": false,
+    "external_termination_bridge_allowed": false,
+    "axiom_audit_required": true
+  },
+  "decisions": {
+    "primary_characterization": "least controllable-predecessor fixed point on an explicit finite public state carrier",
+    "solver_outcomes": ["WIN certificate", "LOSE closed-region certificate"],
+    "state_representation": "canonical Boolean masks plus finite memory, provenance and authorization context",
+    "primary_cost": "worst-case nonnegative natural query cost among safe winning public strategies",
+    "learned_trust_boundary": "a neural model proposes packets; only an independent symbolic checker can authorize a certified action",
+    "first_response_model": "deterministic",
+    "termination_source": "intrinsic finite state enumeration and computed fixed-point stabilization",
+    "primary_empirical_profile": "single NVIDIA RTX 4070-class 12 GB workstation",
+    "confirmatory_seeds": 10,
+    "domains": 2,
+    "learned_systems_full_profile": 7,
+    "maximum_campaign_storage_gb": 30
+  },
+  "work_packages": [
+    {"id": "WP00", "name": "problem freeze and standalone scaffold", "status": "not_started", "depends_on": [], "exit_gate": "M0/A0"},
+    {"id": "WP01", "name": "constructive finite infrastructure", "status": "not_started", "depends_on": ["WP00"], "exit_gate": "finite carrier audit"},
+    {"id": "WP02", "name": "public game and certified target", "status": "not_started", "depends_on": ["WP01"], "exit_gate": "target boolean equivalence"},
+    {"id": "WP03", "name": "controllable predecessor and winning fixed point", "status": "not_started", "depends_on": ["WP02"], "exit_gate": "M1"},
+    {"id": "WP04", "name": "winning strategy certificate", "status": "not_started", "depends_on": ["WP03"], "exit_gate": "M2"},
+    {"id": "WP05", "name": "losing obstruction certificate", "status": "not_started", "depends_on": ["WP03"], "exit_gate": "M4"},
+    {"id": "WP06", "name": "total characterization", "status": "not_started", "depends_on": ["WP04", "WP05"], "exit_gate": "M3/M5"},
+    {"id": "WP07", "name": "exact posterior and adaptive indistinguishability corollaries", "status": "not_started", "depends_on": ["WP06"], "exit_gate": "exact posterior audit"},
+    {"id": "WP08", "name": "worst-case cost optimality", "status": "not_started", "depends_on": ["WP06"], "exit_gate": "M6"},
+    {"id": "WP09", "name": "independent certificate checker", "status": "not_started", "depends_on": ["WP06"], "exit_gate": "A1"},
+    {"id": "WP10", "name": "exhaustive enumeration and mutations", "status": "not_started", "depends_on": ["WP09"], "exit_gate": "A2/X0-X4"},
+    {"id": "WP11", "name": "formal comparison embeddings", "status": "not_started", "depends_on": ["WP07"], "exit_gate": "M8"},
+    {"id": "WP12", "name": "certified learned-latent transfer", "status": "not_started", "depends_on": ["WP06", "WP09"], "exit_gate": "M7"},
+    {"id": "WP13", "name": "learned domains and matched baselines", "status": "not_started", "depends_on": ["WP08", "WP12"], "exit_gate": "E-L1/E-L2"},
+    {"id": "WP14", "name": "pre-registered workstation campaign", "status": "not_started", "depends_on": ["WP10", "WP13"], "exit_gate": "E-L0-E-L6"},
+    {"id": "WP15", "name": "publication and independent replication", "status": "not_started", "depends_on": ["WP11", "WP14"], "exit_gate": "A4/A5"}
+  ],
+  "gates": [
+    {"id": "M0", "status": "not_started", "evidence": []},
+    {"id": "M1", "status": "not_started", "evidence": []},
+    {"id": "M2", "status": "not_started", "evidence": []},
+    {"id": "M3", "status": "not_started", "evidence": []},
+    {"id": "M4", "status": "not_started", "evidence": []},
+    {"id": "M5", "status": "not_started", "evidence": []},
+    {"id": "M6", "status": "not_started", "evidence": []},
+    {"id": "M7", "status": "not_started", "evidence": []},
+    {"id": "M8", "status": "not_started", "evidence": []},
+    {"id": "A0", "status": "not_started", "evidence": []},
+    {"id": "A1", "status": "not_started", "evidence": []},
+    {"id": "A2", "status": "not_started", "evidence": []},
+    {"id": "A4", "status": "not_started", "evidence": []},
+    {"id": "A5", "status": "not_started", "evidence": []},
+    {"id": "E-L0", "status": "not_started", "evidence": []},
+    {"id": "E-L1", "status": "not_started", "evidence": []},
+    {"id": "E-L2", "status": "not_started", "evidence": []},
+    {"id": "E-L3", "status": "not_started", "evidence": []},
+    {"id": "E-L4", "status": "not_started", "evidence": []},
+    {"id": "E-L5", "status": "not_started", "evidence": []},
+    {"id": "E-L6", "status": "not_started", "evidence": []}
+  ]
+}

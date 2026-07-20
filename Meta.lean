@@ -1,14 +1,19 @@
-import Meta.Core.ClosedStabilityTheorem
-import Meta.Core.Gap
-import Meta.Core.ReferentialLength
-import Meta.Core.TwoPole
-import Meta.Core.ParitySeparation
-import Meta.Core.DynamicStability
-import Meta.Core.DynamicTwoPole
-import Meta.Core.DynamicRoleCarrier
-import Meta.Core.DynamicParitySeparation
-import Meta.Core.OrderGap
+import Meta.Core.RelaxedUsageRegime
+import Meta.Core.BilateralCore
+import Meta.Core.ProjectiveCore
 import Meta.Core.ProjectedIdentity
+import Meta.Core.TransportCoherence
+import Meta.Core.StrictRelaxation
+import Meta.Core.ClosedStabilityTheorem
+import Meta.Core.DynamicCore
+import Meta.Core.DynamicRelaxedUsage
+import Meta.Core.DynamicRoleCarrier
+import Meta.Core.Specialization.DirectionalRelaxation
+import Meta.Core.Specialization.TransportCoherenceModel
+import Meta.Core.Specialization.DynamicRelaxedUsageModel
+import Meta.Core.Specialization.OrderGap
+import Meta.Core.Specialization.Parity
+import Meta.Semantics.FoundationalStability
 import Meta.Arithmetic.Core
 import Meta.Arithmetic.Canonical
 import Meta.Arithmetic.RepeatedIndex
@@ -40,11 +45,16 @@ import Meta.Collatz.DiagonalOrder
 import Meta.Dynamics.ObservedDiscrete
 import Meta.Dynamics.ObservedWindow
 import Meta.Dynamics.ObservedDynamicGap
+import Meta.AI.AIFoundationalValidation
 import Meta.Tarski.TruthGap
 import Meta.Tarski.GapContraction
 import Meta.Tarski.ReferentialOrder
 import Meta.Tarski.DynamicReturn
-import Meta.Tarski.FoundationBridge
+import Meta.Tarski.DynamicRelaxedUsage
+import Meta.Tarski.GenericPatchOrbit
+import Meta.Tarski.BareArithmetic.PrimitiveRecursiveSyntaxCoding
+import Meta.Tarski.ConstructivePatchModel
+import Meta.Tarski.ConstructivePatchOrbit
 import Meta.Beth.ImplicitExplicit
 import Meta.Beth.GapContraction
 import Meta.Bell.Coindexation
@@ -58,6 +68,26 @@ import Meta.Synthesis.TarskiBethGap
 import Meta.Synthesis.TarskiBethBellGap
 
 /- AXIOM_AUDIT_BEGIN -/
+#print axioms Meta.RelaxedUsageRegime.projectedIdentityTransport_strictlyIncludedIn_relaxedUsageTransport
+#print axioms Meta.RelaxedUsageRegime.projectedRepresentability_strict
+#print axioms Meta.TransportCoherenceModel.threePhase_direct_transport_eq_composed
+#print axioms Meta.DynamicRelaxedUsage.dynamicRelaxedRegime_not_exactProjective
+#print axioms Meta.DynamicRelaxedUsageModel.switchDynamicRelaxationSynthesis
+#print axioms Meta.RelaxedSemantics.generalRelaxedFoundationalSemantics
+#print axioms Meta.RelaxedSemantics.foundationalTransport_withoutIdentity
+#print axioms Meta.RelaxedSemantics.foundationalUseGraph_nonreduction
+#print axioms Meta.RelaxedSemantics.foundationalTransitionGraph_nonreduction
+#print axioms Meta.RelaxedSemantics.FiniteCumulativeDynamicModel.finiteDynamicFoundationalSystem
+#print axioms Meta.ActiveSemanticClosure.Foundational.activeClosureFoundationalRealization
+#print axioms Meta.ActiveSemanticClosure.OpenFoundational.openActiveClosureFoundationalRealization
+#print axioms Meta.ActiveSemanticClosure.FoundationalNonReduction.aiUseGraphNonReductionCertificate
+#print axioms Meta.ActiveSemanticClosure.Interventions.finiteCrossedResponse_failsClosure
+#print axioms Meta.ActiveSemanticClosure.LeanValidation.aiLeanNonV23Obligations
+#print axioms Meta.ActiveSemanticClosure.Validation.aiFoundationalValidation
+#print axioms Meta.TarskiDynamicRelaxedUsage.tarskiDynamicRelaxedUsageSynthesis
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.genericPatchOrbitTheorem
+#print axioms Meta.ConstructivePatchModel.constructiveTarskiClosedSystem
+#print axioms Meta.ConstructivePatchModel.constructiveTarskiOrbitTheorem
 #print axioms Meta.ClosedStabilityTheorem.IdentityOfUseCell
 #print axioms Meta.ClosedStabilityTheorem.projectedIdentityCell_internalDifference_usedIdentity
 #print axioms Meta.ClosedStabilityTheorem.InterfaceTransport

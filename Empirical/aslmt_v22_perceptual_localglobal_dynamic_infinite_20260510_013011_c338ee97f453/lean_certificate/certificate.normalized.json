@@ -1,0 +1,310 @@
+{
+  "accepted_claims": [
+    "v22 final z=n passes checked IID/OOD finite perceptual gates",
+    "z<n controls witness that lower refined dimensions are rejected",
+    "the refined observable carries a supervised automatic next-interface/action policy",
+    "the selected interface is certified as revealing the dynamic diagonal and supporting a continuation step",
+    "the exported Lean bridge is relative to explicit certificate hypotheses",
+    "the local-finite schema is aligned with Lean local-global and dynamic residual targets"
+  ],
+  "dynamic_predicate": "hidden_target_compatibility",
+  "final_gate": {
+    "bridge_ok": true,
+    "falsification_ok": true,
+    "marginal_nogo_ok": true,
+    "minproof_ok": true,
+    "struct_ok": true
+  },
+  "final_metrics": {
+    "metrics": {
+      "iid": {
+        "A_iou": 0.9818345159292221,
+        "B_cue_iou": 0.0,
+        "B_img_iou": 0.0,
+        "q_acc": 1.0,
+        "query_action_rate": 0.5009765625,
+        "res_acc": 1.0,
+        "z_acc": 1.0
+      },
+      "ood": {
+        "A_iou": 0.8561871144920588,
+        "B_cue_iou": 0.0,
+        "B_img_iou": 0.0,
+        "q_acc": 1.0,
+        "query_action_rate": 0.50439453125,
+        "res_acc": 1.0,
+        "z_acc": 1.0
+      }
+    },
+    "pair_eval": {
+      "iid": {
+        "A_ablated_both_image_pair_rate": 0.0,
+        "A_both_cue_pair_rate": 1.0,
+        "A_both_image_pair_rate": 1.0,
+        "A_swap_follow_image_pair_rate": 1.0,
+        "A_swap_orig_both_image_pair_rate": 0.0,
+        "B_cue_only_both_rate": 0.0,
+        "B_image_only_both_rate": 0.0,
+        "n_ctx": 64,
+        "obs_cue_barrier_ok": true,
+        "obs_image_barrier_ok": true,
+        "ood": false,
+        "seed": 0
+      },
+      "ood": {
+        "A_ablated_both_image_pair_rate": 0.0,
+        "A_both_cue_pair_rate": 1.0,
+        "A_both_image_pair_rate": 1.0,
+        "A_swap_follow_image_pair_rate": 1.0,
+        "A_swap_orig_both_image_pair_rate": 0.0,
+        "B_cue_only_both_rate": 0.0,
+        "B_image_only_both_rate": 0.0,
+        "n_ctx": 64,
+        "obs_cue_barrier_ok": true,
+        "obs_image_barrier_ok": true,
+        "ood": true,
+        "seed": 0
+      }
+    },
+    "weights": {
+      "w_bce": 1.0,
+      "w_dice": 1.0,
+      "w_k": 0.0,
+      "w_pos": 0.25,
+      "w_q": 1.0,
+      "w_rank_cue": 0.25,
+      "w_rank_img": 1.0,
+      "w_z": 5.0
+    }
+  },
+  "final_z_classes": 8,
+  "interface_policy": {
+    "action_space": [
+      "0",
+      "1"
+    ],
+    "causal_chain": [
+      "cue",
+      "z",
+      "query_action",
+      "res_bit",
+      "decoder"
+    ],
+    "environment_response": "res_bit := _env_res_bit(h, k, action)",
+    "formal_contract": [
+      "the selected interface reveals the dynamic diagonal hidden by the poor observable",
+      "the selected interface and response bit determine a certified continuation step"
+    ],
+    "kind": "automatic_next_interface_selection",
+    "not_free_interface_search": true,
+    "policy_source": "query_logits := query_from_z(one_hot(argmax(z_logits.detach())))",
+    "policy_supervision": "_policy_action_from_h(h)",
+    "q_acc_by_split": {
+      "iid": 1.0,
+      "ood": 1.0
+    },
+    "query_action_rate_by_split": {
+      "iid": 0.5009765625,
+      "ood": 0.50439453125
+    },
+    "res_acc_by_split": {
+      "iid": 1.0,
+      "ood": 1.0
+    },
+    "semantic_reading": "the learned refined observable carries the action selecting the next dynamic query branch",
+    "status": "certified_supervised_binary_policy",
+    "z_acc_by_split": {
+      "iid": 1.0,
+      "ood": 1.0
+    }
+  },
+  "kind": "v22_to_lean_certificate",
+  "lean_targets": [
+    "PrimitiveHolonomy.Examples.GeometryDynamicsIndependence.MythosProblem.true_refined_observable_global_factorization",
+    "PrimitiveHolonomy.Empirical.V22LeanCertificate.v22_refined_selects_next_interface",
+    "PrimitiveHolonomy.Empirical.V22LeanCertificate.v22_refined_action_produces_certified_response",
+    "PrimitiveHolonomy.Empirical.V22LeanCertificate.v22_selected_interface_reveals_dynamic_diagonal",
+    "PrimitiveHolonomy.Empirical.V22LeanCertificate.v22_selected_interface_response_continues",
+    "PrimitiveHolonomy.MultiInterfaceModular.LocalFiniteClosureCover",
+    "PrimitiveHolonomy.MultiInterfaceModular.closed_of_localFiniteClosureCover",
+    "PrimitiveHolonomy.MultiInterfaceModular.DynamicResidualProfile",
+    "PrimitiveHolonomy.MultiInterfaceModular.no_residualAt_of_rhoAt_eq_zero",
+    "PrimitiveHolonomy.MultiInterfaceModular.globalClosure_of_noStableResidualSection"
+  ],
+  "local_finite_schema": {
+    "basis": [
+      {
+        "distinction_kind": "h",
+        "finite_class_cases_per_ctx_time": 128,
+        "finite_window_size": 2,
+        "witness_interface": "read_h"
+      },
+      {
+        "distinction_kind": "k",
+        "finite_class_cases_per_ctx_time": 128,
+        "finite_window_size": 2,
+        "witness_interface": "read_k"
+      }
+    ],
+    "case_count_per_ctx_time": 256,
+    "ctx_domain": "Nat",
+    "finite_exhaustive_global_reduction": false,
+    "global_state_enumeration": false,
+    "lean_targets": {
+      "coordinate": "PrimitiveHolonomy.MultiInterfaceModular.no_residualAt_of_rhoAt_eq_zero",
+      "dynamic_profile": "PrimitiveHolonomy.MultiInterfaceModular.DynamicResidualProfile",
+      "local_global": "PrimitiveHolonomy.MultiInterfaceModular.LocalFiniteClosureCover",
+      "stable_section": "PrimitiveHolonomy.MultiInterfaceModular.StableResidualSection"
+    },
+    "levels": [
+      4,
+      8,
+      16,
+      32
+    ],
+    "local_global_alignment": "LocalFiniteClosureCover_over_parameterized_finite_windows",
+    "time_domain": "Nat"
+  },
+  "n_classes": 8,
+  "negative_controls": [
+    {
+      "marginal_nogo_ok": true,
+      "minproof_ok": true,
+      "split": "iid",
+      "struct_ok": false,
+      "struct_rejected": true,
+      "z_classes": 1
+    },
+    {
+      "marginal_nogo_ok": true,
+      "minproof_ok": true,
+      "split": "ood",
+      "struct_ok": false,
+      "struct_rejected": true,
+      "z_classes": 1
+    },
+    {
+      "marginal_nogo_ok": true,
+      "minproof_ok": true,
+      "split": "iid",
+      "struct_ok": false,
+      "struct_rejected": true,
+      "z_classes": 2
+    },
+    {
+      "marginal_nogo_ok": true,
+      "minproof_ok": true,
+      "split": "ood",
+      "struct_ok": false,
+      "struct_rejected": true,
+      "z_classes": 2
+    },
+    {
+      "marginal_nogo_ok": true,
+      "minproof_ok": true,
+      "split": "iid",
+      "struct_ok": false,
+      "struct_rejected": true,
+      "z_classes": 3
+    },
+    {
+      "marginal_nogo_ok": true,
+      "minproof_ok": true,
+      "split": "ood",
+      "struct_ok": false,
+      "struct_rejected": true,
+      "z_classes": 3
+    },
+    {
+      "marginal_nogo_ok": true,
+      "minproof_ok": true,
+      "split": "iid",
+      "struct_ok": false,
+      "struct_rejected": true,
+      "z_classes": 4
+    },
+    {
+      "marginal_nogo_ok": true,
+      "minproof_ok": true,
+      "split": "ood",
+      "struct_ok": false,
+      "struct_rejected": true,
+      "z_classes": 4
+    },
+    {
+      "marginal_nogo_ok": true,
+      "minproof_ok": true,
+      "split": "iid",
+      "struct_ok": false,
+      "struct_rejected": true,
+      "z_classes": 5
+    },
+    {
+      "marginal_nogo_ok": true,
+      "minproof_ok": true,
+      "split": "ood",
+      "struct_ok": false,
+      "struct_rejected": true,
+      "z_classes": 5
+    },
+    {
+      "marginal_nogo_ok": true,
+      "minproof_ok": true,
+      "split": "iid",
+      "struct_ok": false,
+      "struct_rejected": true,
+      "z_classes": 6
+    },
+    {
+      "marginal_nogo_ok": true,
+      "minproof_ok": true,
+      "split": "ood",
+      "struct_ok": false,
+      "struct_rejected": true,
+      "z_classes": 6
+    },
+    {
+      "marginal_nogo_ok": true,
+      "minproof_ok": true,
+      "split": "iid",
+      "struct_ok": false,
+      "struct_rejected": true,
+      "z_classes": 7
+    },
+    {
+      "marginal_nogo_ok": true,
+      "minproof_ok": true,
+      "split": "ood",
+      "struct_ok": false,
+      "struct_rejected": true,
+      "z_classes": 7
+    }
+  ],
+  "observables": {
+    "poor": [
+      "image",
+      "cue"
+    ],
+    "refined": [
+      "image",
+      "cue",
+      "z",
+      "res_bit"
+    ]
+  },
+  "rejected_overclaims": [
+    "empirical success is not exported as an unbounded theorem",
+    "finite prefixes are not treated as global state enumeration",
+    "z<n negative controls are not accepted as refined observables",
+    "automatic interface selection is certified as supervised binary policy selection, not free interface discovery",
+    "the generated Lean file uses explicit certificate axioms in mode A"
+  ],
+  "run_dir": "/mnt/c/users/frederick/documents/foru2read/Empirical/aslmt/runs/aslmt_v22_perceptual_localglobal_dynamic_infinite_20260510_013011_c338ee97f453",
+  "run_tag": "20260510_013011_c338ee97f453",
+  "seed": 0,
+  "splits": [
+    "iid",
+    "ood"
+  ],
+  "trust_mode": "mode_A_certificate_as_explicit_Lean_hypotheses"
+}

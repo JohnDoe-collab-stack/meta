@@ -1,0 +1,8 @@
+{
+  "profile": "preflight",
+  "minimum_free_disk_multiplier_ppm": 1500000,
+  "minimum_cuda_memory_gib": 20,
+  "require_cuda": true,
+  "require_onnx": true,
+  "require_onnxruntime": true
+}

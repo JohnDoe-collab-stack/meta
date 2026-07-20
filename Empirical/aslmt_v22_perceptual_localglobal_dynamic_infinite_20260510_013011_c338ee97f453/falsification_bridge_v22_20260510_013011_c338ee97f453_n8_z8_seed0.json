@@ -1,0 +1,33 @@
+{
+  "mutations": {
+    "break_dynamic_elimination_count": {
+      "rejected": true,
+      "violation_count": 1
+    },
+    "break_lean_schema_domain": {
+      "rejected": true,
+      "violation_count": 1
+    },
+    "claim_global_exhaustion": {
+      "rejected": true,
+      "violation_count": 1
+    },
+    "erase_dimension_negative_control": {
+      "rejected": true,
+      "violation_count": 1
+    },
+    "hide_infinite_scope": {
+      "rejected": true,
+      "violation_count": 1
+    },
+    "lower_z_accuracy": {
+      "rejected": true,
+      "violation_count": 1
+    },
+    "turn_baseline_into_success": {
+      "rejected": true,
+      "violation_count": 1
+    }
+  },
+  "ok": true
+}

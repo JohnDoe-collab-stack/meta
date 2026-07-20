@@ -1,0 +1,11 @@
+{
+  "command": "Carbone/CP0/frozen_runs/cp0_target_reader_20260719T094729Z_sha256-4bdec976e5920568e9d0ea401ded8ff85bc6bdecb3257d3acb05b220694c07a2.py --mode synthetic-audit --out-targets-csv-gz Carbone/CP0/frozen_runs/cp0_synthetic_targets_20260719T094729Z_sha256-4bdec976e5920568e9d0ea401ded8ff85bc6bdecb3257d3acb05b220694c07a2.csv.gz --out-jsonl Carbone/CP0/frozen_runs/cp0_target_reader_20260719T094729Z_sha256-4bdec976e5920568e9d0ea401ded8ff85bc6bdecb3257d3acb05b220694c07a2.jsonl --out-txt Carbone/CP0/frozen_runs/cp0_target_reader_20260719T094729Z_sha256-4bdec976e5920568e9d0ea401ded8ff85bc6bdecb3257d3acb05b220694c07a2.txt --out-dependencies-json Carbone/CP0/frozen_runs/cp0_target_reader_dependencies_20260719T094729Z_sha256-4bdec976e5920568e9d0ea401ded8ff85bc6bdecb3257d3acb05b220694c07a2.json --run-suffix 20260719T094729Z_sha256-4bdec976e5920568e9d0ea401ded8ff85bc6bdecb3257d3acb05b220694c07a2 --script-sha256 4bdec976e5920568e9d0ea401ded8ff85bc6bdecb3257d3acb05b220694c07a2 --frozen-run",
+  "i0_manifest_sha256_declared_not_opened_in_synthetic": "da963892cf8caebf3ad5983773b866a13333260869805542b16d0be1aa01cb9b",
+  "implementation": "CPython",
+  "mode": "synthetic-audit",
+  "official_source_sha256_declared_not_opened_in_synthetic": "103c485fc009ee66f525c140611c8596d31f0673cdbb2ec16ec497ea44a58f6f",
+  "python_version": "3.10.12",
+  "reaction_pb2_sha256_schema_contract": "1ed2befa91faf00e76e9fd1ef555bf0da51c69a0085e5d7dd4db6418751bdd9c",
+  "script_sha256": "4bdec976e5920568e9d0ea401ded8ff85bc6bdecb3257d3acb05b220694c07a2",
+  "stdlib_only": true
+}

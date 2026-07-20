@@ -9,3 +9,14 @@ rev = "master"
 
 [[lean_lib]]
 name = "Meta"
+
+[[lean_lib]]
+name = "Carbone"
+
+[[lean_exe]]
+name = "export_two_phase"
+root = "Carbone.CW0.Lean.ExportTwoPhaseMain"
+
+[[lean_exe]]
+name = "export_cw1_energy"
+root = "Carbone.CW1.Lean.ExportEnergyMain"

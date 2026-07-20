@@ -1,0 +1,18 @@
+{
+  "kinds": {
+    "dimension_negative_control": 1,
+    "dynamic_context_bridge": 1,
+    "dynamic_infinite_zero_elimination_schema": 1,
+    "filtered_prefix_level": 4,
+    "infinite_schema_bridge": 1,
+    "infinite_schema_contract": 1,
+    "local_global_bridge": 2,
+    "local_global_infinite_cover_schema": 1,
+    "perceptual_learning_gate": 2,
+    "pointwise_finite_separation_basis_schema": 2,
+    "v22_bridge_metadata": 1
+  },
+  "meaning": "ok=True means v22 passed perceptual learning, negative controls, local-global bridge, dynamic finite-context scope, and the Lean-aligned infinite local-window schema.",
+  "ok": true,
+  "violation_count": 0
+}
