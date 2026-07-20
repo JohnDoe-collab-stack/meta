@@ -51,9 +51,9 @@ import Meta.Tarski.GapContraction
 import Meta.Tarski.ReferentialOrder
 import Meta.Tarski.DynamicReturn
 import Meta.Tarski.DynamicRelaxedUsage
+import Meta.Tarski.GenericPatchOrbit
 import Meta.Tarski.ConstructivePatchModel
 import Meta.Tarski.ConstructivePatchOrbit
-import Meta.Tarski.FoundationBridge
 import Meta.Beth.ImplicitExplicit
 import Meta.Beth.GapContraction
 import Meta.Bell.Coindexation
@@ -84,6 +84,7 @@ import Meta.Synthesis.TarskiBethBellGap
 #print axioms Meta.ActiveSemanticClosure.LeanValidation.aiLeanNonV23Obligations
 #print axioms Meta.ActiveSemanticClosure.Validation.aiFoundationalValidation
 #print axioms Meta.TarskiDynamicRelaxedUsage.tarskiDynamicRelaxedUsageSynthesis
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.genericPatchOrbitTheorem
 #print axioms Meta.ConstructivePatchModel.constructiveTarskiClosedSystem
 #print axioms Meta.ConstructivePatchModel.constructiveTarskiOrbitTheorem
 #print axioms Meta.ClosedStabilityTheorem.IdentityOfUseCell

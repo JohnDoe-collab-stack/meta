@@ -1,5 +1,10 @@
 # Plan de cloture de l'orbite constructive et de l'instance Foundation
 
+> Statut historique : la voie `FoundationBridge` de ce document n'est plus la
+> voie principale. La reconstruction autonome, sans constructeurs reflexifs
+> `fixed`/`closed`, est specifiee dans
+> `Docs/IntrinsicArithmeticTarskiOrbitImplementationPlan.md`.
+
 ## 0. Objet
 
 Le mecanisme central est maintenant habite et causal :
