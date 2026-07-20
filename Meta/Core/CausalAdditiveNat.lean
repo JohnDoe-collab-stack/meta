@@ -12,11 +12,16 @@ namespace Meta
 namespace CausalAdditive
 namespace CausalWord
 
+universe u v
+
 /-! ## Comparison maps -/
 
 /-- A fully constructive two-sided equivalence, kept local to the final
 comparison layer so the causal-word core remains import-free. -/
-structure ConstructiveEquivalence (Source Target : Type) where
+structure ConstructiveEquivalence
+    (Source : Type u)
+    (Target : Type v) :
+    Type (max u v) where
   toFun : Source -> Target
   invFun : Target -> Source
   left_inv : (source : Source) -> invFun (toFun source) = source
@@ -89,6 +94,80 @@ def equivalence : ConstructiveEquivalence CausalWord Nat where
   right_inv := toNat_ofNat
 
 end CausalWord
+
+/-! ## Visible natural projection of the realized causal object -/
+
+namespace AccumulatingCausalSystem.RealizedCausalNat
+
+variable {State : Type u}
+variable {Gap : Type v}
+variable {system : AccumulatingCausalSystem State Gap}
+variable {initial : State}
+
+/-- Forget the realized state and its causal memory, retaining the additive
+natural value carried by its causal word. -/
+def naturalProjection
+    (realizedNat : RealizedCausalNat system initial) :
+    Nat :=
+  CausalWord.toNat realizedNat.word
+
+/-- Rebuild the canonical realized causal object carrying a natural value. -/
+def naturalEmbedding
+    (number : Nat) :
+    RealizedCausalNat system initial :=
+  embed (CausalWord.ofNat number)
+
+/-- Visible natural projection preserves realized zero. -/
+theorem naturalProjection_zero :
+    naturalProjection (zero : RealizedCausalNat system initial) = 0 :=
+  rfl
+
+/-- Visible natural projection preserves realized successor. -/
+theorem naturalProjection_succ
+    (realizedNat : RealizedCausalNat system initial) :
+    naturalProjection (succ realizedNat) =
+      Nat.succ (naturalProjection realizedNat) :=
+  rfl
+
+/-- Visible natural projection preserves realized addition. -/
+theorem naturalProjection_add
+    (left right : RealizedCausalNat system initial) :
+    naturalProjection (add left right) =
+      naturalProjection left + naturalProjection right :=
+  CausalWord.toNat_add left.word right.word
+
+/-- Projecting a canonically embedded natural returns that natural. -/
+theorem naturalProjection_naturalEmbedding
+    (number : Nat) :
+    naturalProjection
+        (naturalEmbedding number : RealizedCausalNat system initial) =
+      number :=
+  CausalWord.toNat_ofNat number
+
+/-- Re-embedding the visible natural value recovers the complete realized
+object; the projection forgets fields but does not identify orbit elements. -/
+theorem naturalEmbedding_naturalProjection
+    (realizedNat : RealizedCausalNat system initial) :
+    naturalEmbedding (naturalProjection realizedNat) = realizedNat := by
+  calc
+    naturalEmbedding (naturalProjection realizedNat) =
+        embed (CausalWord.ofNat (CausalWord.toNat realizedNat.word)) := rfl
+    _ = embed realizedNat.word :=
+      congrArg embed (CausalWord.ofNat_toNat realizedNat.word)
+    _ = realizedNat := embed_word realizedNat
+
+/-- The visible natural projection is a constructive equivalence on the
+realized additive carrier, although it forgets its causal presentation. -/
+def naturalEquivalence :
+    CausalWord.ConstructiveEquivalence
+      (RealizedCausalNat system initial)
+      Nat where
+  toFun := naturalProjection
+  invFun := naturalEmbedding
+  left_inv := naturalEmbedding_naturalProjection
+  right_inv := naturalProjection_naturalEmbedding
+
+end AccumulatingCausalSystem.RealizedCausalNat
 end CausalAdditive
 end Meta
 
@@ -96,4 +175,7 @@ end Meta
 #print axioms Meta.CausalAdditive.CausalWord.equivalence
 #print axioms Meta.CausalAdditive.CausalWord.toNat_add
 #print axioms Meta.CausalAdditive.CausalWord.ofNat_add
+#print axioms Meta.CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalProjection
+#print axioms Meta.CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalProjection_add
+#print axioms Meta.CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalEquivalence
 /- AXIOM_AUDIT_END -/

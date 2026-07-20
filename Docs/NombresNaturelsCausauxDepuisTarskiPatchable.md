@@ -1099,21 +1099,37 @@ sont donc ni utilisées ni cachées dans la preuve de l’additivité.
 
 ## 18. Répétition visible et non-retour causal
 
-Une projection visible peut oublier la mémoire :
+Une théorie concrète peut porter une observation visible :
 
 ```text
-π : State → Visible
+observe : State → Visible
 ```
 
-Il peut alors arriver que :
+Sa non-injectivité est la propriété négative :
 
 ```text
-π(eval(S₀,u)) = π(eval(S₀,v))
+¬Injective(observe)
+
+:⇔
+
+¬(∀S T, observe(S) = observe(T) → S = T)
 ```
 
-pour deux mots distincts `u` et `v`.
+Elle n’est pas une conséquence générique de `(A)`, `(I)`, `(C)` ou de la
+patchabilité tarskienne. Elle appartient à la théorie mathématique ou au
+modèle qui définit `Visible` et `observe`.
 
-Mais la fidélité causale impose simultanément :
+Constructivement, cette négation ne produit pas automatiquement une
+collision. Une théorie peut fournir le certificat positif plus fort :
+
+```text
+∃u v,
+  u ≠ v
+  ∧ observe(eval(S₀,u)) = observe(eval(S₀,v))
+```
+
+Lorsqu’un tel certificat est construit, la fidélité causale impose
+simultanément :
 
 ```text
 u ≠ v
@@ -1123,7 +1139,10 @@ u ≠ v
 La valeur naturelle réalisée est donc déterminée par l’état causal complet,
 pas nécessairement par sa projection visible.
 
-Le visible peut boucler. L’action additive causale ne se contracte pas.
+Le visible peut donc boucler dans les théories qui démontrent cette
+non-injectivité, tandis que l’action additive causale ne se contracte pas. Les
+deux affirmations ont des statuts distincts : la fidélité causale est
+générique ; la non-injectivité visible est spécifique.
 
 ---
 
@@ -1618,11 +1637,107 @@ dans une dynamique causale à mémoire cumulative.
 
 ---
 
-## 23. Statut formel
+## 23. Coordonnée naturelle canonique
+
+L’objet naturel classique fournit une coordonnée canonique par la composition :
+
+```text
+RealizedCausalNat(S₀)
+  ──word──▶ CausalWord
+  ──toNat─▶ Nat
+```
+
+On nomme cette composition :
+
+```text
+coordNat : RealizedCausalNat(S₀) → Nat
+
+coordNat(x) := toNat(word(x))
+```
+
+Cette coordonnée préserve exactement la structure naturelle additive :
+
+```text
+coordNat(0ʳ) = 0
+
+coordNat(succʳ(x)) = Nat.succ(coordNat(x))
+
+coordNat(x +ʳ y) = coordNat(x) + coordNat(y)
+```
+
+Elle possède l’inverse constructif :
+
+```text
+embedNat : Nat → RealizedCausalNat(S₀)
+
+embedNat(n) := embed₀(ofNat(n))
+```
+
+et les deux lois :
+
+```text
+coordNat(embedNat(n)) = n
+
+embedNat(coordNat(x)) = x
+```
+
+Ainsi, `coordNat` est bijective sur le porteur réalisé :
+
+```text
+RealizedCausalNat(S₀) ≅ Nat
+```
+
+Cette bijectivité interdit de comprendre `coordNat` comme une projection
+visible non injective. Elle ne fusionne aucun objet réalisé et ne perd aucune
+information mathématique sur ce porteur, puisque `embedNat` reconstruit
+entièrement `x` depuis `coordNat(x)`.
+
+`Nat` ne porte certes pas comme champs explicites :
+
+```text
+state(x)
+memory(state(x))
+les gaps successivement réparés
+les événements produits dans chaque contexte
+les transports causaux complets
+```
+
+mais elles sont reconstructibles relativement au système et à l’origine `S₀`.
+La différence porte donc sur la présentation et la structure exposée, pas sur
+l’injectivité du porteur réalisé.
+
+Une véritable perspective visible est une application séparée :
+
+```text
+observe : RealizedCausalNat(S₀) → Visible
+```
+
+et sa difficulté classique éventuelle est :
+
+```text
+¬Injective(observe)
+```
+
+Cette propriété négative ne vient pas de `coordNat`. Elle doit être démontrée
+par la théorie ou le modèle qui définit l’observation. Un certificat explicite
+de collision visible constitue une donnée constructive plus forte.
+
+La conclusion complète est donc :
+
+```text
+Nat est la coordonnée additive canonique de RealizedCausalNat(S₀).
+
+La non-injectivité d’une perspective visible relève d’une application
+distincte et d’une théorie concrète.
+```
+
+---
+
+## 24. Statut formel
 
 Le résultat est réparti entre trois fichiers Lean.
 
-### 23.1 Noyau causal sans Nat
+### 24.1 Noyau causal sans Nat
 
 ```text
 Meta/Core/CausalAdditive.lean
@@ -1658,7 +1773,7 @@ RealizedCausalNat.memoryEquivalent_determines
 RealizedCausalNat.no_positive_absorption
 ```
 
-### 23.2 Identification finale à Nat
+### 24.2 Identification finale à Nat
 
 ```text
 Meta/Core/CausalAdditiveNat.lean
@@ -1679,7 +1794,20 @@ toNat(u +ᶜ v) = toNat(u) + toNat(v)
 ofNat(n + m) = ofNat(n) +ᶜ ofNat(m)
 ```
 
-### 23.3 Instance tarskienne fermée
+Ce fichier définit également la coordonnée de l’objet réalisé. Les identifiants
+Lean conservent le nom technique `naturalProjection`, mais
+`naturalEquivalence` prouve qu’il s’agit d’une coordonnée bijective :
+
+```text
+RealizedCausalNat.naturalProjection
+RealizedCausalNat.naturalEmbedding
+RealizedCausalNat.naturalProjection_zero
+RealizedCausalNat.naturalProjection_succ
+RealizedCausalNat.naturalProjection_add
+RealizedCausalNat.naturalEquivalence
+```
+
+### 24.3 Instance tarskienne fermée
 
 ```text
 Meta/Tarski/CausalAdditiveRealization.lean
@@ -1693,14 +1821,18 @@ tarskiAccumulatingCausalSystem
 tarskiCausalTransportStructure
 tarskiWordAction
 TarskiRealizedCausalNat
+tarskiNaturalProjection
+tarskiNaturalEmbedding
+tarskiNaturalEquivalence
 tarskiCausalAdditiveRealizationTheorem
 ```
 
 Le paquet final contient l’additivité et la fidélité de la transformation,
 l’additivité de l’orbite, les lois de l’objet réalisé, sa fidélité causale
-complète et la non-absorption de tout incrément positif.
+complète, la non-absorption de tout incrément positif, les trois lois de la
+coordonnée naturelle et son équivalence constructive avec `Nat`.
 
-### 23.4 Audit constructif
+### 24.4 Audit constructif
 
 La cible :
 

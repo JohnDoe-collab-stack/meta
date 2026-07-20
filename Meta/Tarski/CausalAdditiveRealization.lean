@@ -318,6 +318,70 @@ def tarskiRealizedAdd
     TarskiRealizedCausalNat patchable initial :=
   CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.add left right
 
+/-! ## Visible natural projection -/
+
+/-- Forget the Tarski causal state, memory, gaps, and contextual events while
+retaining the additive natural value of the realized causal word. -/
+def tarskiNaturalProjection
+    (patchable : PatchableArithmeticTarskiContext.{u, v})
+    (initial : patchable.context.Predicate)
+    (realized : TarskiRealizedCausalNat patchable initial) :
+    Nat :=
+  CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalProjection
+    realized
+
+/-- Canonically realize a visible natural value in the Tarski causal orbit. -/
+def tarskiNaturalEmbedding
+    (patchable : PatchableArithmeticTarskiContext.{u, v})
+    (initial : patchable.context.Predicate)
+    (number : Nat) :
+    TarskiRealizedCausalNat patchable initial :=
+  CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalEmbedding
+    number
+
+/-- The visible projection preserves realized Tarski zero. -/
+theorem tarskiNaturalProjection_zero
+    (patchable : PatchableArithmeticTarskiContext.{u, v})
+    (initial : patchable.context.Predicate) :
+    tarskiNaturalProjection
+        patchable initial (tarskiRealizedZero patchable initial) =
+      0 :=
+  CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalProjection_zero
+
+/-- The visible projection preserves realized Tarski successor. -/
+theorem tarskiNaturalProjection_succ
+    (patchable : PatchableArithmeticTarskiContext.{u, v})
+    (initial : patchable.context.Predicate)
+    (realized : TarskiRealizedCausalNat patchable initial) :
+    tarskiNaturalProjection
+        patchable initial
+        (tarskiRealizedSucc patchable initial realized) =
+      Nat.succ (tarskiNaturalProjection patchable initial realized) :=
+  CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalProjection_succ
+    realized
+
+/-- The visible projection preserves realized Tarski addition. -/
+theorem tarskiNaturalProjection_add
+    (patchable : PatchableArithmeticTarskiContext.{u, v})
+    (initial : patchable.context.Predicate)
+    (left right : TarskiRealizedCausalNat patchable initial) :
+    tarskiNaturalProjection
+        patchable initial
+        (tarskiRealizedAdd patchable initial left right) =
+      tarskiNaturalProjection patchable initial left +
+        tarskiNaturalProjection patchable initial right :=
+  CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalProjection_add
+    left right
+
+/-- The visible natural projection is bijective on the realized carrier. -/
+def tarskiNaturalEquivalence
+    (patchable : PatchableArithmeticTarskiContext.{u, v})
+    (initial : patchable.context.Predicate) :
+    CausalAdditive.CausalWord.ConstructiveEquivalence
+      (TarskiRealizedCausalNat patchable initial)
+      Nat :=
+  CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalEquivalence
+
 /-- The state of a realized Tarski sum is chronological causal evaluation. -/
 theorem tarskiRealizedAdd_state
     (patchable : PatchableArithmeticTarskiContext.{u, v})
@@ -464,6 +528,27 @@ structure TarskiCausalAdditiveRealizationTheorem
         (tarskiAccumulatingCausalSystem patchable initial).eval
           left.state
           right.word
+  naturalProjectionZero :
+    tarskiNaturalProjection
+        patchable initial (tarskiRealizedZero patchable initial) =
+      0
+  naturalProjectionSuccessor :
+    (realized : TarskiRealizedCausalNat patchable initial) ->
+      tarskiNaturalProjection
+          patchable initial
+          (tarskiRealizedSucc patchable initial realized) =
+        Nat.succ (tarskiNaturalProjection patchable initial realized)
+  naturalProjectionAdditive :
+    (left right : TarskiRealizedCausalNat patchable initial) ->
+      tarskiNaturalProjection
+          patchable initial
+          (tarskiRealizedAdd patchable initial left right) =
+        tarskiNaturalProjection patchable initial left +
+          tarskiNaturalProjection patchable initial right
+  naturalProjectionEquivalence :
+    CausalAdditive.CausalWord.ConstructiveEquivalence
+      (TarskiRealizedCausalNat patchable initial)
+      Nat
   realizedAssociative :
     (left middle right : TarskiRealizedCausalNat patchable initial) ->
       tarskiRealizedAdd patchable initial
@@ -501,6 +586,13 @@ def tarskiCausalAdditiveRealizationTheorem
   actionAdditive := causalWordState_add patchable initial
   actionFaithful := causalWordState_causallyFaithful patchable initial
   realizedStateAdditive := tarskiRealizedAdd_state patchable initial
+  naturalProjectionZero := tarskiNaturalProjection_zero patchable initial
+  naturalProjectionSuccessor :=
+    tarskiNaturalProjection_succ patchable initial
+  naturalProjectionAdditive :=
+    tarskiNaturalProjection_add patchable initial
+  naturalProjectionEquivalence :=
+    tarskiNaturalEquivalence patchable initial
   realizedAssociative := tarskiRealizedAdd_associative patchable initial
   realizedCommutative := tarskiRealizedAdd_commutative patchable initial
   realizedStateFaithful :=
@@ -520,6 +612,9 @@ end Meta
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.causalWordState_add
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.causalWordState_causallyFaithful
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiRealizedAdd_state
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiNaturalProjection
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiNaturalProjection_add
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiNaturalEquivalence
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiRealizedState_causallyFaithful
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiCausalAdditiveRealizationTheorem
 /- AXIOM_AUDIT_END -/
