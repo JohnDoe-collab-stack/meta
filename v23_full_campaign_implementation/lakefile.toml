@@ -1,0 +1,7 @@
+name = "v23_certification"
+version = "0.1.0"
+defaultTargets = ["V23"]
+
+[[lean_lib]]
+name = "V23"
+srcDir = "lean"

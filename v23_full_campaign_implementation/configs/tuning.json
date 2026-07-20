@@ -1,0 +1,7 @@
+{
+  "dropout_micros": [0, 100000],
+  "learning_rate_micros": [100, 300, 1000],
+  "maximum_updates": 30000,
+  "seeds": [100, 101, 102],
+  "weight_decay_micros": [0, 10000]
+}

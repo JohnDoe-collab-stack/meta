@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "certified-active-semantic-closure-v23"
+version = "0.1.0"
+description = "Autonomous implementation of the v23 certified active semantic closure campaign"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=2.0,<3",
+  "torch>=2.4,<3",
+  "cryptography>=43,<50",
+]
+
+[project.optional-dependencies]
+onnx = ["onnx>=1.17,<2", "onnxruntime>=1.20,<2"]
+test = ["pytest>=8,<9"]
+
+[project.scripts]
+v23-campaign = "v23.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["v23*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

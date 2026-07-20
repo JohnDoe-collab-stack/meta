@@ -1,0 +1,11 @@
+{
+  "batch_size": 64,
+  "checkpoint_interval": 5000,
+  "domains": ["perceptual", "symbolic"],
+  "maximum_updates": 120000,
+  "regimes": ["R_supervised", "R_intermediate", "R_causal"],
+  "seeds": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+  "sizes": ["small", "base", "large"],
+  "systems": ["B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "B10", "B11", "B12", "B13"],
+  "warmup_updates": 5000
+}

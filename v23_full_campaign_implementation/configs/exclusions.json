@@ -1,0 +1,9 @@
+{
+  "schema": "v23-pre-registered-exclusions-1",
+  "run_cell_exclusions": [],
+  "principal_contrast_exclusions": {
+    "B9": "External patch oracle; diagnostic upper bound only.",
+    "B12": "Direct next-state bypass; diagnostic only."
+  },
+  "rule": "Any additional exclusion requires a new protocol version before the affected run starts."
+}

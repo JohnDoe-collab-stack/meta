@@ -1,0 +1,10 @@
+.lake/
+__pycache__/
+*.pyc
+.pytest_cache/
+runs/
+snapshots/
+*.pt
+*.onnx
+*.npz
+*.aesgcm

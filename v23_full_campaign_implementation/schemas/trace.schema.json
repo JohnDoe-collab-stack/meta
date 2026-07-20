@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "v23-trace.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "episode_id", "system_id", "seed",
+    "observation_hash", "actual_world_id", "initial_fiber", "steps", "final_fiber",
+    "required_action", "predicted_action", "intervention_id", "closed"
+  ],
+  "properties": {
+    "schema_version": {"const": "v23.1"},
+    "episode_id": {"type": "string", "minLength": 1},
+    "system_id": {"type": "string", "minLength": 1},
+    "seed": {"type": "integer", "minimum": 0},
+    "observation_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "actual_world_id": {"type": "string", "minLength": 1},
+    "initial_fiber": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "steps": {"type": "array", "minItems": 1, "items": {"type": "object"}},
+    "final_fiber": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "required_action": {"type": "string"},
+    "predicted_action": {"type": "string"},
+    "intervention_id": {"type": ["string", "null"]},
+    "closed": {"type": "boolean"}
+  }
+}
