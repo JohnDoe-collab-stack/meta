@@ -1,6 +1,7 @@
 import Meta.Core.RelaxedUsageRegime
 import Meta.Core.BilateralCore
 import Meta.Core.CausalAdditive
+import Meta.Core.CausalTotality
 import Meta.Core.CausalAdditiveNat
 import Meta.Core.ProjectiveCore
 import Meta.Core.ProjectedIdentity
@@ -55,6 +56,8 @@ import Meta.Tarski.DynamicReturn
 import Meta.Tarski.DynamicRelaxedUsage
 import Meta.Tarski.GenericPatchOrbit
 import Meta.Tarski.VisibleCausalRecurrence
+import Meta.Tarski.CausalAccumulatingSystem
+import Meta.Tarski.CausalTotality
 import Meta.Tarski.CausalAdditiveRealization
 import Meta.Tarski.BareArithmetic.ClosedOrbit
 import Meta.Tarski.ConstructivePatchModel
@@ -91,6 +94,9 @@ import Meta.Synthesis.TarskiBethBellGap
 #print axioms Meta.TarskiDynamicRelaxedUsage.tarskiDynamicRelaxedUsageSynthesis
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.genericPatchOrbitTheorem
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.genericVisibleCausalNonRecurrenceTheorem
+#print axioms Meta.CausalAdditive.AccumulatingCausalSystem.cumulativeTotalityTheorem
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiCumulativeTotalityTheorem
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiNaturalHistoricalGap_injective
 #print axioms Meta.CausalAdditive.CausalWord.equivalence
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiCausalAdditiveRealizationTheorem
 #print axioms Meta.BareArithmeticTarski.bareArithmeticTarskiContext

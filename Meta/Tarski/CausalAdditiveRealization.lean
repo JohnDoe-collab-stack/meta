@@ -1,5 +1,5 @@
 import Meta.Core.CausalAdditiveNat
-import Meta.Tarski.CausalOrbit
+import Meta.Tarski.CausalTotality
 
 /-!
 # Additive causal realization for every patchable Tarski context
@@ -24,43 +24,6 @@ namespace ClosedStabilityTheorem
 namespace PatchableArithmeticTarskiContext
 
 universe u v
-
-/-! ## Closed accumulating system -/
-
-/-- The causal state before any Tarski repair. -/
-def initialCausalState
-    (patchable : PatchableArithmeticTarskiContext.{u, v})
-    (initial : patchable.context.Predicate) :
-    CausalState patchable initial where
-  current := initial
-  memory := CausalMemory.root
-
-/--
-Every patchable Tarski context is intrinsically an accumulating causal system.
-
-No generic causal law is left as an uninstantiated premise.
--/
-def tarskiAccumulatingCausalSystem
-    (patchable : PatchableArithmeticTarskiContext.{u, v})
-    (initial : patchable.context.Predicate) :
-    CausalAdditive.AccumulatingCausalSystem
-      (CausalState patchable initial)
-      patchable.context.Sentence where
-  gap := fun state => patchable.diagonalSentence state.current
-  Memory := fun state sentence =>
-    CausalMemory.Remembers patchable initial state.memory sentence
-  advance := CausalState.advance patchable initial
-  gap_absent := by
-    intro state
-    exact CausalState.currentGap_not_remembered patchable initial state
-  gap_inscribed := by
-    intro state
-    exact CausalState.advance_remembers_current_gap patchable initial state
-  memory_preserved := by
-    intro state sentence remembered
-    exact
-      CausalState.advance_remembers_previous
-        patchable initial state remembered
 
 /-! ## Intrinsic transcontextual Core transport -/
 
@@ -382,6 +345,31 @@ def tarskiNaturalEquivalence
       Nat :=
   CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalEquivalence
 
+/-- Realize a standard natural number inside the already constructed
+historical Tarski totality. -/
+def tarskiNaturalHistoricalGap
+    (patchable : PatchableArithmeticTarskiContext.{u, v})
+    (initial : patchable.context.Predicate)
+    (number : Nat) :
+    TarskiHistoricalGap patchable initial :=
+  (tarskiAccumulatingCausalSystem patchable initial).naturalHistoricalGap
+    (initialCausalState patchable initial)
+    number
+
+/-- Standard naturals inject into positive historical Tarski memory. -/
+theorem tarskiNaturalHistoricalGap_injective
+    (patchable : PatchableArithmeticTarskiContext.{u, v})
+    (initial : patchable.context.Predicate)
+    {left right : Nat}
+    (same :
+      tarskiNaturalHistoricalGap patchable initial left =
+        tarskiNaturalHistoricalGap patchable initial right) :
+    left = right :=
+  (tarskiAccumulatingCausalSystem patchable initial)
+    |>.naturalHistoricalGap_injective
+      (initialCausalState patchable initial)
+      same
+
 /-- The state of a realized Tarski sum is chronological causal evaluation. -/
 theorem tarskiRealizedAdd_state
     (patchable : PatchableArithmeticTarskiContext.{u, v})
@@ -489,12 +477,15 @@ theorem tarskiRealizedState_causallyFaithful
 /-! ## Closed theorem package -/
 
 /--
-The additive causal realization theorem closed over a patchable Tarski context.
+The cumulative-totality and additive causal realization theorem closed over a
+patchable Tarski context.
 -/
 structure TarskiCausalAdditiveRealizationTheorem
     (patchable : PatchableArithmeticTarskiContext.{u, v})
     (initial : patchable.context.Predicate) :
     Type (max u v) where
+  cumulativeTotality :
+    TarskiCumulativeTotalityTheorem patchable initial
   transformationAdditive :
     (left right : CausalAdditive.CausalWord) ->
     (state : CausalState patchable initial) ->
@@ -549,6 +540,11 @@ structure TarskiCausalAdditiveRealizationTheorem
     CausalAdditive.CausalWord.ConstructiveEquivalence
       (TarskiRealizedCausalNat patchable initial)
       Nat
+  naturalHistoricalGapInjective :
+    {left right : Nat} ->
+      tarskiNaturalHistoricalGap patchable initial left =
+          tarskiNaturalHistoricalGap patchable initial right ->
+        left = right
   realizedAssociative :
     (left middle right : TarskiRealizedCausalNat patchable initial) ->
       tarskiRealizedAdd patchable initial
@@ -580,6 +576,8 @@ def tarskiCausalAdditiveRealizationTheorem
     (patchable : PatchableArithmeticTarskiContext.{u, v})
     (initial : patchable.context.Predicate) :
     TarskiCausalAdditiveRealizationTheorem patchable initial where
+  cumulativeTotality :=
+    tarskiCumulativeTotalityTheorem patchable initial
   transformationAdditive := tarskiWordAction_add_at patchable initial
   transformationFaithful :=
     tarskiWordAction_pointwiseFaithful patchable initial
@@ -593,6 +591,8 @@ def tarskiCausalAdditiveRealizationTheorem
     tarskiNaturalCoordinate_add patchable initial
   naturalCoordinateEquivalence :=
     tarskiNaturalEquivalence patchable initial
+  naturalHistoricalGapInjective :=
+    tarskiNaturalHistoricalGap_injective patchable initial
   realizedAssociative := tarskiRealizedAdd_associative patchable initial
   realizedCommutative := tarskiRealizedAdd_commutative patchable initial
   realizedStateFaithful :=
@@ -615,6 +615,7 @@ end Meta
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiNaturalCoordinate
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiNaturalCoordinate_add
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiNaturalEquivalence
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiNaturalHistoricalGap_injective
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiRealizedState_causallyFaithful
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiCausalAdditiveRealizationTheorem
 /- AXIOM_AUDIT_END -/

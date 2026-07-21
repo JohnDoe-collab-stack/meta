@@ -1,4 +1,4 @@
-# Des gaps réparés à l’additivité naturelle causale
+# Des gaps réparés à l’additivité et à la totalité causales
 
 ## 1. Résultat démontré
 
@@ -17,16 +17,20 @@ fraîcheur intrinsèque des gaps
 → mémoire causale strictement enrichie
 → individuation intrinsèque des états réalisés
 → absence de contraction d’un chemin non vide
+→ totalité historique non épuisable par une étape
+→ réalisation d’une infinité de gaps dans cette totalité
 → addition par composition des chemins
 → action additive fidèle du pas causal
 → réalisation causale de (Nat, 0, succ, +)
 ```
 
-Le point fort est l’additivité réalisée. `Nat` n’est pas introduit comme une
-horloge externe servant à numéroter les états. Les mots causaux sont d’abord
-construits avec un mot vide et l’ajout d’un pas. Leur composition fournit
-l’addition. Le mécanisme tarskien prouve ensuite que cette addition agit sur
-les états sans contraction.
+Le résultat possède deux faces liées. L’additivité est réalisée sans utiliser
+`Nat` comme horloge externe : les mots causaux sont d’abord construits avec un
+mot vide et l’ajout d’un pas, puis leur composition fournit l’addition. La
+totalité historique est également construite avant `Nat` : elle contient tous
+les gaps produits, alors qu’aucun état réalisé ne l’épuise. Le mécanisme
+tarskien prouve à la fois la fidélité de l’action et l’exactitude de chaque
+extension de mémoire.
 
 Autrement dit :
 
@@ -1555,6 +1559,33 @@ state(x) ≃c state(y)
 
 et tel que `+ʳ` soit associative, commutative, cancellative et de neutre `0ʳ`.
 
+Le même contexte porte, avant l’identification à `Nat`, une totalité
+historique :
+
+```text
+HistoricalMemory(p₀,d)
+:⇔
+∃w : CausalWord,
+  Memory(eval(S₀,w),d)
+```
+
+avec les théorèmes fermés :
+
+```text
+Memory(advance(S),d)
+↔ Memory(S,d) ∨ d = gap(S)
+
+E(eval(S₀,w)) ⊊ HistoricalMemory(p₀)
+
+¬ExhaustsHistorical(S₀,eval(S₀,w))
+
+CausalWord ↪ HistoricalGap(p₀)
+```
+
+Ainsi, le théorème principal contient à la fois une réalisation additive de
+l’objet naturel et une totalité historique infinie qu’aucun état réalisé
+n’épuise.
+
 Le morphisme additif porte vers les transformations causales, et non vers le
 type brut des états. Posons :
 
@@ -1623,6 +1654,7 @@ La composition des chemins définit l’addition.
 L’évaluation transforme cette addition en composition de transitions.
 Tarski empêche toute contraction de cette représentation additive.
 Chaque gap devenu mémoire individue l’état futur par rapport à son passé.
+La totalité historique conserve tous les gaps sans devenir un état terminal.
 L’objet naturel causal est ainsi réalisé fidèlement dans les états complets.
 ```
 
@@ -1635,6 +1667,9 @@ La syntaxe libre des chemins porte l’objet naturel abstrait.
 
 Le mécanisme tarskien réalise fidèlement son addition
 dans une dynamique causale à mémoire cumulative.
+
+La même dynamique totalise historiquement tous les gaps produits
+sans qu’aucun état réalisé ne devienne globalement complet.
 ```
 
 ---
@@ -1853,12 +1888,264 @@ supposent ni que `gap` soit injective sur tout le type des états, ni que toute
 observation visible soit injective. La question d’une observation visible
 non injective reste séparée et a été délimitée au §18.
 
-La coordonnée naturelle de la section suivante est construite après cette
-individuation causale. Elle la recode bijectivement ; elle ne la produit pas.
+La totalité historique de la section suivante rassemble ces témoins
+d’individuation sans les contracter dans un état terminal. La coordonnée
+naturelle n’est introduite qu’ensuite, au §25.
 
 ---
 
-## 24. Coordonnée naturelle canonique
+## 24. Totalité historique sans clôture globale
+
+La mémoire cumulative permet de distinguer deux notions qui ne sont plus
+identifiées par le cadre :
+
+```text
+globalité d’un état
+= ce que cet état détermine et mémorise actuellement
+
+totalisation historique
+= tout ce qui a été positivement mémorisé
+  à une étape de l’histoire engendrée
+```
+
+Cette distinction est formalisée avant toute importation de `Nat` dans :
+
+```text
+Meta/Core/CausalTotality.lean
+```
+
+### 24.1 Croissance stricte de chaque étape
+
+Pour un système à mémoire cumulative, posons :
+
+```text
+E(S,d) :⇔ Memory(S,d)
+```
+
+La préservation donne :
+
+```text
+∀d, E(S,d) → E(advance(S),d)
+```
+
+Le gap courant fournit simultanément :
+
+```text
+¬E(S,gap(S))
+
+E(advance(S),gap(S))
+```
+
+Le Core ne représente pas cette croissance par une simple négation d’égalité
+entre prédicats. Il construit une donnée positive :
+
+```text
+StrictPredicateInclusion(E(S),E(advance(S)))
+```
+
+qui contient l’inclusion, le témoin `gap(S)`, son absence dans la source et sa
+présence dans la cible. Le théorème est :
+
+```text
+advance_strictMemoryExtension
+```
+
+On peut donc écrire constructivement :
+
+```text
+E(S) ⊊ E(advance(S))
+```
+
+sans `propext` et sans égalité décisionnelle sur les gaps.
+
+### 24.2 Définition de la totalité historique
+
+Fixons une origine `S₀`. La totalité historique est le prédicat :
+
+```text
+HistoricalMemory(S₀,d)
+:⇔
+∃w : CausalWord,
+  Memory(eval(S₀,w),d)
+```
+
+Elle rassemble toutes les obligations positivement réalisées à une étape
+finie. Elle n’est pas ajoutée au type `State` et n’est pas déclarée être un
+état terminal.
+
+Pour chaque mot `w`, posons :
+
+```text
+S_w := eval(S₀,w)
+E_w(d) :⇔ Memory(S_w,d)
+```
+
+Toute mémoire d’étape est incluse dans la totalité historique :
+
+```text
+E_w(d) → HistoricalMemory(S₀,d)
+```
+
+Mais le gap courant de cette étape donne un témoin explicite de non-exhaustion :
+
+```text
+¬E_w(gap(S_w))
+
+HistoricalMemory(S₀,gap(S_w))
+```
+
+La seconde ligne est prouvée avec le mot témoin `succᶜ(w)`. Ainsi :
+
+```text
+E_w ⊊ HistoricalMemory(S₀)
+```
+
+pour tout `w`. C’est
+`stageMemory_strictlyIncluded_historical`.
+
+Le Core définit également :
+
+```text
+ExhaustsHistorical(S₀,S)
+:⇔
+∀d, HistoricalMemory(S₀,d) ↔ Memory(S,d)
+```
+
+et prouve :
+
+```text
+∀w,
+¬ExhaustsHistorical(S₀,eval(S₀,w))
+```
+
+C’est `no_stage_exhausts_historical`. Aucun état de l’orbite réalisée
+n’épuise donc la totalité de son histoire.
+
+### 24.3 Infini réalisé dans la totalité historique
+
+Le gap historique associé à un mot est :
+
+```text
+historicalGap(S₀,w) := gap(eval(S₀,w))
+```
+
+Le Core prouve :
+
+```text
+historicalGap(S₀,u) = historicalGap(S₀,v)
+→ u = v
+```
+
+C’est `historicalGap_injective`. La preuve n’utilise aucun indice naturel :
+`CausalWord.compare` oriente les deux mots par préfixe, puis la fraîcheur du
+gap sépare la source de toute extension positive.
+
+On forme ensuite le type positif :
+
+```text
+HistoricalGap(S₀)
+:=
+{d : Gap // HistoricalMemory(S₀,d)}
+```
+
+et la réalisation :
+
+```text
+realizedHistoricalGap(S₀)
+:
+CausalWord → HistoricalGap(S₀)
+```
+
+avec :
+
+```text
+realizedHistoricalGap(S₀,u)
+= realizedHistoricalGap(S₀,v)
+→ u = v
+```
+
+La totalité historique contient donc constructivement une copie fidèle de
+tous les mots causaux. Lorsque l’identification finale à `Nat` est introduite,
+on obtient :
+
+```text
+Nat ↪ HistoricalGap(S₀)
+```
+
+L’infini n’est pas seulement potentiel au sens où chaque état pourrait être
+prolongé. Une famille infinie de déterminations distinctes est réalisée dans
+le type des gaps historiquement mémorisés.
+
+### 24.4 Exactitude de l’extension tarskienne
+
+Les trois lois abstraites suffisent à la croissance stricte, mais elles
+n’interdisent pas qu’un système abstrait ajoute simultanément d’autres gaps.
+La mémoire tarskienne concrète fournit le résultat exact :
+
+```text
+Memory(advance(S),d)
+↔
+Memory(S,d) ∨ d = gap(S)
+```
+
+C’est `tarskiAdvance_memory_iff`, prouvé dans :
+
+```text
+Meta/Tarski/CausalTotality.lean
+```
+
+Il découle directement de la définition inductive :
+
+```text
+Remembers(extend(previous,event),d)
+:⇔
+d = event.diagonalSentence ∨ Remembers(previous,d)
+```
+
+Le changement d’ordre de la disjonction est constructif. Aucun principe de
+décision sur l’égalité des phrases n’est requis.
+
+Ainsi, dans l’instance tarskienne, chaque pas ajoute extensionnellement
+exactement le gap courant et préserve tout le passé.
+
+### 24.5 Rupture entre globalité et totalisation
+
+Les théorèmes précédents donnent simultanément :
+
+```text
+∀w,
+gap(S_w) ∉ E_w
+```
+
+et :
+
+```text
+∀w,
+gap(S_w) ∈ HistoricalMemory(S₀)
+```
+
+La première propriété maintient l’incomplétude de chaque état réalisé. La
+seconde garantit que toute exclusion diagonale engendrée devient une
+détermination positive de l’histoire.
+
+La conclusion formalisée est donc :
+
+```text
+aucun état réalisé ne contient la totalité historique
+
+mais
+
+aucun gap engendré par l’histoire n’échappe à cette totalité
+```
+
+La totalisation est réalisée comme prédicat historique et comme type positif
+de gaps mémorisés. Elle n’est pas réalisée comme clôture globale dans un état
+final. L’incomplétude n’est plus l’opposé de la totalisation : elle produit
+strictement son contenu tout en empêchant son achèvement global dans l’orbite.
+
+---
+
+## 25. Coordonnée naturelle canonique
 
 L’objet naturel classique fournit une coordonnée canonique par la composition :
 
@@ -1954,11 +2241,12 @@ distincte et d’une théorie concrète.
 
 ---
 
-## 25. Statut formel
+## 26. Statut formel
 
-Le résultat est réparti entre trois fichiers Lean.
+Le résultat est réparti en couches dont les dépendances suivent l’ordre
+mathématique de la construction.
 
-### 25.1 Noyau causal sans Nat
+### 26.1 Noyau causal et additif sans Nat
 
 ```text
 Meta/Core/CausalAdditive.lean
@@ -2001,7 +2289,82 @@ RealizedCausalNat.state_eq_determines_word
 RealizedCausalNat.no_positive_absorption
 ```
 
-### 25.2 Identification finale à Nat
+### 26.2 Totalité historique générique sans Nat
+
+```text
+Meta/Core/CausalTotality.lean
+```
+
+Ce fichier construit :
+
+```text
+StrictPredicateInclusion
+stageMemory
+HistoricalMemory
+HistoricalGap
+realizedHistoricalGap
+ExhaustsHistorical
+CumulativeTotalityTheorem
+```
+
+et prouve notamment :
+
+```text
+advance_strictMemoryExtension
+stageMemory_strictlyIncluded_historical
+currentGap_mem_historical
+historicalGap_injective
+realizedHistoricalGap_injective
+no_stage_exhausts_historical
+cumulativeTotalityTheorem
+```
+
+Ce fichier importe seulement `Meta.Core.CausalAdditive`. Il ne dépend pas de
+`CausalAdditiveNat`.
+
+### 26.3 Adaptateur tarskien cumulatif sans Nat
+
+```text
+Meta/Tarski/CausalAccumulatingSystem.lean
+```
+
+Ce fichier extrait de la mémoire tarskienne intrinsèque :
+
+```text
+initialCausalState
+tarskiAccumulatingCausalSystem
+```
+
+L’adaptateur ne dépend pas de la couche d’identification à `Nat`.
+
+### 26.4 Totalité historique tarskienne exacte sans Nat
+
+```text
+Meta/Tarski/CausalTotality.lean
+```
+
+Ce fichier construit et prouve :
+
+```text
+tarskiAdvance_memory_iff
+tarskiHistoricalMemory
+tarskiHistoricalGap
+TarskiHistoricalGap
+tarskiRealizedHistoricalGap
+tarskiAdvance_strictMemoryExtension
+tarskiStageMemory_strictlyIncluded_historical
+tarskiCurrentGap_mem_historical
+tarskiHistoricalGap_injective
+tarskiRealizedHistoricalGap_injective
+tarskiNoStage_exhausts_historical
+TarskiCumulativeTotalityTheorem
+tarskiCumulativeTotalityTheorem
+```
+
+Le paquet final combine le théorème générique de totalité cumulative et la
+loi d’exactitude propre à la mémoire tarskienne.
+
+### 26.5 Identification finale à Nat
 
 ```text
 Meta/Core/CausalAdditiveNat.lean
@@ -2031,44 +2394,51 @@ RealizedCausalNat.naturalCoordinate_zero
 RealizedCausalNat.naturalCoordinate_succ
 RealizedCausalNat.naturalCoordinate_add
 RealizedCausalNat.naturalEquivalence
+AccumulatingCausalSystem.naturalHistoricalGap
+AccumulatingCausalSystem.naturalHistoricalGap_injective
 ```
 
-### 25.3 Instance tarskienne fermée
+### 26.6 Réalisation additive tarskienne fermée
 
 ```text
 Meta/Tarski/CausalAdditiveRealization.lean
 ```
 
 Pour tout `PatchableArithmeticTarskiContext` et tout candidat initial, ce
-fichier construit :
+fichier prolonge l’adaptateur cumulatif avec :
 
 ```text
-tarskiAccumulatingCausalSystem
 tarskiCausalTransportStructure
 tarskiWordAction
 TarskiRealizedCausalNat
 tarskiNaturalCoordinate
 tarskiNaturalEmbedding
 tarskiNaturalEquivalence
+tarskiNaturalHistoricalGap
+tarskiNaturalHistoricalGap_injective
 tarskiRealizedState_causallyDeterminesWord
 tarskiRealizedState_causallyFaithful
 tarskiCausalAdditiveRealizationTheorem
 ```
 
-Le paquet final contient l’additivité et la fidélité de la transformation,
-l’additivité de l’orbite, les lois de l’objet réalisé, sa fidélité causale
-complète, la non-absorption de tout incrément positif, les trois lois de la
-coordonnée naturelle et son équivalence constructive avec `Nat`.
+Le paquet final contient le paquet de totalité cumulative, l’additivité et la
+fidélité de la transformation, l’additivité de l’orbite, les lois de l’objet
+réalisé, sa fidélité causale complète, la non-absorption de tout incrément
+positif, les trois lois de la coordonnée naturelle et son équivalence
+constructive avec `Nat`.
 
-### 25.4 Audit constructif
+### 26.7 Audit constructif
 
-La cible :
+Les cibles principales :
 
 ```text
+lake build Meta.Core.CausalTotality
+lake build Meta.Tarski.CausalAccumulatingSystem
+lake build Meta.Tarski.CausalTotality
 lake build Meta.Tarski.CausalAdditiveRealization
 ```
 
-compile intégralement. Les blocs `#print axioms` des trois fichiers déclarent
+compilent intégralement. Les blocs `#print axioms` de chaque fichier déclarent
 que toutes les déclarations principales sont indépendantes de tout axiome.
 La preuve n’utilise ni `Classical`, ni `propext`, ni `Quot.sound`, ni quotient,
 ni rang, ni fenêtre, ni pont terminal externe. Aucune déclaration principale

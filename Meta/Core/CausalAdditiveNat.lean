@@ -1,4 +1,4 @@
-import Meta.Core.CausalAdditive
+import Meta.Core.CausalTotality
 
 /-!
 # Final identification of causal words with `Nat`
@@ -95,6 +95,44 @@ def equivalence : ConstructiveEquivalence CausalWord Nat where
 
 end CausalWord
 
+/-! ## Final natural indexing of historical gaps -/
+
+namespace AccumulatingCausalSystem
+
+variable {State : Type u}
+variable {Gap : Type v}
+
+/-- Realize a standard natural number as a positive historical gap only after
+the causal historical totality has already been constructed. -/
+def naturalHistoricalGap
+    (system : AccumulatingCausalSystem State Gap)
+    (initial : State)
+    (number : Nat) :
+    system.HistoricalGap initial :=
+  system.realizedHistoricalGap initial (CausalWord.ofNat number)
+
+/-- Standard naturals inject into the already realized historical-gap
+totality. -/
+theorem naturalHistoricalGap_injective
+    (system : AccumulatingCausalSystem State Gap)
+    (initial : State)
+    {left right : Nat}
+    (same :
+      system.naturalHistoricalGap initial left =
+        system.naturalHistoricalGap initial right) :
+    left = right := by
+  have sameWord :
+      CausalWord.ofNat left = CausalWord.ofNat right :=
+    system.realizedHistoricalGap_injective initial same
+  calc
+    left = CausalWord.toNat (CausalWord.ofNat left) :=
+      (CausalWord.toNat_ofNat left).symm
+    _ = CausalWord.toNat (CausalWord.ofNat right) :=
+      congrArg CausalWord.toNat sameWord
+    _ = right := CausalWord.toNat_ofNat right
+
+end AccumulatingCausalSystem
+
 /-! ## Canonical natural coordinate of the realized causal object -/
 
 namespace AccumulatingCausalSystem.RealizedCausalNat
@@ -175,6 +213,7 @@ end Meta
 #print axioms Meta.CausalAdditive.CausalWord.equivalence
 #print axioms Meta.CausalAdditive.CausalWord.toNat_add
 #print axioms Meta.CausalAdditive.CausalWord.ofNat_add
+#print axioms Meta.CausalAdditive.AccumulatingCausalSystem.naturalHistoricalGap_injective
 #print axioms Meta.CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalCoordinate
 #print axioms Meta.CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalCoordinate_add
 #print axioms Meta.CausalAdditive.AccumulatingCausalSystem.RealizedCausalNat.naturalEquivalence
