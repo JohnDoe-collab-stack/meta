@@ -367,9 +367,14 @@ theorem substitutionMachineStep_pushedTask
         (substitutionMachineState (substitutionStackPush task work) results)
         value =
       substitutionExecuteTask task work results value := by
-  unfold substitutionMachineStep substitutionMachineState
+  unfold substitutionMachineStep substitutionMachineState substitutionStackPush
   rw [natUnpairLeft_pair, natUnpairRight_pair]
-  unfold substitutionStackPush
+  change
+    substitutionExecuteTask
+        (natUnpairLeft (natPair task work))
+        (natUnpairRight (natPair task work))
+        results value =
+      substitutionExecuteTask task work results value
   rw [natUnpairLeft_pair, natUnpairRight_pair]
 
 /-- Splitting an iteration count executes the two blocks consecutively. -/
@@ -625,9 +630,9 @@ theorem RawTerm.substitutionMachineRun_correct
   | zero =>
       rw [RawTerm.substitutionCost, substitutionMachineRun_one]
       rw [substitutionMachineStep_processTermTask]
-      simp [substitutionProcessTermStep, RawTerm.code,
-        substitutionPushResult, RawTerm.substitute,
-        natUnpairLeft_pair, natUnpairRight_pair]
+      simp only [substitutionProcessTermStep, RawTerm.code,
+        natUnpairLeft_pair]
+      rfl
   | succ body inductionHypothesis =>
       rw [RawTerm.substitutionCost, substitutionMachineRun_succ]
       rw [substitutionMachineStep_processTermTask]
@@ -697,9 +702,9 @@ theorem RawFormula.substitutionMachineRun_correct
   | falsum =>
       rw [RawFormula.substitutionCost, substitutionMachineRun_one]
       rw [substitutionMachineStep_processFormulaTask]
-      simp [substitutionProcessFormulaStep, RawFormula.code,
-        substitutionPushResult, RawFormula.substitute,
-        natUnpairLeft_pair, natUnpairRight_pair]
+      simp only [substitutionProcessFormulaStep, RawFormula.code,
+        natUnpairLeft_pair]
+      rfl
   | equal left right =>
       rw [RawFormula.substitutionCost, substitutionMachineRun_succ]
       rw [substitutionMachineStep_processFormulaTask]
@@ -968,8 +973,8 @@ theorem substitutionMachineStep_completed
         (substitutionMachineState 0 results)
         value =
       substitutionMachineState 0 results := by
-  simp [substitutionMachineStep, substitutionMachineState,
-    natUnpairLeft_pair, natUnpairRight_pair]
+  unfold substitutionMachineStep substitutionMachineState
+  rw [natUnpairLeft_pair, natUnpairRight_pair]
 
 /-- A completed machine state is fixed by every further run. -/
 theorem substitutionMachineRun_completed
@@ -1009,8 +1014,8 @@ theorem machineSubstituteNumeralCode_code
       rw [RawFormula.substitute_numeralAtDepth_zero] at exactRun
       unfold substitutionMachineInitialState
       rw [exactRun, substitutionMachineRun_completed]
-      simp [substitutionMachineState, substitutionStackPush,
-        substitutionStackHead, natUnpairLeft_pair, natUnpairRight_pair]
+      unfold substitutionMachineState
+      rw [natUnpairRight_pair, substitutionStackHead_push]
 
 end BareArithmeticTarski
 end Meta

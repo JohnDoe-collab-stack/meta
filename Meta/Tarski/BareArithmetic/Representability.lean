@@ -59,10 +59,8 @@ theorem fittedOffset_lt_ambient
 
 /-- Original graph inputs fit exactly after the intermediate block. -/
 theorem originalInputsFit (total inputArity : Nat) :
-    Nat.succ total + inputArity <= total + Nat.succ inputArity :=
-  Eq.le
-    ((Nat.succ_add total inputArity).trans
-      (Nat.add_succ total inputArity).symm)
+    Nat.succ total + inputArity <= total + Nat.succ inputArity := by
+  rw [Nat.succ_add, Nat.add_succ]
 
 /-- A block beginning at zero and using its whole declared length fits. -/
 theorem zeroOffsetFits (length : Nat) : 0 + length <= length :=

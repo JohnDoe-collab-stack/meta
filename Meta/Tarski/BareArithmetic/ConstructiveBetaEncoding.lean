@@ -53,7 +53,7 @@ theorem natAddInterchange (first second third fourth : Nat) :
 /-- A right summand is below the whole sum, by recursion on the left one. -/
 theorem natLeAddLeft (right left : Nat) : right <= left + right := by
   induction left with
-  | zero => exact Eq.le (Nat.zero_add right).symm
+  | zero => rw [Nat.zero_add]
   | succ left inductionHypothesis =>
       exact Eq.mp
         (congrArg (fun upper => right <= upper)

@@ -11,6 +11,46 @@ self-substitution on every well-formed formula code.
 namespace Meta
 namespace BareArithmeticTarski
 
+/-!
+Projection bounds are data carried by the positive program trees.  Keep them
+as explicit constructive proofs so the programs do not inherit tactic axioms.
+-/
+
+private theorem indexZero_lt_two : 0 < 2 :=
+  Nat.zero_lt_succ 1
+
+private theorem indexOne_lt_two : 1 < 2 :=
+  Nat.succ_lt_succ (Nat.zero_lt_succ 0)
+
+private theorem indexOne_lt_four : 1 < 4 :=
+  Nat.succ_lt_succ (Nat.zero_lt_succ 2)
+
+private theorem indexThree_lt_four : 3 < 4 :=
+  Nat.succ_lt_succ
+    (Nat.succ_lt_succ
+      (Nat.succ_lt_succ (Nat.zero_lt_succ 0)))
+
+private theorem indexZero_lt_five : 0 < 5 :=
+  Nat.zero_lt_succ 4
+
+private theorem indexOne_lt_five : 1 < 5 :=
+  Nat.succ_lt_succ (Nat.zero_lt_succ 3)
+
+private theorem indexTwo_lt_five : 2 < 5 :=
+  Nat.succ_lt_succ
+    (Nat.succ_lt_succ (Nat.zero_lt_succ 2))
+
+private theorem indexThree_lt_five : 3 < 5 :=
+  Nat.succ_lt_succ
+    (Nat.succ_lt_succ
+      (Nat.succ_lt_succ (Nat.zero_lt_succ 1)))
+
+private theorem indexFour_lt_five : 4 < 5 :=
+  Nat.succ_lt_succ
+    (Nat.succ_lt_succ
+      (Nat.succ_lt_succ
+        (Nat.succ_lt_succ (Nat.zero_lt_succ 0))))
+
 @[simp] theorem PRFunction.run_predecessor (value : Nat) :
     PRFunction.predecessor.run (NatVector.cons value NatVector.nil) =
       value.pred :=
@@ -29,6 +69,10 @@ namespace BareArithmeticTarski
       natDouble value :=
   PRFunction.run_eq_of_evaluates
     (PRFunction.double_evaluates value)
+
+@[simp] theorem PRFunction.run_identity (value : Nat) :
+    PRFunction.identity.run (NatVector.cons value NatVector.nil) = value :=
+  rfl
 
 /-! ## Context-polymorphic numeric constructors -/
 
@@ -141,11 +185,11 @@ def PRFunction.machineBuildBinaryIn
 /-! ## Program for one term-processing task -/
 
 def PRFunction.machineProcessTermStep : PRFunction 5 :=
-  let code := PRFunction.projection 5 0 (by omega)
-  let depth := PRFunction.projection 5 1 (by omega)
-  let work := PRFunction.projection 5 2 (by omega)
-  let results := PRFunction.projection 5 3 (by omega)
-  let value := PRFunction.projection 5 4 (by omega)
+  let code := PRFunction.projection 5 0 indexZero_lt_five
+  let depth := PRFunction.projection 5 1 indexOne_lt_five
+  let work := PRFunction.projection 5 2 indexTwo_lt_five
+  let results := PRFunction.projection 5 3 indexThree_lt_five
+  let value := PRFunction.projection 5 4 indexFour_lt_five
   let encoded := PRFunction.unaryIn PRFunction.predecessor code
   let tag := PRFunction.unaryIn PRFunction.unpairLeft encoded
   let payload := PRFunction.unaryIn PRFunction.unpairRight encoded
@@ -197,10 +241,10 @@ def PRFunction.machineProcessTermStep : PRFunction 5 :=
 /-! ## Program for one formula-processing task -/
 
 def PRFunction.machineProcessFormulaStep : PRFunction 5 :=
-  let code := PRFunction.projection 5 0 (by omega)
-  let depth := PRFunction.projection 5 1 (by omega)
-  let work := PRFunction.projection 5 2 (by omega)
-  let results := PRFunction.projection 5 3 (by omega)
+  let code := PRFunction.projection 5 0 indexZero_lt_five
+  let depth := PRFunction.projection 5 1 indexOne_lt_five
+  let work := PRFunction.projection 5 2 indexTwo_lt_five
+  let results := PRFunction.projection 5 3 indexThree_lt_five
   let encoded := PRFunction.unaryIn PRFunction.predecessor code
   let tag := PRFunction.unaryIn PRFunction.unpairLeft encoded
   let payload := PRFunction.unaryIn PRFunction.unpairRight encoded
@@ -248,8 +292,8 @@ def PRFunction.machineProcessFormulaStep : PRFunction 5 :=
 /-! ## Complete one-step dispatcher -/
 
 def PRFunction.machineStep : PRFunction 2 :=
-  let state := PRFunction.projection 2 0 (by omega)
-  let value := PRFunction.projection 2 1 (by omega)
+  let state := PRFunction.projection 2 0 indexZero_lt_two
+  let value := PRFunction.projection 2 1 indexOne_lt_two
   let work := PRFunction.unaryIn PRFunction.unpairLeft state
   let results := PRFunction.unaryIn PRFunction.unpairRight state
   let encodedWork := PRFunction.unaryIn PRFunction.predecessor work
@@ -311,13 +355,13 @@ def PRFunction.machineStep : PRFunction 2 :=
 def PRFunction.machineIterationStep : PRFunction 4 :=
   PRFunction.composition PRFunction.machineStep
     (PRFunctionVector.cons
-      (PRFunction.projection 4 1 (by omega))
+      (PRFunction.projection 4 1 indexOne_lt_four)
       (PRFunctionVector.singleton
-        (PRFunction.projection 4 3 (by omega))))
+        (PRFunction.projection 4 3 indexThree_lt_four)))
 
 def PRFunction.machineRun : PRFunction 3 :=
   PRFunction.primitiveRecursion
-    (PRFunction.projection 2 0 (by omega))
+    (PRFunction.projection 2 0 indexZero_lt_two)
     PRFunction.machineIterationStep
 
 def PRFunction.machineInitialState : PRFunction 1 :=
@@ -331,8 +375,8 @@ def PRFunction.machineInitialState : PRFunction 1 :=
     (PRFunction.constant 1 0)
 
 def PRFunction.machineSubstituteNumeral : PRFunction 2 :=
-  let code := PRFunction.projection 2 0 (by omega)
-  let value := PRFunction.projection 2 1 (by omega)
+  let code := PRFunction.projection 2 0 indexZero_lt_two
+  let value := PRFunction.projection 2 1 indexOne_lt_two
   let fuel := PRFunction.unaryIn PRFunction.double code
   let initial := PRFunction.unaryIn PRFunction.machineInitialState code
   let finalState := PRFunction.composition PRFunction.machineRun
@@ -363,8 +407,11 @@ def PRFunction.captureAvoidingDiagonalSubstitution : PRFunction 1 :=
   cases stack with
   | zero => rfl
   | succ encoded =>
-      simp [PRFunction.machineStackHead, substitutionStackHead,
-        natIfZero]
+      unfold PRFunction.machineStackHead
+      rw [PRFunction.run_select, PRFunction.run_identity,
+        PRFunction.run_zero, PRFunction.run_unaryIn,
+        PRFunction.run_predecessor, PRFunction.run_unpairLeft]
+      rfl
 
 @[simp] theorem PRFunction.run_machineStackTail (stack : Nat) :
     PRFunction.machineStackTail.run (NatVector.cons stack NatVector.nil) =
@@ -372,8 +419,11 @@ def PRFunction.captureAvoidingDiagonalSubstitution : PRFunction 1 :=
   cases stack with
   | zero => rfl
   | succ encoded =>
-      simp [PRFunction.machineStackTail, substitutionStackTail,
-        natIfZero]
+      unfold PRFunction.machineStackTail
+      rw [PRFunction.run_select, PRFunction.run_identity,
+        PRFunction.run_zero, PRFunction.run_unaryIn,
+        PRFunction.run_predecessor, PRFunction.run_unpairRight]
+      rfl
 
 @[simp] theorem PRFunction.run_machineTask (tag payload : Nat) :
     PRFunction.machineTask.run
@@ -395,7 +445,9 @@ def PRFunction.captureAvoidingDiagonalSubstitution : PRFunction 1 :=
     (inputs : NatVector arity) :
     (PRFunction.machineStackPushIn item stack).run inputs =
       substitutionStackPush (item.run inputs) (stack.run inputs) := by
-  change PRFunction.machineStackPush.run _ = _
+  change PRFunction.machineStackPush.run
+    (NatVector.cons (item.run inputs)
+      (NatVector.cons (stack.run inputs) NatVector.nil)) = _
   rw [PRFunction.run_machineStackPush]
 
 @[simp] theorem PRFunction.run_machineTaskIn
@@ -404,7 +456,9 @@ def PRFunction.captureAvoidingDiagonalSubstitution : PRFunction 1 :=
     (inputs : NatVector arity) :
     (PRFunction.machineTaskIn tag payload).run inputs =
       substitutionTask (tag.run inputs) (payload.run inputs) := by
-  change PRFunction.machineTask.run _ = _
+  change PRFunction.machineTask.run
+    (NatVector.cons (tag.run inputs)
+      (NatVector.cons (payload.run inputs) NatVector.nil)) = _
   rw [PRFunction.run_machineTask]
 
 @[simp] theorem PRFunction.run_machineStateIn
@@ -413,7 +467,9 @@ def PRFunction.captureAvoidingDiagonalSubstitution : PRFunction 1 :=
     (inputs : NatVector arity) :
     (PRFunction.machineStateIn work results).run inputs =
       substitutionMachineState (work.run inputs) (results.run inputs) := by
-  change PRFunction.machineState.run _ = _
+  change PRFunction.machineState.run
+    (NatVector.cons (work.run inputs)
+      (NatVector.cons (results.run inputs) NatVector.nil)) = _
   rw [PRFunction.run_machineState]
 
 @[simp] theorem PRFunction.run_machineProcessTaskIn
@@ -424,7 +480,9 @@ def PRFunction.captureAvoidingDiagonalSubstitution : PRFunction 1 :=
       substitutionTask
         (taskTag.run inputs)
         (natPair (code.run inputs) (depth.run inputs)) := by
-  simp [PRFunction.machineProcessTaskIn]
+  unfold PRFunction.machineProcessTaskIn
+  rw [PRFunction.run_machineTaskIn, PRFunction.run_binaryIn,
+    PRFunction.run_pair]
 
 @[simp] theorem PRFunction.run_machinePushResultIn
     {arity : Nat}
@@ -433,7 +491,8 @@ def PRFunction.captureAvoidingDiagonalSubstitution : PRFunction 1 :=
     (PRFunction.machinePushResultIn work results result).run inputs =
       substitutionPushResult
         (work.run inputs) (results.run inputs) (result.run inputs) := by
-  simp [PRFunction.machinePushResultIn, substitutionPushResult]
+  unfold PRFunction.machinePushResultIn substitutionPushResult
+  rw [PRFunction.run_machineStateIn, PRFunction.run_machineStackPushIn]
 
 @[simp] theorem PRFunction.run_machineBuildUnaryIn
     {arity : Nat}
@@ -442,8 +501,12 @@ def PRFunction.captureAvoidingDiagonalSubstitution : PRFunction 1 :=
     (PRFunction.machineBuildUnaryIn syntaxTag work results).run inputs =
       substitutionBuildUnary
         (syntaxTag.run inputs) (work.run inputs) (results.run inputs) := by
-  simp [PRFunction.machineBuildUnaryIn, substitutionBuildUnary,
-    substitutionPushResult]
+  unfold PRFunction.machineBuildUnaryIn substitutionBuildUnary
+  rw [PRFunction.run_machinePushResultIn,
+    PRFunction.run_unaryIn, PRFunction.run_machineStackTail,
+    PRFunction.run_unaryIn, PRFunction.run_successor,
+    PRFunction.run_binaryIn, PRFunction.run_pair,
+    PRFunction.run_unaryIn, PRFunction.run_machineStackHead]
 
 @[simp] theorem PRFunction.run_machineBuildBinaryIn
     {arity : Nat}
@@ -452,27 +515,108 @@ def PRFunction.captureAvoidingDiagonalSubstitution : PRFunction 1 :=
     (PRFunction.machineBuildBinaryIn syntaxTag work results).run inputs =
       substitutionBuildBinary
         (syntaxTag.run inputs) (work.run inputs) (results.run inputs) := by
-  simp [PRFunction.machineBuildBinaryIn, substitutionBuildBinary,
-    substitutionPushResult]
+  unfold PRFunction.machineBuildBinaryIn substitutionBuildBinary
+  rw [PRFunction.run_machinePushResultIn,
+    PRFunction.run_unaryIn, PRFunction.run_machineStackTail,
+    PRFunction.run_unaryIn, PRFunction.run_machineStackTail,
+    PRFunction.run_unaryIn, PRFunction.run_successor,
+    PRFunction.run_binaryIn, PRFunction.run_pair,
+    PRFunction.run_binaryIn, PRFunction.run_pair,
+    PRFunction.run_unaryIn, PRFunction.run_machineStackHead,
+    PRFunction.run_unaryIn, PRFunction.run_machineStackTail,
+    PRFunction.run_unaryIn, PRFunction.run_machineStackHead]
 
 /-- Numeric less-than bits are exact constructive characteristic values. -/
 theorem natLessBit_eq_one_of_lt
     {left right : Nat}
     (strict : left < right) :
     natLessBit left right = 1 := by
-  unfold natLessBit natPositiveBit
-  have positive : 0 < right - left := Nat.sub_pos_of_lt strict
-  cases difference : right - left with
-  | zero => exact (Nat.lt_irrefl 0 (difference ▸ positive)).elim
-  | succ difference => rfl
+  induction left generalizing right with
+  | zero =>
+      cases right with
+      | zero => exact (Nat.not_lt_zero 0 strict).elim
+      | succ right => rfl
+  | succ left inductionHypothesis =>
+      cases right with
+      | zero => exact (Nat.not_lt_zero (Nat.succ left) strict).elim
+      | succ right =>
+          unfold natLessBit
+          repeat rw [Nat.add_one]
+          rw [Nat.succ_sub_succ_eq_sub]
+          exact inductionHypothesis (Nat.lt_of_succ_lt_succ strict)
 
 theorem natLessBit_eq_zero_of_not_lt
     {left right : Nat}
     (notStrict : left < right -> False) :
     natLessBit left right = 0 := by
-  unfold natLessBit natPositiveBit
-  rw [Nat.sub_eq_zero_of_le (Nat.le_of_not_gt notStrict)]
-  rfl
+  induction left generalizing right with
+  | zero =>
+      cases right with
+      | zero => rfl
+      | succ right => exact (notStrict (Nat.zero_lt_succ right)).elim
+  | succ left inductionHypothesis =>
+      cases right with
+      | zero =>
+          unfold natLessBit
+          rw [Nat.zero_sub]
+          rfl
+      | succ right =>
+          unfold natLessBit
+          repeat rw [Nat.add_one]
+          rw [Nat.succ_sub_succ_eq_sub]
+          apply inductionHypothesis
+          intro strict
+          exact notStrict (Nat.succ_lt_succ strict)
+
+private theorem natIfZero_zero_clean (whenZero whenPositive : Nat) :
+    natIfZero 0 whenZero whenPositive = whenZero := rfl
+
+private theorem natIfZero_succ_clean
+    (selector whenZero whenPositive : Nat) :
+    natIfZero (Nat.succ selector) whenZero whenPositive = whenPositive := rfl
+
+private theorem natEqualBit_zero_zero_clean :
+    natEqualBit 0 0 = 1 := rfl
+
+private theorem natEqualBit_succ_zero_clean (value : Nat) :
+    natEqualBit (Nat.succ value) 0 = 0 := by
+  unfold natEqualBit natIsZero
+  rw [Nat.sub_zero, Nat.zero_sub, Nat.add_zero]
+
+private theorem natEqualBit_succ_succ_clean (left right : Nat) :
+    natEqualBit (Nat.succ left) (Nat.succ right) = natEqualBit left right := by
+  unfold natEqualBit
+  rw [Nat.succ_sub_succ_eq_sub, Nat.succ_sub_succ_eq_sub]
+
+macro "normalize_active_machine_program" : tactic =>
+  `(tactic|
+    repeat
+      first
+      | rw [PRFunction.run_select]
+      | rw [PRFunction.run_selectTag]
+      | rw [PRFunction.run_projection]
+      | rw [NatVector.get_cons_zero]
+      | rw [NatVector.get_cons_succ]
+      | rw [PRFunction.run_machinePushResultIn]
+      | rw [PRFunction.run_machineStateIn]
+      | rw [PRFunction.run_machineStackPushIn]
+      | rw [PRFunction.run_machineProcessTaskIn]
+      | rw [PRFunction.run_constant]
+      | rw [PRFunction.run_unaryIn]
+      | rw [PRFunction.run_binaryIn]
+      | rw [PRFunction.run_predecessor]
+      | rw [PRFunction.run_unpairLeft]
+      | rw [PRFunction.run_unpairRight]
+      | rw [PRFunction.run_lessBit]
+      | rw [PRFunction.run_numeralCode]
+      | rw [PRFunction.run_successor]
+      | rw [PRFunction.run_pair])
+
+macro "evaluate_current_process_tag" : tactic =>
+  `(tactic|
+    rw [PRFunction.run_unaryIn, PRFunction.run_unpairLeft,
+      PRFunction.run_unaryIn, PRFunction.run_predecessor,
+      PRFunction.run_projection, NatVector.get_cons_zero])
 
 /-- The five-input term program implements the numeric term step exactly. -/
 theorem PRFunction.run_machineProcessTermStep
@@ -486,58 +630,121 @@ theorem PRFunction.run_machineProcessTermStep
       substitutionProcessTermStep code depth work results value := by
   cases code with
   | zero =>
-      simp [PRFunction.machineProcessTermStep,
-        substitutionProcessTermStep, natIfZero]
+      rw [substitutionProcessTermStep.eq_1]
+      unfold PRFunction.machineProcessTermStep
+      normalize_active_machine_program
+      rfl
   | succ encoded =>
-      cases components : natUnpair encoded with
-      | mk tag payload =>
-          have leftComponent : natUnpairLeft encoded = tag := by
-            unfold natUnpairLeft
-            rw [← components]
+      rw [substitutionProcessTermStep.eq_2]
+      unfold PRFunction.machineProcessTermStep
+      dsimp only
+      rw [PRFunction.run_select]
+      rw [PRFunction.run_projection, NatVector.get_cons_zero]
+      rw [natIfZero_succ_clean]
+      change (PRFunction.selectTag _ 0 _ _).run _ = _
+      rw [PRFunction.run_selectTag]
+      rw [PRFunction.run_unaryIn, PRFunction.run_unpairLeft,
+        PRFunction.run_unaryIn, PRFunction.run_predecessor,
+        PRFunction.run_projection, NatVector.get_cons_zero]
+      have predecessor : (encoded + 1).pred = encoded := rfl
+      rw [predecessor]
+      cases tagValue : natUnpairLeft encoded with
+      | zero =>
+          unfold natEqualBit natIsZero
+          rw [natIfZero_succ_clean]
+          change (PRFunction.select _ _ _).run _ = _
+          normalize_active_machine_program
+          rw [predecessor]
+          by_cases bounded : natUnpairRight encoded < depth
+          · rw [natLessBit_eq_one_of_lt bounded,
+              natIfZero_succ_clean, if_pos bounded]
             rfl
-          have rightComponent : natUnpairRight encoded = payload := by
-            unfold natUnpairRight
-            rw [← components]
-            rfl
-          rw [show encoded = natPair tag payload by
-            exact (congrArg (fun pair => natPair pair.1 pair.2) components).symm.trans
-              (natUnpair_pair tag payload ▸ rfl)]
-          rw [natUnpairLeft_pair, natUnpairRight_pair]
+          · rw [natLessBit_eq_zero_of_not_lt bounded,
+              natIfZero_zero_clean, if_neg bounded]
+      | succ tag =>
+          repeat rw [Nat.add_one]
+          rw [natEqualBit_succ_zero_clean, natIfZero_zero_clean]
           cases tag with
           | zero =>
-              by_cases bounded : payload < depth
-              · rw [natLessBit_eq_one_of_lt bounded]
-                simp [PRFunction.machineProcessTermStep,
-                  substitutionProcessTermStep, natIfZero,
-                  natEqualBit, natIsZero]
-              · rw [natLessBit_eq_zero_of_not_lt bounded]
-                simp [PRFunction.machineProcessTermStep,
-                  substitutionProcessTermStep, natIfZero,
-                  natEqualBit, natIsZero]
+              change (PRFunction.selectTag _ 1 _ _).run _ = _
+              rw [PRFunction.run_selectTag]
+              evaluate_current_process_tag
+              rw [show (Nat.succ encoded).pred = encoded from rfl, tagValue]
+              rw [natEqualBit_succ_succ_clean,
+                natEqualBit_zero_zero_clean, natIfZero_succ_clean]
+              normalize_active_machine_program
           | succ tag =>
+              change (PRFunction.selectTag _ 1 _ _).run _ = _
+              rw [PRFunction.run_selectTag]
+              evaluate_current_process_tag
+              rw [show (Nat.succ encoded).pred = encoded from rfl, tagValue]
+              rw [natEqualBit_succ_succ_clean,
+                natEqualBit_succ_zero_clean, natIfZero_zero_clean]
               cases tag with
               | zero =>
-                  simp [PRFunction.machineProcessTermStep,
-                    substitutionProcessTermStep, natIfZero,
-                    natEqualBit, natIsZero]
+                  change (PRFunction.selectTag _ 2 _ _).run _ = _
+                  rw [PRFunction.run_selectTag]
+                  evaluate_current_process_tag
+                  rw [show (Nat.succ encoded).pred = encoded from rfl, tagValue]
+                  rw [natEqualBit_succ_succ_clean,
+                    natEqualBit_succ_succ_clean,
+                    natEqualBit_zero_zero_clean, natIfZero_succ_clean]
+                  normalize_active_machine_program
+                  rfl
               | succ tag =>
+                  change (PRFunction.selectTag _ 2 _ _).run _ = _
+                  rw [PRFunction.run_selectTag]
+                  evaluate_current_process_tag
+                  rw [show (Nat.succ encoded).pred = encoded from rfl, tagValue]
+                  rw [natEqualBit_succ_succ_clean,
+                    natEqualBit_succ_succ_clean,
+                    natEqualBit_succ_zero_clean, natIfZero_zero_clean]
                   cases tag with
                   | zero =>
-                      simp [PRFunction.machineProcessTermStep,
-                        substitutionProcessTermStep, natIfZero,
-                        natEqualBit, natIsZero]
+                      change (PRFunction.selectTag _ 3 _ _).run _ = _
+                      rw [PRFunction.run_selectTag]
+                      evaluate_current_process_tag
+                      rw [show (Nat.succ encoded).pred = encoded from rfl, tagValue]
+                      rw [natEqualBit_succ_succ_clean,
+                        natEqualBit_succ_succ_clean,
+                        natEqualBit_succ_succ_clean,
+                        natEqualBit_zero_zero_clean, natIfZero_succ_clean]
+                      normalize_active_machine_program
+                      rfl
                   | succ tag =>
+                      change (PRFunction.selectTag _ 3 _ _).run _ = _
+                      rw [PRFunction.run_selectTag]
+                      evaluate_current_process_tag
+                      rw [show (Nat.succ encoded).pred = encoded from rfl, tagValue]
+                      rw [natEqualBit_succ_succ_clean,
+                        natEqualBit_succ_succ_clean,
+                        natEqualBit_succ_succ_clean,
+                        natEqualBit_succ_zero_clean, natIfZero_zero_clean]
                       cases tag with
                       | zero =>
-                          simp [PRFunction.machineProcessTermStep,
-                            substitutionProcessTermStep, natIfZero,
-                            natEqualBit, natIsZero]
+                          change (PRFunction.selectTag _ 4 _ _).run _ = _
+                          rw [PRFunction.run_selectTag]
+                          evaluate_current_process_tag
+                          rw [show (Nat.succ encoded).pred = encoded from rfl, tagValue]
+                          rw [natEqualBit_succ_succ_clean,
+                            natEqualBit_succ_succ_clean,
+                            natEqualBit_succ_succ_clean,
+                            natEqualBit_succ_succ_clean,
+                            natEqualBit_zero_zero_clean, natIfZero_succ_clean]
+                          normalize_active_machine_program
+                          rfl
                       | succ tag =>
-                          cases tag with
-                          | zero =>
-                              simp [PRFunction.machineProcessTermStep,
-                                substitutionProcessTermStep, natIfZero,
-                                natEqualBit, natIsZero]
+                          change (PRFunction.selectTag _ 4 _ _).run _ = _
+                          rw [PRFunction.run_selectTag]
+                          evaluate_current_process_tag
+                          rw [show (Nat.succ encoded).pred = encoded from rfl, tagValue]
+                          rw [natEqualBit_succ_succ_clean,
+                            natEqualBit_succ_succ_clean,
+                            natEqualBit_succ_succ_clean,
+                            natEqualBit_succ_succ_clean,
+                            natEqualBit_succ_zero_clean, natIfZero_zero_clean]
+                          normalize_active_machine_program
+                          rfl
 
 /-- The five-input formula program implements the numeric formula step exactly. -/
 theorem PRFunction.run_machineProcessFormulaStep
@@ -551,174 +758,339 @@ theorem PRFunction.run_machineProcessFormulaStep
       substitutionProcessFormulaStep code depth work results value := by
   cases code with
   | zero =>
-      simp [PRFunction.machineProcessFormulaStep,
-        substitutionProcessFormulaStep, natIfZero]
+      rw [substitutionProcessFormulaStep.eq_1]
+      unfold PRFunction.machineProcessFormulaStep
+      normalize_active_machine_program
+      rfl
   | succ encoded =>
-      cases components : natUnpair encoded with
-      | mk tag payload =>
-          rw [show encoded = natPair tag payload by
-            exact (congrArg (fun pair => natPair pair.1 pair.2) components).symm.trans
-              (natUnpair_pair tag payload ▸ rfl)]
-          rw [natUnpairLeft_pair, natUnpairRight_pair]
+      rw [substitutionProcessFormulaStep.eq_2]
+      unfold PRFunction.machineProcessFormulaStep
+      dsimp only
+      rw [PRFunction.run_select]
+      rw [PRFunction.run_projection, NatVector.get_cons_zero]
+      rw [natIfZero_succ_clean]
+      change (PRFunction.selectTag _ 0 _ _).run _ = _
+      rw [PRFunction.run_selectTag]
+      rw [PRFunction.run_unaryIn, PRFunction.run_unpairLeft,
+        PRFunction.run_unaryIn, PRFunction.run_predecessor,
+        PRFunction.run_projection, NatVector.get_cons_zero]
+      have predecessor : (encoded + 1).pred = encoded := rfl
+      rw [predecessor]
+      cases tagValue : natUnpairLeft encoded with
+      | zero =>
+          rw [natEqualBit_zero_zero_clean, natIfZero_succ_clean]
+          normalize_active_machine_program
+      | succ tag =>
+          repeat rw [Nat.add_one]
+          rw [natEqualBit_succ_zero_clean, natIfZero_zero_clean]
           cases tag with
           | zero =>
-              simp [PRFunction.machineProcessFormulaStep,
-                substitutionProcessFormulaStep, natIfZero,
-                natEqualBit, natIsZero]
+              change (PRFunction.selectTag _ 1 _ _).run _ = _
+              rw [PRFunction.run_selectTag]
+              evaluate_current_process_tag
+              rw [show (Nat.succ encoded).pred = encoded from rfl, tagValue]
+              repeat rw [natEqualBit_succ_succ_clean]
+              rw [natEqualBit_zero_zero_clean, natIfZero_succ_clean]
+              normalize_active_machine_program
+              rfl
           | succ tag =>
+              change (PRFunction.selectTag _ 1 _ _).run _ = _
+              rw [PRFunction.run_selectTag]
+              evaluate_current_process_tag
+              rw [show (Nat.succ encoded).pred = encoded from rfl, tagValue]
+              repeat rw [natEqualBit_succ_succ_clean]
+              rw [natEqualBit_succ_zero_clean, natIfZero_zero_clean]
               cases tag with
               | zero =>
-                  simp [PRFunction.machineProcessFormulaStep,
-                    substitutionProcessFormulaStep, natIfZero,
-                    natEqualBit, natIsZero]
+                  change (PRFunction.selectTag _ 2 _ _).run _ = _
+                  rw [PRFunction.run_selectTag]
+                  evaluate_current_process_tag
+                  rw [show (Nat.succ encoded).pred = encoded from rfl, tagValue]
+                  repeat rw [natEqualBit_succ_succ_clean]
+                  rw [natEqualBit_zero_zero_clean, natIfZero_succ_clean]
+                  normalize_active_machine_program
+                  rfl
               | succ tag =>
+                  change (PRFunction.selectTag _ 2 _ _).run _ = _
+                  rw [PRFunction.run_selectTag]
+                  evaluate_current_process_tag
+                  rw [show (Nat.succ encoded).pred = encoded from rfl, tagValue]
+                  repeat rw [natEqualBit_succ_succ_clean]
+                  rw [natEqualBit_succ_zero_clean, natIfZero_zero_clean]
                   cases tag with
                   | zero =>
-                      simp [PRFunction.machineProcessFormulaStep,
-                        substitutionProcessFormulaStep, natIfZero,
-                        natEqualBit, natIsZero]
+                      change (PRFunction.selectTag _ 3 _ _).run _ = _
+                      rw [PRFunction.run_selectTag]
+                      evaluate_current_process_tag
+                      rw [show (Nat.succ encoded).pred = encoded from rfl, tagValue]
+                      repeat rw [natEqualBit_succ_succ_clean]
+                      rw [natEqualBit_zero_zero_clean, natIfZero_succ_clean]
+                      normalize_active_machine_program
+                      rfl
                   | succ tag =>
+                      change (PRFunction.selectTag _ 3 _ _).run _ = _
+                      rw [PRFunction.run_selectTag]
+                      evaluate_current_process_tag
+                      rw [show (Nat.succ encoded).pred = encoded from rfl, tagValue]
+                      repeat rw [natEqualBit_succ_succ_clean]
+                      rw [natEqualBit_succ_zero_clean, natIfZero_zero_clean]
                       cases tag with
                       | zero =>
-                          simp [PRFunction.machineProcessFormulaStep,
-                            substitutionProcessFormulaStep, natIfZero,
-                            natEqualBit, natIsZero]
+                          change (PRFunction.selectTag _ 4 _ _).run _ = _
+                          rw [PRFunction.run_selectTag]
+                          evaluate_current_process_tag
+                          rw [show (Nat.succ encoded).pred = encoded from rfl, tagValue]
+                          repeat rw [natEqualBit_succ_succ_clean]
+                          rw [natEqualBit_zero_zero_clean, natIfZero_succ_clean]
+                          normalize_active_machine_program
+                          rfl
                       | succ tag =>
+                          change (PRFunction.selectTag _ 4 _ _).run _ = _
+                          rw [PRFunction.run_selectTag]
+                          evaluate_current_process_tag
+                          rw [show (Nat.succ encoded).pred = encoded from rfl, tagValue]
+                          repeat rw [natEqualBit_succ_succ_clean]
+                          rw [natEqualBit_succ_zero_clean, natIfZero_zero_clean]
                           cases tag with
                           | zero =>
-                              simp [PRFunction.machineProcessFormulaStep,
-                                substitutionProcessFormulaStep, natIfZero,
-                                natEqualBit, natIsZero]
+                              change (PRFunction.selectTag _ 5 _ _).run _ = _
+                              rw [PRFunction.run_selectTag]
+                              evaluate_current_process_tag
+                              rw [show (Nat.succ encoded).pred = encoded from rfl,
+                                tagValue]
+                              repeat rw [natEqualBit_succ_succ_clean]
+                              rw [natEqualBit_zero_zero_clean, natIfZero_succ_clean]
+                              normalize_active_machine_program
+                              rfl
                           | succ tag =>
+                              change (PRFunction.selectTag _ 5 _ _).run _ = _
+                              rw [PRFunction.run_selectTag]
+                              evaluate_current_process_tag
+                              rw [show (Nat.succ encoded).pred = encoded from rfl,
+                                tagValue]
+                              repeat rw [natEqualBit_succ_succ_clean]
+                              rw [natEqualBit_succ_zero_clean, natIfZero_zero_clean]
                               cases tag with
                               | zero =>
-                                  simp [PRFunction.machineProcessFormulaStep,
-                                    substitutionProcessFormulaStep, natIfZero,
-                                    natEqualBit, natIsZero]
-                              | succ tag =>
-                                  cases tag with
-                                  | zero =>
-                                      simp [PRFunction.machineProcessFormulaStep,
-                                        substitutionProcessFormulaStep, natIfZero,
-                                        natEqualBit, natIsZero]
+                                  change (PRFunction.selectTag _ 6 _ _).run _ = _
+                                  rw [PRFunction.run_selectTag]
+                                  evaluate_current_process_tag
+                                  rw [show (Nat.succ encoded).pred = encoded from rfl,
+                                    tagValue]
+                                  repeat rw [natEqualBit_succ_succ_clean]
+                                  rw [natEqualBit_zero_zero_clean, natIfZero_succ_clean]
+                                  normalize_active_machine_program
+                                  rfl
 
+                              | succ tag =>
+                                  change (PRFunction.selectTag _ 6 _ _).run _ = _
+                                  rw [PRFunction.run_selectTag]
+                                  evaluate_current_process_tag
+                                  rw [show (Nat.succ encoded).pred = encoded from rfl,
+                                    tagValue]
+                                  repeat rw [natEqualBit_succ_succ_clean]
+                                  rw [natEqualBit_succ_zero_clean, natIfZero_zero_clean]
+                                  normalize_active_machine_program
+                                  rfl
+
+private theorem substitutionMachineStep_zero_work_clean
+    (state value : Nat)
+    (stateWork : natUnpairLeft state = 0) :
+    substitutionMachineStep state value = state := by
+  unfold substitutionMachineStep
+  rw [stateWork]
+
+private theorem substitutionMachineStep_succ_work_clean
+    (state value encodedWork results : Nat)
+    (stateWork : natUnpairLeft state = Nat.succ encodedWork)
+    (stateResults : natUnpairRight state = results) :
+    substitutionMachineStep state value =
+      substitutionExecuteTask
+        (natUnpairLeft encodedWork)
+        (natUnpairRight encodedWork)
+        results value := by
+  unfold substitutionMachineStep
+  rw [stateWork, stateResults]
+
+macro "rewrite_machine_step_once" : tactic =>
+  `(tactic|
+    first
+    | rw [PRFunction.run_select]
+    | rw [PRFunction.run_selectTag]
+    | rw [PRFunction.run_projection]
+    | rw [NatVector.get_cons_zero]
+    | rw [NatVector.get_cons_succ]
+    | rw [PRFunction.run_unaryIn]
+    | rw [PRFunction.run_predecessor]
+    | rw [PRFunction.run_unpairLeft]
+    | rw [PRFunction.run_unpairRight]
+    | rw [PRFunction.run_constant]
+    | rw [PRFunction.run_composition]
+    | rw [PRFunctionVector.run_cons]
+    | rw [PRFunctionVector.run_singleton]
+    | rw [PRFunctionVector.run_nil]
+    | rw [PRFunction.run_machineStateIn]
+    | rw [PRFunction.run_machineProcessTermStep]
+    | rw [PRFunction.run_machineProcessFormulaStep]
+    | rw [PRFunction.run_machineBuildUnaryIn]
+    | rw [PRFunction.run_machineBuildBinaryIn]
+    | rw [natIfZero_zero_clean]
+    | rw [natIfZero_succ_clean]
+    | rw [natEqualBit_zero_zero_clean]
+    | rw [natEqualBit_succ_zero_clean]
+    | rw [natEqualBit_succ_succ_clean]
+    | rw [Nat.add_one]
+    | rw [Nat.pred_succ]
+    | rw [PRFunction.machineStep]
+    | rw [substitutionExecuteTask]
+    | rw [substitutionMachineState])
+
+macro "close_machine_step_branch_one" "[" rule:ident "]" : tactic =>
+  `(tactic|
+    repeat
+      first
+      | rewrite_machine_step_once
+      | rw [($rule)]
+      | rfl)
+
+macro "close_machine_step_branch_four"
+    "[" ruleOne:ident "," ruleTwo:ident "," ruleThree:ident ","
+      ruleFour:ident "]" : tactic =>
+  `(tactic|
+    repeat
+      first
+      | rewrite_machine_step_once
+      | rw [($ruleOne)]
+      | rw [($ruleTwo)]
+      | rw [($ruleThree)]
+      | rw [($ruleFour)]
+      | rfl)
+
+macro "close_machine_step_branch_six"
+    "[" ruleOne:ident "," ruleTwo:ident "," ruleThree:ident ","
+      ruleFour:ident "," ruleFive:ident "," ruleSix:ident "]" : tactic =>
+  `(tactic|
+    repeat
+      first
+      | rewrite_machine_step_once
+      | rw [($ruleOne)]
+      | rw [($ruleTwo)]
+      | rw [($ruleThree)]
+      | rw [($ruleFour)]
+      | rw [($ruleFive)]
+      | rw [($ruleSix)]
+      | rfl)
+
+set_option maxHeartbeats 2000000 in
 /-- The two-input positive program implements one complete machine step. -/
 theorem PRFunction.run_machineStep (state value : Nat) :
     PRFunction.machineStep.run
         (NatVector.cons state (NatVector.cons value NatVector.nil)) =
       substitutionMachineStep state value := by
-  cases stateComponents : natUnpair state with
+  cases stateComponents : (natUnpairLeft state, natUnpairRight state) with
   | mk work results =>
-      rw [show state = natPair work results by
-        exact (congrArg (fun pair => natPair pair.1 pair.2) stateComponents).symm.trans
-          (natUnpair_pair work results ▸ rfl)]
-      rw [natUnpairLeft_pair, natUnpairRight_pair]
+      have stateWork : natUnpairLeft state = work := by
+        exact congrArg Prod.fst stateComponents
+      have stateResults : natUnpairRight state = results := by
+        exact congrArg Prod.snd stateComponents
       cases work with
       | zero =>
-          simp [PRFunction.machineStep, substitutionMachineStep,
-            substitutionMachineState, natIfZero]
+          rw [substitutionMachineStep_zero_work_clean state value stateWork]
+          close_machine_step_branch_one [stateWork]
       | succ encodedWork =>
-          cases workComponents : natUnpair encodedWork with
+          rw [substitutionMachineStep_succ_work_clean state value encodedWork results
+            (by
+              rw [Nat.add_one] at stateWork
+              exact stateWork)
+            stateResults]
+          cases workComponents :
+              (natUnpairLeft encodedWork, natUnpairRight encodedWork) with
           | mk task remainingWork =>
-              rw [show encodedWork = natPair task remainingWork by
-                exact (congrArg (fun pair => natPair pair.1 pair.2)
-                  workComponents).symm.trans
-                  (natUnpair_pair task remainingWork ▸ rfl)]
-              rw [natUnpairLeft_pair, natUnpairRight_pair]
+              have workTask : natUnpairLeft encodedWork = task := by
+                exact congrArg Prod.fst workComponents
+              have workRemaining : natUnpairRight encodedWork = remainingWork := by
+                exact congrArg Prod.snd workComponents
               cases task with
               | zero =>
-                  simp [PRFunction.machineStep, substitutionMachineStep,
-                    substitutionMachineState, natIfZero]
+                  close_machine_step_branch_four
+                    [stateWork, stateResults, workTask, workRemaining]
               | succ encodedTask =>
-                  cases taskComponents : natUnpair encodedTask with
+                  cases taskComponents :
+                      (natUnpairLeft encodedTask, natUnpairRight encodedTask) with
                   | mk tag payload =>
-                      rw [show encodedTask = natPair tag payload by
-                        exact (congrArg (fun pair => natPair pair.1 pair.2)
-                          taskComponents).symm.trans
-                          (natUnpair_pair tag payload ▸ rfl)]
-                      rw [natUnpairLeft_pair, natUnpairRight_pair]
+                      have taskTag : natUnpairLeft encodedTask = tag := by
+                        exact congrArg Prod.fst taskComponents
+                      have taskPayload : natUnpairRight encodedTask = payload := by
+                        exact congrArg Prod.snd taskComponents
                       cases tag with
                       | zero =>
-                          simp [PRFunction.machineStep,
-                            substitutionMachineStep,
-                            substitutionMachineState, natIfZero,
-                            natEqualBit, natIsZero]
+                          close_machine_step_branch_six
+                            [stateWork, stateResults, workTask, workRemaining,
+                              taskTag, taskPayload]
                       | succ tag =>
                           cases tag with
                           | zero =>
-                              simp [PRFunction.machineStep,
-                                substitutionMachineStep,
-                                substitutionMachineState, natIfZero,
-                                natEqualBit, natIsZero]
+                              close_machine_step_branch_six
+                                [stateWork, stateResults, workTask, workRemaining,
+                                  taskTag, taskPayload]
                           | succ tag =>
                               cases tag with
                               | zero =>
-                                  simp [PRFunction.machineStep,
-                                    substitutionMachineStep,
-                                    substitutionMachineState, natIfZero,
-                                    natEqualBit, natIsZero]
+                                  close_machine_step_branch_six
+                                    [stateWork, stateResults, workTask, workRemaining,
+                                      taskTag, taskPayload]
                               | succ tag =>
                                   cases tag with
                                   | zero =>
-                                      simp [PRFunction.machineStep,
-                                        substitutionMachineStep,
-                                        substitutionMachineState, natIfZero,
-                                        natEqualBit, natIsZero]
+                                      close_machine_step_branch_six
+                                        [stateWork, stateResults, workTask, workRemaining,
+                                          taskTag, taskPayload]
                                   | succ tag =>
                                       cases tag with
                                       | zero =>
-                                          simp [PRFunction.machineStep,
-                                            substitutionMachineStep,
-                                            substitutionMachineState, natIfZero,
-                                            natEqualBit, natIsZero]
+                                          close_machine_step_branch_six
+                                            [stateWork, stateResults, workTask, workRemaining,
+                                              taskTag, taskPayload]
                                       | succ tag =>
                                           cases tag with
                                           | zero =>
-                                              simp [PRFunction.machineStep,
-                                                substitutionMachineStep,
-                                                substitutionMachineState,
-                                                natIfZero, natEqualBit, natIsZero]
+                                              close_machine_step_branch_six
+                                                [stateWork, stateResults, workTask,
+                                                  workRemaining, taskTag, taskPayload]
                                           | succ tag =>
                                               cases tag with
                                               | zero =>
-                                                  simp [PRFunction.machineStep,
-                                                    substitutionMachineStep,
-                                                    substitutionMachineState,
-                                                    natIfZero, natEqualBit,
-                                                    natIsZero]
+                                                  close_machine_step_branch_six
+                                                    [stateWork, stateResults, workTask,
+                                                      workRemaining, taskTag, taskPayload]
                                               | succ tag =>
                                                   cases tag with
                                                   | zero =>
-                                                      simp [PRFunction.machineStep,
-                                                        substitutionMachineStep,
-                                                        substitutionMachineState,
-                                                        natIfZero, natEqualBit,
-                                                        natIsZero]
+                                                      close_machine_step_branch_six
+                                                        [stateWork, stateResults, workTask,
+                                                          workRemaining, taskTag, taskPayload]
                                                   | succ tag =>
                                                       cases tag with
                                                       | zero =>
-                                                          simp [PRFunction.machineStep,
-                                                            substitutionMachineStep,
-                                                            substitutionMachineState,
-                                                            natIfZero, natEqualBit,
-                                                            natIsZero]
+                                                          close_machine_step_branch_six
+                                                            [stateWork, stateResults, workTask,
+                                                              workRemaining, taskTag, taskPayload]
                                                       | succ tag =>
                                                           cases tag with
                                                           | zero =>
-                                                              simp [PRFunction.machineStep,
-                                                                substitutionMachineStep,
-                                                                substitutionMachineState,
-                                                                natIfZero, natEqualBit,
-                                                                natIsZero]
+                                                              close_machine_step_branch_six
+                                                                [stateWork, stateResults, workTask,
+                                                                  workRemaining, taskTag, taskPayload]
                                                           | succ tag =>
                                                               cases tag with
                                                               | zero =>
-                                                                  simp [PRFunction.machineStep,
-                                                                    substitutionMachineStep,
-                                                                    substitutionMachineState,
-                                                                    natIfZero,
-                                                                    natEqualBit,
-                                                                    natIsZero]
+                                                                  close_machine_step_branch_six
+                                                                    [stateWork, stateResults, workTask,
+                                                                      workRemaining, taskTag, taskPayload]
+                                                              | succ tag =>
+                                                                  close_machine_step_branch_six
+                                                                    [stateWork, stateResults, workTask,
+                                                                      workRemaining, taskTag, taskPayload]
 
 @[simp] theorem PRFunction.run_machineIterationStep
     (counter previous state value : Nat) :
@@ -728,7 +1100,8 @@ theorem PRFunction.run_machineStep (state value : Nat) :
             (NatVector.cons state
               (NatVector.cons value NatVector.nil)))) =
       substitutionMachineStep previous value := by
-  change PRFunction.machineStep.run _ = _
+  change PRFunction.machineStep.run
+    (NatVector.cons previous (NatVector.cons value NatVector.nil)) = _
   rw [PRFunction.run_machineStep]
 
 /-- The primitive-recursion iterator is exactly the semantic machine run. -/
@@ -753,16 +1126,17 @@ theorem PRFunction.run_machineRun
                 (NatVector.cons state
                   (NatVector.cons value NatVector.nil)))) = _
       rw [PRFunction.run_machineIterationStep, inductionHypothesis]
-      rfl
+      rw [← substitutionMachineRun_one]
+      exact (substitutionMachineRun_add steps 1 state value).symm
 
 @[simp] theorem PRFunction.run_machineInitialState (formulaCode : Nat) :
     PRFunction.machineInitialState.run
         (NatVector.cons formulaCode NatVector.nil) =
       substitutionMachineInitialState formulaCode := by
-  simp [PRFunction.machineInitialState,
-    substitutionMachineInitialState, substitutionMachineState,
-    substitutionStackPush, substitutionProcessFormulaTask,
-    substitutionTask]
+  unfold PRFunction.machineInitialState
+  normalize_active_machine_program
+  rw [PRFunction.run_identity]
+  rfl
 
 /-- The explicit binary program computes the verified code substitution. -/
 theorem PRFunction.run_machineSubstituteNumeral
@@ -771,9 +1145,23 @@ theorem PRFunction.run_machineSubstituteNumeral
         (NatVector.cons formulaCode
           (NatVector.cons value NatVector.nil)) =
       machineSubstituteNumeralCode formulaCode value := by
-  simp [PRFunction.machineSubstituteNumeral,
-    machineSubstituteNumeralCode,
-    PRFunction.run_machineRun]
+  unfold PRFunction.machineSubstituteNumeral
+  repeat
+    first
+    | rw [PRFunction.run_unaryIn]
+    | rw [PRFunction.run_composition]
+    | rw [PRFunctionVector.run_cons]
+    | rw [PRFunctionVector.run_singleton]
+    | rw [PRFunctionVector.run_nil]
+    | rw [PRFunction.run_projection]
+    | rw [NatVector.get_cons_zero]
+    | rw [NatVector.get_cons_succ]
+    | rw [PRFunction.run_double]
+    | rw [PRFunction.run_machineInitialState]
+    | rw [PRFunction.run_machineRun]
+    | rw [PRFunction.run_unpairRight]
+    | rw [PRFunction.run_machineStackHead]
+    | rfl
 
 /-- Positive execution certificate for substitution on every genuine code. -/
 theorem PRFunction.machineSubstituteNumeral_evaluates_code
@@ -809,21 +1197,6 @@ theorem PRFunction.captureAvoidingDiagonalSubstitution_evaluates_code
           (NatVector.cons formula.code NatVector.nil)))
   · exact PRFunction.machineSubstituteNumeral_evaluates_code
       formula formula.code
-                                                              | succ tag =>
-                                                                  simp [PRFunction.machineStep,
-                                                                    substitutionMachineStep,
-                                                                    substitutionMachineState,
-                                                                    natIfZero,
-                                                                    natEqualBit,
-                                                                    natIsZero]
-                                  | succ tag =>
-                                      simp [PRFunction.machineProcessFormulaStep,
-                                        substitutionProcessFormulaStep, natIfZero,
-                                        natEqualBit, natIsZero]
-                          | succ tag =>
-                              simp [PRFunction.machineProcessTermStep,
-                                substitutionProcessTermStep, natIfZero,
-                                natEqualBit, natIsZero]
 
 end BareArithmeticTarski
 end Meta

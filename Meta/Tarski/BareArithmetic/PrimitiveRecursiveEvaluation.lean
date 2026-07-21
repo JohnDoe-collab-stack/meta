@@ -61,80 +61,6 @@ def NatVector.dropFirst
           NatVector.cons next rest
       rw [inductionHypothesis next]
 
-/-- A compiled evaluator for one program arity. -/
-structure PRFunctionEvaluator (arity : Nat) where
-  apply : NatVector arity -> Nat
-
-/-- A compiled evaluator for a vector of common-input programs. -/
-structure PRFunctionVectorEvaluator (inputArity outputArity : Nat) where
-  apply : NatVector inputArity -> NatVector outputArity
-
-/-- Structural compilation of a positive program to its total evaluator. -/
-def PRFunction.evaluator
-    {arity : Nat}
-    (program : PRFunction arity) :
-    PRFunctionEvaluator arity :=
-  PRFunction.rec
-    (motive_1 := fun arity _program => PRFunctionEvaluator arity)
-    (motive_2 := fun inputArity outputArity _programs =>
-      PRFunctionVectorEvaluator inputArity outputArity)
-    { apply := fun _inputs => 0 }
-    { apply := fun inputs =>
-        Nat.succ (inputs.get 0 (Nat.zero_lt_succ 0)) }
-    (fun _arity index bounded =>
-      { apply := fun inputs => inputs.get index bounded })
-    (fun _outer _inner outerEvaluator innerEvaluator =>
-      { apply := fun inputs =>
-          outerEvaluator.apply (innerEvaluator.apply inputs) })
-    (fun _base _step baseEvaluator stepEvaluator =>
-      { apply := fun inputs =>
-          (inputs.get 0 (Nat.zero_lt_succ _)).rec
-            (baseEvaluator.apply inputs.dropFirst)
-            (fun index previous =>
-              stepEvaluator.apply
-                (NatVector.cons index
-                  (NatVector.cons previous inputs.dropFirst))) })
-    { apply := fun _inputs => NatVector.nil }
-    (fun _head _tail headEvaluator tailEvaluator =>
-      { apply := fun inputs =>
-          NatVector.cons
-            (headEvaluator.apply inputs)
-            (tailEvaluator.apply inputs) })
-    program
-
-/-- Structural compilation of a program vector to its total evaluator. -/
-def PRFunctionVector.evaluator
-    {inputArity outputArity : Nat}
-    (programs : PRFunctionVector inputArity outputArity) :
-    PRFunctionVectorEvaluator inputArity outputArity :=
-  PRFunctionVector.rec
-    (motive_1 := fun arity _program => PRFunctionEvaluator arity)
-    (motive_2 := fun inputArity outputArity _programs =>
-      PRFunctionVectorEvaluator inputArity outputArity)
-    { apply := fun _inputs => 0 }
-    { apply := fun inputs =>
-        Nat.succ (inputs.get 0 (Nat.zero_lt_succ 0)) }
-    (fun _arity index bounded =>
-      { apply := fun inputs => inputs.get index bounded })
-    (fun _outer _inner outerEvaluator innerEvaluator =>
-      { apply := fun inputs =>
-          outerEvaluator.apply (innerEvaluator.apply inputs) })
-    (fun _base _step baseEvaluator stepEvaluator =>
-      { apply := fun inputs =>
-          (inputs.get 0 (Nat.zero_lt_succ _)).rec
-            (baseEvaluator.apply inputs.dropFirst)
-            (fun index previous =>
-              stepEvaluator.apply
-                (NatVector.cons index
-                  (NatVector.cons previous inputs.dropFirst))) })
-    { apply := fun _inputs => NatVector.nil }
-    (fun _head _tail headEvaluator tailEvaluator =>
-      { apply := fun inputs =>
-          NatVector.cons
-            (headEvaluator.apply inputs)
-            (tailEvaluator.apply inputs) })
-    programs
-
 /-- Total evaluator of a positive primitive-recursive program. -/
 abbrev PRFunction.run
     {arity : Nat}
@@ -148,20 +74,6 @@ abbrev PRFunctionVector.run
     (programs : PRFunctionVector inputArity outputArity)
     (inputs : NatVector inputArity) : NatVector outputArity :=
   PRFunctionVector.runCore programs inputs
-
-/-- Definitional application equation for the compiled recursion evaluator. -/
-theorem PRFunction.evaluator_primitive_apply
-    {parameterArity : Nat}
-    (base : PRFunction parameterArity)
-    (step : PRFunction (Nat.succ (Nat.succ parameterArity)))
-    (inputs : NatVector (Nat.succ parameterArity)) :
-    (PRFunction.primitiveRecursion base step).evaluator.apply inputs =
-      (inputs.get 0 (Nat.zero_lt_succ parameterArity)).rec
-        (base.evaluator.apply inputs.dropFirst)
-        (fun index previous =>
-          step.evaluator.apply
-            (NatVector.cons index
-              (NatVector.cons previous inputs.dropFirst))) := rfl
 
 @[simp] theorem PRFunction.run_zero
     {arity : Nat}
