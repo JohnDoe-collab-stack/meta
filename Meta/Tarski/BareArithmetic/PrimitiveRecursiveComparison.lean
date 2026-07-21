@@ -34,7 +34,8 @@ theorem PRFunction.constant_evaluates
       · apply PRFunctionVector.Evaluates.cons
         · exact inductionHypothesis
         · exact PRFunctionVector.Evaluates.nil inputs
-      · exact PRFunction.Evaluates.successor value
+      · exact PRFunction.Evaluates.successor
+          (NatVector.cons value NatVector.nil)
 
 /-- Multiplication step: add the fixed right input to the previous result. -/
 def PRFunction.multiplyStep : PRFunction 3 :=

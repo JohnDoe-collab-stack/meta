@@ -16,17 +16,6 @@ universe u v
 
 /-! ## Comparison maps -/
 
-/-- A fully constructive two-sided equivalence, kept local to the final
-comparison layer so the causal-word core remains import-free. -/
-structure ConstructiveEquivalence
-    (Source : Type u)
-    (Target : Type v) :
-    Type (max u v) where
-  toFun : Source -> Target
-  invFun : Target -> Source
-  left_inv : (source : Source) -> invFun (toFun source) = source
-  right_inv : (target : Target) -> toFun (invFun target) = target
-
 /-- Read a causal word as a standard natural number. -/
 def toNat : CausalWord -> Nat
   | CausalWord.zero => 0

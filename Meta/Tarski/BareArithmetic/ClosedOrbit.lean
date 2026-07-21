@@ -1,5 +1,6 @@
 import Meta.Tarski.BareArithmetic.Patch
 import Meta.Tarski.VisibleCausalRecurrence
+import Meta.Tarski.CausalAdditiveRealization
 
 /-!
 # Closed bare-arithmetic Tarski instance
@@ -54,6 +55,21 @@ def bareArithmeticVisibleCausalNonRecurrenceTheorem :
       bareArithmeticPatchableContext
       initialBareArithmeticPredicate :=
   genericVisibleCausalNonRecurrenceTheorem
+    bareArithmeticPatchableContext
+    initialBareArithmeticPredicate
+
+/--
+The complete causal-additive and cumulative-totality realization specialized
+to ordinary first-order arithmetic syntax.
+
+This is not an additional hypothesis on the arithmetic instance: it is the
+generic closed theorem instantiated with `bareArithmeticPatchableContext`.
+-/
+def bareArithmeticCausalAdditiveRealizationTheorem :
+    TarskiCausalAdditiveRealizationTheorem
+      bareArithmeticPatchableContext
+      initialBareArithmeticPredicate :=
+  tarskiCausalAdditiveRealizationTheorem
     bareArithmeticPatchableContext
     initialBareArithmeticPredicate
 
@@ -217,7 +233,10 @@ def bareArithmeticNontriviality : BareArithmeticNontriviality where
   everyStepChangesSemantics := bareOrbit_semanticChangeAtCurrent
   diagonalUsesOrdinaryGrammar := bareDiagonalOrdinary
 
-/-- One closed value containing the instance and both non-return packages. -/
+/--
+One closed value containing the ordinary arithmetic instance, its two
+non-return packages, and its full causal-additive realization.
+-/
 structure BareArithmeticTarskiClosedSystem : Type where
   orbitTheorem :
     GenericPatchOrbitTheorem
@@ -227,12 +246,18 @@ structure BareArithmeticTarskiClosedSystem : Type where
     GenericVisibleCausalNonRecurrenceTheorem
       bareArithmeticPatchableContext
       initialBareArithmeticPredicate
+  causalAdditiveTheorem :
+    TarskiCausalAdditiveRealizationTheorem
+      bareArithmeticPatchableContext
+      initialBareArithmeticPredicate
   nontriviality : BareArithmeticNontriviality
 
 /-- Fully closed Foundation-independent arithmetic realization. -/
 def bareArithmeticTarskiClosedSystem : BareArithmeticTarskiClosedSystem where
   orbitTheorem := bareArithmeticGenericPatchOrbitTheorem
   visibleCausalTheorem := bareArithmeticVisibleCausalNonRecurrenceTheorem
+  causalAdditiveTheorem :=
+    bareArithmeticCausalAdditiveRealizationTheorem
   nontriviality := bareArithmeticNontriviality
 
 end BareArithmeticTarski
@@ -243,6 +268,7 @@ end Meta
 #print axioms Meta.BareArithmeticTarski.bareArithmeticPatchableContext
 #print axioms Meta.BareArithmeticTarski.bareArithmeticGenericPatchOrbitTheorem
 #print axioms Meta.BareArithmeticTarski.bareArithmeticVisibleCausalNonRecurrenceTheorem
+#print axioms Meta.BareArithmeticTarski.bareArithmeticCausalAdditiveRealizationTheorem
 #print axioms Meta.BareArithmeticTarski.bareArithmeticNontriviality
 #print axioms Meta.BareArithmeticTarski.bareArithmeticTarskiClosedSystem
 /- AXIOM_AUDIT_END -/

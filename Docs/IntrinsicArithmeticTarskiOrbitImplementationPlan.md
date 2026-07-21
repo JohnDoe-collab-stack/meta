@@ -41,7 +41,7 @@ Le critere central est plus fort que la seule absence d'axiomes : le point fixe
 doit etre **produit** par le codage, la substitution et leur representabilite
 arithmetique. Il ne doit pas etre suppose ou incorpore dans la grammaire.
 
-### 0.1 Etat d'execution au 20 juillet 2026
+### 0.1 Etat d'execution au 21 juillet 2026
 
 ```text
 G0 fermee  : prototypes fixed/closed absents de Meta.lean ;
@@ -56,7 +56,10 @@ G6 fermee  : compilateur PR vers formules arithmetiques et specification
 G7 fermee  : diagonaliseur construit par auto-substitution representee ;
 G8 fermee  : patch syntaxique, accord local et preservation ;
 G9 fermee  : contexte patchable ferme et deux packages d'orbite generiques ;
-G10 fermee : certificats syntaxiques, semantiques et dynamiques non triviaux.
+G10 fermee : certificats syntaxiques, semantiques et dynamiques non triviaux ;
+G11 fermee : totalite historique, horloge intrinseque et memoire exacte ;
+G12 fermee : action additive fidele et objet naturel causal realise,
+             specialises a l'arithmetique ordinaire.
 ```
 
 La valeur terminale est :
@@ -65,8 +68,11 @@ La valeur terminale est :
 Meta.BareArithmeticTarski.bareArithmeticTarskiClosedSystem
 ```
 
-Elle est importee par `Meta.lean`. Le build global passe et chacun de ses
-constituants principaux est annonce par Lean comme ne dependant d'aucun axiome.
+Elle est importee par `Meta.lean`. Elle contient maintenant le theoreme
+generique d'orbite, le theoreme de recurrence visible sans retour causal, le
+paquet causal-additif complet et le certificat de non-trivialite. Le build
+global passe et chacun de ses constituants principaux est annonce par Lean
+comme ne dependant d'aucun axiome.
 
 Un premier essai avec l'appariement de Mathlib a ete rejete par l'audit parce
 qu'il faisait remonter `propext`, `Classical.choice` et `Quot.sound`. Le module
@@ -85,6 +91,13 @@ conservee sous le nom
 `quantifierBlindDiagonalSubstitutionPrototype`, uniquement comme
 infrastructure de comparaison. Le diagonaliseur final utilise la machine a
 piles capture-avoiding et son theoreme de commutation exact avec la syntaxe.
+
+L'encodage beta de la recursion primitive ne repose plus sur un theoreme CRT
+importe. `ConstructiveBetaEncoding.lean` construit directement les temoins par
+un encodage factoriel. Les certificats vectoriels de representabilite vivent
+dans `Type`, ce qui evite de fabriquer leur structure positive par egalite de
+propositions. Les anciens marqueurs `noncomputable` de l'evaluateur PR ont
+egalement ete retires : la chaine executable est structurelle et totale.
 
 ## 1. Etat actuel et decision de conservation
 
@@ -179,7 +192,9 @@ Cette valeur doit contenir au minimum :
 8. un patch syntaxique et ses deux lois ;
 9. un PatchableArithmeticTarskiContext ferme ;
 10. l'instance du GenericPatchOrbitTheorem ;
-11. un certificat de non-trivialite semantique et dynamique.
+11. un certificat de non-trivialite semantique et dynamique ;
+12. le paquet de totalite historique, horloge et memoire finie exacte ;
+13. le paquet d'action additive fidele et d'objet naturel causal realise.
 ```
 
 La specification diagonale finale reste exactement celle attendue par le
@@ -253,6 +268,7 @@ Meta/Tarski/BareArithmetic/PrimitiveRecursiveCodeSubstitution.lean
 Meta/Tarski/BareArithmetic/SubstitutionMachine.lean
 Meta/Tarski/BareArithmetic/PrimitiveRecursiveSubstitutionMachine.lean
 Meta/Tarski/BareArithmetic/ArithmeticFormulaTools.lean
+Meta/Tarski/BareArithmetic/ConstructiveBetaEncoding.lean
 Meta/Tarski/BareArithmetic/Representability.lean
 Meta/Tarski/BareArithmetic/Diagonal.lean
 Meta/Tarski/BareArithmetic/Patch.lean
@@ -277,7 +293,10 @@ Syntax
     CodeSubstitution
           |
           v
-  PrimitiveRecursive --> ArithmeticFormulaTools --> Representability
+  PrimitiveRecursive --> ArithmeticFormulaTools
+                              |
+                              v
+                    ConstructiveBetaEncoding --> Representability
           |
           v
   PR arithmetic, controle, decouplage, comparaison et codage syntaxique
@@ -295,6 +314,9 @@ Syntax
           +----------------------+
                                  v
 GenericPatchOrbit ----------> ClosedOrbit
+                                 ^
+                                 |
+                    CausalAdditiveRealization
 ```
 
 Aucun de ces modules ne doit importer :
@@ -883,6 +905,7 @@ Ajouter a l'audit global :
 #print axioms Meta.BareArithmeticTarski.bareArithmeticTarskiContext
 #print axioms Meta.BareArithmeticTarski.bareArithmeticPatchableContext
 #print axioms Meta.BareArithmeticTarski.bareArithmeticGenericPatchOrbitTheorem
+#print axioms Meta.BareArithmeticTarski.bareArithmeticCausalAdditiveRealizationTheorem
 #print axioms Meta.BareArithmeticTarski.bareArithmeticNontriviality
 #print axioms Meta.BareArithmeticTarski.bareArithmeticTarskiClosedSystem
 ```
@@ -938,6 +961,8 @@ toutes les sorties indiquent "does not depend on any axioms".
 | Contexte patchable ferme | `ClosedOrbit` | `bareArithmeticPatchableContext` | G9 |
 | Orbite injective | `GenericPatchOrbit` + `ClosedOrbit` | `bareArithmeticGenericPatchOrbitTheorem` | G9 |
 | Non-trivialite | `ClosedOrbit` | `bareArithmeticNontriviality` | G10 |
+| Totalite, horloge et memoire exacte | `CausalTotality` + `CausalClock` + `CausalClockNat` | `TarskiCausalAdditiveRealizationTheorem.cumulativeTotality`, `.intrinsicClock`, `.exactFiniteMemory` | G11 |
+| Action additive et realisation fidele | `CausalAdditiveRealization` + `ClosedOrbit` | `bareArithmeticCausalAdditiveRealizationTheorem` | G12 |
 
 Une ligne sans declaration fermee signifie que l'objectif correspondant n'est
 pas termine.
@@ -1036,7 +1061,12 @@ simultanement vraies :
 9. le theoreme generique fournit l'injectivite et le non-retour ;
 10. la non-trivialite semantique et dynamique est prouvee ;
 11. Meta compile sans importer FoundationBridge ;
-12. tous les audits sont vides.
+12. tous les audits sont vides ;
+13. chaque avance ajoute exactement le gap courant a la memoire ;
+14. aucun stade realise n'epuise la totalite historique ;
+15. l'etat causal complet decode son mot causal ;
+16. l'action des mots est additive et fidele ;
+17. le paquet complet est specialise au contexte arithmetique ordinaire.
 ```
 
 Avant ces douze points, la formulation correcte est :
@@ -1052,9 +1082,10 @@ Apres ces douze points, la formulation autorisee devient :
 Tarski dans une syntaxe arithmetique constructive autonome".
 ```
 
-## 22. Premier lot d'implementation recommande
+## 22. Ordre historique d'implementation, desormais execute
 
-Le premier lot ne doit pas tenter la diagonalisation. Il doit fermer G0 a G3 :
+Le premier lot ne devait pas tenter la diagonalisation. Il devait fermer G0 a
+G3 :
 
 ```text
 Lot 1A : quarantaine des claims reflexifs dans Meta.lean ;
@@ -1073,5 +1104,7 @@ un rapport court sur la mesure des codes ;
 aucune declaration de contexte Tarski ferme.
 ```
 
-Ce lot fournit la base sur laquelle la difficulte reelle, G4 a G7, peut etre
-attaquee sans nouveau raccourci semantique.
+Ce lot a fourni la base sur laquelle G4 a G7 ont ensuite ete fermes sans
+raccourci semantique. Les portes G8 a G12 sont egalement fermees. Cette section
+est conservee comme ordre de reconstruction reproductible, et non comme liste
+de travaux encore ouverts.

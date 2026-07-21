@@ -183,7 +183,8 @@ theorem PRFunction.unpairLeftFuel_evaluates (fuel code : Nat) :
                       (NatVector.cons (natUnpairLeftFuel fuel code)
                         (NatVector.cons code NatVector.nil)))
               · exact PRFunction.Evaluates.successor
-                  (natUnpairLeftFuel fuel code)
+                  (NatVector.cons
+                    (natUnpairLeftFuel fuel code) NatVector.nil)
             · exact PRFunctionVector.Evaluates.nil
                 (NatVector.cons fuel
                   (NatVector.cons (natUnpairLeftFuel fuel code)
@@ -214,7 +215,8 @@ theorem PRFunction.unpairLeft_evaluates (code : Nat) :
       (natUnpairLeft code) := by
   apply PRFunction.Evaluates.composition
   · apply PRFunctionVector.Evaluates.cons
-    · exact PRFunction.Evaluates.successor code
+    · exact PRFunction.Evaluates.successor
+        (NatVector.cons code NatVector.nil)
     · apply PRFunctionVector.Evaluates.cons
       · exact PRFunction.Evaluates.projection
           0

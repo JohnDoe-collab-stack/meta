@@ -19,6 +19,9 @@ fraîcheur intrinsèque des gaps
 → absence de contraction d’un chemin non vide
 → totalité historique non épuisable par une étape
 → réalisation d’une infinité de gaps dans cette totalité
+→ décodage intrinsèque du mot depuis la mémoire de l’état
+→ cardinalité exacte des événements mémorisés
+→ ordre naturel identifié à l’accessibilité causale
 → addition par composition des chemins
 → action additive fidèle du pas causal
 → réalisation causale de (Nat, 0, succ, +)
@@ -30,7 +33,11 @@ mot vide et l’ajout d’un pas, puis leur composition fournit l’addition. La
 totalité historique est également construite avant `Nat` : elle contient tous
 les gaps produits, alors qu’aucun état réalisé ne l’épuise. Le mécanisme
 tarskien prouve à la fois la fidélité de l’action et l’exactitude de chaque
-extension de mémoire.
+extension de mémoire. Il prouve maintenant davantage : la forme positive de
+la mémoire décode le mot causal exact qui a produit l’état, et ses positions
+sont constructivement équivalentes aux positions strictement antérieures de
+ce mot. `Nat` et `Fin` n’interviennent qu’après cette construction, comme
+coordonnées finales.
 
 Autrement dit :
 
@@ -1004,6 +1011,8 @@ fidélité forte de la projection d’état :
 ```text
 state(x) ≃c state(y)
 → x = y
+
+intrinsicTime(state(x)) = word(x)
 ```
 
 et, en particulier :
@@ -1192,6 +1201,14 @@ formalisation ajoute maintenant :
 les mots causaux construits sans Nat
 leur addition associative, commutative et cancellative
 l’action additive dans les endotransformations chronologiques
+la totalité historique non épuisable par une étape
+l’horloge intrinsèque lue depuis la mémoire positive
+la rétraction intrinsicTime(eval(S₀,w)) = w
+les positions positives représentant exactement Remembers
+l’absence de doublons entre les phrases stockées
+la cardinalité causale exacte Position ≅ CausalFin
+l’identification finale Position ≅ Fin(n)
+l’ordre par préfixe identifié à l’accessibilité causale
 la fidélité abstraite dérivée de la mémoire cumulative
 l’objet RealizedCausalNat
 ses lois additives complètes
@@ -1246,6 +1263,30 @@ Meta/Core/DynamicRelaxedUsage.lean
   dynamicTransport_preservesComposition
   DynamicGapCausalState
   GapDrivenDynamicSystem
+
+Meta/Core/CausalFinite.lean
+  CausalFin
+  CausalWord.Extension
+  CausalWord.PositiveExtension
+  CausalWord.Precedes
+  CausalWord.StrictlyPrecedes
+  AccumulatingCausalSystem.Reachable
+  AccumulatingCausalSystem.orbitReachable_iff_precedes
+
+Meta/Tarski/CausalClock.lean
+  CausalMemory.causalTime
+  CausalMemory.Position
+  CausalMemory.remembers_iff_position
+  CausalMemory.sentenceAt_injective
+  CausalState.intrinsicTime
+  intrinsicTime_eval
+  stagePositionEquivalence
+
+Meta/Tarski/CausalClockNat.lean
+  CausalFin.finEquivalence
+  stagePositionFinEquivalence
+  intrinsicNaturalTime_causalOrbit
+  causalOrbitPositionFinEquivalence
 ```
 
 Le modèle de commutation à deux états du Core prouve par ailleurs que la
@@ -1278,10 +1319,14 @@ l’ordre inverse :
 9. lois additives transportées à l’objet réalisé ;
 10. instance tarskienne construite depuis (D), (R) et (P) ;
 11. transport transcontextuel construit depuis les événements complets ;
-12. CausalWord identifié à Nat seulement dans la couche finale.
+12. CausalFin et l’ordre causal construits sans Nat ;
+13. le mot exact décodé depuis la forme positive de la mémoire ;
+14. les phrases mémorisées identifiées exactement à leurs positions ;
+15. les positions identifiées à CausalFin avant toute coordonnée numérique ;
+16. CausalWord identifié à Nat et CausalFin à Fin seulement dans la couche finale.
 ```
 
-Cette architecture est implémentée dans trois couches :
+Cette architecture est implémentée dans les couches suivantes :
 
 ```text
 Meta/Core/CausalAdditive.lean
@@ -1292,20 +1337,43 @@ Meta/Core/CausalAdditive.lean
   chemins et transports transcontextuels positifs
   RealizedCausalNat et ses lois additives
 
+Meta/Core/CausalTotality.lean
+  croissance stricte et totalité historique sans Nat
+
+Meta/Core/CausalFinite.lean
+  CausalFin sans Nat
+  extension positive, précédence et précédence stricte
+  accessibilité exactement équivalente à la précédence
+  croissance stricte le long d’une extension positive
+
+Meta/Tarski/CausalClock.lean
+  lecture structurelle du temps depuis CausalMemory
+  positions positives et exactitude de Remembers
+  injectivité des phrases stockées
+  rétraction de eval par intrinsicTime
+  Position ≅ CausalFin
+
 Meta/Core/CausalAdditiveNat.lean
   comparaison constructive CausalWord ↔ Nat
   compatibilité de zéro, successeur et addition
+
+Meta/Tarski/CausalClockNat.lean
+  comparaison constructive CausalFin(w) ↔ Fin(toNat(w))
+  mémoire de causalOrbit(n) exactement équivalente à Fin(n)
 
 Meta/Tarski/CausalAdditiveRealization.lean
   instance fermée du système cumulatif
   action tarskienne dans Endchrono
   transport construit depuis les payloads complets du Core
   fidélité de l’orbite et de l’objet réalisé complet
+  décodage du mot depuis l’état de tout objet réalisé
 ```
 
-Le premier fichier ne mentionne pas `Nat` dans ses déclarations. Le second est
-la seule couche où `Nat` intervient. Le troisième ne suppose aucune loi
-causale générique non instanciée : il les construit depuis le contexte de
+Les fichiers `CausalAdditive`, `CausalTotality`, `CausalFinite` et
+`CausalClock` construisent la dynamique, l’ordre, l’horloge et la cardinalité
+causale sans `Nat` ni `Fin`. Les deux fichiers portant le suffixe `Nat`
+forment la couche de comparaison finale. Le paquet tarskien ne suppose aucune
+loi causale générique non instanciée : il les construit depuis le contexte de
 Tarski patchable et la mémoire causale existante.
 
 Aucun rang, aucune fenêtre, aucun générateur externe de fraîcheur, aucun pont
@@ -1514,6 +1582,159 @@ addition des mots
 → composition cohérente des transports du Core
 ```
 
+### 21.6 Théorème d’horloge intrinsèque
+
+La mémoire tarskienne est un type inductif positif : une racine, ou une
+mémoire antérieure étendue par l’événement courant. On lit donc
+structurellement son temps causal :
+
+```text
+causalTime(root) = 0ᶜ
+
+causalTime(extend(previous,event))
+= succᶜ(causalTime(previous))
+```
+
+Pour un état complet :
+
+```text
+intrinsicTime(S) := causalTime(memory(S))
+```
+
+L’avance prolonge cette heure exactement une fois :
+
+```text
+intrinsicTime(advance(S)) = succᶜ(intrinsicTime(S))
+```
+
+Le théorème central est la rétraction :
+
+```text
+intrinsicTime(eval(S₀,w)) = w
+```
+
+Il est plus précis que l’injectivité de `eval`. La fidélité disait que deux
+mots ne pouvaient pas être contractés dans un même état causal. La rétraction
+construit effectivement, depuis chaque état réalisé, le mot unique qui l’a
+produit. L’horloge n’est donc ni un champ compteur ajouté à `CausalState`, ni
+une existence obtenue par choix : elle est calculée par récursion sur la
+mémoire déjà portée par l’état.
+
+Pour l’objet réalisé, ce résultat devient :
+
+```text
+intrinsicTime(state(x)) = word(x)
+```
+
+L’identité et l’individuation sont ainsi raccordées à un décodeur interne.
+
+### 21.7 Théorème de cardinalité causale exacte
+
+Les positions d’une mémoire sont définies avant `Nat` :
+
+```text
+Position(root) = vide
+
+Position(extend(previous,event))
+= option(Position(previous))
+```
+
+`none` désigne le nouvel événement et `some(p)` une position héritée. La
+fonction `sentenceAt` lit la phrase portée par une position. Deux théorèmes
+ferment l’interprétation extensionnelle :
+
+```text
+Remembers(memory,d)
+↔
+∃p : Position(memory), sentenceAt(p) = d
+
+sentenceAt(p) = sentenceAt(q)
+→ p = q
+```
+
+La seconde propriété n’est pas celle d’une liste supposée sans doublons. Son
+cas décisif oppose la nouvelle position à une position ancienne : une
+collision rendrait le gap courant déjà mémorisé, en contradiction avec le
+mismatch tarskien. La fraîcheur intrinsèque garantit donc l’absence de
+doublons.
+
+On définit parallèlement :
+
+```text
+CausalFin(0ᶜ) = vide
+
+CausalFin(succᶜ(w)) = option(CausalFin(w))
+```
+
+et on construit deux fonctions mutuellement inverses :
+
+```text
+Position(memory)
+≅
+CausalFin(causalTime(memory))
+```
+
+Sur une étape réalisée :
+
+```text
+Position(memory(eval(S₀,w))) ≅ CausalFin(w)
+```
+
+Ce théorème exprime la cardinalité finie exacte avant toute mesure par
+`Nat`. La comparaison finale donne seulement ensuite :
+
+```text
+CausalFin(w) ≅ Fin(toNat(w))
+
+Position(memory(causalOrbit(n))) ≅ Fin(n)
+```
+
+Chaque étape contient donc exactement une position par événement causal déjà
+inscrit. La famille des étapes réalise des mémoires de toute taille finie,
+sans borne uniforme, mais aucune mémoire finie n’épuise la totalité
+historique.
+
+### 21.8 Théorème d’ordre causal
+
+On définit l’ordre des mots par extension :
+
+```text
+Precedes(u,v)
+:⇔
+∃r, v = u +ᶜ r
+
+StrictlyPrecedes(u,v)
+:⇔
+∃r, r ≠ 0ᶜ ∧ v = u +ᶜ r
+```
+
+La réflexivité, la transitivité, l’antisymétrie, l’irréflexivité stricte et la
+comparabilité sont prouvées par la structure unaire des mots, sans longueur
+naturelle. Pour produire une donnée dans `Type`, le Core utilise la structure
+positive `PositiveExtension(u,v)`, qui porte réellement le suffixe non vide ;
+il n’extrait jamais un témoin depuis une existence propositionnelle.
+
+L’accessibilité des états est :
+
+```text
+Reachable(S,T)
+:⇔
+∃w, T = eval(S,w)
+```
+
+Sur l’orbite cumulative fidèle :
+
+```text
+Reachable(eval(S₀,u),eval(S₀,v))
+↔
+Precedes(u,v)
+```
+
+Une extension positive produit en outre une inclusion stricte de mémoire,
+avec `gap(eval(S₀,u))` comme témoin. L’ordre naturel n’est donc pas seulement
+copié sur les mots : il est réalisé exactement comme accessibilité causale et
+comme croissance mémorielle.
+
 ---
 
 ## 22. Théorème principal formalisé
@@ -1582,9 +1803,29 @@ E(eval(S₀,w)) ⊊ HistoricalMemory(p₀)
 CausalWord ↪ HistoricalGap(p₀)
 ```
 
+Il contient également, avant `Nat`, l’ordre et la cardinalité intrinsèques :
+
+```text
+Position(memory(eval(S₀,w))) ≅ CausalFin(w)
+
+Reachable(eval(S₀,u),eval(S₀,v))
+↔ Precedes(u,v)
+
+PositiveExtension(u,v)
+→ E(eval(S₀,u)) ⊊ E(eval(S₀,v))
+```
+
+La couche finale de comparaison prouve :
+
+```text
+intrinsicNaturalTime(causalOrbit(n)) = n
+
+Position(memory(causalOrbit(n))) ≅ Fin(n)
+```
+
 Ainsi, le théorème principal contient à la fois une réalisation additive de
-l’objet naturel et une totalité historique infinie qu’aucun état réalisé
-n’épuise.
+l’objet naturel, une horloge décodable, une mesure finie exacte de chaque
+mémoire et une totalité historique infinie qu’aucun état réalisé n’épuise.
 
 Le morphisme additif porte vers les transformations causales, et non vers le
 type brut des états. Posons :
@@ -1654,6 +1895,9 @@ La composition des chemins définit l’addition.
 L’évaluation transforme cette addition en composition de transitions.
 Tarski empêche toute contraction de cette représentation additive.
 Chaque gap devenu mémoire individue l’état futur par rapport à son passé.
+La mémoire complète décode le mot exact qui l’a produite.
+Ses positions réalisent exactement les antécédents causaux de ce mot.
+L’accessibilité causale réalise l’ordre de préfixe.
 La totalité historique conserve tous les gaps sans devenir un état terminal.
 L’objet naturel causal est ainsi réalisé fidèlement dans les états complets.
 ```
@@ -1749,6 +1993,25 @@ x = y  ↔  state(x) = state(y)
 
 Le premier critère vient du paquet réalisé. Les deux suivants utilisent la
 fidélité de l’évaluation imposée par la mémoire cumulative.
+
+La formalisation établit désormais un renforcement calculatoire de ces
+critères. La fonction :
+
+```text
+intrinsicTime : CausalState(p₀) → CausalWord
+```
+
+est définie par récursion sur la mémoire positive de l’état et vérifie :
+
+```text
+intrinsicTime(eval(S₀,w)) = w
+
+intrinsicTime(state(x)) = word(x)
+```
+
+L’identité historique n’est donc pas seulement caractérisée par une
+implication d’unicité. Sur l’orbite réalisée, le mot individuant est
+effectivement reconstructible depuis l’état complet.
 
 ### 23.2 Témoin intrinsèque d’individuation
 
@@ -1890,7 +2153,8 @@ non injective reste séparée et a été délimitée au §18.
 
 La totalité historique de la section suivante rassemble ces témoins
 d’individuation sans les contracter dans un état terminal. La coordonnée
-naturelle n’est introduite qu’ensuite, au §25.
+naturelle n’est introduite qu’après la construction de l’horloge, des
+positions et de l’ordre causaux, au §28.
 
 ---
 
@@ -2145,7 +2409,304 @@ strictement son contenu tout en empêchant son achèvement global dans l’orbit
 
 ---
 
-## 25. Coordonnée naturelle canonique
+## 25. Horloge intrinsèque décodée depuis l’état
+
+La fidélité prouvée précédemment fournit une propriété d’unicité : si deux
+mots ont des réalisations causalement équivalentes, ils sont égaux. Une
+horloge intrinsèque exige davantage. Il faut une fonction définie sur l’état
+complet qui retrouve positivement le mot réalisé.
+
+La mémoire tarskienne a exactement la forme inductive suivante :
+
+```text
+root
+
+extend(previous,event)
+```
+
+On définit donc sans `Nat` :
+
+```text
+causalTime(root) := 0ᶜ
+
+causalTime(extend(previous,event))
+:= succᶜ(causalTime(previous))
+```
+
+Puis :
+
+```text
+intrinsicTime(S) := causalTime(memory(S))
+```
+
+La définition de l’avance étend la mémoire une fois et une seule fois. Elle
+donne définitionnellement :
+
+```text
+intrinsicTime(advance(S))
+= succᶜ(intrinsicTime(S))
+```
+
+Une induction sur le mot donne le théorème de rétraction :
+
+```text
+intrinsicTime(eval(S₀,w)) = w
+```
+
+Ainsi :
+
+```text
+eval(S₀) : CausalWord → CausalState(p₀)
+
+intrinsicTime : CausalState(p₀) → CausalWord
+
+intrinsicTime ∘ eval(S₀) = identité pointwise
+```
+
+Cette équation implique l’injectivité de `eval(S₀)`, mais elle est plus forte
+comme donnée : elle exhibe un décodeur total sur les états causaux, calculé à
+partir de leur mémoire. Aucun champ `counter`, aucun rang et aucun oracle de
+reconstruction ne sont ajoutés.
+
+Pour tout objet réalisé `x` :
+
+```text
+intrinsicTime(state(x)) = word(x)
+```
+
+Le mot stocké dans `RealizedCausalNat` est donc vérifié par le contenu causal
+de l’état et récupérable depuis lui. L’identité de l’objet, l’individuation de
+ses étapes et son heure causale deviennent trois lectures du même historique
+positif.
+
+---
+
+## 26. Mémoire exactement finie avant Nat
+
+L’exactitude de l’avance :
+
+```text
+Memory(advance(S),d)
+↔ Memory(S,d) ∨ d = gap(S)
+```
+
+dit quels éléments sont mémorisés, mais ne suffit pas à elle seule à produire
+un type de positions sans choix. La formalisation définit donc les positions
+directement depuis la structure positive de `CausalMemory` :
+
+```text
+Position(root) := vide
+
+Position(extend(previous,event))
+:= option(Position(previous))
+```
+
+La position `none` désigne l’événement nouvellement inscrit. Une position
+`some(p)` désigne l’événement ancien situé en `p` dans la mémoire précédente.
+La lecture :
+
+```text
+sentenceAt : Position(memory) → Sentence
+```
+
+est définie par la même récursion.
+
+### 26.1 Exactitude de Remembers
+
+Pour toute mémoire cohérente et toute phrase `d` :
+
+```text
+Remembers(memory,d)
+↔
+∃p : Position(memory), sentenceAt(p) = d
+```
+
+La direction gauche reste propositionnelle : elle ne tente jamais d’extraire
+une position dans `Type` depuis une preuve existentielle au moyen d’un choix.
+La structure de position est construite indépendamment ; le théorème prouve
+ensuite que son image est exactement le prédicat extensionnel `Remembers`.
+
+### 26.2 Unicité des positions
+
+La fonction `sentenceAt` est injective :
+
+```text
+sentenceAt(p) = sentenceAt(q)
+→ p = q
+```
+
+Les deux positions héritées sont séparées par l’hypothèse inductive. Le cas
+non trivial oppose la position nouvelle à une position ancienne. Une telle
+égalité ferait du nouveau gap une phrase déjà mémorisée dans `previous`, en
+contradiction avec :
+
+```text
+current_not_remembered(previous)
+```
+
+L’absence de doublons n’est donc pas une condition ajoutée à une liste. Elle
+est dérivée de la fraîcheur tarskienne engendrée par mismatch, réparation et
+préservation.
+
+### 26.3 Cardinalité causale exacte
+
+Le type fini interne est construit sur les mots eux-mêmes :
+
+```text
+CausalFin(0ᶜ) := vide
+
+CausalFin(succᶜ(w)) := option(CausalFin(w))
+```
+
+Deux fonctions récursives mutuellement inverses donnent, pour toute mémoire :
+
+```text
+Position(memory)
+≅
+CausalFin(causalTime(memory))
+```
+
+En appliquant la rétraction de l’horloge à une étape réalisée :
+
+```text
+Position(memory(eval(S₀,w)))
+≅
+CausalFin(w)
+```
+
+Cette équivalence est la formulation intrinsèque de la cardinalité exacte.
+Elle est complète avant toute importation de `Nat` ou de `Fin`.
+
+### 26.4 Comparaison finale avec Fin
+
+Dans le fichier final seulement, une autre équivalence constructive est
+définie :
+
+```text
+CausalFin(w) ≅ Fin(toNat(w))
+```
+
+Par composition :
+
+```text
+Position(memory(eval(S₀,w)))
+≅
+Fin(toNat(w))
+```
+
+et pour l’ancienne présentation de l’orbite :
+
+```text
+Position(memory(causalOrbit(n))) ≅ Fin(n)
+
+intrinsicNaturalTime(causalOrbit(n)) = n
+```
+
+La mémoire à l’étape `n` contient donc exactement `n` événements distincts.
+Ce n’est pas une convention d’indexation : les positions existent dans la
+mémoire, couvrent exactement `Remembers`, et leurs phrases sont injectives.
+
+La famille entière réalise des mémoires exactement finies de toute taille.
+Elle est sans borne uniforme, tandis que chaque stade demeure strictement
+inclus dans la totalité historique. Cela articule proprement :
+
+```text
+finitude exacte de chaque état
++ croissance indéfinie des états
++ infini réalisé de la totalité historique
++ absence d’état totalisant final
+```
+
+---
+
+## 27. Ordre naturel comme accessibilité causale
+
+L’addition des mots définit la précédence :
+
+```text
+Precedes(u,v)
+:⇔
+∃r, v = u +ᶜ r
+```
+
+et la précédence stricte :
+
+```text
+StrictlyPrecedes(u,v)
+:⇔
+∃r, r ≠ 0ᶜ ∧ v = u +ᶜ r
+```
+
+Le Core prouve constructivement :
+
+```text
+Precedes est réflexive
+Precedes est transitive
+Precedes est antisymétrique
+StrictlyPrecedes est irréflexive
+tous les mots causaux sont comparables
+```
+
+La comparabilité est calculée directement par la forme unaire des mots. Elle
+ne passe pas par `toNat`.
+
+Pour distinguer données et propositions, le Core définit également :
+
+```text
+Extension(u,v)
+= suffixe r et preuve v = u +ᶜ r
+
+PositiveExtension(u,v)
+= suffixe r non vide et preuve v = u +ᶜ r
+```
+
+Ces structures vivent dans `Type`. Elles permettent de construire une
+inclusion stricte de mémoire sans éliminer illicitement une existence de
+`Prop` vers une donnée positive.
+
+L’accessibilité d’un système causal est :
+
+```text
+Reachable(S,T)
+:⇔
+∃w, T = eval(S,w)
+```
+
+Sur toute orbite d’un système cumulatif :
+
+```text
+Reachable(eval(S₀,u),eval(S₀,v))
+↔
+Precedes(u,v)
+```
+
+La direction de droite utilise la loi additive de `eval`. La direction de
+gauche utilise sa fidélité : tout chemin atteignant la réalisation de `v`
+depuis celle de `u` impose `v = u +ᶜ r`.
+
+Enfin, toute `PositiveExtension(u,v)` construit :
+
+```text
+E(eval(S₀,u)) ⊊ E(eval(S₀,v))
+```
+
+avec `gap(eval(S₀,u))` comme séparateur. L’ordre du naturel causal possède
+donc deux présentations exactement équivalentes, et toute précédence positive
+se réalise par une croissance mémorielle stricte :
+
+```text
+préfixe additif des mots
+= accessibilité des états
+
+extension positive
+→ inclusion cumulative stricte des mémoires
+```
+
+`Nat` arrive ensuite comme coordonnée de cet ordre déjà réalisé.
+
+---
+
+## 28. Coordonnée naturelle canonique
 
 L’objet naturel classique fournit une coordonnée canonique par la composition :
 
@@ -2241,12 +2802,12 @@ distincte et d’une théorie concrète.
 
 ---
 
-## 26. Statut formel
+## 29. Statut formel
 
 Le résultat est réparti en couches dont les dépendances suivent l’ordre
 mathématique de la construction.
 
-### 26.1 Noyau causal et additif sans Nat
+### 29.1 Noyau causal et additif sans Nat
 
 ```text
 Meta/Core/CausalAdditive.lean
@@ -2289,7 +2850,7 @@ RealizedCausalNat.state_eq_determines_word
 RealizedCausalNat.no_positive_absorption
 ```
 
-### 26.2 Totalité historique générique sans Nat
+### 29.2 Totalité historique générique sans Nat
 
 ```text
 Meta/Core/CausalTotality.lean
@@ -2322,7 +2883,28 @@ cumulativeTotalityTheorem
 Ce fichier importe seulement `Meta.Core.CausalAdditive`. Il ne dépend pas de
 `CausalAdditiveNat`.
 
-### 26.3 Adaptateur tarskien cumulatif sans Nat
+### 29.3 Finitude causale et ordre sans Nat
+
+```text
+Meta/Core/CausalFinite.lean
+```
+
+Ce fichier définit sans `Nat` ni `Fin` :
+
+```text
+CausalFin
+CausalWord.Extension
+CausalWord.PositiveExtension
+CausalWord.Precedes
+CausalWord.StrictlyPrecedes
+AccumulatingCausalSystem.Reachable
+```
+
+Il prouve l’ordre partiel constructif des mots, leur comparabilité, l’identité
+entre accessibilité orbitale et précédence, puis la croissance stricte de la
+mémoire le long de toute extension positive.
+
+### 29.4 Adaptateur tarskien cumulatif sans Nat
 
 ```text
 Meta/Tarski/CausalAccumulatingSystem.lean
@@ -2337,7 +2919,7 @@ tarskiAccumulatingCausalSystem
 
 L’adaptateur ne dépend pas de la couche d’identification à `Nat`.
 
-### 26.4 Totalité historique tarskienne exacte sans Nat
+### 29.5 Totalité historique tarskienne exacte sans Nat
 
 ```text
 Meta/Tarski/CausalTotality.lean
@@ -2364,7 +2946,37 @@ tarskiCumulativeTotalityTheorem
 Le paquet final combine le théorème générique de totalité cumulative et la
 loi d’exactitude propre à la mémoire tarskienne.
 
-### 26.5 Identification finale à Nat
+### 29.6 Horloge intrinsèque et positions exactes sans Nat
+
+```text
+Meta/Tarski/CausalClock.lean
+```
+
+Ce fichier construit :
+
+```text
+CausalMemory.causalTime
+CausalMemory.Position
+CausalMemory.sentenceAt
+CausalState.intrinsicTime
+CausalState.MemoryPosition
+TarskiIntrinsicClockTheorem
+```
+
+et prouve notamment :
+
+```text
+CausalMemory.remembers_iff_position
+CausalMemory.sentenceAt_injective
+CausalMemory.positionEquivalence
+intrinsicTime_eval
+stagePositionEquivalence
+tarskiIntrinsicClockTheorem
+```
+
+Il importe `CausalFinite`, mais aucune couche `Nat`.
+
+### 29.7 Identification finale à Nat
 
 ```text
 Meta/Core/CausalAdditiveNat.lean
@@ -2398,7 +3010,28 @@ AccumulatingCausalSystem.naturalHistoricalGap
 AccumulatingCausalSystem.naturalHistoricalGap_injective
 ```
 
-### 26.6 Réalisation additive tarskienne fermée
+### 29.8 Comparaison finale de la mémoire à Fin
+
+```text
+Meta/Tarski/CausalClockNat.lean
+```
+
+Ce fichier est strictement postérieur à l’horloge intrinsèque. Il construit :
+
+```text
+CausalFin.finEquivalence
+stagePositionFinEquivalence
+CausalState.intrinsicNaturalTime
+causalOrbitPositionFinEquivalence
+TarskiExactFiniteMemoryTheorem
+tarskiExactFiniteMemoryTheorem
+```
+
+Les théorèmes principaux donnent `Position(eval(S₀,w)) ≅ Fin(toNat(w))`,
+`Position(causalOrbit(n)) ≅ Fin(n)` et le décodage exact de l’ancienne orbite
+par sa mémoire.
+
+### 29.9 Réalisation additive tarskienne fermée
 
 ```text
 Meta/Tarski/CausalAdditiveRealization.lean
@@ -2418,24 +3051,104 @@ tarskiNaturalHistoricalGap
 tarskiNaturalHistoricalGap_injective
 tarskiRealizedState_causallyDeterminesWord
 tarskiRealizedState_causallyFaithful
+tarskiRealizedState_intrinsicTime
 tarskiCausalAdditiveRealizationTheorem
 ```
 
-Le paquet final contient le paquet de totalité cumulative, l’additivité et la
-fidélité de la transformation, l’additivité de l’orbite, les lois de l’objet
-réalisé, sa fidélité causale complète, la non-absorption de tout incrément
-positif, les trois lois de la coordonnée naturelle et son équivalence
-constructive avec `Nat`.
+Le paquet final contient les paquets de totalité cumulative, d’horloge
+intrinsèque et de mémoire exactement finie. Il contient aussi l’additivité et
+la fidélité de la transformation, l’additivité de l’orbite, les lois de
+l’objet réalisé, sa fidélité causale complète, le décodage de son mot, la
+non-absorption de tout incrément positif, les trois lois de la coordonnée
+naturelle et son équivalence constructive avec `Nat`.
 
-### 26.7 Audit constructif
+### 29.10 Fermeture dans l’arithmétique ordinaire
+
+Le résultat générique précédent est désormais spécialisé à une syntaxe
+arithmétique autonome dans :
+
+```text
+Meta/Tarski/BareArithmetic/ClosedOrbit.lean
+```
+
+La chaîne concrète ne reçoit ni diagonaliseur ni patch comme oracle. Elle
+construit successivement :
+
+```text
+formules et termes de De Bruijn
+→ codage calculable et injectif
+→ substitution capture-avoiding
+→ machine de substitution primitive récursive
+→ formule arithmétique représentant son graphe
+→ phrase diagonale
+→ patch syntaxique
+→ bareArithmeticPatchableContext
+```
+
+Le raccord terminal est la valeur fermée :
+
+```text
+bareArithmeticCausalAdditiveRealizationTheorem :
+  TarskiCausalAdditiveRealizationTheorem
+    bareArithmeticPatchableContext
+    initialBareArithmeticPredicate
+```
+
+Elle spécialise simultanément au même système arithmétique concret :
+
+```text
+la croissance exacte de la mémoire ;
+la totalité historique non épuisable ;
+l’horloge intrinsèque ;
+la mémoire finie exacte ;
+l’action additive fidèle ;
+l’addition réalisée ;
+l’identité et l’individuation causales ;
+la coordonnée naturelle finale.
+```
+
+La valeur :
+
+```text
+bareArithmeticTarskiClosedSystem
+```
+
+contient maintenant ce paquet, en plus du théorème d’orbite générique, du
+théorème de répétition visible avec séparation causale et du certificat de
+non-trivialité.
+
+Cette spécialisation ferme la différence entre deux niveaux qui devaient
+rester distincts dans les versions antérieures du document :
+
+```text
+théorème abstrait :
+  les trois lois causales suffisent à produire la structure ;
+
+réalisation arithmétique :
+  mismatch, réparation et préservation produisent effectivement ces lois
+  dans une syntaxe arithmétique ordinaire.
+```
+
+`Nat` n’est pas utilisé pour fabriquer la fraîcheur, la mémoire, la fidélité
+ou l’horloge intrinsèque. Il intervient ensuite comme coordonnée bijective de
+l’objet déjà réalisé. Cette coordonnée n’est donc pas une observation
+non injective. Toute perspective visible non injective reste une application
+distincte et doit être prouvée séparément.
+
+### 29.11 Audit constructif
 
 Les cibles principales :
 
 ```text
 lake build Meta.Core.CausalTotality
+lake build Meta.Core.CausalFinite
 lake build Meta.Tarski.CausalAccumulatingSystem
 lake build Meta.Tarski.CausalTotality
+lake build Meta.Tarski.CausalClock
+lake build Meta.Tarski.CausalClockNat
 lake build Meta.Tarski.CausalAdditiveRealization
+lake build Meta.Tarski.BareArithmetic.ClosedOrbit
+lake build Meta
 ```
 
 compilent intégralement. Les blocs `#print axioms` de chaque fichier déclarent
@@ -2443,3 +3156,10 @@ que toutes les déclarations principales sont indépendantes de tout axiome.
 La preuve n’utilise ni `Classical`, ni `propext`, ni `Quot.sound`, ni quotient,
 ni rang, ni fenêtre, ni pont terminal externe. Aucune déclaration principale
 ne dépend de `FoundationBridge`.
+
+Les deux sorties fermées terminales auditées sont :
+
+```text
+Meta.BareArithmeticTarski.bareArithmeticCausalAdditiveRealizationTheorem
+Meta.BareArithmeticTarski.bareArithmeticTarskiClosedSystem
+```

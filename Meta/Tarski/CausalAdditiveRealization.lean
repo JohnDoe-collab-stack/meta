@@ -1,4 +1,4 @@
-import Meta.Core.CausalAdditiveNat
+import Meta.Tarski.CausalClockNat
 import Meta.Tarski.CausalTotality
 
 /-!
@@ -474,6 +474,29 @@ theorem tarskiRealizedState_causallyFaithful
     abstractMemoryEquivalentOfTarski
       patchable initial equivalent.sameMemory
 
+/-- The complete state of a realized Tarski natural decodes the word that
+individuates it.  This is an actual intrinsic decoder, not merely a uniqueness
+statement obtained from faithfulness. -/
+theorem tarskiRealizedState_intrinsicTime
+    (patchable : PatchableArithmeticTarskiContext.{u, v})
+    (initial : patchable.context.Predicate)
+    (realized : TarskiRealizedCausalNat patchable initial) :
+    CausalState.intrinsicTime patchable initial realized.state =
+      realized.word := by
+  calc
+    CausalState.intrinsicTime patchable initial realized.state =
+        CausalState.intrinsicTime
+          patchable
+          initial
+          ((tarskiAccumulatingCausalSystem patchable initial).eval
+            (initialCausalState patchable initial)
+            realized.word) :=
+      congrArg
+        (CausalState.intrinsicTime patchable initial)
+        realized.realized
+    _ = realized.word :=
+      intrinsicTime_eval patchable initial realized.word
+
 /-! ## Closed theorem package -/
 
 /--
@@ -486,6 +509,10 @@ structure TarskiCausalAdditiveRealizationTheorem
     Type (max u v) where
   cumulativeTotality :
     TarskiCumulativeTotalityTheorem patchable initial
+  intrinsicClock :
+    TarskiIntrinsicClockTheorem patchable initial
+  exactFiniteMemory :
+    TarskiExactFiniteMemoryTheorem patchable initial
   transformationAdditive :
     (left right : CausalAdditive.CausalWord) ->
     (state : CausalState patchable initial) ->
@@ -559,6 +586,10 @@ structure TarskiCausalAdditiveRealizationTheorem
     (left right : TarskiRealizedCausalNat patchable initial) ->
       CausallyEquivalent left.state right.state ->
         left = right
+  realizedStateDecodesWord :
+    (realized : TarskiRealizedCausalNat patchable initial) ->
+      CausalState.intrinsicTime patchable initial realized.state =
+        realized.word
   realizedNoPositiveAbsorption :
     (realized : TarskiRealizedCausalNat patchable initial) ->
     (word : CausalAdditive.CausalWord) ->
@@ -578,6 +609,10 @@ def tarskiCausalAdditiveRealizationTheorem
     TarskiCausalAdditiveRealizationTheorem patchable initial where
   cumulativeTotality :=
     tarskiCumulativeTotalityTheorem patchable initial
+  intrinsicClock :=
+    tarskiIntrinsicClockTheorem patchable initial
+  exactFiniteMemory :=
+    tarskiExactFiniteMemoryTheorem patchable initial
   transformationAdditive := tarskiWordAction_add_at patchable initial
   transformationFaithful :=
     tarskiWordAction_pointwiseFaithful patchable initial
@@ -597,6 +632,8 @@ def tarskiCausalAdditiveRealizationTheorem
   realizedCommutative := tarskiRealizedAdd_commutative patchable initial
   realizedStateFaithful :=
     tarskiRealizedState_causallyFaithful patchable initial
+  realizedStateDecodesWord :=
+    tarskiRealizedState_intrinsicTime patchable initial
   realizedNoPositiveAbsorption :=
     tarskiRealizedAdd_noPositiveAbsorption patchable initial
 
@@ -617,5 +654,6 @@ end Meta
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiNaturalEquivalence
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiNaturalHistoricalGap_injective
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiRealizedState_causallyFaithful
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiRealizedState_intrinsicTime
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiCausalAdditiveRealizationTheorem
 /- AXIOM_AUDIT_END -/

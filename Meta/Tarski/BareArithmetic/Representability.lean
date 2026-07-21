@@ -1,4 +1,4 @@
-import Meta.Tarski.BareArithmetic.ArithmeticFormulaTools
+import Meta.Tarski.BareArithmetic.ConstructiveBetaEncoding
 
 /-!
 # Constructive arithmetic representation of primitive-recursive programs
@@ -35,6 +35,149 @@ theorem trueFormula_wellScoped (bound : Nat) :
     trueFormula.WellScoped bound :=
   And.intro trivial trivial
 
+/-- Reassociate one successor from a vector length to its starting offset. -/
+theorem succOffsetTailFits
+    {offset tailLength total : Nat}
+    (fits : offset + Nat.succ tailLength <= total) :
+    Nat.succ offset + tailLength <= total :=
+  Eq.mp
+    (congrArg (fun value => value <= total)
+      ((Nat.succ_add offset tailLength).trans
+        (Nat.add_succ offset tailLength).symm).symm)
+    fits
+
+/-- The head offset of a nonempty fitted block lies in the ambient scope. -/
+theorem fittedOffset_lt_ambient
+    {offset tailLength total inputArity : Nat}
+    (fits : offset + Nat.succ tailLength <= total) :
+    offset < total + Nat.succ inputArity :=
+  Nat.lt_trans
+    (Nat.lt_of_lt_of_le
+      (Nat.lt_add_of_pos_right (Nat.succ_pos tailLength))
+      fits)
+    (Nat.lt_add_of_pos_right (Nat.succ_pos inputArity))
+
+/-- Original graph inputs fit exactly after the intermediate block. -/
+theorem originalInputsFit (total inputArity : Nat) :
+    Nat.succ total + inputArity <= total + Nat.succ inputArity :=
+  Eq.le
+    ((Nat.succ_add total inputArity).trans
+      (Nat.add_succ total inputArity).symm)
+
+/-- A block beginning at zero and using its whole declared length fits. -/
+theorem zeroOffsetFits (length : Nat) : 0 + length <= length :=
+  Eq.mp
+    (congrArg (fun value => value <= length) (Nat.zero_add length).symm)
+    (Nat.le_refl length)
+
+/-- Read one original input after a prefixed vector and the graph output. -/
+theorem prependEnvironment_originalInput
+    {prefixLength inputArity index : Nat}
+    (prefixValues : NatVector prefixLength)
+    (inputs : NatVector inputArity)
+    (output : Nat)
+    (bounded : index < inputArity) :
+    prependEnvironment prefixValues (graphEnvironment inputs output)
+        (Nat.succ prefixLength + index) =
+      inputs.get index bounded := by
+  have shifted :=
+    prependEnvironment_shift prefixValues (graphEnvironment inputs output)
+      (Nat.succ index)
+  have positionEquality :
+      Nat.succ prefixLength + index = prefixLength + Nat.succ index :=
+    (Nat.succ_add prefixLength index).trans
+      (Nat.add_succ prefixLength index).symm
+  have normalized :
+      prependEnvironment prefixValues (graphEnvironment inputs output)
+          (Nat.succ prefixLength + index) =
+        graphEnvironment inputs output (Nat.succ index) :=
+    Eq.mp
+      (congrArg
+        (fun position =>
+          prependEnvironment prefixValues (graphEnvironment inputs output)
+              position =
+            graphEnvironment inputs output (Nat.succ index))
+        positionEquality.symm)
+      shifted
+  exact normalized.trans (NatVector.getD_eq_get inputs bounded)
+
+/-- Two outer witnesses leave primitive-recursion parameters at offset four. -/
+theorem prependTwo_graphParameter
+    {parameterArity index : Nat}
+    (first second counter output : Nat)
+    (parameters : NatVector parameterArity)
+    (bounded : index < parameterArity) :
+    prependEnvironment
+        (NatVector.cons first (NatVector.cons second NatVector.nil))
+        (graphEnvironment (NatVector.cons counter parameters) output)
+        (4 + index) =
+      parameters.get index bounded := by
+  have readInput :=
+    prependEnvironment_originalInput
+      (NatVector.cons first (NatVector.cons second NatVector.nil))
+      (NatVector.cons counter parameters)
+      output
+      (Nat.succ_lt_succ bounded)
+  have positionEquality :
+      4 + index = Nat.succ 2 + Nat.succ index :=
+    (Nat.succ_add 3 index).trans
+      (Nat.add_succ 3 index).symm
+  exact Eq.mp
+    (congrArg
+      (fun position =>
+        prependEnvironment
+            (NatVector.cons first (NatVector.cons second NatVector.nil))
+            (graphEnvironment (NatVector.cons counter parameters) output)
+            position =
+          parameters.get index bounded)
+      positionEquality.symm)
+    readInput
+
+/-- Two local step witnesses and one pushed counter preserve parameter access. -/
+theorem prependTwo_pushedParameter
+    {parameterArity index : Nat}
+    (previous next counterValue : Nat)
+    (topEnvironment : Environment)
+    (bounded : index < parameterArity) :
+    prependEnvironment
+        (NatVector.cons previous (NatVector.cons next NatVector.nil))
+        (pushEnvironment topEnvironment counterValue)
+        (7 + index) =
+      topEnvironment (4 + index) := by
+  have shifted :=
+    prependEnvironment_shift
+      (NatVector.cons previous (NatVector.cons next NatVector.nil))
+      (pushEnvironment topEnvironment counterValue)
+      (5 + index)
+  have positionEquality : 7 + index = 2 + (5 + index) :=
+    Nat.add_assoc 2 5 index
+  have normalized :
+      prependEnvironment
+          (NatVector.cons previous (NatVector.cons next NatVector.nil))
+          (pushEnvironment topEnvironment counterValue)
+          (7 + index) =
+        pushEnvironment topEnvironment counterValue (5 + index) :=
+    Eq.mp
+      (congrArg
+        (fun position =>
+          prependEnvironment
+              (NatVector.cons previous (NatVector.cons next NatVector.nil))
+              (pushEnvironment topEnvironment counterValue)
+              position =
+            pushEnvironment topEnvironment counterValue (5 + index))
+        positionEquality.symm)
+      shifted
+  have successorEquality : 5 + index = Nat.succ (4 + index) :=
+    Nat.succ_add 4 index
+  exact normalized.trans
+    (Eq.mp
+      (congrArg
+        (fun position =>
+          pushEnvironment topEnvironment counterValue position =
+            topEnvironment (4 + index))
+        successorEquality.symm)
+      rfl)
+
 /--
 All component graphs applied to consecutive intermediate-output variables.
 
@@ -58,18 +201,18 @@ def ArithmeticGraphVector.body
       let headApplication :=
         head.apply (RawTerm.bvar offset) originalInputs
       let tailBody :=
-        tail.body (Nat.succ offset) total (by omega)
+        tail.body (Nat.succ offset) total (succOffsetTailFits fits)
       { raw := RawFormula.conj headApplication tailBody.raw
         isScoped := And.intro
           (head.apply_wellScoped
             (RawTerm.bvar offset)
             originalInputs
-            (by omega)
+            (fittedOffset_lt_ambient fits)
             (RawTermVector.variables_wellScoped
               (Nat.succ total)
               inputArity
               (total + Nat.succ inputArity)
-              (by omega)))
+              (originalInputsFit total inputArity)))
           tailBody.isScoped }
 
 /-! ## Closure of graph formulas under composition -/
@@ -83,7 +226,7 @@ def compositionGraph
   let intermediateTerms := RawTermVector.variables 0 outputArity
   let outerApplication :=
     outer.apply (RawTerm.bvar outputArity) intermediateTerms
-  let innerBody := inner.body 0 outputArity (Nat.le_refl outputArity)
+  let innerBody := inner.body 0 outputArity (zeroOffsetFits outputArity)
   let body := RawFormula.conj outerApplication innerBody.raw
   { raw := body.existsMany outputArity
     isScoped := RawFormula.existsMany_wellScoped
@@ -94,11 +237,13 @@ def compositionGraph
         (outer.apply_wellScoped
           (RawTerm.bvar outputArity)
           intermediateTerms
-          (by omega)
+          (Nat.lt_add_of_pos_right (Nat.succ_pos inputArity))
           (RawTermVector.variables_wellScoped
             0 outputArity
             (outputArity + Nat.succ inputArity)
-            (by omega)))
+            (Nat.le_trans
+              (zeroOffsetFits outputArity)
+              (Nat.le_add_right outputArity (Nat.succ inputArity)))))
         innerBody.isScoped) }
 
 /-! ## Closure of graph formulas under primitive recursion -/
@@ -114,6 +259,40 @@ def primitiveStepInputs (parameterArity : Nat) :
   RawTermVector.cons (RawTerm.bvar 2)
     (RawTermVector.cons (RawTerm.bvar 0)
       (RawTermVector.variables 7 parameterArity))
+
+/-- Normal form of the scope used by the primitive-recursion base clause. -/
+theorem primitiveBaseScope_eq (parameterArity : Nat) :
+    Nat.succ (2 + Nat.succ (Nat.succ parameterArity)) =
+      5 + parameterArity := by
+  induction parameterArity with
+  | zero => rfl
+  | succ parameterArity inductionHypothesis =>
+      exact congrArg Nat.succ inductionHypothesis
+
+/-- Normal form of the scope used by the primitive-recursion transition. -/
+theorem primitiveStepScope_eq (parameterArity : Nat) :
+    2 + Nat.succ (2 + Nat.succ (Nat.succ parameterArity)) =
+      7 + parameterArity := by
+  induction parameterArity with
+  | zero => rfl
+  | succ parameterArity inductionHypothesis =>
+      exact congrArg Nat.succ inductionHypothesis
+
+/-- Normal form of the scope used by the outer output clause. -/
+theorem primitiveOutputScope_eq (parameterArity : Nat) :
+    2 + Nat.succ (Nat.succ parameterArity) =
+      4 + parameterArity := by
+  induction parameterArity with
+  | zero => rfl
+  | succ parameterArity inductionHypothesis =>
+      exact congrArg Nat.succ inductionHypothesis
+
+/-- A fixed De Bruijn index remains below a scope enlarged on the right. -/
+theorem fixedIndex_lt_add
+    (index fixed extra : Nat)
+    (bounded : index < fixed) :
+    index < fixed + extra :=
+  Nat.lt_of_lt_of_le bounded (Nat.le_add_right fixed extra)
 
 /--
 Arithmetic graph of primitive recursion.
@@ -165,108 +344,80 @@ def primitiveRecursionGraph
   let body := RawFormula.conj baseClause
     (RawFormula.conj transitionClause outputClause)
   { raw := body.existsMany 2
-    isScoped := RawFormula.existsMany_wellScoped
-      2
-      (Nat.succ (Nat.succ parameterArity))
-      body
-      (And.intro
-        (by
-          apply And.intro
-          · exact betaValueFormula_wellScoped
-              (RawTerm.bvar 1)
-              (RawTerm.bvar 2)
-              RawTerm.zero
-              (RawTerm.bvar 0)
-              (by omega) (by omega) trivial (by omega)
-          · exact base.apply_wellScoped
-              (RawTerm.bvar 0)
-              (primitiveBaseParameters parameterArity)
-              (by omega)
-              (RawTermVector.variables_wellScoped
-                5 parameterArity
-                (Nat.succ (2 + Nat.succ (Nat.succ parameterArity)))
-                (by omega)))
-        (And.intro
-          (by
-            apply And.intro
-            · exact lessThanFormula_wellScoped
-                (RawTerm.bvar 0)
-                (RawTerm.bvar 4)
-                (by omega) (by omega)
-            · apply RawFormula.existsMany_wellScoped
-              exact And.intro
-                (betaValueFormula_wellScoped
-                  (RawTerm.bvar 3)
-                  (RawTerm.bvar 4)
-                  (RawTerm.bvar 2)
-                  (RawTerm.bvar 0)
-                  (by omega) (by omega) (by omega) (by omega))
-                (And.intro
-                  (betaValueFormula_wellScoped
-                    (RawTerm.bvar 3)
-                    (RawTerm.bvar 4)
-                    (RawTerm.succ (RawTerm.bvar 2))
-                    (RawTerm.bvar 1)
-                    (by omega) (by omega) (by
-                      exact (by omega)) (by omega))
-                  (step.apply_wellScoped
-                    (RawTerm.bvar 1)
-                    (primitiveStepInputs parameterArity)
-                    (by omega)
-                    (And.intro (by omega)
-                      (And.intro (by omega)
-                        (RawTermVector.variables_wellScoped
-                          7 parameterArity
-                          (2 + Nat.succ
-                            (2 + Nat.succ (Nat.succ parameterArity)))
-                          (by omega))))))
-          (betaValueFormula_wellScoped
-            (RawTerm.bvar 0)
-            (RawTerm.bvar 1)
-            (RawTerm.bvar 3)
-            (RawTerm.bvar 2)
-            (by omega) (by omega) (by omega) (by omega)))) }
-
-/-! ## The compiler -/
-
-mutual
-  /-- Compile a positive primitive-recursive program to bare arithmetic. -/
-  def PRFunction.graphFormula :
-      {arity : Nat} -> PRFunction arity -> ArithmeticGraph arity
-    | arity, PRFunction.zero =>
-        { raw := RawFormula.equal (RawTerm.bvar 0) RawTerm.zero
-          isScoped := And.intro (Nat.zero_lt_succ arity) trivial }
-    | _arity, PRFunction.successor =>
-        { raw := RawFormula.equal
-            (RawTerm.bvar 0)
-            (RawTerm.succ (RawTerm.bvar 1))
-          isScoped := And.intro
-            (Nat.zero_lt_succ 1)
-            (Nat.succ_lt_succ (Nat.zero_lt_succ 0)) }
-    | _arity, PRFunction.projection arity index bounded =>
-        { raw := RawFormula.equal
-            (RawTerm.bvar 0)
-            (RawTerm.bvar (Nat.succ index))
-          isScoped := And.intro
-            (Nat.zero_lt_succ arity)
-            (Nat.succ_lt_succ bounded) }
-    | _arity, PRFunction.composition outer inner =>
-        compositionGraph outer.graphFormula inner.graphFormulas
-    | _arity, PRFunction.primitiveRecursion base step =>
-        primitiveRecursionGraph base.graphFormula step.graphFormula
-
-  /-- Compile a vector of programs pointwise. -/
-  def PRFunctionVector.graphFormulas :
-      {inputArity outputArity : Nat} ->
-        PRFunctionVector inputArity outputArity ->
-        ArithmeticGraphVector inputArity outputArity
-    | _inputArity, _outputArity, PRFunctionVector.nil =>
-        ArithmeticGraphVector.nil
-    | _inputArity, _outputArity, PRFunctionVector.cons head tail =>
-        ArithmeticGraphVector.cons
-          head.graphFormula
-          tail.graphFormulas
-end
+    isScoped := by
+      apply RawFormula.existsMany_wellScoped
+      constructor
+      · constructor
+        · apply betaValueFormula_wellScoped
+          · change 1 < (2 + parameterArity.succ.succ).succ
+            rw [primitiveBaseScope_eq]
+            exact fixedIndex_lt_add 1 5 parameterArity (by decide)
+          · change 2 < (2 + parameterArity.succ.succ).succ
+            rw [primitiveBaseScope_eq]
+            exact fixedIndex_lt_add 2 5 parameterArity (by decide)
+          · trivial
+          · change 0 < (2 + parameterArity.succ.succ).succ
+            exact Nat.zero_lt_succ _
+        · apply base.apply_wellScoped
+          · change 0 < (2 + parameterArity.succ.succ).succ
+            exact Nat.zero_lt_succ _
+          · apply RawTermVector.variables_wellScoped
+            rw [primitiveBaseScope_eq]
+      · constructor
+        · constructor
+          · apply lessThanFormula_wellScoped
+            · change 0 < (2 + parameterArity.succ.succ).succ
+              exact Nat.zero_lt_succ _
+            · change 4 < (2 + parameterArity.succ.succ).succ
+              rw [primitiveBaseScope_eq]
+              exact fixedIndex_lt_add 4 5 parameterArity (by decide)
+          · apply RawFormula.existsMany_wellScoped
+            constructor
+            · apply betaValueFormula_wellScoped
+              · rw [primitiveStepScope_eq]
+                exact fixedIndex_lt_add 3 7 parameterArity (by decide)
+              · rw [primitiveStepScope_eq]
+                exact fixedIndex_lt_add 4 7 parameterArity (by decide)
+              · rw [primitiveStepScope_eq]
+                exact fixedIndex_lt_add 2 7 parameterArity (by decide)
+              · rw [primitiveStepScope_eq]
+                exact fixedIndex_lt_add 0 7 parameterArity (by decide)
+            · constructor
+              · apply betaValueFormula_wellScoped
+                · rw [primitiveStepScope_eq]
+                  exact fixedIndex_lt_add 3 7 parameterArity (by decide)
+                · rw [primitiveStepScope_eq]
+                  exact fixedIndex_lt_add 4 7 parameterArity (by decide)
+                · rw [primitiveStepScope_eq]
+                  exact fixedIndex_lt_add 2 7 parameterArity (by decide)
+                · rw [primitiveStepScope_eq]
+                  exact fixedIndex_lt_add 1 7 parameterArity (by decide)
+              · apply step.apply_wellScoped
+                · change 1 < 2 + Nat.succ
+                    (2 + Nat.succ (Nat.succ parameterArity))
+                  rw [primitiveStepScope_eq]
+                  exact fixedIndex_lt_add 1 7 parameterArity (by decide)
+                · constructor
+                  · change 2 < 2 + Nat.succ
+                      (2 + Nat.succ (Nat.succ parameterArity))
+                    rw [primitiveStepScope_eq]
+                    exact fixedIndex_lt_add 2 7 parameterArity (by decide)
+                  · constructor
+                    · change 0 < 2 + Nat.succ
+                        (2 + Nat.succ (Nat.succ parameterArity))
+                      rw [primitiveStepScope_eq]
+                      exact fixedIndex_lt_add 0 7 parameterArity (by decide)
+                    · apply RawTermVector.variables_wellScoped
+                      rw [primitiveStepScope_eq]
+        · apply betaValueFormula_wellScoped
+          · rw [primitiveOutputScope_eq]
+            exact fixedIndex_lt_add 0 4 parameterArity (by decide)
+          · rw [primitiveOutputScope_eq]
+            exact fixedIndex_lt_add 1 4 parameterArity (by decide)
+          · rw [primitiveOutputScope_eq]
+            exact fixedIndex_lt_add 3 4 parameterArity (by decide)
+          · rw [primitiveOutputScope_eq]
+            exact fixedIndex_lt_add 2 4 parameterArity (by decide) }
 
 /-! ## Semantic correctness of composition -/
 
@@ -281,13 +432,13 @@ def ArithmeticGraph.Represents
       graph.Holds inputs output ↔
         PRFunction.Evaluates program inputs output
 
-/-- Pointwise representation evidence for a vector of programs. -/
+/-- Positive pointwise certificate for a vector of represented programs. -/
 inductive ArithmeticGraphVector.Represents
     {inputArity : Nat} :
     {length : Nat} ->
       ArithmeticGraphVector inputArity length ->
       PRFunctionVector inputArity length ->
-      Prop
+      Type
   | nil :
       ArithmeticGraphVector.Represents
         ArithmeticGraphVector.nil
@@ -317,15 +468,15 @@ theorem RawTermVector.variables_evaluate_get
   | succ length inductionHypothesis =>
       cases index with
       | zero =>
-          rw [Nat.add_zero]
+          exact congrArg environment (Nat.add_zero start).symm
       | succ index =>
           change
             ((RawTermVector.variables (Nat.succ start) length).getD index).evaluate
                 environment =
               environment (start + Nat.succ index)
           rw [inductionHypothesis
-            (Nat.succ start)
-            index
+            (start := Nat.succ start)
+            (index := index)
             (Nat.lt_of_succ_lt_succ bounded)]
           rw [Nat.succ_add, Nat.add_succ]
 
@@ -352,8 +503,14 @@ theorem ArithmeticGraph.apply_holds_of_values
   cases index with
   | zero => exact outputValue
   | succ index =>
-      rw [RawTermVector.evaluate_getD]
-      exact inputValues index (Nat.lt_of_succ_lt_succ bounded)
+      have inputBounded : index < arity := Nat.lt_of_succ_lt_succ bounded
+      change
+        (inputTerms.evaluate environment).getD index = inputs.getD index
+      exact Eq.trans
+        (RawTermVector.evaluate_getD inputTerms environment index)
+        (Eq.trans
+          (inputValues index inputBounded)
+          (NatVector.getD_eq_get inputs inputBounded).symm)
 
 /--
 The conjunction generated for a graph vector represents pointwise vector
@@ -381,86 +538,101 @@ theorem ArithmeticGraphVector.body_holds_iff
             outputs.get index bounded) :
     (graphs.body offset total fits).raw.Holds environment ↔
       PRFunctionVector.Evaluates programs inputs outputs := by
-  induction represents generalizing offset outputs with
+  induction represents generalizing offset with
   | nil =>
-      cases outputs with
-      | nil =>
-          constructor
-          · intro _truth
-            exact PRFunctionVector.Evaluates.nil inputs
-          · intro _evaluation impossible
-            exact impossible
+      constructor
+      · intro _truth
+        unfold PRFunctionVector.Evaluates
+        exact (NatVector.tabulateD_getD_self outputs).symm
+      · intro _evaluation impossible
+        exact impossible
   | @cons length headGraph tailGraphs headProgram tailPrograms
       headRepresents tailRepresents inductionHypothesis =>
-      cases outputs with
-      | cons headOutput tailOutputs =>
-          change
-            ((headGraph.apply
-                (RawTerm.bvar offset)
-                (RawTermVector.variables
-                  (Nat.succ total) inputArity)).Holds environment ∧
-              (tailGraphs.body
-                (Nat.succ offset)
-                total
-                (by omega)).raw.Holds environment) ↔
-              PRFunctionVector.Evaluates
-                (PRFunctionVector.cons headProgram tailPrograms)
-                inputs
-                (NatVector.cons headOutput tailOutputs)
-          have headFormula :
-              (headGraph.apply
-                (RawTerm.bvar offset)
-                (RawTermVector.variables
-                  (Nat.succ total) inputArity)).Holds environment ↔
-                PRFunction.Evaluates headProgram inputs headOutput := by
-            apply Iff.trans
-              (headGraph.apply_holds_of_values
-                (RawTerm.bvar offset)
-                (RawTermVector.variables
-                  (Nat.succ total) inputArity)
+      change
+        ((headGraph.apply
+            (RawTerm.bvar offset)
+            (RawTermVector.variables
+              (Nat.succ total) inputArity)).Holds environment ∧
+          (tailGraphs.body
+            (Nat.succ offset)
+            total
+            (succOffsetTailFits fits)).raw.Holds environment) ↔
+          PRFunctionVector.Evaluates
+            (PRFunctionVector.cons headProgram tailPrograms)
+            inputs outputs
+      have headFormula :
+          (headGraph.apply
+            (RawTerm.bvar offset)
+            (RawTermVector.variables
+              (Nat.succ total) inputArity)).Holds environment ↔
+            PRFunction.Evaluates headProgram inputs (outputs.getD 0) := by
+        apply Iff.trans
+          (headGraph.apply_holds_of_values
+            (RawTerm.bvar offset)
+            (RawTermVector.variables
+              (Nat.succ total) inputArity)
+            environment
+            inputs
+            (outputs.getD 0)
+            ((outputValues 0 (Nat.zero_lt_succ length)).trans
+              (NatVector.getD_eq_get outputs
+                (Nat.zero_lt_succ length)).symm)
+            (fun index bounded =>
+              (RawTermVector.variables_evaluate_get
+                (Nat.succ total)
+                inputArity
                 environment
-                inputs
-                headOutput
-                (outputValues 0 (Nat.zero_lt_succ length))
-                (fun index bounded =>
-                  (RawTermVector.variables_evaluate_get
-                    (Nat.succ total)
-                    inputArity
-                    environment
-                    index
-                    bounded).trans
-                    (inputValues index bounded)))
-            exact headRepresents inputs headOutput
-          have tailFormula :
-              (tailGraphs.body
-                (Nat.succ offset)
-                total
-                (by omega)).raw.Holds environment ↔
-                PRFunctionVector.Evaluates
-                  tailPrograms inputs tailOutputs := by
-            apply inductionHypothesis
-            · exact inputValues
-            · intro index bounded
-              have mapped :=
-                outputValues
-                  (Nat.succ index)
-                  (Nat.succ_lt_succ bounded)
-              change
-                environment (Nat.succ offset + index) =
-                  tailOutputs.get index bounded
-              rw [Nat.succ_add]
-              exact mapped
-          constructor
-          · intro conjunction
-            exact PRFunctionVector.Evaluates.cons
-              (headFormula.mp conjunction.1)
-              (tailFormula.mp conjunction.2)
-          · intro evaluation
-            cases evaluation with
-            | cons headEvaluation tailEvaluation =>
-                exact And.intro
-                  (headFormula.mpr headEvaluation)
-                  (tailFormula.mpr tailEvaluation)
+                index
+                bounded).trans
+                (inputValues index bounded)))
+        exact headRepresents inputs (outputs.getD 0)
+      have tailFormula :
+          (tailGraphs.body
+            (Nat.succ offset)
+            total
+            (succOffsetTailFits fits)).raw.Holds environment ↔
+            PRFunctionVector.Evaluates
+              tailPrograms inputs outputs.tailD := by
+        exact inductionHypothesis
+          (offset := Nat.succ offset)
+          (fits := succOffsetTailFits fits)
+          (outputs := outputs.tailD)
+          (fun index bounded => by
+            have mapped :=
+              outputValues
+                (Nat.succ index)
+                (Nat.succ_lt_succ bounded)
+            rw [Nat.succ_add]
+            exact mapped.trans
+              (NatVector.tailD_get outputs bounded).symm)
+      constructor
+      · intro conjunction
+        unfold PRFunctionVector.Evaluates
+        exact (NatVector.rebuildD outputs).symm.trans
+          ((congrArg
+            (fun headValue => NatVector.cons headValue outputs.tailD)
+            (headFormula.mp conjunction.1)).trans
+            (congrArg
+              (fun tailValues =>
+                NatVector.cons
+                  (PRFunction.runCore headProgram inputs) tailValues)
+              (tailFormula.mp conjunction.2)))
+      · intro evaluation
+        have headEvaluation :
+            PRFunction.Evaluates headProgram inputs (outputs.getD 0) := by
+          unfold PRFunction.Evaluates
+          exact congrArg (fun values => values.getD 0) evaluation
+        have tailEvaluation :
+            PRFunctionVector.Evaluates
+              tailPrograms inputs outputs.tailD := by
+          unfold PRFunctionVector.Evaluates
+          exact (congrArg (fun values => values.tailD) evaluation).trans
+            (NatVector.tailD_cons
+              (PRFunction.runCore headProgram inputs)
+              (PRFunctionVector.runCore tailPrograms inputs))
+        exact And.intro
+          (headFormula.mpr headEvaluation)
+          (tailFormula.mpr tailEvaluation)
 
 /-- The arithmetic graph constructor for composition is semantically exact. -/
 theorem compositionGraph_represents
@@ -480,11 +652,13 @@ theorem compositionGraph_represents
         (RawTerm.bvar outputArity)
         (RawTermVector.variables 0 outputArity))
       (innerGraphs.body
-        0 outputArity (Nat.le_refl outputArity)).raw).existsMany
+        0 outputArity (zeroOffsetFits outputArity)).raw).existsMany
           outputArity).Holds (graphEnvironment inputs output) ↔ _
-  rw [RawFormula.existsMany_holds]
   constructor
-  · intro witness
+  · intro blockHolds
+    have witness :=
+      RawFormula.existsManyForward
+        outputArity _ _ blockHolds
     cases witness with
     | intro intermediate bodyHolds =>
         have outerFormula :
@@ -521,7 +695,7 @@ theorem compositionGraph_represents
           exact outerRepresents intermediate output
         have innerFormula :
             (innerGraphs.body
-              0 outputArity (Nat.le_refl outputArity)).raw.Holds
+              0 outputArity (zeroOffsetFits outputArity)).raw.Holds
                 (prependEnvironment intermediate
                   (graphEnvironment inputs output)) ↔
               PRFunctionVector.Evaluates
@@ -530,10 +704,10 @@ theorem compositionGraph_represents
             innerRepresents
             0
             outputArity
-            (Nat.le_refl outputArity)
+            (zeroOffsetFits outputArity)
           · intro index bounded
-            rw [prependEnvironment_shift]
-            rfl
+            exact prependEnvironment_originalInput
+              intermediate inputs output bounded
           · intro index bounded
             rw [Nat.zero_add]
             exact prependEnvironment_get
@@ -544,53 +718,52 @@ theorem compositionGraph_represents
           (innerFormula.mp bodyHolds.2)
           (outerFormula.mp bodyHolds.1)
   · intro evaluation
-    cases evaluation with
-    | @composition _ _ _ _ _ intermediate _
-        innerEvaluation outerEvaluation =>
-        refine Exists.intro intermediate ?_
-        constructor
-        · apply (outerGraph.apply_holds_of_values
-            (RawTerm.bvar outputArity)
-            (RawTermVector.variables 0 outputArity)
+    apply RawFormula.existsManyBackward outputArity _ _
+    let intermediate := PRFunctionVector.runCore innerPrograms inputs
+    refine Exists.intro intermediate ?_
+    constructor
+    · exact ((outerGraph.apply_holds_of_values
+        (RawTerm.bvar outputArity)
+        (RawTermVector.variables 0 outputArity)
+        (prependEnvironment intermediate
+          (graphEnvironment inputs output))
+        intermediate
+        output
+        (prependEnvironment_shift
+          intermediate
+          (graphEnvironment inputs output)
+          0)
+        (fun index bounded =>
+          (RawTermVector.variables_evaluate_get
+            0 outputArity
             (prependEnvironment intermediate
               (graphEnvironment inputs output))
-            intermediate
-            output
-            (prependEnvironment_shift
-              intermediate
-              (graphEnvironment inputs output)
-              0)
-            (fun index bounded =>
-              (RawTermVector.variables_evaluate_get
-                0 outputArity
-                (prependEnvironment intermediate
-                  (graphEnvironment inputs output))
-                index bounded).trans (by
-                  rw [Nat.zero_add]
-                  exact prependEnvironment_get
-                    intermediate
-                    (graphEnvironment inputs output)
-                    bounded))).mpr
-          ((outerRepresents intermediate output).mpr outerEvaluation)
-        · apply (innerGraphs.body_holds_iff
-            innerRepresents
-            0
-            outputArity
-            (Nat.le_refl outputArity)
-            (prependEnvironment intermediate
-              (graphEnvironment inputs output))
-            inputs
-            intermediate
-            (fun index bounded => by
-              rw [prependEnvironment_shift]
-              rfl)
-            (fun index bounded => by
+            index bounded).trans (by
               rw [Nat.zero_add]
               exact prependEnvironment_get
                 intermediate
                 (graphEnvironment inputs output)
-                bounded)).mpr
-          innerEvaluation
+                bounded))).mpr
+      ((outerRepresents intermediate output).mpr evaluation))
+    · exact ((innerGraphs.body_holds_iff
+        innerRepresents
+        0
+        outputArity
+        (zeroOffsetFits outputArity)
+        (prependEnvironment intermediate
+          (graphEnvironment inputs output))
+        inputs
+        intermediate
+        (fun index bounded =>
+          prependEnvironment_originalInput
+            intermediate inputs output bounded)
+        (fun index bounded => by
+          rw [Nat.zero_add]
+          exact prependEnvironment_get
+            intermediate
+            (graphEnvironment inputs output)
+            bounded)).mpr
+      rfl)
 
 /-! ## Finite execution runs for primitive recursion -/
 
@@ -616,7 +789,7 @@ theorem NatVector.get_snoc_of_lt
       | zero => rfl
       | succ index =>
           exact inductionHypothesis
-            value
+            (index := index)
             (Nat.lt_of_succ_lt_succ bounded)
 
 /-- The new final vector entry is the appended value. -/
@@ -629,67 +802,35 @@ theorem NatVector.get_snoc_last
   | nil => rfl
   | cons head tail inductionHypothesis => exact inductionHypothesis
 
-/-- Forget the length index and retain the entries in order. -/
-def NatVector.toList {length : Nat} : NatVector length -> List Nat
-  | NatVector.nil => []
-  | NatVector.cons head tail => head :: tail.toList
-
-/-- The forgotten list has the indexed vector length. -/
-theorem NatVector.toList_length
-    {length : Nat}
-    (values : NatVector length) :
-    values.toList.length = length := by
-  induction values with
-  | nil => rfl
-  | cons head tail inductionHypothesis =>
-      change Nat.succ tail.toList.length = Nat.succ _
-      rw [inductionHypothesis]
-
-/-- List lookup agrees with proof-indexed vector lookup. -/
-theorem NatVector.toList_get
-    {length index : Nat}
-    (values : NatVector length)
-    (bounded : index < length) :
-    values.toList.get
-        ⟨index, values.toList_length ▸ bounded⟩ =
-      values.get index bounded := by
-  induction values generalizing index with
-  | nil => exact (Nat.not_lt_zero index bounded).elim
-  | cons head tail inductionHypothesis =>
-      cases index with
-      | zero => rfl
-      | succ index =>
-          exact inductionHypothesis (Nat.lt_of_succ_lt_succ bounded)
-
 /-- Numeric beta component with its two sequence parameters kept separate. -/
 def betaComponent (dividend coefficient index : Nat) : Nat :=
-  dividend % ((index + 1) * coefficient + 1)
+  constructiveRemainder
+    dividend
+    ((index + 1) * coefficient + 1)
 
-/-- `unbeta` supplies two components coding every entry of a finite vector. -/
-theorem betaComponent_unbeta_vector
+/-- The internal beta witness supplies every entry of a finite vector. -/
+theorem betaComponent_encoded_vector
     {length index : Nat}
     (values : NatVector length)
     (bounded : index < length) :
     betaComponent
-        (Nat.unbeta values.toList).unpair.1
-        (Nat.unbeta values.toList).unpair.2
+        values.betaDividend
+        values.betaCoefficient
         index =
       values.get index bounded := by
-  have betaLookup :=
-    Nat.beta_unbeta_coe
-      values.toList
-      ⟨index, values.toList_length ▸ bounded⟩
-  rw [NatVector.toList_get values bounded] at betaLookup
-  exact betaLookup
+  change
+    constructiveRemainder values.betaDividend (values.betaModulus index) =
+      values.get index bounded
+  exact constructiveRemainder_betaDividend values bounded
 
-/-- Complete finite run certified by a primitive-recursion execution. -/
+/-- Positive run predicate for one explicitly supplied finite value vector. -/
 structure PrimitiveRecursionRun
     {parameterArity : Nat}
     (base : PRFunction parameterArity)
     (step : PRFunction (Nat.succ (Nat.succ parameterArity)))
     (parameters : NatVector parameterArity)
-    (counter output : Nat) where
-  values : NatVector (Nat.succ counter)
+    (counter output : Nat)
+    (values : NatVector (Nat.succ counter)) : Prop where
   baseEvaluation :
     PRFunction.Evaluates base parameters
       (values.get 0 (Nat.zero_lt_succ counter))
@@ -706,8 +847,8 @@ structure PrimitiveRecursionRun
   finalValue :
     values.get counter (Nat.lt_succ_self counter) = output
 
-/-- Every positive primitive-recursion evaluation yields its complete run. -/
-def PrimitiveRecursionRun.ofEvaluation
+/-- Every primitive-recursion execution has a positive finite run witness. -/
+theorem PrimitiveRecursionRun.exists_of_evaluation
     {parameterArity : Nat}
     {base : PRFunction parameterArity}
     {step : PRFunction (Nat.succ (Nat.succ parameterArity))}
@@ -718,40 +859,58 @@ def PrimitiveRecursionRun.ofEvaluation
         (PRFunction.primitiveRecursion base step)
         (NatVector.cons counter parameters)
         output) :
-    PrimitiveRecursionRun base step parameters counter output :=
-  match evaluation with
-  | PRFunction.Evaluates.primitiveZero baseEvaluation =>
-      { values := NatVector.cons output NatVector.nil
-        baseEvaluation := baseEvaluation
-        stepEvaluation := by
-          intro index impossible
-          exact (Nat.not_lt_zero index impossible).elim
-        finalValue := rfl }
-  | @PRFunction.Evaluates.primitiveSucc _ _ _ counter previous output
-      parameters previousEvaluation stepEvaluation =>
-      let previousRun :=
-        PrimitiveRecursionRun.ofEvaluation previousEvaluation
-      { values := previousRun.values.snoc output
-        baseEvaluation := by
-          rw [NatVector.get_snoc_of_lt]
-          exact previousRun.baseEvaluation
-        stepEvaluation := by
-          intro index bounded
-          have boundedOrFinal : index < counter ∨ index = counter :=
-            Nat.lt_or_eq_of_le (Nat.le_of_lt_succ bounded)
-          cases boundedOrFinal with
-          | inl earlier =>
-              have oldStep := previousRun.stepEvaluation index earlier
-              rw [NatVector.get_snoc_of_lt,
-                NatVector.get_snoc_of_lt]
-              exact oldStep
-          | inr finalIndex =>
-              cases finalIndex
-              rw [NatVector.get_snoc_of_lt,
-                NatVector.get_snoc_last,
-                previousRun.finalValue]
-              exact stepEvaluation
-        finalValue := NatVector.get_snoc_last previousRun.values output }
+    Exists fun values : NatVector (Nat.succ counter) =>
+      PrimitiveRecursionRun base step parameters counter output values :=
+  Nat.rec
+    (motive := fun counter =>
+      (output : Nat) ->
+      PRFunction.Evaluates
+        (PRFunction.primitiveRecursion base step)
+        (NatVector.cons counter parameters) output ->
+      Exists fun values : NatVector (Nat.succ counter) =>
+        PrimitiveRecursionRun base step parameters counter output values)
+    (fun output zeroEvaluation =>
+      Exists.intro
+        (NatVector.cons output NatVector.nil)
+        { baseEvaluation :=
+            zeroEvaluation.trans
+              (PRFunction.Evaluates.runCore_primitive_zero
+                base step parameters)
+          stepEvaluation := by
+            intro index impossible
+            exact (Nat.not_lt_zero index impossible).elim
+          finalValue := rfl })
+    (fun counter inductionHypothesis output successorEvaluation =>
+      let previous :=
+        PRFunction.runCore (PRFunction.primitiveRecursion base step)
+          (NatVector.cons counter parameters)
+      match inductionHypothesis previous rfl with
+      | Exists.intro previousValues previousRun =>
+          Exists.intro (previousValues.snoc output)
+            { baseEvaluation := by
+                rw [NatVector.get_snoc_of_lt]
+                exact previousRun.baseEvaluation
+              stepEvaluation := by
+                intro index bounded
+                have boundedOrFinal : index < counter ∨ index = counter :=
+                  Nat.lt_or_eq_of_le (Nat.le_of_lt_succ bounded)
+                cases boundedOrFinal with
+                | inl earlier =>
+                    have oldStep := previousRun.stepEvaluation index earlier
+                    rw [NatVector.get_snoc_of_lt,
+                      NatVector.get_snoc_of_lt]
+                    exact oldStep
+                | inr finalIndex =>
+                    cases finalIndex
+                    rw [NatVector.get_snoc_of_lt
+                        previousValues output (Nat.lt_succ_self counter),
+                      NatVector.get_snoc_last previousValues output,
+                      previousRun.finalValue]
+                    exact successorEvaluation.trans
+                      (PRFunction.Evaluates.runCore_primitive_succ
+                        base step counter parameters)
+              finalValue := NatVector.get_snoc_last previousValues output })
+    counter output evaluation
 
 /-! ## Semantic correctness of primitive recursion -/
 
@@ -770,9 +929,20 @@ theorem primitiveBaseParameters_evaluate
     ((primitiveBaseParameters parameterArity).getD index).evaluate
         (pushEnvironment topEnvironment baseValue) =
       parameters.get index bounded := by
-  rw [RawTermVector.variables_evaluate_get 5 parameterArity]
-  change topEnvironment (4 + index) = parameters.get index bounded
-  exact parameterValues index bounded
+  unfold primitiveBaseParameters
+  rw [RawTermVector.variables_evaluate_get
+    5 parameterArity _ index bounded]
+  have positionEquality : 5 + index = Nat.succ (4 + index) :=
+    Nat.succ_add 4 index
+  exact Eq.trans
+    (Eq.mp
+      (congrArg
+        (fun position =>
+          pushEnvironment topEnvironment baseValue position =
+            topEnvironment (4 + index))
+        positionEquality.symm)
+      rfl)
+    (parameterValues index bounded)
 
 /-- Values of the parameter variables in a primitive-recursion step body. -/
 theorem primitiveStepParameters_evaluate
@@ -792,9 +962,13 @@ theorem primitiveStepParameters_evaluate
             (NatVector.cons next NatVector.nil))
           (pushEnvironment topEnvironment counterValue)) =
       parameters.get index bounded := by
-  rw [RawTermVector.variables_evaluate_get 7 parameterArity]
-  change topEnvironment (4 + index) = parameters.get index bounded
-  exact parameterValues index bounded
+  rw [RawTermVector.variables_evaluate_get
+    7 parameterArity _ index bounded]
+  exact (prependTwo_pushedParameter
+    (parameterArity := parameterArity)
+    (index := index)
+    previous next counterValue topEnvironment bounded).trans
+      (parameterValues index bounded)
 
 /-- The arithmetic beta construction makes primitive recursion representable. -/
 theorem primitiveRecursionGraph_represents
@@ -808,8 +982,13 @@ theorem primitiveRecursionGraph_represents
     (primitiveRecursionGraph baseGraph stepGraph).Represents
       (PRFunction.primitiveRecursion baseProgram stepProgram) := by
   intro inputs output
-  cases inputs with
-  | cons counter parameters =>
+  let counter := inputs.getD 0
+  let parameters := inputs.tailD
+  have inputsEquality :
+      NatVector.cons counter parameters = inputs :=
+    NatVector.rebuildD inputs
+  rw [← inputsEquality]
+  focus
       let baseCore := RawFormula.conj
         (betaValueFormula
           (RawTerm.bvar 1)
@@ -855,16 +1034,21 @@ theorem primitiveRecursionGraph_represents
             (PRFunction.primitiveRecursion baseProgram stepProgram)
             (NatVector.cons counter parameters)
             output
-      rw [RawFormula.existsMany_holds]
       constructor
-      · intro witness
+      · intro blockHolds
+        have witness :=
+          RawFormula.existsManyForward 2 body _ blockHolds
         cases witness with
         | intro sequenceParameters bodyHolds =>
-            cases sequenceParameters with
-            | cons dividend sequenceTail =>
-                cases sequenceTail with
-                | cons coefficient emptyTail =>
-                    cases emptyTail
+            let dividend := sequenceParameters.getD 0
+            let coefficient := sequenceParameters.getD 1
+            have sequenceParametersEquality :
+                NatVector.cons dividend
+                    (NatVector.cons coefficient NatVector.nil) =
+                  sequenceParameters :=
+              NatVector.tabulateD_getD_self sequenceParameters
+            rw [← sequenceParametersEquality] at bodyHolds
+            focus
                     let originalEnvironment :=
                       graphEnvironment
                         (NatVector.cons counter parameters)
@@ -880,7 +1064,8 @@ theorem primitiveRecursionGraph_represents
                             topEnvironment (4 + index) =
                               parameters.get index bounded := by
                       intro index bounded
-                      rfl
+                      exact prependTwo_graphParameter
+                        dividend coefficient counter output parameters bounded
                     have baseHolds : baseClause.Holds topEnvironment :=
                       bodyHolds.1
                     cases baseHolds with
@@ -946,16 +1131,23 @@ theorem primitiveRecursionGraph_represents
                               (RawTerm.bvar 4)
                               indexEnvironment).mpr
                             exact bounded
-                          have transitionExists :=
+                          have transitionBlock :=
                             transitionHolds index conditionHolds
-                          rw [RawFormula.existsMany_holds] at transitionExists
+                          have transitionExists :=
+                            RawFormula.existsManyForward
+                              2 transitionCore indexEnvironment
+                              transitionBlock
                           cases transitionExists with
                           | intro adjacent transitionCoreHolds =>
-                              cases adjacent with
-                              | cons previous adjacentTail =>
-                                  cases adjacentTail with
-                                  | cons next emptyAdjacent =>
-                                      cases emptyAdjacent
+                              let previous := adjacent.getD 0
+                              let next := adjacent.getD 1
+                              have adjacentEquality :
+                                  NatVector.cons previous
+                                      (NatVector.cons next NatVector.nil) =
+                                    adjacent :=
+                                NatVector.tabulateD_getD_self adjacent
+                              rw [← adjacentEquality] at transitionCoreHolds
+                              focus
                                       let stepEnvironment :=
                                         prependEnvironment
                                           (NatVector.cons previous
@@ -1062,10 +1254,11 @@ theorem primitiveRecursionGraph_represents
                         rw [outputBeta]
                         exact buildExecution counter (Nat.le_refl counter)
       · intro evaluation
-        let run := PrimitiveRecursionRun.ofEvaluation evaluation
-        let encoded := Nat.unbeta run.values.toList
-        let dividend := encoded.unpair.1
-        let coefficient := encoded.unpair.2
+        apply RawFormula.existsManyBackward 2 body _
+        obtain ⟨runValues, run⟩ :=
+          PrimitiveRecursionRun.exists_of_evaluation evaluation
+        let dividend := runValues.betaDividend
+        let coefficient := runValues.betaCoefficient
         refine Exists.intro
           (NatVector.cons dividend
             (NatVector.cons coefficient NatVector.nil)) ?_
@@ -1084,10 +1277,11 @@ theorem primitiveRecursionGraph_represents
                 topEnvironment (4 + index) =
                   parameters.get index bounded := by
           intro index bounded
-          rfl
+          exact prependTwo_graphParameter
+            dividend coefficient counter output parameters bounded
         constructor
         · let baseValue :=
-            run.values.get 0 (Nat.zero_lt_succ counter)
+            runValues.get 0 (Nat.zero_lt_succ counter)
           refine Exists.intro baseValue ?_
           let baseEnvironment := pushEnvironment topEnvironment baseValue
           constructor
@@ -1097,8 +1291,8 @@ theorem primitiveRecursionGraph_represents
               RawTerm.zero
               (RawTerm.bvar 0)
               baseEnvironment).mpr
-            exact (betaComponent_unbeta_vector
-              run.values
+            exact (betaComponent_encoded_vector
+              runValues
               (Nat.zero_lt_succ counter)).symm
           · apply (baseGraph.apply_holds_of_values
               (RawTerm.bvar 0)
@@ -1124,12 +1318,12 @@ theorem primitiveRecursionGraph_represents
                 (RawTerm.bvar 4)
                 indexEnvironment).mp conditionHolds
             let previous :=
-              run.values.get index
+              runValues.get index
                 (Nat.lt_trans bounded (Nat.lt_succ_self counter))
             let next :=
-              run.values.get (Nat.succ index)
+              runValues.get (Nat.succ index)
                 (Nat.succ_lt_succ bounded)
-            rw [RawFormula.existsMany_holds]
+            apply RawFormula.existsManyBackward 2 transitionCore _
             refine Exists.intro
               (NatVector.cons previous
                 (NatVector.cons next NatVector.nil)) ?_
@@ -1145,8 +1339,8 @@ theorem primitiveRecursionGraph_represents
                 (RawTerm.bvar 2)
                 (RawTerm.bvar 0)
                 stepEnvironment).mpr
-              exact (betaComponent_unbeta_vector
-                run.values
+              exact (betaComponent_encoded_vector
+                runValues
                 (Nat.lt_trans bounded
                   (Nat.lt_succ_self counter))).symm
             · constructor
@@ -1156,8 +1350,8 @@ theorem primitiveRecursionGraph_represents
                   (RawTerm.succ (RawTerm.bvar 2))
                   (RawTerm.bvar 1)
                   stepEnvironment).mpr
-                exact (betaComponent_unbeta_vector
-                  run.values
+                exact (betaComponent_encoded_vector
+                  runValues
                   (Nat.succ_lt_succ bounded)).symm
               · apply (stepGraph.apply_holds_of_values
                   (RawTerm.bvar 1)
@@ -1196,87 +1390,201 @@ theorem primitiveRecursionGraph_represents
               (RawTerm.bvar 3)
               (RawTerm.bvar 2)
               topEnvironment).mpr
+            change output = betaComponent dividend coefficient counter
             rw [← run.finalValue]
-            exact (betaComponent_unbeta_vector
-              run.values
+            exact (betaComponent_encoded_vector
+              runValues
               (Nat.lt_succ_self counter)).symm
 
 /-! ## Correctness of the complete compiler -/
 
-mutual
-  /-- Every compiled program graph is extensionally its execution relation. -/
-  def PRFunction.graphFormula_represents :
-      {arity : Nat} ->
-        (program : PRFunction arity) ->
-          program.graphFormula.Represents program
-    | _arity, PRFunction.zero => by
-        intro inputs output
-        change (output = 0) ↔ PRFunction.Evaluates PRFunction.zero inputs output
-        constructor
-        · intro equality
-          cases equality
-          exact PRFunction.Evaluates.zero inputs
-        · intro evaluation
-          cases evaluation
-          rfl
-    | _arity, PRFunction.successor => by
-        intro inputs output
-        cases inputs with
-        | cons value tail =>
-            cases tail
-            change
-              (output = Nat.succ value) ↔
-                PRFunction.Evaluates
-                  PRFunction.successor
-                  (NatVector.cons value NatVector.nil)
-                  output
-            constructor
-            · intro equality
-              cases equality
-              exact PRFunction.Evaluates.successor value
-            · intro evaluation
-              cases evaluation
-              rfl
-    | _arity, PRFunction.projection arity index bounded => by
-        intro inputs output
-        change
-          (output = inputs.get index bounded) ↔
-            PRFunction.Evaluates
-              (PRFunction.projection arity index bounded)
-              inputs
-              output
-        constructor
-        · intro equality
-          cases equality
-          exact PRFunction.Evaluates.projection index bounded inputs
-        · intro evaluation
-          cases evaluation
-          rfl
-    | _arity, PRFunction.composition outer inner =>
-        compositionGraph_represents
-          outer.graphFormula
-          inner.graphFormulas
-          outer.graphFormula_represents
-          inner.graphFormulas_represent
-    | _arity, PRFunction.primitiveRecursion base step =>
-        primitiveRecursionGraph_represents
-          base.graphFormula
-          step.graphFormula
-          base.graphFormula_represents
-          step.graphFormula_represents
+/-- A compiled graph kept together with its constructive correctness proof. -/
+structure CertifiedArithmeticGraph
+    {arity : Nat}
+    (program : PRFunction arity) where
+  graph : ArithmeticGraph arity
+  represents : graph.Represents program
 
-  /-- Every compiled vector graph represents pointwise vector execution. -/
-  def PRFunctionVector.graphFormulas_represent :
+/-- A compiled vector kept together with its pointwise correctness proof. -/
+structure CertifiedArithmeticGraphVector
+    {inputArity outputArity : Nat}
+    (programs : PRFunctionVector inputArity outputArity) where
+  graphs : ArithmeticGraphVector inputArity outputArity
+  represents : graphs.Represents programs
+
+/-- Certified graph of the constant-zero program. -/
+def certifiedZeroGraph {arity : Nat} :
+    CertifiedArithmeticGraph (PRFunction.zero : PRFunction arity) where
+  graph :=
+    { raw := RawFormula.equal (RawTerm.bvar 0) RawTerm.zero
+      isScoped := And.intro (Nat.zero_lt_succ _) trivial }
+  represents := by
+    intro inputs output
+    change (output = 0) ↔ PRFunction.Evaluates PRFunction.zero inputs output
+    constructor
+    · intro equality
+      cases equality
+      exact PRFunction.Evaluates.zero inputs
+    · intro evaluation
+      cases evaluation
+      rfl
+
+/-- Certified graph of successor. -/
+def certifiedSuccessorGraph :
+    CertifiedArithmeticGraph PRFunction.successor where
+  graph :=
+    { raw := RawFormula.equal
+        (RawTerm.bvar 0)
+        (RawTerm.succ (RawTerm.bvar 1))
+      isScoped := And.intro
+        (Nat.zero_lt_succ 1)
+        (Nat.succ_lt_succ (Nat.zero_lt_succ 0)) }
+  represents := by
+    intro inputs output
+    change
+      (output = Nat.succ (inputs.getD 0)) ↔
+        PRFunction.Evaluates PRFunction.successor inputs output
+    constructor
+    · intro equality
+      cases equality
+      exact PRFunction.Evaluates.successor inputs
+    · intro evaluation
+      exact evaluation
+
+/-- Certified graph of one projection. -/
+def certifiedProjectionGraph
+    (arity index : Nat)
+    (bounded : index < arity) :
+    CertifiedArithmeticGraph (PRFunction.projection arity index bounded) where
+  graph :=
+    { raw := RawFormula.equal
+        (RawTerm.bvar 0)
+        (RawTerm.bvar (Nat.succ index))
+      isScoped := And.intro
+        (Nat.zero_lt_succ arity)
+        (Nat.succ_lt_succ bounded) }
+  represents := by
+    intro inputs output
+    change
+      (output = inputs.getD index) ↔
+        PRFunction.Evaluates
+          (PRFunction.projection arity index bounded)
+          inputs
+          output
+    constructor
+    · intro equality
+      have exactEquality : output = inputs.get index bounded :=
+        equality.trans (NatVector.getD_eq_get inputs bounded)
+      cases exactEquality
+      exact PRFunction.Evaluates.projection index bounded inputs
+    · intro evaluation
+      cases evaluation
+      exact (NatVector.getD_eq_get inputs bounded).symm
+
+/-- Composition preserves certified arithmetic representability. -/
+def certifiedCompositionGraph
+    {inputArity outputArity : Nat}
+    {outer : PRFunction outputArity}
+    {inner : PRFunctionVector inputArity outputArity}
+    (outerCompiler : CertifiedArithmeticGraph outer)
+    (innerCompiler : CertifiedArithmeticGraphVector inner) :
+    CertifiedArithmeticGraph (PRFunction.composition outer inner) where
+  graph := compositionGraph outerCompiler.graph innerCompiler.graphs
+  represents := compositionGraph_represents
+    outerCompiler.graph innerCompiler.graphs
+    outerCompiler.represents innerCompiler.represents
+
+/-- Primitive recursion preserves certified arithmetic representability. -/
+def certifiedPrimitiveRecursionGraph
+    {parameterArity : Nat}
+    {base : PRFunction parameterArity}
+    {step : PRFunction (Nat.succ (Nat.succ parameterArity))}
+    (baseCompiler : CertifiedArithmeticGraph base)
+    (stepCompiler : CertifiedArithmeticGraph step) :
+    CertifiedArithmeticGraph (PRFunction.primitiveRecursion base step) where
+  graph := primitiveRecursionGraph baseCompiler.graph stepCompiler.graph
+  represents := primitiveRecursionGraph_represents
+    baseCompiler.graph stepCompiler.graph
+    baseCompiler.represents stepCompiler.represents
+
+/-- Empty certified graph vector. -/
+def certifiedNilGraphVector {inputArity : Nat} :
+    CertifiedArithmeticGraphVector
+      (PRFunctionVector.nil : PRFunctionVector inputArity 0) where
+  graphs := ArithmeticGraphVector.nil
+  represents := ArithmeticGraphVector.Represents.nil
+
+/-- Pointwise extension of a certified graph vector. -/
+def certifiedConsGraphVector
+    {inputArity length : Nat}
+    {head : PRFunction inputArity}
+    {tail : PRFunctionVector inputArity length}
+    (headCompiler : CertifiedArithmeticGraph head)
+    (tailCompiler : CertifiedArithmeticGraphVector tail) :
+    CertifiedArithmeticGraphVector (PRFunctionVector.cons head tail) where
+  graphs := ArithmeticGraphVector.cons
+    headCompiler.graph tailCompiler.graphs
+  represents := ArithmeticGraphVector.Represents.cons
+    headCompiler.represents tailCompiler.represents
+
+mutual
+  /-- Structural certified compiler for a positive program tree. -/
+  def PRFunction.certifiedGraphCompiler :
+      {arity : Nat} ->
+      (program : PRFunction arity) ->
+      CertifiedArithmeticGraph program
+    | _, PRFunction.zero => certifiedZeroGraph
+    | _, PRFunction.successor => certifiedSuccessorGraph
+    | _, PRFunction.projection arity index bounded =>
+        certifiedProjectionGraph arity index bounded
+    | _, PRFunction.composition outer inner =>
+        certifiedCompositionGraph
+          (PRFunction.certifiedGraphCompiler outer)
+          (PRFunctionVector.certifiedGraphCompiler inner)
+    | _, PRFunction.primitiveRecursion base step =>
+        certifiedPrimitiveRecursionGraph
+          (PRFunction.certifiedGraphCompiler base)
+          (PRFunction.certifiedGraphCompiler step)
+
+  /-- Structural certified compiler for a vector of program trees. -/
+  def PRFunctionVector.certifiedGraphCompiler :
       {inputArity outputArity : Nat} ->
-        (programs : PRFunctionVector inputArity outputArity) ->
-          programs.graphFormulas.Represents programs
-    | _inputArity, _outputArity, PRFunctionVector.nil =>
-        ArithmeticGraphVector.Represents.nil
-    | _inputArity, _outputArity, PRFunctionVector.cons head tail =>
-        ArithmeticGraphVector.Represents.cons
-          head.graphFormula_represents
-          tail.graphFormulas_represent
+      (programs : PRFunctionVector inputArity outputArity) ->
+      CertifiedArithmeticGraphVector programs
+    | _, _, PRFunctionVector.nil =>
+        certifiedNilGraphVector
+    | _, _, PRFunctionVector.cons head tail =>
+        certifiedConsGraphVector
+          (PRFunction.certifiedGraphCompiler head)
+          (PRFunctionVector.certifiedGraphCompiler tail)
 end
+
+/-- Compile a positive primitive-recursive program to bare arithmetic. -/
+def PRFunction.graphFormula
+    {arity : Nat}
+    (program : PRFunction arity) : ArithmeticGraph arity :=
+  program.certifiedGraphCompiler.graph
+
+/-- Compile a vector of positive programs pointwise. -/
+def PRFunctionVector.graphFormulas
+    {inputArity outputArity : Nat}
+    (programs : PRFunctionVector inputArity outputArity) :
+    ArithmeticGraphVector inputArity outputArity :=
+  programs.certifiedGraphCompiler.graphs
+
+/-- Every compiled program graph is extensionally its execution relation. -/
+theorem PRFunction.graphFormula_represents
+    {arity : Nat}
+    (program : PRFunction arity) :
+    program.graphFormula.Represents program :=
+  program.certifiedGraphCompiler.represents
+
+/-- Every compiled vector graph carries a pointwise execution certificate. -/
+def PRFunctionVector.graphFormulas_represent
+    {inputArity outputArity : Nat}
+    (programs : PRFunctionVector inputArity outputArity) :
+    programs.graphFormulas.Represents programs :=
+  programs.certifiedGraphCompiler.represents
 
 /-- Public biconditional specification of the arithmetic graph compiler. -/
 theorem PRFunction.graphFormula_spec
@@ -1292,9 +1600,10 @@ end BareArithmeticTarski
 end Meta
 
 /- AXIOM_AUDIT_BEGIN -/
-#print axioms Meta.BareArithmeticTarski.compositionGraph
-#print axioms Meta.BareArithmeticTarski.primitiveRecursionGraph
 #print axioms Meta.BareArithmeticTarski.PRFunction.graphFormula
 #print axioms Meta.BareArithmeticTarski.PRFunctionVector.graphFormulas
 #print axioms Meta.BareArithmeticTarski.PRFunction.graphFormula_spec
+#print axioms Meta.BareArithmeticTarski.compositionGraph_represents
+#print axioms Meta.BareArithmeticTarski.primitiveRecursionGraph_represents
+#print axioms Meta.BareArithmeticTarski.PRFunction.certifiedGraphCompiler
 /- AXIOM_AUDIT_END -/

@@ -28,6 +28,18 @@ inductive CausalWord : Type where
 
 namespace CausalWord
 
+/-- A fully constructive two-sided equivalence.  It is defined in the
+causal-word core because later intrinsic finite types use it before any
+comparison with `Nat`. -/
+structure ConstructiveEquivalence
+    (Source : Type u)
+    (Target : Type v) :
+    Type (max u v) where
+  toFun : Source -> Target
+  invFun : Target -> Source
+  left_inv : (source : Source) -> invFun (toFun source) = source
+  right_inv : (target : Target) -> toFun (invFun target) = target
+
 /-- The one-step causal word. -/
 def one : CausalWord :=
   CausalWord.succ CausalWord.zero
@@ -959,6 +971,7 @@ end CausalAdditive
 end Meta
 
 /- AXIOM_AUDIT_BEGIN -/
+#print axioms Meta.CausalAdditive.CausalWord.ConstructiveEquivalence
 #print axioms Meta.CausalAdditive.CausalWord.add_commutative
 #print axioms Meta.CausalAdditive.AccumulatingCausalSystem.wordAction_add_at
 #print axioms Meta.CausalAdditive.AccumulatingCausalSystem.wordAction_pointwise_faithful

@@ -29,7 +29,8 @@ theorem PRFunction.constantOne_evaluates
   · apply PRFunctionVector.Evaluates.cons
     · exact PRFunction.Evaluates.zero inputs
     · exact PRFunctionVector.Evaluates.nil inputs
-  · exact PRFunction.Evaluates.successor 0
+  · exact PRFunction.Evaluates.successor
+      (NatVector.cons 0 NatVector.nil)
 
 /-- Primitive-recursive predecessor. -/
 def PRFunction.predecessor : PRFunction 1 :=
@@ -237,7 +238,8 @@ theorem PRFunction.half_evaluates (value : Nat) :
                 · exact PRFunctionVector.Evaluates.nil
                     (NatVector.cons value
                       (NatVector.cons (natHalf value) NatVector.nil))
-              · exact PRFunction.Evaluates.successor (natHalf value)
+              · exact PRFunction.Evaluates.successor
+                  (NatVector.cons (natHalf value) NatVector.nil)
             · exact PRFunctionVector.Evaluates.nil
                 (NatVector.cons value
                   (NatVector.cons (natHalf value) NatVector.nil))

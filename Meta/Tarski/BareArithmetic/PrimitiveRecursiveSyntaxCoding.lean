@@ -44,7 +44,8 @@ theorem PRFunction.taggedUnaryCode_evaluates (tag payload : Nat) :
       · exact PRFunction.pair_evaluates tag payload
     · exact PRFunctionVector.Evaluates.nil
         (NatVector.cons payload NatVector.nil)
-  · exact PRFunction.Evaluates.successor (natPair tag payload)
+  · exact PRFunction.Evaluates.successor
+      (NatVector.cons (natPair tag payload) NatVector.nil)
 
 /-- Pair the two inputs as a payload. -/
 def PRFunction.pairInputs : PRFunction 2 :=
@@ -86,7 +87,7 @@ theorem PRFunction.taggedBinaryCode_evaluates
         (NatVector.cons left
           (NatVector.cons right NatVector.nil))
   · exact PRFunction.Evaluates.successor
-      (natPair tag (natPair left right))
+      (NatVector.cons (natPair tag (natPair left right)) NatVector.nil)
 
 /-- Code of a bound-variable term. -/
 def PRFunction.boundVariableCode : PRFunction 1 :=

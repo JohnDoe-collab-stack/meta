@@ -57,7 +57,8 @@ theorem PRFunction.add_evaluates (left right : Nat) :
             (NatVector.cons left
               (NatVector.cons (left + right)
                 (NatVector.cons right NatVector.nil)))
-      · exact PRFunction.Evaluates.successor (left + right)
+      · exact PRFunction.Evaluates.successor
+          (NatVector.cons (left + right) NatVector.nil)
 
 /-- Structural doubling agrees with adding a natural to itself. -/
 theorem nat_add_self_eq_natDouble (value : Nat) :
@@ -149,7 +150,7 @@ theorem PRFunction.pair_evaluates (tag payload : Nat) :
               (NatVector.cons (natPair tag payload)
                 (NatVector.cons payload NatVector.nil)))
       · exact PRFunction.Evaluates.successor
-          (natDouble (natPair tag payload))
+          (NatVector.cons (natDouble (natPair tag payload)) NatVector.nil)
 
 end BareArithmeticTarski
 end Meta

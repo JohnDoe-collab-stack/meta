@@ -1,5 +1,4 @@
 import Meta.Tarski.BareArithmetic.PrimitiveRecursive
-import Mathlib.Logic.Godel.GodelBetaFunction
 
 /-!
 # Arithmetic formula tools for constructive representability
@@ -9,25 +8,15 @@ arithmetic terms, simultaneous graph application, blocks of existential
 quantifiers, and the ordinary arithmetic formula defining one value of
 Goedel's beta sequence.
 
-The beta existence theorem is imported from Mathlib's constructive natural
-number development.  No declaration from `Foundation` is imported.
+The beta relation is ordinary arithmetic. Its finite-sequence witness is
+constructed internally by the constructive factorial encoding in
+`ConstructiveBetaEncoding`, without quotienting finite containers.
 -/
 
 namespace Meta
 namespace BareArithmeticTarski
 
 /-! ## Total access to finite vectors -/
-
-/-- Total vector access, returning zero outside the indexed extent. -/
-def NatVector.getD {length : Nat} (values : NatVector length) : Nat -> Nat
-  | 0 =>
-      match values with
-      | NatVector.nil => 0
-      | NatVector.cons head _tail => head
-  | Nat.succ index =>
-      match values with
-      | NatVector.nil => 0
-      | NatVector.cons _head tail => tail.getD index
 
 /-- Total access agrees with proof-indexed access inside the extent. -/
 theorem NatVector.getD_eq_get
@@ -43,6 +32,52 @@ theorem NatVector.getD_eq_get
       | zero => rfl
       | succ index =>
           exact inductionHypothesis (Nat.lt_of_succ_lt_succ bounded)
+
+/-- Total access into a tabulation returns its generating component. -/
+theorem NatVector.tabulateD_getD
+    (length : Nat)
+    (values : Nat -> Nat)
+    (index : Nat)
+    (bounded : index < length) :
+    (NatVector.tabulateD length values).getD index = values index := by
+  induction length generalizing values index with
+  | zero => exact (Nat.not_lt_zero index bounded).elim
+  | succ length inductionHypothesis =>
+      cases index with
+      | zero => rfl
+      | succ index =>
+          exact inductionHypothesis
+            (fun inner => values (Nat.succ inner))
+            index
+            (Nat.lt_of_succ_lt_succ bounded)
+
+/-- Tail access agrees with access at the successor position. -/
+theorem NatVector.tailD_get
+    {length index : Nat}
+    (values : NatVector (Nat.succ length))
+    (bounded : index < length) :
+    values.tailD.get index bounded =
+      values.get (Nat.succ index) (Nat.succ_lt_succ bounded) := by
+  exact (NatVector.getD_eq_get values.tailD bounded).symm.trans
+    ((NatVector.tabulateD_getD length
+      (fun inner => values.getD (Nat.succ inner)) index bounded).trans
+      (NatVector.getD_eq_get values (Nat.succ_lt_succ bounded)))
+
+/-- Forget the length index while retaining all entries in order. -/
+def NatVector.toList {length : Nat} (values : NatVector length) : List Nat :=
+  match values with
+  | NatVector.nil => []
+  | NatVector.cons head tail => head :: tail.toList
+
+/-- Forgetting the index preserves the statically known length. -/
+theorem NatVector.toList_length
+    {length : Nat}
+    (values : NatVector length) :
+    values.toList.length = length := by
+  induction values with
+  | nil => rfl
+  | cons head tail inductionHypothesis =>
+      exact congrArg Nat.succ inductionHypothesis
 
 /-- A length-indexed vector of raw arithmetic terms. -/
 inductive RawTermVector : Nat -> Type
@@ -66,10 +101,12 @@ def RawTermVector.getD
 
 /-- Pointwise scoping of a finite term vector. -/
 def RawTermVector.WellScoped
-    (bound : Nat) :
-    {length : Nat} -> RawTermVector length -> Prop
-  | 0, RawTermVector.nil => True
-  | Nat.succ _length, RawTermVector.cons head tail =>
+    {length : Nat}
+    (terms : RawTermVector length)
+    (bound : Nat) : Prop :=
+  match terms with
+  | RawTermVector.nil => True
+  | RawTermVector.cons head tail =>
       head.WellScoped bound ∧ tail.WellScoped bound
 
 /-- Evaluation of a finite vector of terms. -/
@@ -103,7 +140,7 @@ theorem RawTermVector.evaluate_getD
 theorem RawTermVector.getD_wellScoped
     {length bound : Nat}
     (terms : RawTermVector length)
-    (scoped : terms.WellScoped bound)
+    (scopeProof : terms.WellScoped bound)
     (index : Nat) :
     (terms.getD index).WellScoped bound := by
   induction terms generalizing index with
@@ -111,8 +148,8 @@ theorem RawTermVector.getD_wellScoped
       cases index <;> exact trivial
   | cons head tail inductionHypothesis =>
       cases index with
-      | zero => exact scoped.1
-      | succ index => exact inductionHypothesis scoped.2 index
+      | zero => exact scopeProof.1
+      | succ index => exact inductionHypothesis scopeProof.2 index
 
 /-- Consecutive variables beginning at `start`. -/
 def RawTermVector.variables :
@@ -127,26 +164,81 @@ def RawTermVector.variables :
 theorem RawTermVector.variables_wellScoped
     (start length bound : Nat)
     (bounded : start + length <= bound) :
-    (RawTermVector.variables start length).WellScoped bound := by
-  induction length generalizing start with
-  | zero => exact trivial
-  | succ length inductionHypothesis =>
-      constructor
-      · exact Nat.lt_of_lt_of_le
+    (RawTermVector.variables start length).WellScoped bound :=
+  Nat.rec
+    (motive := fun length =>
+      (start : Nat) ->
+      start + length <= bound ->
+        (RawTermVector.variables start length).WellScoped bound)
+    (fun _start _bounded => trivial)
+    (fun length inductionHypothesis start bounded =>
+      And.intro
+        (Nat.lt_of_lt_of_le
           (Nat.lt_add_of_pos_right (Nat.succ_pos length))
-          bounded
-      · apply inductionHypothesis (Nat.succ start)
-        rw [Nat.succ_add]
-        exact bounded
+          bounded)
+        (inductionHypothesis
+          (Nat.succ start)
+          (Eq.mp
+            (congrArg
+              (fun lower => lower <= bound)
+              ((Nat.succ_add start length).trans
+                (Nat.add_succ start length).symm).symm)
+            bounded)))
+    length start bounded
 
 /-! ## Environments and existential blocks -/
 
+/-- Positive decomposition of a statically nonempty vector. -/
+structure NatVector.Uncons
+    {length : Nat}
+    (values : NatVector (Nat.succ length)) : Type where
+  head : Nat
+  tail : NatVector length
+  rebuild : NatVector.cons head tail = values
+
+/-- Every statically nonempty vector has a constructor decomposition. -/
+def NatVector.uncons
+    {length : Nat}
+    (values : NatVector (Nat.succ length)) :
+    NatVector.Uncons values :=
+  match values with
+  | NatVector.cons head tail =>
+      { head := head
+        tail := tail
+        rebuild := rfl }
+
 /-- Prefix an environment by all entries of a finite vector. -/
-def prependEnvironment :
-    {length : Nat} -> NatVector length -> Environment -> Environment
-  | 0, NatVector.nil, environment => environment
-  | Nat.succ _length, NatVector.cons head tail, environment =>
-      pushEnvironment (prependEnvironment tail environment) head
+def prependEnvironment
+    {length : Nat}
+    (values : NatVector length)
+    (environment : Environment)
+    (index : Nat) : Nat :=
+  match values, index with
+  | NatVector.nil, index => environment index
+  | NatVector.cons head _tail, 0 => head
+  | NatVector.cons _head tail, Nat.succ inner =>
+      prependEnvironment tail environment inner
+
+/-- Prefix an environment by an ordinary list, in De Bruijn order. -/
+def prependListEnvironment : List Nat -> Environment -> Environment
+  | [], environment => environment
+  | head :: tail, environment =>
+      pushEnvironment (prependListEnvironment tail environment) head
+
+/-- The indexed and unindexed prefix constructions agree pointwise. -/
+theorem prependListEnvironment_toList
+    {length : Nat}
+    (values : NatVector length)
+    (environment : Environment)
+    (index : Nat) :
+    prependListEnvironment values.toList environment index =
+      prependEnvironment values environment index := by
+  induction values generalizing index with
+  | nil => rfl
+  | cons head tail inductionHypothesis =>
+      cases index with
+      | zero => rfl
+      | succ index => exact inductionHypothesis index
 
 /-- Looking inside the prefix returns the corresponding vector entry. -/
 theorem prependEnvironment_get
@@ -173,18 +265,149 @@ theorem prependEnvironment_shift
     prependEnvironment values environment (length + index) =
       environment index := by
   induction values with
-  | nil => rfl
+  | nil => exact congrArg environment (Nat.zero_add index)
   | @cons length head tail inductionHypothesis =>
-      change
-        prependEnvironment tail environment (length + index) =
-          environment index
-      exact inductionHypothesis
+      exact Eq.mpr
+        (congrArg
+          (fun position =>
+            prependEnvironment (NatVector.cons head tail) environment position =
+              environment index)
+          (Nat.succ_add length index))
+        inductionHypothesis
 
 /-- Bind `count` consecutive variables around a formula. -/
 def RawFormula.existsMany : Nat -> RawFormula -> RawFormula
   | 0, body => body
-  | Nat.succ count, body =>
-      RawFormula.existsMany count (RawFormula.ex body)
+  | Nat.succ count, body => (RawFormula.ex body).existsMany count
+
+/-- One explicit unfolding equation for a nonempty existential block. -/
+theorem RawFormula.existsMany_succ
+    (count : Nat)
+    (body : RawFormula) :
+    body.existsMany (Nat.succ count) =
+      (RawFormula.ex body).existsMany count :=
+  rfl
+
+/-- One direction of the definitional environment rearrangement for a prefix. -/
+def RawFormula.prependConsHoldsForward
+    (body : RawFormula)
+    {length : Nat}
+    (headValue : Nat)
+    (tailValues : NatVector length)
+    (environment : Environment) :
+    body.Holds
+        (pushEnvironment
+          (prependEnvironment tailValues environment)
+          headValue) ->
+      body.Holds
+        (prependEnvironment
+          (NatVector.cons headValue tailValues)
+          environment) :=
+  (body.holds_congr
+    (pushEnvironment (prependEnvironment tailValues environment) headValue)
+    (prependEnvironment
+      (NatVector.cons headValue tailValues) environment)
+    (fun index => by cases index <;> rfl)).mp
+
+/-- Reverse environment rearrangement for a prefixed vector. -/
+def RawFormula.prependConsHoldsBackward
+    (body : RawFormula)
+    {length : Nat}
+    (headValue : Nat)
+    (tailValues : NatVector length)
+    (environment : Environment) :
+    body.Holds
+        (prependEnvironment
+          (NatVector.cons headValue tailValues)
+          environment) ->
+      body.Holds
+        (pushEnvironment
+          (prependEnvironment tailValues environment)
+          headValue) :=
+  (body.holds_congr
+    (pushEnvironment (prependEnvironment tailValues environment) headValue)
+    (prependEnvironment
+      (NatVector.cons headValue tailValues) environment)
+    (fun index => by cases index <;> rfl)).mpr
+
+/-- Forward semantics of a block of existential binders. -/
+def RawFormula.existsManyForward
+    (count : Nat)
+    (body : RawFormula)
+    (environment : Environment) :
+    (body.existsMany count).Holds environment ->
+      Exists fun values : NatVector count =>
+        body.Holds (prependEnvironment values environment) :=
+  Nat.rec
+    (motive := fun count =>
+      (body : RawFormula) ->
+      (environment : Environment) ->
+      (body.existsMany count).Holds environment ->
+        Exists fun values : NatVector count =>
+          body.Holds (prependEnvironment values environment))
+    (fun _body _environment bodyHolds =>
+      Exists.intro NatVector.nil bodyHolds)
+    (fun _count previous body environment blockHolds =>
+      match previous (RawFormula.ex body) environment blockHolds with
+          | Exists.intro tailValues existentialHolds =>
+              match existentialHolds with
+              | Exists.intro headValue bodyHolds =>
+                  Exists.intro
+                    (NatVector.cons headValue tailValues)
+                    (body.prependConsHoldsForward
+                      headValue tailValues environment bodyHolds))
+    count body environment
+
+/-- Backward semantics of a block of existential binders. -/
+def RawFormula.existsManyBackwardFromList :
+    (values : List Nat) ->
+    (body : RawFormula) ->
+    (environment : Environment) ->
+    body.Holds (prependListEnvironment values environment) ->
+      (body.existsMany values.length).Holds environment
+  | [], _body, _environment, bodyHolds => bodyHolds
+  | headValue :: tailValues, body, environment, bodyHolds =>
+      RawFormula.existsManyBackwardFromList
+        tailValues
+        (RawFormula.ex body)
+        environment
+        (Exists.intro headValue bodyHolds)
+
+/-- Backward semantics specialized to an already supplied positive vector. -/
+def RawFormula.existsManyBackwardFromVector
+    {count : Nat}
+    (values : NatVector count)
+    (body : RawFormula)
+    (environment : Environment)
+    (bodyHolds : body.Holds (prependEnvironment values environment)) :
+    (body.existsMany count).Holds environment :=
+  let listHolds : body.Holds
+      (prependListEnvironment values.toList environment) :=
+    (body.holds_congr
+      (prependListEnvironment values.toList environment)
+      (prependEnvironment values environment)
+      (prependListEnvironment_toList values environment)).mpr bodyHolds
+  let blockHolds := RawFormula.existsManyBackwardFromList
+    values.toList body environment listHolds
+  Eq.mp
+    (congrArg
+      (fun length => (body.existsMany length).Holds environment)
+      (values.toList_length))
+    blockHolds
+
+/-- Backward semantics of a block of existential binders. -/
+def RawFormula.existsManyBackward
+    (count : Nat)
+    (body : RawFormula)
+    (environment : Environment) :
+    (Exists fun values : NatVector count =>
+      body.Holds (prependEnvironment values environment)) ->
+        (body.existsMany count).Holds environment :=
+  fun witness =>
+    match witness with
+    | Exists.intro values bodyHolds =>
+        RawFormula.existsManyBackwardFromVector
+          values body environment bodyHolds
 
 /-- A block of existentials binds exactly its prefixed environment. -/
 theorem RawFormula.existsMany_holds
@@ -193,49 +416,30 @@ theorem RawFormula.existsMany_holds
     (environment : Environment) :
     (body.existsMany count).Holds environment ↔
       Exists fun values : NatVector count =>
-        body.Holds (prependEnvironment values environment) := by
-  induction count with
-  | zero =>
-      constructor
-      · intro bodyHolds
-        exact Exists.intro NatVector.nil bodyHolds
-      · intro witness
-        cases witness with
-        | intro values bodyHolds =>
-            cases values
-            exact bodyHolds
-  | succ count inductionHypothesis =>
-      apply Iff.trans (inductionHypothesis (RawFormula.ex body) environment)
-      constructor
-      · intro witness
-        cases witness with
-        | intro tailValues existentialHolds =>
-            cases existentialHolds with
-            | intro headValue bodyHolds =>
-                exact Exists.intro
-                  (NatVector.cons headValue tailValues)
-                  bodyHolds
-      · intro witness
-        cases witness with
-        | intro values bodyHolds =>
-            cases values with
-            | cons headValue tailValues =>
-                exact Exists.intro tailValues
-                  (Exists.intro headValue bodyHolds)
+        body.Holds (prependEnvironment values environment) :=
+  Iff.intro
+    (RawFormula.existsManyForward count body environment)
+    (RawFormula.existsManyBackward count body environment)
 
 /-- Existential blocks remove the corresponding number of free variables. -/
 theorem RawFormula.existsMany_wellScoped
     (count bound : Nat)
     (body : RawFormula)
-    (scoped : body.WellScoped (count + bound)) :
+    (scopeProof : body.WellScoped (count + bound)) :
     (body.existsMany count).WellScoped bound := by
-  induction count with
-  | zero => exact scoped
+  induction count generalizing body bound with
+  | zero =>
+      exact Eq.mp
+        (congrArg (fun available => body.WellScoped available)
+          (Nat.zero_add bound))
+        scopeProof
   | succ count inductionHypothesis =>
-      apply inductionHypothesis (RawFormula.ex body)
-      change body.WellScoped (Nat.succ (count + bound))
-      rw [← Nat.succ_add]
-      exact scoped
+    apply inductionHypothesis (body := RawFormula.ex body) (bound := bound)
+    change body.WellScoped (Nat.succ (count + bound))
+    exact Eq.mp
+      (congrArg (fun available => body.WellScoped available)
+        (Nat.succ_add count bound))
+      scopeProof
 
 /-! ## Graph application by ordinary substitution -/
 
@@ -331,10 +535,59 @@ def RawTerm.shift (term : RawTerm) : RawTerm :=
 theorem RawTerm.shift_wellScoped
     {bound : Nat}
     (term : RawTerm)
-    (scoped : term.WellScoped bound) :
+    (scopeProof : term.WellScoped bound) :
     term.shift.WellScoped (Nat.succ bound) :=
-  term.wellScoped_rename scoped Nat.succ
+  term.wellScoped_rename scopeProof Nat.succ
     (fun _index bounded => Nat.succ_lt_succ bounded)
+
+/-- A shifted term ignores the freshly pushed value. -/
+theorem RawTerm.shift_evaluate
+    (term : RawTerm)
+    (environment : Environment)
+    (value : Nat) :
+    term.shift.evaluate (pushEnvironment environment value) =
+      term.evaluate environment := by
+  unfold RawTerm.shift
+  rw [RawTerm.evaluate_rename]
+  exact term.evaluate_congr
+    (fun index => pushEnvironment environment value (Nat.succ index))
+    environment
+    (fun _index => rfl)
+
+/-- Constructive positive difference, proved without library quotient machinery. -/
+theorem natExistsAddSuccEqOfLt
+    {smaller larger : Nat}
+    (strict : smaller < larger) :
+    Exists fun gap : Nat => smaller + Nat.succ gap = larger := by
+  induction smaller generalizing larger with
+  | zero =>
+      cases larger with
+      | zero => exact (Nat.not_lt_zero 0 strict).elim
+      | succ larger =>
+          exact Exists.intro larger (Nat.zero_add (Nat.succ larger))
+  | succ smaller inductionHypothesis =>
+      cases larger with
+      | zero => exact (Nat.not_lt_zero (Nat.succ smaller) strict).elim
+      | succ larger =>
+          have earlier : smaller < larger :=
+            Nat.lt_of_succ_lt_succ strict
+          cases inductionHypothesis earlier with
+          | intro gap equality =>
+              exact Exists.intro gap (by
+                rw [Nat.succ_add]
+                exact congrArg Nat.succ equality)
+
+/-- A positive addend gives a strictly larger natural. -/
+theorem natLtAddSucc (value gap : Nat) :
+    value < value + Nat.succ gap := by
+  induction gap with
+  | zero =>
+      rw [Nat.add_one]
+      exact Nat.lt_succ_self value
+  | succ gap inductionHypothesis =>
+      rw [Nat.add_succ]
+      exact Nat.lt_trans inductionHypothesis
+        (Nat.lt_succ_self (value + Nat.succ gap))
 
 /-- Ordinary arithmetic strict order, expressed using one existential gap. -/
 def lessThanFormula (left right : RawTerm) : RawFormula :=
@@ -353,7 +606,7 @@ theorem lessThanFormula_wellScoped
   And.intro
     (And.intro
       (left.shift_wellScoped leftScoped)
-      (And.intro trivial (Nat.zero_lt_succ bound)))
+      (Nat.zero_lt_succ bound))
     (right.shift_wellScoped rightScoped)
 
 /-- The strict-order formula has its standard natural-number semantics. -/
@@ -364,31 +617,254 @@ theorem lessThanFormula_holds
       left.evaluate environment < right.evaluate environment := by
   change
     (Exists fun gap : Nat =>
-      (RawTerm.add left.shift (RawTerm.succ (RawTerm.bvar 0))).evaluate
-          (pushEnvironment environment gap) =
+      left.shift.evaluate (pushEnvironment environment gap) + Nat.succ gap =
         right.shift.evaluate (pushEnvironment environment gap)) ↔
-      left.evaluate environment < right.evaluate environment
-  rw [left.evaluate_rename, right.evaluate_rename]
-  change
-    (Exists fun gap : Nat =>
-      left.evaluate environment + Nat.succ gap = right.evaluate environment) ↔
       left.evaluate environment < right.evaluate environment
   constructor
   · intro witness
     cases witness with
     | intro gap equality =>
-        rw [← equality]
-        exact Nat.lt_add_of_pos_right (Nat.succ_pos gap)
+        have normalized :
+            left.evaluate environment + Nat.succ gap =
+              right.evaluate environment :=
+          Eq.trans
+            (congrArg
+              (fun value => value + Nat.succ gap)
+              (left.shift_evaluate environment gap).symm)
+            (Eq.trans equality (right.shift_evaluate environment gap))
+        exact Eq.mp
+          (congrArg
+            (fun rightValue => left.evaluate environment < rightValue)
+            normalized)
+          (natLtAddSucc (left.evaluate environment) gap)
   · intro strict
-    cases Nat.exists_eq_add_of_lt strict with
+    cases natExistsAddSuccEqOfLt strict with
     | intro gap equality =>
-        cases gap with
-        | zero =>
-            exact (Nat.lt_irrefl _ (equality ▸ strict)).elim
-        | succ gap =>
-            exact Exists.intro gap (by
-              rw [Nat.add_comm] at equality
-              exact equality.symm)
+        exact Exists.intro gap
+          (Eq.trans
+            (congrArg
+              (fun value => value + Nat.succ gap)
+              (left.shift_evaluate environment gap))
+            (Eq.trans equality (right.shift_evaluate environment gap).symm))
+
+/-! ## Structural Euclidean division -/
+
+/--
+Fuel-structural Euclidean division.  The first component is the quotient and
+the second the remainder.  The definition recurses only on the dividend and
+therefore needs no well-founded or quotient principle.
+-/
+def constructiveDivMod (modulus : Nat) : Nat -> Nat × Nat
+  | 0 => (0, 0)
+  | Nat.succ dividend =>
+      let previous := constructiveDivMod modulus dividend
+      if Nat.succ previous.2 < modulus then
+        (previous.1, Nat.succ previous.2)
+      else
+        (Nat.succ previous.1, 0)
+
+/-- Quotient computed by structural Euclidean division. -/
+def constructiveQuotient (dividend modulus : Nat) : Nat :=
+  (constructiveDivMod modulus dividend).1
+
+/-- Remainder computed by structural Euclidean division. -/
+def constructiveRemainder (dividend modulus : Nat) : Nat :=
+  (constructiveDivMod modulus dividend).2
+
+/-- Positive correctness data carried by structural Euclidean division. -/
+structure ConstructiveDivModCorrect
+    (dividend modulus : Nat) : Type where
+  equation :
+    dividend =
+      (constructiveDivMod modulus dividend).1 * modulus +
+        (constructiveDivMod modulus dividend).2
+  bounded : (constructiveDivMod modulus dividend).2 < modulus
+
+/-- One unfolding equation for the branch that grows the remainder. -/
+theorem constructiveDivMod_succ_of_lt
+    (dividend modulus : Nat)
+    (grows : Nat.succ (constructiveDivMod modulus dividend).2 < modulus) :
+    constructiveDivMod modulus (Nat.succ dividend) =
+      ((constructiveDivMod modulus dividend).1,
+        Nat.succ (constructiveDivMod modulus dividend).2) := by
+  change
+    (if Nat.succ (constructiveDivMod modulus dividend).2 < modulus then
+      ((constructiveDivMod modulus dividend).1,
+        Nat.succ (constructiveDivMod modulus dividend).2)
+    else
+      (Nat.succ (constructiveDivMod modulus dividend).1, 0)) = _
+  exact if_pos grows
+
+/-- One unfolding equation for the branch that closes a full modulus. -/
+theorem constructiveDivMod_succ_of_not_lt
+    (dividend modulus : Nat)
+    (full : Not (Nat.succ (constructiveDivMod modulus dividend).2 < modulus)) :
+    constructiveDivMod modulus (Nat.succ dividend) =
+      (Nat.succ (constructiveDivMod modulus dividend).1, 0) := by
+  change
+    (if Nat.succ (constructiveDivMod modulus dividend).2 < modulus then
+      ((constructiveDivMod modulus dividend).1,
+        Nat.succ (constructiveDivMod modulus dividend).2)
+    else
+      (Nat.succ (constructiveDivMod modulus dividend).1, 0)) = _
+  exact if_neg full
+
+/--
+The structural division algorithm builds its equation and remainder bound in
+the same recursion that computes the pair.  The correctness object lives in
+`Type`, so no propositional extensionality is needed to compile the recursion.
+-/
+def constructiveDivModCorrect
+    (modulus : Nat)
+    (positive : 0 < modulus) :
+    (dividend : Nat) -> ConstructiveDivModCorrect dividend modulus
+  | 0 =>
+      { equation := by
+          change 0 = 0 * modulus + 0
+          exact (Eq.trans (Nat.add_zero (0 * modulus))
+            (Nat.zero_mul modulus)).symm
+        bounded := positive }
+  | Nat.succ dividend =>
+      let previous := constructiveDivModCorrect modulus positive dividend
+      if grows : Nat.succ (constructiveDivMod modulus dividend).2 < modulus then
+        let stepEquality :=
+          constructiveDivMod_succ_of_lt dividend modulus grows
+        let branchEquation :
+              Nat.succ dividend =
+                (constructiveDivMod modulus dividend).1 * modulus +
+                  Nat.succ (constructiveDivMod modulus dividend).2 :=
+          Eq.trans
+            (congrArg Nat.succ previous.equation)
+            (Nat.add_succ
+              ((constructiveDivMod modulus dividend).1 * modulus)
+              (constructiveDivMod modulus dividend).2).symm
+        { equation :=
+            Eq.mp
+              (congrArg
+                (fun result =>
+                  Nat.succ dividend = result.1 * modulus + result.2)
+                stepEquality.symm)
+              branchEquation
+          bounded :=
+            Eq.mp
+              (congrArg (fun result => result.2 < modulus) stepEquality.symm)
+              grows }
+      else
+        let stepEquality :=
+          constructiveDivMod_succ_of_not_lt dividend modulus grows
+        let fillsModulus :
+            Nat.succ (constructiveDivMod modulus dividend).2 = modulus :=
+          Nat.le_antisymm
+            (Nat.succ_le_of_lt previous.bounded)
+            (Nat.le_of_not_gt grows)
+        let branchEquation :
+              Nat.succ dividend =
+                Nat.succ (constructiveDivMod modulus dividend).1 * modulus + 0 :=
+          Eq.trans
+            (congrArg Nat.succ previous.equation)
+            (Eq.trans
+              (Nat.add_succ
+                ((constructiveDivMod modulus dividend).1 * modulus)
+                (constructiveDivMod modulus dividend).2).symm
+              (Eq.trans
+                (congrArg
+                  (fun value =>
+                    (constructiveDivMod modulus dividend).1 * modulus + value)
+                  fillsModulus)
+                (Eq.trans
+                  (Nat.succ_mul
+                    (constructiveDivMod modulus dividend).1 modulus).symm
+                  (Nat.add_zero
+                    (Nat.succ
+                      (constructiveDivMod modulus dividend).1 * modulus)).symm)))
+        { equation :=
+            Eq.mp
+              (congrArg
+                (fun result =>
+                  Nat.succ dividend = result.1 * modulus + result.2)
+                stepEquality.symm)
+              branchEquation
+          bounded :=
+            Eq.mp
+              (congrArg (fun result => result.2 < modulus) stepEquality.symm)
+              positive }
+
+/-- Equation and bound certified by structural Euclidean division. -/
+theorem constructiveDivMod_spec
+    (dividend modulus : Nat)
+    (positive : 0 < modulus) :
+    dividend =
+        constructiveQuotient dividend modulus * modulus +
+          constructiveRemainder dividend modulus ∧
+      constructiveRemainder dividend modulus < modulus :=
+  let correctness := constructiveDivModCorrect modulus positive dividend
+  And.intro correctness.equation correctness.bounded
+
+/-- A bounded remainder cannot bridge one whole modulus. -/
+theorem boundedSums_ne_of_quotient_lt
+    {modulus leftQuotient rightQuotient leftRemainder rightRemainder : Nat}
+    (quotientLt : leftQuotient < rightQuotient)
+    (leftBound : leftRemainder < modulus) :
+    leftQuotient * modulus + leftRemainder ≠
+      rightQuotient * modulus + rightRemainder := by
+  intro sameSums
+  have successorBound : Nat.succ leftQuotient <= rightQuotient := quotientLt
+  have strictlySmaller :
+      leftQuotient * modulus + leftRemainder <
+        rightQuotient * modulus + rightRemainder := calc
+    leftQuotient * modulus + leftRemainder <
+        leftQuotient * modulus + modulus :=
+      Nat.add_lt_add_left leftBound _
+    _ = Nat.succ leftQuotient * modulus :=
+      (Nat.succ_mul leftQuotient modulus).symm
+    _ <= rightQuotient * modulus :=
+      Nat.mul_le_mul_right modulus successorBound
+    _ <= rightQuotient * modulus + rightRemainder :=
+      Nat.le_add_right _ _
+  exact Nat.ne_of_lt strictlySmaller sameSums
+
+/-- Left cancellation for natural addition, rebuilt by structural recursion. -/
+theorem natAddLeftCancel
+    (prefixValue left right : Nat)
+    (equality : prefixValue + left = prefixValue + right) :
+    left = right := by
+  induction prefixValue with
+  | zero =>
+      exact Eq.trans
+        (Nat.zero_add left).symm
+        (Eq.trans equality (Nat.zero_add right))
+  | succ prefixValue inductionHypothesis =>
+      apply inductionHypothesis
+      exact Nat.succ.inj
+        (Eq.trans
+          (Nat.succ_add prefixValue left).symm
+          (Eq.trans equality (Nat.succ_add prefixValue right)))
+
+/-- Bounded quotient/remainder decompositions have a unique remainder. -/
+theorem boundedRemainder_unique
+    {dividend modulus leftQuotient rightQuotient leftRemainder rightRemainder : Nat}
+    (leftEquation :
+      dividend = leftQuotient * modulus + leftRemainder)
+    (rightEquation :
+      dividend = rightQuotient * modulus + rightRemainder)
+    (leftBound : leftRemainder < modulus)
+    (rightBound : rightRemainder < modulus) :
+    leftRemainder = rightRemainder := by
+  have sameSums :
+      leftQuotient * modulus + leftRemainder =
+        rightQuotient * modulus + rightRemainder :=
+    leftEquation.symm.trans rightEquation
+  match Nat.lt_trichotomy leftQuotient rightQuotient with
+  | Or.inl leftEarlier =>
+      exact (boundedSums_ne_of_quotient_lt
+        leftEarlier leftBound sameSums).elim
+  | Or.inr (Or.inl sameQuotient) =>
+      cases sameQuotient
+      exact natAddLeftCancel
+        (leftQuotient * modulus) leftRemainder rightRemainder sameSums
+  | Or.inr (Or.inr rightEarlier) =>
+      exact (boundedSums_ne_of_quotient_lt
+        rightEarlier rightBound sameSums.symm).elim
 
 /-- `remainder` is the remainder of `dividend` modulo positive `modulus`. -/
 def remainderFormula
@@ -432,16 +908,50 @@ theorem remainderFormula_holds
         dividend.evaluate environment =
           quotient * modulus.evaluate environment +
             remainder.evaluate environment := by
-  apply and_congr (lessThanFormula_holds remainder modulus environment)
   change
-    (Exists fun quotient : Nat =>
-      dividend.shift.evaluate (pushEnvironment environment quotient) =
-        (RawTerm.add
-          (RawTerm.mul (RawTerm.bvar 0) modulus.shift)
-          remainder.shift).evaluate
-            (pushEnvironment environment quotient)) ↔ _
-  rw [dividend.evaluate_rename, modulus.evaluate_rename,
-    remainder.evaluate_rename]
+    ((lessThanFormula remainder modulus).Holds environment ∧
+      Exists fun quotient : Nat =>
+        dividend.shift.evaluate (pushEnvironment environment quotient) =
+          quotient * modulus.shift.evaluate
+              (pushEnvironment environment quotient) +
+            remainder.shift.evaluate
+              (pushEnvironment environment quotient)) ↔ _
+  constructor
+  · intro formulaHolds
+    exact And.intro
+      ((lessThanFormula_holds remainder modulus environment).mp formulaHolds.1)
+      (match formulaHolds.2 with
+      | Exists.intro quotient equation =>
+          Exists.intro quotient
+            (Eq.trans
+              (dividend.shift_evaluate environment quotient).symm
+              (Eq.trans equation
+                ((congrArg
+                    (fun left => quotient * left +
+                      remainder.shift.evaluate
+                        (pushEnvironment environment quotient))
+                    (modulus.shift_evaluate environment quotient)).trans
+                  (congrArg
+                    (fun right => quotient * modulus.evaluate environment + right)
+                    (remainder.shift_evaluate environment quotient))))))
+  · intro characterization
+    exact And.intro
+      ((lessThanFormula_holds remainder modulus environment).mpr characterization.1)
+      (match characterization.2 with
+      | Exists.intro quotient equation =>
+          Exists.intro quotient
+            (Eq.trans
+              (dividend.shift_evaluate environment quotient)
+              (Eq.trans equation
+                ((congrArg
+                    (fun left => quotient * left +
+                      remainder.evaluate environment)
+                    (modulus.shift_evaluate environment quotient).symm).trans
+                  (congrArg
+                    (fun right => quotient *
+                      modulus.shift.evaluate
+                        (pushEnvironment environment quotient) + right)
+                    (remainder.shift_evaluate environment quotient).symm)))))
 
 /-- Bounded quotient equations are exactly natural remainders. -/
 theorem remainder_characterization
@@ -450,23 +960,26 @@ theorem remainder_characterization
     (remainder < modulus ∧
       Exists fun quotient : Nat =>
         dividend = quotient * modulus + remainder) ↔
-      remainder = dividend % modulus := by
+      remainder = constructiveRemainder dividend modulus := by
+  have canonical := constructiveDivMod_spec dividend modulus positive
   constructor
   · intro characterization
     cases characterization with
     | intro bounded witness =>
         cases witness with
         | intro quotient equality =>
-            rw [equality, Nat.add_mod, Nat.mul_mod,
-              Nat.zero_add, Nat.mod_eq_of_lt bounded]
+            exact boundedRemainder_unique
+              equality
+              canonical.1
+              bounded
+              canonical.2
   · intro equality
-    cases equality
+    rw [equality]
     constructor
-    · exact Nat.mod_lt dividend positive
-    · exact Exists.intro (dividend / modulus) (by
-        have division := Nat.mod_add_div dividend modulus
-        rw [Nat.mul_comm] at division
-        exact division.symm)
+    · exact canonical.2
+    · exact Exists.intro
+        (constructiveQuotient dividend modulus)
+        canonical.1
 
 /-- The modulus used by one component of Goedel's beta sequence. -/
 def betaModulusTerm (coefficient index : RawTerm) : RawTerm :=
@@ -496,7 +1009,7 @@ theorem betaValueFormula_wellScoped
     (betaModulusTerm coefficient index)
     value
     dividendScoped
-    (And.intro (And.intro indexScoped trivial) coefficientScoped)
+    (And.intro indexScoped coefficientScoped)
     valueScoped
 
 /-- The beta lookup formula computes the intended remainder. -/
@@ -505,7 +1018,8 @@ theorem betaValueFormula_holds
     (environment : Environment) :
     (betaValueFormula dividend coefficient index value).Holds environment ↔
       value.evaluate environment =
-        dividend.evaluate environment %
+        constructiveRemainder
+          (dividend.evaluate environment)
           ((index.evaluate environment + 1) *
             coefficient.evaluate environment + 1) := by
   apply Iff.trans
@@ -526,30 +1040,44 @@ theorem betaValueFormula_holds
                 (Nat.succ (index.evaluate environment) *
                   coefficient.evaluate environment) +
             value.evaluate environment) ↔ _
-  rw [remainder_characterization
-    (dividend.evaluate environment)
-    (Nat.succ
-      (Nat.succ (index.evaluate environment) *
-        coefficient.evaluate environment))
-    (value.evaluate environment)
-    (Nat.succ_pos _)]
-  change
-    value.evaluate environment =
-      dividend.evaluate environment %
-        Nat.succ
+  apply Iff.trans
+    (remainder_characterization
+      (dividend.evaluate environment)
+      (Nat.succ
+        (Nat.succ (index.evaluate environment) *
+          coefficient.evaluate environment))
+      (value.evaluate environment)
+      (Nat.succ_pos _))
+  let modulusEquality :
+      Nat.succ
           (Nat.succ (index.evaluate environment) *
-            coefficient.evaluate environment) ↔ _
-  rw [Nat.succ_eq_add_one, Nat.succ_eq_add_one]
+            coefficient.evaluate environment) =
+        (index.evaluate environment + 1) *
+            coefficient.evaluate environment + 1 :=
+    Eq.trans
+      (congrArg Nat.succ
+        (congrArg
+          (fun factor => factor * coefficient.evaluate environment)
+          (Nat.succ_eq_add_one (index.evaluate environment))))
+      (Nat.succ_eq_add_one
+        ((index.evaluate environment + 1) *
+          coefficient.evaluate environment))
+  let remainderEquality :=
+    congrArg
+      (constructiveRemainder (dividend.evaluate environment))
+      modulusEquality
+  exact Iff.intro
+    (fun equality => equality.trans remainderEquality)
+    (fun equality => equality.trans remainderEquality.symm)
 
 end BareArithmeticTarski
 end Meta
 
 /- AXIOM_AUDIT_BEGIN -/
 #print axioms Meta.BareArithmeticTarski.RawFormula.existsMany_holds
-#print axioms Meta.BareArithmeticTarski.ArithmeticGraph.apply_holds
-#print axioms Meta.BareArithmeticTarski.betaValueFormula_wellScoped
-#print axioms Meta.BareArithmeticTarski.lessThanFormula_holds
-#print axioms Meta.BareArithmeticTarski.remainder_characterization
+#print axioms Meta.BareArithmeticTarski.RawFormula.existsManyForward
+#print axioms Meta.BareArithmeticTarski.RawFormula.existsManyBackward
 #print axioms Meta.BareArithmeticTarski.betaValueFormula_holds
-#print axioms Nat.beta_unbeta_coe
+#print axioms Meta.BareArithmeticTarski.constructiveDivMod_spec
+#print axioms Meta.BareArithmeticTarski.RawTermVector.variables_wellScoped
 /- AXIOM_AUDIT_END -/

@@ -29,7 +29,7 @@ theorem PRFunction.run_eq_of_evaluates
     {output : Nat}
     (evaluation : PRFunction.Evaluates program inputs output) :
     program.run inputs = output :=
-  PRFunction.evaluates_unique program.run_evaluates evaluation
+  PRFunction.evaluates_unique (program.run_evaluates inputs) evaluation
 
 @[simp] theorem PRFunction.run_constant
     (arity value : Nat)
@@ -112,6 +112,76 @@ theorem PRFunction.run_eq_of_evaluates
   PRFunction.run_eq_of_evaluates
     (PRFunction.numeralCode_evaluates value)
 
+/-!
+The syntax constructors are named aliases of the generic tagged-code
+programs.  Export their execution equations explicitly so downstream proofs
+never depend on how aggressively Lean unfolds those aliases.
+-/
+
+@[simp] theorem PRFunction.run_termZeroCode
+    (arity : Nat) (inputs : NatVector arity) :
+    (PRFunction.termZeroCode arity).run inputs = RawTerm.zero.code :=
+  PRFunction.run_constant arity RawTerm.zero.code inputs
+
+@[simp] theorem PRFunction.run_termSuccessorCode (payload : Nat) :
+    PRFunction.termSuccessorCode.run
+        (NatVector.cons payload NatVector.nil) =
+      Nat.succ (natPair 2 payload) :=
+  PRFunction.run_taggedUnaryCode 2 payload
+
+@[simp] theorem PRFunction.run_termAddCode (left right : Nat) :
+    PRFunction.termAddCode.run
+        (NatVector.cons left (NatVector.cons right NatVector.nil)) =
+      Nat.succ (natPair 3 (natPair left right)) :=
+  PRFunction.run_taggedBinaryCode 3 left right
+
+@[simp] theorem PRFunction.run_termMultiplyCode (left right : Nat) :
+    PRFunction.termMultiplyCode.run
+        (NatVector.cons left (NatVector.cons right NatVector.nil)) =
+      Nat.succ (natPair 4 (natPair left right)) :=
+  PRFunction.run_taggedBinaryCode 4 left right
+
+@[simp] theorem PRFunction.run_falsumCode
+    (arity : Nat) (inputs : NatVector arity) :
+    (PRFunction.falsumCode arity).run inputs = RawFormula.falsum.code :=
+  PRFunction.run_constant arity RawFormula.falsum.code inputs
+
+@[simp] theorem PRFunction.run_formulaEqualCode (left right : Nat) :
+    PRFunction.formulaEqualCode.run
+        (NatVector.cons left (NatVector.cons right NatVector.nil)) =
+      Nat.succ (natPair 1 (natPair left right)) :=
+  PRFunction.run_taggedBinaryCode 1 left right
+
+@[simp] theorem PRFunction.run_formulaConjunctionCode (left right : Nat) :
+    PRFunction.formulaConjunctionCode.run
+        (NatVector.cons left (NatVector.cons right NatVector.nil)) =
+      Nat.succ (natPair 2 (natPair left right)) :=
+  PRFunction.run_taggedBinaryCode 2 left right
+
+@[simp] theorem PRFunction.run_formulaDisjunctionCode (left right : Nat) :
+    PRFunction.formulaDisjunctionCode.run
+        (NatVector.cons left (NatVector.cons right NatVector.nil)) =
+      Nat.succ (natPair 3 (natPair left right)) :=
+  PRFunction.run_taggedBinaryCode 3 left right
+
+@[simp] theorem PRFunction.run_formulaImplicationCode (left right : Nat) :
+    PRFunction.formulaImplicationCode.run
+        (NatVector.cons left (NatVector.cons right NatVector.nil)) =
+      Nat.succ (natPair 4 (natPair left right)) :=
+  PRFunction.run_taggedBinaryCode 4 left right
+
+@[simp] theorem PRFunction.run_formulaUniversalCode (body : Nat) :
+    PRFunction.formulaUniversalCode.run
+        (NatVector.cons body NatVector.nil) =
+      Nat.succ (natPair 5 body) :=
+  PRFunction.run_taggedUnaryCode 5 body
+
+@[simp] theorem PRFunction.run_formulaExistentialCode (body : Nat) :
+    PRFunction.formulaExistentialCode.run
+        (NatVector.cons body NatVector.nil) =
+      Nat.succ (natPair 6 body) :=
+  PRFunction.run_taggedUnaryCode 6 body
+
 /-! ## Generic program-level selection -/
 
 /-- Select between two programs with a numeric zero selector. -/
@@ -137,11 +207,11 @@ def PRFunction.select
   apply PRFunction.run_eq_of_evaluates
   apply PRFunction.Evaluates.composition
   · exact PRFunctionVector.Evaluates.cons
-      selector.run_evaluates
+      (selector.run_evaluates inputs)
       (PRFunctionVector.Evaluates.cons
-        whenZero.run_evaluates
+        (whenZero.run_evaluates inputs)
         (PRFunctionVector.Evaluates.cons
-          whenPositive.run_evaluates
+          (whenPositive.run_evaluates inputs)
           (PRFunctionVector.Evaluates.nil inputs)))
   · exact PRFunction.ifZero_evaluates
       (selector.run inputs)
@@ -176,13 +246,11 @@ def PRFunction.selectTag
         (otherwise.run inputs)
         (whenEqual.run inputs) := by
   rw [PRFunction.selectTag, PRFunction.run_select]
-  change
-    PRFunction.equalBit.run
-        (NatVector.cons (tag.run inputs)
-          (NatVector.cons
-            ((PRFunction.constant arity expected).run inputs)
-            NatVector.nil)) = _
-  rw [PRFunction.run_constant, PRFunction.run_equalBit]
+  rw [PRFunction.run_composition,
+    PRFunctionVector.run_cons,
+    PRFunctionVector.run_singleton,
+    PRFunction.run_constant,
+    PRFunction.run_equalBit]
 
 /-! ## One course-of-values substitution step -/
 
@@ -358,6 +426,27 @@ def PRFunction.quantifierBlindDiagonalSubstitutionPrototype : PRFunction 1 :=
 
 /-! ## Numeric trace computed by the program -/
 
+@[simp] theorem PRFunction.run_substitutionCounter
+    (counter history value : Nat) :
+    PRFunction.substitutionCounter.run
+        (NatVector.cons counter
+          (NatVector.cons history (NatVector.cons value NatVector.nil))) =
+      counter := rfl
+
+@[simp] theorem PRFunction.run_substitutionHistory
+    (counter history value : Nat) :
+    PRFunction.substitutionHistory.run
+        (NatVector.cons counter
+          (NatVector.cons history (NatVector.cons value NatVector.nil))) =
+      history := rfl
+
+@[simp] theorem PRFunction.run_substitutionValue
+    (counter history value : Nat) :
+    PRFunction.substitutionValue.run
+        (NatVector.cons counter
+          (NatVector.cons history (NatVector.cons value NatVector.nil))) =
+      value := rfl
+
 @[simp] theorem PRFunction.run_substitutionCurrentCode
     (counter history value : Nat) :
     PRFunction.substitutionCurrentCode.run
@@ -436,8 +525,13 @@ def PRFunction.quantifierBlindDiagonalSubstitutionPrototype : PRFunction 1 :=
             (NatVector.cons history
               (NatVector.cons value NatVector.nil))))
         history := by
-  change PRFunction.traceLookupCode.run _ = _
-  rw [PRFunction.run_traceLookupCode]
+  simp only [PRFunction.substitutionLookup,
+    PRFunction.run_composition,
+    PRFunctionVector.run_cons,
+    PRFunctionVector.run_singleton,
+    PRFunction.run_substitutionCurrentCode,
+    PRFunction.run_substitutionHistory,
+    PRFunction.run_traceLookupCode]
 
 @[simp] theorem PRFunction.run_substitutionTermLookup
     (child : PRFunction 3)
@@ -454,9 +548,11 @@ def PRFunction.quantifierBlindDiagonalSubstitutionPrototype : PRFunction 1 :=
               (NatVector.cons history
                 (NatVector.cons value NatVector.nil))))
           history) := by
-  change PRFunction.unpairLeft.run _ = _
-  rw [PRFunction.run_unpairLeft,
-    PRFunction.run_substitutionLookup]
+  simp only [PRFunction.substitutionTermLookup,
+    PRFunction.run_composition,
+    PRFunctionVector.run_singleton,
+    PRFunction.run_substitutionLookup,
+    PRFunction.run_unpairLeft]
 
 @[simp] theorem PRFunction.run_substitutionFormulaLookup
     (child : PRFunction 3)
@@ -473,9 +569,11 @@ def PRFunction.quantifierBlindDiagonalSubstitutionPrototype : PRFunction 1 :=
               (NatVector.cons history
                 (NatVector.cons value NatVector.nil))))
           history) := by
-  change PRFunction.unpairRight.run _ = _
-  rw [PRFunction.run_unpairRight,
-    PRFunction.run_substitutionLookup]
+  simp only [PRFunction.substitutionFormulaLookup,
+    PRFunction.run_composition,
+    PRFunctionVector.run_singleton,
+    PRFunction.run_substitutionLookup,
+    PRFunction.run_unpairRight]
 
 @[simp] theorem PRFunction.run_substitutionUnary
     (constructor : PRFunction 1)
@@ -559,8 +657,10 @@ theorem substitutionTraceValue_lookup
           rw [substitutionTraceValue_succ,
             natTraceLookup_zero_pair]
   | succ offset inductionHypothesis =>
-      rw [Nat.add_succ, substitutionTraceValue_succ,
-        natTraceLookup_succ_pair]
+      rw [Nat.add_succ]
+      change natTraceLookup (Nat.succ offset)
+          (substitutionTraceValue (Nat.succ (code + offset)) value) = _
+      rw [substitutionTraceValue_succ, natTraceLookup_succ_pair]
       exact inductionHypothesis
 
 /-- Absolute child-code lookup recovers the corresponding earlier entry. -/
@@ -577,8 +677,10 @@ theorem substitutionTraceValue_lookupCode
       have bounded : child <= current := Nat.le_of_lt_succ childEarlier
       cases natExistsEqAddOfLe bounded with
       | intro offset equality =>
+          simp only [Nat.pred_succ]
           unfold natTraceLookupCode
-          rw [equality, Nat.add_sub_cancel_left]
+          rw [equality, Nat.add_one, Nat.pred_succ,
+            Nat.add_sub_cancel_left]
           exact substitutionTraceValue_lookup child offset value childPositive
 
 /-- The explicit trace-builder program computes the named numeric trace. -/
@@ -600,8 +702,12 @@ theorem PRFunction.run_substitutionTrace (code value : Nat) :
                     (NatVector.cons value NatVector.nil)))
                 (NatVector.cons value NatVector.nil))) = _
       rw [inductionHypothesis]
-      change PRFunction.pair.run _ = _
-      rw [PRFunction.run_pair]
+      simp only [PRFunction.prependToPrevious,
+        PRFunction.run_composition,
+        PRFunctionVector.run_cons,
+        PRFunctionVector.run_singleton,
+        PRFunction.run_projection,
+        PRFunction.run_pair]
       rfl
 
 /-! ## Correctness on genuine term and formula codes -/
@@ -622,8 +728,9 @@ theorem PRFunction.run_substitutionEntry
           (NatVector.cons counter
             (NatVector.cons history
               (NatVector.cons value NatVector.nil)))) := by
-  change PRFunction.pair.run _ = _
-  rw [PRFunction.run_pair]
+  simp only [PRFunction.substitutionEntry,
+    PRFunction.run_substitutionBinary,
+    PRFunction.run_pair]
 
 /-- The two unpaired entry components are the corresponding program readings. -/
 theorem substitutionEntryAt_termComponent
@@ -634,7 +741,7 @@ theorem substitutionEntryAt_termComponent
           (NatVector.cons (substitutionTraceValue counter value)
             (NatVector.cons value NatVector.nil))) := by
   unfold substitutionEntryAt
-  rw [PRFunction.run_substitutionEntry, natUnpairLeft_pair]
+  simp only [PRFunction.run_substitutionEntry, natUnpairLeft_pair]
 
 theorem substitutionEntryAt_formulaComponent
     (counter value : Nat) :
@@ -644,7 +751,7 @@ theorem substitutionEntryAt_formulaComponent
           (NatVector.cons (substitutionTraceValue counter value)
             (NatVector.cons value NatVector.nil))) := by
   unfold substitutionEntryAt
-  rw [PRFunction.run_substitutionEntry, natUnpairRight_pair]
+  simp only [PRFunction.run_substitutionEntry, natUnpairRight_pair]
 
 /-- Bound-variable codes select the numeral replacement branch. -/
 theorem PRFunction.run_substitutionTermAt_bvar
@@ -686,8 +793,9 @@ theorem PRFunction.run_substitutionTermLookup_of_child
             (NatVector.cons value NatVector.nil))) =
       natUnpairLeft (substitutionEntryAt childCode value) := by
   rw [PRFunction.run_substitutionTermLookup, childRun]
-  rw [substitutionTraceValue_lookupCode
-    (Nat.succ counter) childCode value childPositive childEarlier]
+  exact congrArg natUnpairLeft
+    (substitutionTraceValue_lookupCode
+      (Nat.succ counter) childCode value childPositive childEarlier)
 
 /-- A formula-child lookup in the canonical trace returns its stored component. -/
 theorem PRFunction.run_substitutionFormulaLookup_of_child
@@ -707,8 +815,9 @@ theorem PRFunction.run_substitutionFormulaLookup_of_child
             (NatVector.cons value NatVector.nil))) =
       natUnpairRight (substitutionEntryAt childCode value) := by
   rw [PRFunction.run_substitutionFormulaLookup, childRun]
-  rw [substitutionTraceValue_lookupCode
-    (Nat.succ counter) childCode value childPositive childEarlier]
+  exact congrArg natUnpairRight
+    (substitutionTraceValue_lookupCode
+      (Nat.succ counter) childCode value childPositive childEarlier)
 
 theorem PRFunction.run_substitutionTermAt_succ
     (child history value : Nat) :

@@ -2,6 +2,7 @@ import Meta.Core.RelaxedUsageRegime
 import Meta.Core.BilateralCore
 import Meta.Core.CausalAdditive
 import Meta.Core.CausalTotality
+import Meta.Core.CausalFinite
 import Meta.Core.CausalAdditiveNat
 import Meta.Core.ProjectiveCore
 import Meta.Core.ProjectedIdentity
@@ -58,6 +59,8 @@ import Meta.Tarski.GenericPatchOrbit
 import Meta.Tarski.VisibleCausalRecurrence
 import Meta.Tarski.CausalAccumulatingSystem
 import Meta.Tarski.CausalTotality
+import Meta.Tarski.CausalClock
+import Meta.Tarski.CausalClockNat
 import Meta.Tarski.CausalAdditiveRealization
 import Meta.Tarski.BareArithmetic.ClosedOrbit
 import Meta.Tarski.ConstructivePatchModel
@@ -95,7 +98,10 @@ import Meta.Synthesis.TarskiBethBellGap
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.genericPatchOrbitTheorem
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.genericVisibleCausalNonRecurrenceTheorem
 #print axioms Meta.CausalAdditive.AccumulatingCausalSystem.cumulativeTotalityTheorem
+#print axioms Meta.CausalAdditive.AccumulatingCausalSystem.orbitReachable_iff_precedes
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiCumulativeTotalityTheorem
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiIntrinsicClockTheorem
+#print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiExactFiniteMemoryTheorem
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiNaturalHistoricalGap_injective
 #print axioms Meta.CausalAdditive.CausalWord.equivalence
 #print axioms Meta.ClosedStabilityTheorem.PatchableArithmeticTarskiContext.tarskiCausalAdditiveRealizationTheorem
@@ -103,6 +109,7 @@ import Meta.Synthesis.TarskiBethBellGap
 #print axioms Meta.BareArithmeticTarski.bareArithmeticPatchableContext
 #print axioms Meta.BareArithmeticTarski.bareArithmeticGenericPatchOrbitTheorem
 #print axioms Meta.BareArithmeticTarski.bareArithmeticVisibleCausalNonRecurrenceTheorem
+#print axioms Meta.BareArithmeticTarski.bareArithmeticCausalAdditiveRealizationTheorem
 #print axioms Meta.BareArithmeticTarski.bareArithmeticNontriviality
 #print axioms Meta.BareArithmeticTarski.bareArithmeticTarskiClosedSystem
 #print axioms Meta.ConstructivePatchModel.constructiveTarskiClosedSystem
