@@ -195,10 +195,99 @@ GapMediatedEvaluation(State, Gap) :
     ↔ d = gap(S) ∨ Memory(S, d).
 ```
 
-Le système T et le système P doivent fournir deux instances fermées de cette
-interface. Ils partagent sa forme causale, mais chacun construit
-`memory_sound`, `frontier_open`, `frontier_closed` et
-`evaluation_preserved` avec son propre évaluateur.
+Cette interface est la projection propositionnelle du mécanisme. Elle suffit
+pour appliquer le Core causal, mais elle ne doit pas être l'objet primaire du
+transport : un témoin de `Memory(S, d) : Prop` ne peut pas, en général, être
+éliminé constructivement pour fabriquer une donnée dans `Type`.
+
+### Réalisation positive par positions
+
+L'objet primaire est le type des occurrences causales déjà inscrites. Chaque
+position porte sa phrase et son certificat local d'évaluation :
+
+```text
+PositiveGapMediatedEvaluation(State, Gap) :
+  gap       : State → Gap
+  Position  : State → Type
+  label     : Position(S) → Gap
+  Evaluated : State → Gap → Prop
+  advance   : State → State
+
+  position_evaluated :
+    Evaluated(S, label(p))
+
+  advancePositions :
+    ConstructiveEquivalence(
+      Position(advance(S)),
+      Option(Position(S)))
+
+  newest_label :
+    label(advancePositions⁻¹(none)) = gap(S)
+
+  inherited_label :
+    label(advancePositions⁻¹(some(p))) = label(p)
+
+  frontier_open :
+    ¬Evaluated(S, gap(S))
+
+  evaluation_preserved :
+    Evaluated(S, d) → Evaluated(advance(S), d).
+```
+
+`none` désigne la position nouvellement créée et `some(p)` la conservation
+d'une position antérieure. `ConstructiveEquivalence` est une donnée positive
+avec deux fonctions inverses ; elle n'utilise ni choix ni quotient.
+
+La mémoire propositionnelle est ensuite définie en oubliant la position, mais
+pas avant le transport :
+
+```text
+Memory⁺(S, d)
+:⇔ il existe p : Position(S), label(p) = d.
+```
+
+Les lois constitutives ne sont plus des champs indépendants :
+
+```text
+frontier_closed
+  dérive de la position none, de newest_label
+  et de position_evaluated dans advance(S) ;
+
+memory_exact
+  dérive par analyse de advancePositions(p) : Option(Position(S)) ;
+
+memory_sound
+  dérive directement de position_evaluated ;
+
+gap_absent
+  dérive de memory_sound et frontier_open ;
+
+gap_inscribed et memory_preserved
+  dérivent respectivement des branches none et some.
+```
+
+Cette formulation rend exact le rôle du gap. Le gap courant n'évalue rien par
+lui-même dans l'état source. `advance` le transforme en nouvelle occurrence
+positive ; cette occurrence appartient alors au domaine causal certifié de
+l'évaluateur successeur. La fermeture de l'ancien gap est donc construite à
+partir de sa position nouvelle, tandis que l'ouverture de la frontière et la
+préservation de toute l'évaluation restent des théorèmes propres au système.
+
+Il ne faut pas définir une fonction de la forme :
+
+```text
+positionOfMemory : Memory⁺(S, d) → Position(S).
+```
+
+Elle demanderait précisément d'extraire une donnée de `Type` depuis une preuve
+existentielle dans `Prop`. Le morphisme transportera directement les
+`Position`; les prédicats `Memory_T` et `EventMemory_P` n'en seront que les
+projections extensionnelles.
+
+Les deux systèmes doivent fournir des réalisations fermées de cette interface
+positive. Ils partagent sa forme causale, mais chacun construit
+`position_evaluated`, `frontier_open` et `evaluation_preserved` avec son propre
+évaluateur.
 
 ### Statut des lois de l'interface
 
@@ -406,6 +495,49 @@ Un simple `Predicate` ne suffit pas comme état causal : deux états ayant le
 même comportement visible peuvent conserver des histoires différentes. La
 mémoire fait partie de l'identité causale de l'état.
 
+La réalisation positive nécessaire au transport est déjà présente dans le
+code tarskien :
+
+```text
+Position_T(S)
+:= CausalState.MemoryPosition(S)
+
+label_T(p)
+:= CausalMemory.sentenceAt(S.memory, p).
+```
+
+La définition de `CausalMemory.Position` suit exactement la forme attendue :
+
+```text
+Position_T(racine) = type vide
+
+Position_T(advance_T(S))
+= Option(Position_T(S)).
+```
+
+La position `none` porte le gap qui vient d'être réparé et `some(p)` conserve
+l'ancienne position. Les théorèmes déjà compilés établissent :
+
+```text
+CausalMemory.position_remembered
+  : toute position fournit un témoin de mémoire ;
+
+CausalMemory.remembers_iff_position
+  : Memory_T(S, d) équivaut, dans Prop, à l'existence d'une position étiquetée d ;
+
+CausalMemory.sentenceAt_injective
+  : deux positions de même étiquette sont égales ;
+
+CausalMemory.positionEquivalence
+  : les positions sont constructivement équivalentes au temps causal fini
+    intrinsèque de la mémoire.
+```
+
+Le certificat `position_evaluated_T` s'obtient en composant
+`position_remembered` avec `CausalMemory.correctAt_of_remembers`. La partie
+positive de l'interface n'exige donc pas de reconstruire la mémoire
+tarskienne ; il reste seulement à l'empaqueter sous l'interface commune.
+
 ## Système causal de théories
 
 Une histoire est une suite finie, construite positivement, de phrases ajoutées
@@ -454,6 +586,61 @@ Evaluated_P(S, φ)
 :⇔ Theorems_P(S, φ).
 ```
 
+Le code arithmétique possède déjà une occurrence positive indexée par la
+phrase :
+
+```text
+TheoryHistory.Contains : Sentence → TheoryHistory → Type.
+```
+
+`newest` désigne la dernière phrase ajoutée et `earlier` transporte une
+occurrence antérieure. La mémoire propositionnelle actuelle est exactement
+l'oubli de ce témoin :
+
+```text
+EventMemory_P(S, d)
+:= Nonempty(S.history.Contains(d)).
+```
+
+La position non indexée à ajouter à l'interface commune peut donc être définie
+sans choix :
+
+```text
+Position_P(S)
+:= Σ d : Sentence, S.history.Contains(d)
+
+label_P(p)
+:= p.1.
+```
+
+L'extension possède une équivalence constructive explicite :
+
+```text
+Position_P(advance_P(S))
+≃ Option(Position_P(S))
+
+⟨gap_P(S), newest⟩  ↦ none
+⟨d, earlier(old)⟩   ↦ some(⟨d, old⟩).
+```
+
+L'inverse envoie `none` sur la nouvelle occurrence et `some(p)` sur
+`earlier(p)`. Les deux identités se prouvent par analyse des constructeurs de
+`Contains`; aucune recherche et aucune élimination de `Nonempty` vers `Type`
+ne sont nécessaires.
+
+`position_evaluated_P` s'obtient en enveloppant l'occurrence dans `Nonempty`,
+puis en appliquant `historyMember_provable`. L'équivalence entre
+`EventMemory_P(S, d)` et l'existence, dans `Prop`, d'une position portant `d`
+est également constructive.
+
+Une précision est nécessaire : `TheoryHistory` autorise syntaxiquement deux
+ajouts égaux, donc `label_P` n'est pas injective sur un état certifié arbitraire.
+Le morphisme des occurrences n'a pas besoin de cette injectivité. Sur l'orbite
+engendrée depuis `initialPAState`, `provabilityGap_not_mem` permet en revanche
+de prouver par induction que chaque nouvelle étiquette est fraîche ; cette
+propriété sera requise seulement si l'on veut ensuite oublier les occurrences
+et obtenir une fonction sur les phrases historiques elles-mêmes.
+
 La mémoire événementielle satisfait une extension exacte :
 
 ```text
@@ -472,25 +659,34 @@ Theorems_P(S, φ)
 → Theorems_P(advance_P(S), φ).
 ```
 
-Le statut prévu des lois est :
+Les déclarations destinées à porter ces lois sont présentes dans
+`ProvabilityProgression.lean` :
 
 ```text
 frontier_open_P
-  dérive de l'indépendance de Rosser pour l'histoire courante ;
+  = provabilityGap_not_provable,
+    dérivé de l'indépendance de Rosser pour l'histoire courante ;
 
 frontier_closed_P
-  dérive du constructeur de dérivation qui utilise le nouvel axiome ;
+  = provabilityGap_provable_after_advance,
+    construit par la règle du nouvel axiome ;
 
 memory_exact_P
-  dérive de l'extension exacte de TheoryHistory ;
+  = provabilityAdvance_memory_iff,
+    dérivé par analyse de newest et earlier ;
 
 memory_sound_P
-  dérive de la transformation qui convertit une occurrence dans l'histoire
-  en dérivation par la règle d'axiome ;
+  = historyMember_provable,
+    qui convertit une occurrence en dérivation par la règle d'axiome ;
 
 evaluation_preserved_P
-  dérive d'une transformation explicite des anciennes dérivations.
+  = provabilityTheorems_preserved,
+    transformation explicite des anciennes dérivations.
 ```
+
+Cette correspondance a été vérifiée dans le texte source, mais elle ne doit pas
+encore être qualifiée de théorème fermé du dépôt courant : la chaîne d'imports
+arithmétique ne compile pas intégralement à l'état vérifié plus bas.
 
 La preuve de `frontier_closed_P` est directe une fois la phrase ajoutée : tout
 axiome de l'histoire courante possède immédiatement une dérivation. Cela ne
@@ -662,9 +858,21 @@ Comme `State_T` contient une mémoire inductive depuis sa racine, `φ` peut êtr
 défini par récursion sur cette mémoire :
 
 ```text
-la racine tarskienne est envoyée sur initialPAState ;
-chaque extension tarskienne provoque une extension du système P.
+φMemory(CausalMemory.root)
+:= initialPAState
+
+φMemory(CausalMemory.extend(previous, event))
+:= advance_P(φMemory(previous))
+
+φ(S)
+:= φMemory(S.memory).
 ```
+
+Le contenu syntaxique de `event` n'est pas envoyé sur une phrase identique :
+il détermine la position causale du pas. Le gap de Rosser correspondant est
+reconstruit localement depuis l'état P obtenu au pas précédent. Par réduction
+sur le constructeur `extend`, cette définition vise une commutation
+définitionnelle avec `advance`, plutôt qu'un pont ajouté après la récursion.
 
 Cette récursion fournit la composante d'état, mais ne suffit pas à elle seule au
 morphisme recherché. Il faut aussi transporter les événements qui constituent
@@ -674,27 +882,70 @@ le gap qui a causé le pas tarskien et le gap qui a causé le pas de théorie.
 La construction complète utilise le chemin causal lui-même. Elle n'introduit
 ni rang numérique, ni compteur temporel, ni recherche d'un indice extérieur.
 
-La correspondance minimale entre gaps est d'abord une relation portée par les
-états appariés :
+La seconde composante primaire transporte les occurrences positives :
 
 ```text
-CurrentGapCorrespondence(S)
-: gap_T(S) correspond à gap_P(φ(S)).
+positionMap_S :
+  ConstructiveEquivalence(
+    Position_T(S),
+    Position_P(φ(S))).
 ```
 
-Cette correspondance doit se prolonger à tout le domaine causal certifié :
+Elle est construite par la même récursion que `φ`. À la racine, elle relie les
+deux types vides. À chaque extension, elle applique le foncteur `Option` à
+l'équivalence déjà obtenue. Elle doit donc satisfaire les égalités de
+cohérence suivantes :
 
 ```text
-Memory_T(S, d_T)
-→ il existe d_P tel que
-    d_T correspond à d_P
-    et EventMemory_P(φ(S), d_P)
+positionMap_root(p)
+:= élimination du type vide
 
-EventMemory_P(φ(S), d_P)
-→ il existe d_T tel que
-    d_T correspond à d_P
-    et Memory_T(S, d_T).
+positionMap_extend(none)
+:= new_P
+
+positionMap_extend(some(p))
+:= old_P(positionMap_previous(p))
+
+positionMap_advance(new_T(S))
+= new_P(φ(S))
+
+positionMap_advance(old_T(p))
+= old_P(positionMap_S(p)).
 ```
+
+Ici `new` est l'inverse de la branche `none` de `advancePositions` et `old`
+celui de la branche `some`. Ces égalités empêchent une simple bijection
+arbitraire entre deux mémoires de même taille : elles préservent l'origine
+causale de chaque occurrence et sa conservation à travers les pas.
+
+La correspondance des frontières devient alors une conséquence du transport
+de la nouvelle position. Les deux gaps courants sont les étiquettes des
+positions qui apparaissent dans les états successeurs :
+
+```text
+gap_T(S)
+= label_T(new_T(S))
+
+gap_P(φ(S))
+= label_P(new_P(φ(S))).
+```
+
+Comme `φ` commute avec `advance` et que `positionMap_advance` envoie la nouvelle
+position sur la nouvelle position, le morphisme apparie les deux événements
+frontière sans identifier leurs phrases.
+
+Pour toute position historique `p`, la paire de phrases transportée est :
+
+```text
+d_T := label_T(p)
+
+d_P := label_P(positionMap_S(p)).
+```
+
+Elle fournit immédiatement les deux faits de mémoire correspondants. Le
+transport inverse utilise `positionMap_S⁻¹`. On obtient donc le transport
+bidirectionnel des domaines causaux certifiés sans choisir une position à
+partir d'une preuve de `Memory_T` ou de `EventMemory_P`.
 
 Les théorèmes locaux d'évaluation s'appliquent ensuite séparément :
 
@@ -711,11 +962,11 @@ montre que la même architecture syntaxique de frontière et d'extension reçoit
 deux réalisations sémantiques locales différentes :
 
 ```text
-gap_T(S)  → advance_T(S)  → Memory_T        → Evaluated_T
-   ↓              ↓              ↓
-correspondance    φ       domaine transporté
-   ↓              ↓              ↓
-gap_P(φ(S)) → advance_P(φ(S)) → EventMemory_P → Evaluated_P
+gap_T(S)  → advance_T(S)  → new_T / Position_T → Evaluated_T
+   ↓              ↓                ↓
+événement apparié φ             positionMap
+   ↓              ↓                ↓
+gap_P(φ(S)) → advance_P(φ(S)) → new_P / Position_P → Evaluated_P
 ```
 
 Les flèches horizontales décrivent la médiation du gap vers l'évaluation
@@ -735,8 +986,9 @@ apparition d'une nouvelle frontière fraîche.
 
 Cette préservation distingue le morphisme d'une simple synchronisation des
 nombres de pas. Deux histoires de même longueur ne suffisent pas : leurs
-événements doivent être appariés et chaque mémoire transportée doit continuer
-à fournir ses certificats locaux d'évaluation.
+occurrences doivent être appariées par une équivalence compatible avec `none`
+et `some`, et chaque position transportée doit continuer à fournir son
+certificat local d'évaluation.
 
 Le morphisme conserve aussi le statut des lois :
 
@@ -755,6 +1007,30 @@ alors localement l'ancien gap.
 
 ### Transformation syntaxique globale secondaire
 
+Le morphisme positif fournit déjà une transformation syntaxique dépendante de
+l'état et de l'occurrence :
+
+```text
+χ_S(p : Position_T(S))
+:= label_P(positionMap_S(p)).
+```
+
+Cette définition est constructive parce que `p` est une donnée de `Type`. Elle
+apparie exactement les événements historiques. Pour la frontière courante, la
+même construction est appliquée aux nouvelles positions dans les états
+successeurs :
+
+```text
+χ_frontier,S(gap_T(S))
+:= label_P(new_P(φ(S)))
+ = gap_P(φ(S)).
+```
+
+Cette écriture ne prétend pas définir `χ_frontier,S` sur toutes les phrases :
+son domaine est l'événement courant individué. Elle suffit au morphisme causal
+parce que celui-ci transporte des occurrences et leurs étiquettes, pas une
+fonction arbitraire sur toute la syntaxe.
+
 Une fonction syntaxique globale
 
 ```text
@@ -770,8 +1046,17 @@ gap_P(φ(S)) = χ(gap_T(S)).
 
 Cette fonction renforcerait la correspondance relationnelle des gaps, mais
 elle n'est pas le cœur du morphisme. Le résultat central existe dès que les
-frontières, les événements, les mémoires et leur rôle dans l'extension locale
-de l'évaluation sont transportés sans identification sémantique.
+frontières, les positions, leurs étiquettes et leur rôle dans l'extension
+locale de l'évaluation sont transportés sans identification sémantique.
+
+Pour faire descendre `χ_S` des occurrences vers les phrases historiques, il
+faut en plus une fidélité des étiquettes. Elle existe déjà dans T par
+`sentenceAt_injective`. Dans P, elle doit être prouvée sur l'orbite engendrée à
+partir de la fraîcheur de chaque gap de Rosser. Même après cette descente, la
+transformation reste naturellement dépendante de l'état. Une fonction globale
+sur toutes les `Sentence` demanderait encore une loi de cohérence entre les
+états et une définition explicite hors du domaine historique ; ces données ne
+sont pas nécessaires au résultat causal.
 
 Le cas `χ = id` est un théorème éventuel, pas une donnée initiale. Il exigerait
 de montrer que le patch d'un candidat tarskien et la reconstruction du prédicat
@@ -809,23 +1094,72 @@ reste valide dans sa propre réalisation. Il ne transforme jamais une preuve de
 `Evaluated_T` en preuve de `Evaluated_P`, ni réciproquement. La sémantique
 tarskienne et la prouvabilité restent des certificats locaux aux deux systèmes.
 
-## Ordre de construction
+## État vérifié et ordre de construction restant
 
-Le morphisme vient après la fermeture du système de prouvabilité :
+La chaîne arithmétique qui était auparavant décrite comme préalable est
+maintenant présente dans les fichiers sources :
 
 ```text
-P3  vérificateur numérique primitif récursif ;
-P4  formule uniforme Prov_h et spécification ;
-P5  représentabilité interne ;
+P3  PRFunction.proofCheck ;
+P4  proofFormula, provabilityPredicate, Prov_PA et leurs spécifications ;
+P5  représentabilité et réfutation internes des fonctions primitives récursives ;
 P6  diagonalisation interne ;
-P7  cohérence fermée de PA ;
-P8  indépendance de Rosser et conservation de la cohérence ;
-P9  progression certifiée, Evaluated_P et mémoire exacte ;
-P10 instances fermées de GapMediatedEvaluation et du système causal additif ;
-puis morphisme des frontières et des domaines causaux certifiés ;
-puis, si elle existe, transformation syntaxique globale χ.
+P7  paConsistent ;
+P8  indépendance de Rosser et extendWithRosser_consistent ;
+P9  CertifiedTheoryState, advance, Theorems et mémoire événementielle exacte ;
+P10 paProvabilityAccumulatingSystem et les déclarations de son orbite causale.
 ```
 
-Avant ces constructions, `Evaluated_P`, `φ`, `CurrentGapCorrespondence`, le
-transport des domaines et `χ` restent des cibles formelles précisément
-spécifiées, et non des propriétés acquises.
+La vérification distingue cependant deux statuts.
+
+Les modules `Meta.Tarski.CausalClock` et
+`Meta.Tarski.BareArithmetic.TheoryHistoryCoding` compilent et leurs audits ne
+déclarent aucun axiome. Le premier contient déjà les positions positives
+exactes de T. Le second confirme constructivement le support requis pour P :
+`TheoryHistory`, `TheoryHistory.Contains` et l'extension positive des axiomes.
+
+Le fichier `Meta.Tarski.BareArithmetic.ProvabilityProgression` contient bien
+les cinq déclarations locales nécessaires côté P :
+`historyMember_provable`, `provabilityGap_not_provable`,
+`provabilityGap_provable_after_advance`, `provabilityTheorems_preserved` et
+`provabilityAdvance_memory_iff`. Mais la commande de compilation de la chaîne
+complète échoue actuellement dans des dépendances antérieures, notamment
+`InternalTermNormalization.lean`, avec des erreurs de typage et de syntaxe. La
+récupération sur ces erreurs fait apparaître `sorryAx` dans l'audit de ce
+module. Tant que ces erreurs ne sont pas résolues, P3–P10 doivent être décrits
+comme présents dans le source et architecturalement assemblés, non comme une
+fermeture Lean constructive vérifiée.
+
+Le travail restant pour le morphisme est désormais circonscrit :
+
+```text
+M1  définir l'interface PositiveGapMediatedEvaluation et sa projection
+    vers GapMediatedEvaluation puis vers (A)(I)(C) ;
+
+M2  empaqueter les positions tarskiennes déjà existantes ;
+
+M3  définir Position_P := Σ d, TheoryHistory.Contains d,
+    son étiquette et son équivalence d'extension par Option ;
+
+M4  empaqueter la progression de Rosser dans l'interface positive ;
+
+M5  définir φ par récursion sur CausalMemory et prouver
+    φ(advance_T(S)) = advance_P(φ(S)) ;
+
+M6  définir positionMap par la même récursion et prouver sa compatibilité
+    avec les constructeurs new et old ;
+
+M7  en déduire le transport des frontières, des mémoires propositionnelles
+    et des certificats locaux d'évaluation ;
+
+M8  optionnellement, prouver l'injectivité de label_P sur l'orbite engendrée
+    et étudier la descente vers une transformation syntaxique globale χ.
+```
+
+Ainsi, `Evaluated_P` et le système causal P ont désormais des définitions
+sources précises, mais leur fermeture constructive doit d'abord être rétablie
+par une compilation complète sans `sorryAx`. Après cette fermeture, ce qui
+restera à introduire comme déclarations Lean sera l'interface positive commune,
+le paquet de positions P, `φ`, `positionMap` et leurs lois de cohérence. Cette
+seconde difficulté est une construction intrinsèque par récursion sur les
+histoires, sans rang numérique, sans choix et sans pont terminal externe.
