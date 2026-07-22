@@ -4,12 +4,14 @@
 
 L'écart n'est ni une distance numérique ni une comparaison de deux valeurs de
 vérité. Il est une phrase arithmétique distinguée, construite syntaxiquement à
-partir de l'état courant.
+partir de l'état courant. Cette phrase fournit la prise syntaxique par laquelle
+l'évaluation locale peut être étendue sans être confondue avec la syntaxe.
 
 À chaque état, la fonction `gap` désigne un gap courant. Cette individuation ne
 signifie pas que le système ne possède aucun autre désaccord ou aucune autre
 phrase indépendante. Elle signifie qu'un événement syntaxique canonique est
-choisi pour causer le pas suivant.
+choisi pour marquer la frontière actuelle de l'évaluation, causer le pas
+suivant, puis entrer dans le domaine causal déjà évalué.
 
 La propriété d'extension exacte porte sur la mémoire événementielle : un pas
 inscrit exactement le gap courant et conserve tous les événements antérieurs.
@@ -29,7 +31,8 @@ Cette loi est plus précise que les trois lois minimales du système causal :
 
 Les lois `(A)(I)(C)` suffisent à la fraîcheur, à la non-récurrence causale et à
 la fidélité additive. La loi d'extension exacte exprime en plus qu'un seul
-nouvel événement est ajouté par pas.
+nouvel événement est ajouté par pas. Des lois locales supplémentaires relient
+ensuite cette mémoire syntaxique à l'évaluation propre à chaque système.
 
 ## Deux couches distinctes
 
@@ -91,6 +94,194 @@ models(provabilityPredicate(h) appliqué au code de s)
 Ce théorème appartient au système de prouvabilité. Il ne compare pas la vérité
 du gap tarskien à la démontrabilité d'un gap du système de théories.
 
+## Factorisation de l'évaluation par le gap
+
+La séparation entre syntaxe et sémantique n'isole pas la syntaxe de toute
+évaluation. Elle impose que le passage de l'une à l'autre soit explicite et
+local à chaque système.
+
+Les deux réalisations possèdent ainsi des relations d'évaluation distinctes :
+
+```text
+Evaluated_T(S, d)
+:⇔ le candidat courant de S est correct à la phrase d
+
+Evaluated_P(S, d)
+:⇔ la théorie portée par S démontre la phrase d.
+```
+
+Dans le système T, `Evaluated_T` est défini à partir de `CorrectAt`, donc de
+`truthAt` et de `models`. Dans le système P, `Evaluated_P` est défini par
+`TheoryProvable`. Aucune équivalence n'est demandée entre ces deux relations.
+
+La mémoire fournit, dans chaque système, un domaine causal certifié
+d'évaluation :
+
+```text
+Memory_T(S, d)
+→ Evaluated_T(S, d)
+
+EventMemory_P(S, d)
+→ Evaluated_P(S, d).
+```
+
+La réciproque n'est pas exigée. Un candidat peut être correct sur une phrase
+qui n'est pas mémorisée, et une théorie démontre en général beaucoup plus de
+phrases que les seuls événements inscrits dans son histoire. La mémoire ne
+représente donc pas toute l'extension de l'évaluateur ; elle représente le
+sous-domaine construit causalement et conservé positivement.
+
+Le gap courant est la frontière syntaxique de ce domaine :
+
+```text
+¬Evaluated_T(S, gap_T(S))
+
+¬Evaluated_P(S, gap_P(S)).
+```
+
+Le pas causé par ce gap construit l'évaluateur suivant en incorporant le gap,
+puis certifie que cette incorporation étend effectivement l'évaluation locale :
+
+```text
+Evaluated_T(advance_T(S), gap_T(S))
+
+Evaluated_P(advance_P(S), gap_P(S)).
+```
+
+Cette fermeture n'est pas une découverte indépendante effectuée par
+l'évaluateur après le pas. Elle est visée par la définition même de `advance` :
+le gap devient constitutif de l'état qui définit l'évaluateur suivant. La loi
+`frontier_closed` certifie que la construction syntaxique produit bien l'effet
+d'évaluation annoncé. Elle ne décide pas la vérité du gap et ne transporte
+aucune valeur sémantique entre les systèmes.
+
+Les évaluations déjà acquises sont conservées :
+
+```text
+Evaluated_T(S, d)
+→ Evaluated_T(advance_T(S), d)
+
+Evaluated_P(S, d)
+→ Evaluated_P(advance_P(S), d).
+```
+
+Dans T, la première conservation dérive du mismatch au gap courant et de la
+préservation du patch hors de cet indice. Dans P, la seconde dérive du
+transport des dérivations vers l'extension de théorie.
+
+L'interface commune à formaliser peut être présentée ainsi :
+
+```text
+GapMediatedEvaluation(State, Gap) :
+  gap       : State → Gap
+  Memory    : State → Gap → Prop
+  Evaluated : State → Gap → Prop
+  advance   : State → State
+
+  memory_sound :
+    Memory(S, d) → Evaluated(S, d)
+
+  frontier_open :
+    ¬Evaluated(S, gap(S))
+
+  frontier_closed :
+    Evaluated(advance(S), gap(S))
+
+  evaluation_preserved :
+    Evaluated(S, d) → Evaluated(advance(S), d)
+
+  memory_exact :
+    Memory(advance(S), d)
+    ↔ d = gap(S) ∨ Memory(S, d).
+```
+
+Le système T et le système P doivent fournir deux instances fermées de cette
+interface. Ils partagent sa forme causale, mais chacun construit
+`memory_sound`, `frontier_open`, `frontier_closed` et
+`evaluation_preserved` avec son propre évaluateur.
+
+### Statut des lois de l'interface
+
+Les cinq lois ne sont pas indépendantes au même sens et ne portent pas le même
+contenu démonstratif.
+
+Les lois constitutives expriment ce que la construction de `advance` est
+destinée à produire :
+
+```text
+frontier_closed
+memory_exact.
+```
+
+Elles doivent néanmoins être prouvées. La définition de l'état suivant ne
+suffit pas à elle seule : il faut montrer que l'incorporation syntaxique du gap
+est correctement reconnue par l'évaluateur local et que la représentation de
+la mémoire possède exactement la forme annoncée.
+
+La loi d'obstruction porte le contenu négatif qui rend le pas nécessaire :
+
+```text
+frontier_open.
+```
+
+Elle ne provient pas de l'ajout du gap. Dans T, elle dérive du mismatch
+diagonal. Dans P, elle doit dériver de l'indépendance de Rosser et de la
+cohérence de l'état courant.
+
+Les lois de cohérence relient l'histoire causale à l'évaluateur local et
+garantissent que l'avance ne détruit pas ce qui était déjà acquis :
+
+```text
+memory_sound
+evaluation_preserved.
+```
+
+La force du système ne réside donc pas dans `frontier_closed` prise isolément,
+mais dans la conjonction suivante :
+
+```text
+frontière réellement ouverte avant le pas
++ fermeture construite et certifiée par advance
++ mémoire exacte de l'événement
++ préservation des évaluations antérieures
++ nouvelle frontière fraîche après le pas.
+```
+
+Toute instance de `GapMediatedEvaluation` fournit ensuite les trois lois du
+Core causal en oubliant le contenu particulier de `Evaluated` :
+
+```text
+gap_absent
+  dérive de memory_sound et frontier_open ;
+
+gap_inscribed
+  dérive de memory_exact avec d = gap(S) ;
+
+memory_preserved
+  dérive de memory_exact par conservation de l'ancienne branche.
+```
+
+Le Core causal reçoit ainsi une structure commune parce que le gap a déjà
+médiatisé, dans chaque réalisation, le passage de la syntaxe vers son
+évaluation locale. L'oubli vers `(A)(I)(C)` supprime la nature de l'évaluateur,
+mais conserve les conséquences causales de cette médiation.
+
+Le rôle du gap peut alors être résumé sans mélange des couches :
+
+```text
+syntaxe de l'état
+→ construction du gap
+→ frontière actuelle de l'évaluation locale
+→ advance causé par le gap
+→ évaluation locale de l'ancien gap
+→ inscription dans le domaine causal certifié
+→ production d'une nouvelle frontière.
+```
+
+Le gap n'est pas lui-même un évaluateur et ne porte pas une valeur sémantique
+universelle. Il est l'objet syntaxique qui rend possible l'extension contrôlée
+de chaque évaluateur local.
+
 ## Prédicats de prouvabilité et phrases diagonales
 
 Une fois le vérificateur numérique construit et représenté dans
@@ -144,6 +335,9 @@ State_T := CausalState
 
 current_T : State_T → Predicate
 Memory_T  : State_T → Sentence → Prop
+
+Evaluated_T(S, d)
+:⇔ CorrectAt(current_T(S), d).
 ```
 
 Le gap et l'avance sont :
@@ -168,6 +362,45 @@ le comportement précédent est préservé hors de cet indice ;
 l'ancien gap est mémorisé ;
 le nouveau gap est absent de la nouvelle mémoire.
 ```
+
+Le statut des lois est précis :
+
+```text
+frontier_open_T
+  dérive du fixed point diagonal et du mismatch local ;
+
+frontier_closed_T
+  dérive de patch_agrees_at ;
+
+memory_exact_T
+  dérive de la forme inductive de l'extension de mémoire ;
+
+memory_sound_T
+  dérive par induction sur la mémoire de la réparation de chaque ancien gap
+  et de sa préservation par les patches suivants ;
+
+evaluation_preserved_T
+  dérive du mismatch au gap courant et de
+  patch_preserves_off_index.
+```
+
+`frontier_closed_T` est proche du design du patch, mais n'est pas une simple
+égalité définitionnelle. Le patch contient syntaxiquement la phrase `d` dans
+la branche sélectionnée au code de `d`. Il faut encore prouver, dans la
+sémantique des formules, que cette branche est effectivement sélectionnée et
+que son interprétation coïncide avec `models(d)`. Cette preuve certifie
+l'incorporation du gap ; elle ne calcule pas si `d` est vraie ou fausse.
+
+La mémoire tarskienne est sémantiquement certifiée, mais demeure une donnée
+syntaxique et causale :
+
+```text
+Memory_T(S, d)
+→ Evaluated_T(S, d).
+```
+
+Cette implication est prouvée localement dans T. Elle n'introduit aucune
+relation avec la prouvabilité du système P.
 
 Un simple `Predicate` ne suffit pas comme état causal : deux états ayant le
 même comportement visible peuvent conserver des histoires différentes. La
@@ -216,6 +449,9 @@ EventMemory_P(S, d)
 
 Theorems_P(S, φ)
 :⇔ TheoryProvable(S.history, φ).
+
+Evaluated_P(S, φ)
+:⇔ Theorems_P(S, φ).
 ```
 
 La mémoire événementielle satisfait une extension exacte :
@@ -236,6 +472,53 @@ Theorems_P(S, φ)
 → Theorems_P(advance_P(S), φ).
 ```
 
+Le statut prévu des lois est :
+
+```text
+frontier_open_P
+  dérive de l'indépendance de Rosser pour l'histoire courante ;
+
+frontier_closed_P
+  dérive du constructeur de dérivation qui utilise le nouvel axiome ;
+
+memory_exact_P
+  dérive de l'extension exacte de TheoryHistory ;
+
+memory_sound_P
+  dérive de la transformation qui convertit une occurrence dans l'histoire
+  en dérivation par la règle d'axiome ;
+
+evaluation_preserved_P
+  dérive d'une transformation explicite des anciennes dérivations.
+```
+
+La preuve de `frontier_closed_P` est directe une fois la phrase ajoutée : tout
+axiome de l'histoire courante possède immédiatement une dérivation. Cela ne
+rend pas `advance_P` trivial. Pour que son résultat soit encore un
+`CertifiedTheoryState`, il faut construire la cohérence de la théorie étendue.
+Cette construction consomme la seconde non-prouvabilité de Rosser et le
+théorème de déduction pour les extensions finies.
+
+Il faut donc distinguer :
+
+```text
+incorporer le gap comme nouvel axiome
+→ fermeture locale immédiate du gap ;
+
+certifier l'état suivant
+→ preuve substantielle que cette incorporation préserve la cohérence.
+```
+
+L'histoire fournit donc elle aussi un domaine causal certifié :
+
+```text
+EventMemory_P(S, d)
+→ Evaluated_P(S, d).
+```
+
+Cette implication est réalisée par une transformation explicite qui convertit
+une occurrence dans l'histoire en dérivation par la règle d'axiome.
+
 Il ne faut pas demander que l'ensemble des théorèmes gagne exactement une
 phrase : l'ajout d'un axiome ajoute aussi toutes ses conséquences.
 
@@ -247,6 +530,13 @@ Chaque pas traite effectivement son gap courant :
 dans le système T, l'ancien indice est réparé ;
 dans le système P, l'ancienne phrase devient un axiome et donc un théorème.
 ```
+
+Dans les deux cas, la clôture locale est construite. `advance` ne consulte pas
+un évaluateur indépendant qui découvrirait après coup que le gap est résolu. Il
+incorpore le gap à la structure qui définit l'évaluateur suivant, puis fournit
+le certificat local correspondant. Le gap est ainsi la cause structurelle de
+sa propre clôture dans l'état successeur, sans s'évaluer lui-même dans l'état
+source.
 
 Ce qui demeure ouvert n'est pas l'ancien gap, mais la progression entière. Le
 successeur possède un nouveau gap, distinct de tous les événements déjà
@@ -285,6 +575,7 @@ individué qui :
 cause le pas suivant ;
 est inscrit dans la mémoire ;
 reste identifiable dans toute l'histoire future ;
+étend le domaine causal certifié d'évaluation ;
 sépare causalement l'état source de ses successeurs ;
 fait apparaître un nouveau gap après son traitement.
 ```
@@ -296,7 +587,8 @@ morphisme.
 
 Le changement de référentiel ne transforme donc pas une phrase fausse en une
 phrase vraie et ne compare pas vérité et prouvabilité. Il transforme la lecture
-du même phénomène : d'une obstruction constatée à un événement conservé qui
+du même phénomène : d'une obstruction constatée à une frontière syntaxique qui
+permet d'étendre l'évaluation locale, reste conservée comme événement et
 engendre une progression.
 
 ## Incomplétude globale constante et totalisation locale non constante
@@ -329,6 +621,7 @@ une théorie complète, ni un point fixe terminal. Après chaque traitement :
 
 ```text
 l'ancien gap appartient à la mémoire ;
+l'ancien gap appartient au domaine causal certifié d'évaluation ;
 l'état courant a changé ;
 un nouveau gap frais est produit ;
 la progression reste ouverte.
@@ -341,8 +634,8 @@ incomplétude globale constante
 = présence, à chaque état, d'une obstruction de même forme ;
 
 totalisation locale non constante
-= inscription effective de l'obstruction courante par une transformation
-  qui engendre un nouvel état et une nouvelle obstruction.
+= évaluation et inscription effectives de l'obstruction courante par une
+  transformation qui engendre un nouvel état et une nouvelle obstruction.
 ```
 
 Il n'y a donc aucune totalisation globale d'un manque unique. Il existe une
@@ -351,8 +644,12 @@ chacune suivie d'un gap nouveau.
 
 ## Morphisme causal visé
 
-Le premier morphisme à construire porte sur les états causaux complets et sur
-leurs histoires, sans comparer `models` et `TheoryProvable` :
+Le morphisme central porte sur les états causaux complets, leurs frontières
+syntaxiques et leurs domaines causaux certifiés d'évaluation. Il ne compare ni
+les valeurs produites par `models` et `TheoryProvable`, ni les relations
+`Evaluated_T` et `Evaluated_P`.
+
+La première composante transporte les états et commute avec l'avance :
 
 ```text
 φ : State_T → CertifiedTheoryState
@@ -369,8 +666,13 @@ la racine tarskienne est envoyée sur initialPAState ;
 chaque extension tarskienne provoque une extension du système P.
 ```
 
-Cette construction utilise le chemin causal lui-même. Elle n'introduit ni rang
-numérique, ni compteur temporel, ni recherche d'un indice extérieur.
+Cette récursion fournit la composante d'état, mais ne suffit pas à elle seule au
+morphisme recherché. Il faut aussi transporter les événements qui constituent
+les domaines certifiés. Chaque extension doit conserver la correspondance entre
+le gap qui a causé le pas tarskien et le gap qui a causé le pas de théorie.
+
+La construction complète utilise le chemin causal lui-même. Elle n'introduit
+ni rang numérique, ni compteur temporel, ni recherche d'un indice extérieur.
 
 La correspondance minimale entre gaps est d'abord une relation portée par les
 états appariés :
@@ -380,9 +682,78 @@ CurrentGapCorrespondence(S)
 : gap_T(S) correspond à gap_P(φ(S)).
 ```
 
-Elle doit se prolonger aux mémoires : chaque événement tarskien mémorisé doit
-être accompagné de l'événement du système P produit au même pas causal, et
-réciproquement.
+Cette correspondance doit se prolonger à tout le domaine causal certifié :
+
+```text
+Memory_T(S, d_T)
+→ il existe d_P tel que
+    d_T correspond à d_P
+    et EventMemory_P(φ(S), d_P)
+
+EventMemory_P(φ(S), d_P)
+→ il existe d_T tel que
+    d_T correspond à d_P
+    et Memory_T(S, d_T).
+```
+
+Les théorèmes locaux d'évaluation s'appliquent ensuite séparément :
+
+```text
+Memory_T(S, d_T)
+→ Evaluated_T(S, d_T)
+
+EventMemory_P(φ(S), d_P)
+→ Evaluated_P(φ(S), d_P).
+```
+
+Il n'existe aucune flèche entre les deux conclusions `Evaluated`. Le morphisme
+montre que la même architecture syntaxique de frontière et d'extension reçoit
+deux réalisations sémantiques locales différentes :
+
+```text
+gap_T(S)  → advance_T(S)  → Memory_T        → Evaluated_T
+   ↓              ↓              ↓
+correspondance    φ       domaine transporté
+   ↓              ↓              ↓
+gap_P(φ(S)) → advance_P(φ(S)) → EventMemory_P → Evaluated_P
+```
+
+Les flèches horizontales décrivent la médiation du gap vers l'évaluation
+locale. Les flèches verticales transportent seulement la structure syntaxique
+et causale. Aucune flèche verticale ne compare les sémantiques terminales.
+
+Le morphisme doit donc préserver le cycle complet :
+
+```text
+frontière courante non évaluée localement ;
+gap syntaxique causant l'avance ;
+évaluation locale de l'ancien gap après l'avance ;
+inscription exacte dans la mémoire ;
+conservation du domaine déjà certifié ;
+apparition d'une nouvelle frontière fraîche.
+```
+
+Cette préservation distingue le morphisme d'une simple synchronisation des
+nombres de pas. Deux histoires de même longueur ne suffisent pas : leurs
+événements doivent être appariés et chaque mémoire transportée doit continuer
+à fournir ses certificats locaux d'évaluation.
+
+Le morphisme conserve aussi le statut des lois :
+
+```text
+les deux frontier_open restent des obstructions prouvées localement ;
+les deux frontier_closed restent des fermetures construites par advance ;
+les deux memory_exact décrivent l'incorporation exacte d'un événement ;
+les deux memory_sound relient séparément la mémoire à l'évaluation locale ;
+les deux evaluation_preserved conservent les acquis de chaque évaluateur.
+```
+
+Il ne transforme pas une fermeture construite en découverte sémantique. Il
+montre que deux mécanismes d'incorporation différents réalisent la même forme
+de médiation : le gap syntaxique reconfigure l'évaluateur suivant, qui certifie
+alors localement l'ancien gap.
+
+### Transformation syntaxique globale secondaire
 
 Une fonction syntaxique globale
 
@@ -396,6 +767,11 @@ construction d'une transformation explicite satisfaisant :
 ```text
 gap_P(φ(S)) = χ(gap_T(S)).
 ```
+
+Cette fonction renforcerait la correspondance relationnelle des gaps, mais
+elle n'est pas le cœur du morphisme. Le résultat central existe dès que les
+frontières, les événements, les mémoires et leur rôle dans l'extension locale
+de l'évaluation sont transportés sans identification sémantique.
 
 Le cas `χ = id` est un théorème éventuel, pas une donnée initiale. Il exigerait
 de montrer que le patch d'un candidat tarskien et la reconstruction du prédicat
@@ -414,19 +790,24 @@ models(gap_T(S))
 ↔ TheoryProvable(φ(S).history, gap_P(φ(S))).
 ```
 
-Il transporte seulement :
+Il transporte la factorisation causale de l'évaluation :
 
 ```text
 la succession des états ;
-l'individuation du gap courant ;
+l'individuation de la frontière syntaxique courante ;
+l'ouverture locale portée par le gap courant ;
+l'évaluation locale de l'ancien gap après advance ;
 l'inscription exacte des événements ;
-la conservation des mémoires ;
+la conservation des domaines causaux certifiés ;
+les implications locales mémoire → évaluation ;
 les lois causales `(A)(I)(C)` ;
 la structure additive induite par les chemins causaux.
 ```
 
-La sémantique tarskienne et la prouvabilité restent des certificats locaux aux
-deux réalisations.
+Le transport des implications `mémoire → évaluation` signifie que chacune
+reste valide dans sa propre réalisation. Il ne transforme jamais une preuve de
+`Evaluated_T` en preuve de `Evaluated_P`, ni réciproquement. La sémantique
+tarskienne et la prouvabilité restent des certificats locaux aux deux systèmes.
 
 ## Ordre de construction
 
@@ -439,11 +820,12 @@ P5  représentabilité interne ;
 P6  diagonalisation interne ;
 P7  cohérence fermée de PA ;
 P8  indépendance de Rosser et conservation de la cohérence ;
-P9  progression certifiée et mémoires exactes ;
-P10 instance causale additive fermée ;
-puis morphisme des histoires causales ;
+P9  progression certifiée, Evaluated_P et mémoire exacte ;
+P10 instances fermées de GapMediatedEvaluation et du système causal additif ;
+puis morphisme des frontières et des domaines causaux certifiés ;
 puis, si elle existe, transformation syntaxique globale χ.
 ```
 
-Avant ces constructions, `φ`, `CurrentGapCorrespondence` et `χ` restent des
-cibles formelles précisément spécifiées, et non des propriétés acquises.
+Avant ces constructions, `Evaluated_P`, `φ`, `CurrentGapCorrespondence`, le
+transport des domaines et `χ` restent des cibles formelles précisément
+spécifiées, et non des propriétés acquises.
