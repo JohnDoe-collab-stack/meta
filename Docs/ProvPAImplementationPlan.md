@@ -139,6 +139,65 @@ PA ⊢ dτ ↔ ¬τ(⌜dτ⌝).
 Le passage de la première ligne à la seconde est une vraie porte
 d’implémentation. Il ne doit pas être déclaré automatique.
 
+### 2.1 État formel atteint
+
+Le socle suivant est maintenant présent et compilé :
+
+```text
+GeneralInstantiation.lean
+  → instanciation générale d’un terme dans un terme ou une formule ;
+
+PrimitiveRecursiveTermRaising.lean
+  → programme positif de levée des codes de termes ;
+
+GeneralSubstitutionMachine.lean
+PrimitiveRecursiveGeneralSubstitutionMachine.lean
+  → machine de substitution générale et arbre PRFunction certifié ;
+
+PrimitiveRecursiveDivision.lean
+PrimitiveRecursiveBetaLookup.lean
+  → quotient, reste et accès β primitifs récursifs ;
+
+ProofCalculus.lean
+  → calcul objet PA/HA dans Type, avec 23 règles syntaxiques ;
+
+ProofCoding.lean
+ProofDecoding.lean
+  → linéarisation, rebasing, archive β et décodage total ;
+
+ArithmeticAxiomChecking.lean
+ProofLeafChecking.lean
+ProofRuleChecking.lean
+  → reconstruction certifiée des axiomes et des 23 règles PA ;
+
+ProofArchiveChecking.lean
+  → lecture chronologique d’une archive β et retour d’une dérivation PA
+    close de la phrase demandée.
+```
+
+La discipline chronologique est intrinsèque au vérificateur : une règle ne
+reçoit comme prémisses que les dérivations déjà reconstruites dans le préfixe
+accepté. Une référence future ne peut donc fournir aucun objet de preuve.
+
+Les déclarations terminales de ces fichiers compilent avec un audit vide. Le
+code ne contient ni `sorry`, ni `admit`, ni `noncomputable`, ni `Classical`,
+ni `propext`, ni `Quot.sound`, ni déclaration `axiom`.
+
+Cet état ne ferme pas encore P2 ou P3. Il reste exactement à construire :
+
+```text
+P2 : checkArchive_encodeStandardDerivation
+     et l’exactitude complète encode → decode → check ;
+
+P3 : le vérificateur purement numérique,
+     ses reconnaisseurs syntaxiques primitifs récursifs,
+     puis PRFunction.proofCheck.
+```
+
+En conséquence, aucune déclaration nommée `provPA` ou `Prov_PA` n’est encore
+autorisée : la formule ne sera introduite qu’après fermeture du programme PR
+qui doit la représenter.
+
 ## 3. Calcul de preuves objet
 
 ### 3.1 Types de base
