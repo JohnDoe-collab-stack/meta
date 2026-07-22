@@ -112,8 +112,10 @@ Le dépôt fournit déjà les briques suivantes.
 | Traces calculables | `PrimitiveRecursiveTrace.lean` | fermé |
 | Encodage β constructif | `ConstructiveBetaEncoding.lean` | fermé |
 | Compilateur PR vers graphes arithmétiques | `PRFunction.graphFormula` | fermé sémantiquement |
-| Substitution codée par numéral | `machineSubstituteNumeralCode` | fermée seulement pour ce cas |
-| Substitution générale d’un terme codé | aucun programme actuel | ouverte |
+| Substitution codée par numéral | `machineSubstituteNumeralCode` | fermée |
+| Instanciation par un terme codé arbitraire | `machineInstantiateTermCode`, `PRFunction.machineInstantiateTerm` | fermée pour la variable de De Bruijn la plus récente |
+| Levée d’un terme codé | `PRFunction.raiseTermCode` | fermée |
+| Levée numérique des formules et contextes | aucun programme PR actuel | ouverte pour P3 |
 | Diagonalisation tarskienne négative | `Diagonal.lean` | fermée sémantiquement |
 | Mots causaux et addition | `CausalAdditive.lean` | fermé |
 | Totalité historique | `CausalTotality.lean` | fermé |
@@ -145,14 +147,16 @@ Le socle suivant est maintenant présent et compilé :
 
 ```text
 GeneralInstantiation.lean
-  → instanciation générale d’un terme dans un terme ou une formule ;
+  → instanciation sans capture de la variable de De Bruijn la plus récente
+    par un terme arbitraire, dans un terme ou une formule ;
 
 PrimitiveRecursiveTermRaising.lean
   → programme positif de levée des codes de termes ;
 
 GeneralSubstitutionMachine.lean
 PrimitiveRecursiveGeneralSubstitutionMachine.lean
-  → machine de substitution générale et arbre PRFunction certifié ;
+  → machine d’instanciation par un terme codé arbitraire et arbre
+    PRFunction certifié ;
 
 PrimitiveRecursiveDivision.lean
 PrimitiveRecursiveBetaLookup.lean
@@ -172,7 +176,7 @@ ProofRuleChecking.lean
 
 ProofArchiveChecking.lean
   → lecture chronologique d’une archive β et retour d’une dérivation PA
-    close de la phrase demandée.
+    fermée de la phrase demandée.
 ```
 
 La discipline chronologique est intrinsèque au vérificateur : une règle ne
@@ -183,27 +187,49 @@ Les déclarations terminales de ces fichiers compilent avec un audit vide. Le
 code ne contient ni `sorry`, ni `admit`, ni `noncomputable`, ni `Classical`,
 ni `propext`, ni `Quot.sound`, ni déclaration `axiom`.
 
-Cet état ne ferme pas encore P2 ou P3. Il reste exactement à construire :
+Le calcul typé, son codage et le vérificateur proof-producing sont acquis. Cet
+état ne ferme pas encore P2 ou P3. Il reste exactement à construire :
 
 ```text
-P2 : checkArchive_encodeStandardDerivation
-     et l’exactitude complète encode → decode → check ;
+P2 : un invariant chronologique côté encodeur ;
+     sa stabilité sous rebase et appendRebased ;
+     le round-trip β quote → decode ;
+     l’alignement des références avec les sous-dérivations ;
+     checkPAArchive_encodeStandardDerivation ;
 
 P3 : le vérificateur purement numérique,
      ses reconnaisseurs syntaxiques primitifs récursifs,
      puis PRFunction.proofCheck.
 ```
 
+La chronologie intrinsèque du vérificateur signifie qu’une référence future est
+rejetée. Elle ne prouve pas, à elle seule, que l’encodeur produit des références
+correctes ni que l’archive encodée est acceptée. Cette seconde direction est
+précisément l’obligation restante de P2.
+
 En conséquence, aucune déclaration nommée `provPA` ou `Prov_PA` n’est encore
 autorisée : la formule ne sera introduite qu’après fermeture du programme PR
 qui doit la représenter.
+
+État des portes au moment de cette révision :
+
+| Porte | État | Prochaine obligation décisive |
+|---|---|---|
+| P1 | fermée | aucune ; conserver l’audit constructif |
+| P2 | partiellement réalisée | chronologie et complétude de l’encodeur |
+| P3 | ouverte | vérificateur numérique `PRFunction.proofCheck` |
+| P4 | bloquée par P3 | `Proof_h`, `Prov_h`, `provPA_spec` |
+| P5–P6 | ouvertes | représentabilité et diagonalisation internes |
+| P7 | ouverte | cohérence fermée de PA |
+| P8–P9 | ouvertes | Rosser uniforme et progression cohérente |
+| P10 | ouverte | instance causale terminale fermée |
 
 ## 3. Calcul de preuves objet
 
 ### 3.1 Types de base
 
-Ajouter un calcul de déduction naturelle contextuel, formulé comme donnée
-positive dans `Type`.
+Le calcul réalisé est une déduction naturelle contextuelle formulée comme
+donnée positive dans `Type`.
 
 ```text
 ScopedFormula(bound)
@@ -312,23 +338,35 @@ construire la cohérence de PA sans utiliser `Classical` dans Lean.
 
 ### 3.5 Prérequis : substitution générale de termes codés
 
-La substitution syntaxique générale existe déjà sur `RawTerm` et
-`RawFormula`, mais la machine primitive récursive actuelle ne traite que
-l’instanciation par un numéral. Le calcul de preuves quantifié et le schéma
-d’induction exigent donc de construire :
+L’ancien manque « remplacement seulement par un numéral » est fermé. Le dépôt
+possède maintenant :
 
 ```text
-substituteTermCode(formulaCode,variable,termCode) ;
-liftTermCode(termCode,cutoff) ;
-liftFormulaCode(formulaCode,cutoff) ;
-instantiateTermCode(formulaCode,termCode) ;
-universalClosureCode(formulaCode,bound).
+RawTerm.instantiateTerm ;
+RawFormula.instantiateTerm ;
+machineInstantiateTermCode ;
+PRFunction.machineInstantiateTerm ;
+PRFunction.raiseTermCode.
 ```
 
-Chaque fonction doit avoir un programme `PRFunction` et une spécification sur
-les codes fraîchement construits. Le programme doit transporter explicitement
-la profondeur courante sous les quantificateurs, comme la machine de
-substitution par numéral déjà fermée.
+`machineInstantiateTerm` effectue l’instanciation sans capture de la variable la
+plus récente par un terme codé arbitraire. `raiseTermCode` lève les variables
+libres d’un terme d’un montant explicite.
+
+P3 exigera encore les opérations numériques correspondant exactement aux
+transformations de formules et de contextes utilisées par les règles
+`liftVariables` et `freeInstantiation`. Au minimum :
+
+```text
+raiseFormulaCode(formulaCode,amount) ;
+raiseContextCode(contextCode,amount) ;
+instantiateContextTermCode(contextCode,termCode).
+```
+
+Une substitution à une variable arbitraire ou une clôture universelle codée ne
+doit être ajoutée que si une règle du vérificateur numérique ou la
+diagonalisation interne la consomme effectivement. Le plan ne doit ni déclarer
+ouverte une opération déjà fermée, ni imposer une primitive inutilisée.
 
 ### Sorties exigées
 
@@ -342,16 +380,19 @@ paTheory
 haTheory
 PAProvable
 HAProvable
-Derivation.weaken
+Derivation.weakening
 Derivation.substitute
 Derivation.implicationIntroduction
 Derivation.modusPonens
-PRFunction.substituteTermCode
-PRFunction.liftTermCode
-PRFunction.liftFormulaCode
-PRFunction.instantiateTermCode
-PRFunction.universalClosureCode
+PRFunction.raiseTermCode
+PRFunction.machineInstantiateTerm
+PRFunction.raiseFormulaCode
+PRFunction.raiseContextCode
+PRFunction.instantiateContextTermCode
 ```
+
+Dans cette liste, `raiseTermCode` et `machineInstantiateTerm` sont acquis. Les
+trois dernières déclarations appartiennent au lot numérique P3.
 
 ### Porte P1
 
@@ -360,7 +401,8 @@ toutes les règles sont syntaxiques et finitaires ;
 les preuves vivent dans Type ;
 PA et HA partagent les mêmes axiomes arithmétiques ;
 seul le mode logique diffère ;
-la substitution générale de termes codés est primitive récursive ;
+l’instanciation de la variable de De Bruijn la plus récente par un terme codé
+arbitraire est primitive récursive ;
 les quatre règles quantifiées sont vérifiables sur les codes ;
 aucune règle ne consulte RawFormula.Holds ou Sentence.models.
 ```
@@ -369,24 +411,29 @@ aucune règle ne consulte RawFormula.Holds ou Sentence.models.
 
 ### 4.1 Archive β d’une preuve
 
-Une dérivation codée sera une archive finie de lignes :
+Une archive transparente est actuellement une liste finie, éventuellement
+vide, de lignes :
 
 ```text
 ProofArchive :=
-  (nombre strictement positif de lignes,
-   dividende β,
-   coefficient β).
+  (lines : List ProofLine).
 ```
 
-Si le nombre de lignes est `succ(n)`, la conclusion de l’archive est, par
-définition, la ligne située à l’index `n`. Aucun second index de conclusion ne
-doit être stocké.
+Sa quotation numérique contient le nombre de lignes, le dividende β et le
+coefficient β. Toute archive produite par `encodeDerivation` ou
+`encodeStandardDerivation` est non vide. Le vérificateur terminal rejette
+explicitement le code d’une archive vide, puisqu’elle ne possède aucune
+conclusion.
+
+Si le nombre de lignes est `succ(n)`, la conclusion de l’archive est la ligne
+située à l’index `n`. Aucun second index de conclusion n’est stocké.
 
 Chaque valeur β à la position `i` code une ligne :
 
 ```text
 ProofLineCode :=
   (tag de règle,
+   borne de scoping,
    code du contexte,
    code de la conclusion,
    références aux lignes prémisses,
@@ -403,14 +450,13 @@ compilées en fonctions primitives récursives.
 
 ### 4.2 Accès β exécutable
 
-Le dépôt possède la fonction Lean `constructiveRemainder` et la formule
-arithmétique `betaValueFormula`, mais pas encore les arbres `PRFunction`
-nécessaires au vérificateur. Construire explicitement :
+Le dépôt possède maintenant les quatre arbres `PRFunction` nécessaires à
+l’accès β :
 
 ```text
 PRFunction.constructiveQuotient : PRFunction 2
 PRFunction.constructiveRemainder : PRFunction 2
-PRFunction.betaModulus : PRFunction 2
+PRFunction.betaModulus : PRFunction 3
 PRFunction.betaLookup : PRFunction 3
 ```
 
@@ -421,25 +467,32 @@ PRFunction.betaLookup.run(dividend,coefficient,index)
 = betaComponent(dividend,coefficient,index).
 ```
 
-La division doit être une récursion primitive structurelle sur le dividende ;
-elle ne doit pas importer un quotient ou un algorithme non certifié.
+La division est une récursion primitive structurelle sur le dividende ; elle
+n’importe aucun quotient ni algorithme non certifié. `betaModulus` garde
+l’arité trois du calcul uniforme de `betaLookup`.
 
 ### 4.3 Codage des contextes et des théories finies
 
-Les contextes locaux et les extensions finies de PA seront codés séparément :
+Les contextes locaux possèdent déjà `FormulaContext.quote`. Les extensions
+finies de PA doivent être codées séparément :
 
 ```text
-ContextCode := séquence finie de codes de formules ;
 TheoryHistoryCode := séquence finie de codes de phrases ajoutées.
 ```
 
 La présence d’une phrase dans l’extension finie doit être décidée par un
 parcours borné calculable.
 
+La fermeture de P2 porte d’abord sur `encodeStandardDerivation` et le
+vérificateur PA racine déjà présents. La généralisation uniforme à
+`TheoryHistoryCode` intervient ensuite, avant `proofCheck`, car `Proof_h` et
+`Prov_h` doivent fonctionner pour chaque extension finie de la progression et
+pas seulement pour PA à la racine.
+
 ### 4.4 Linéarisation et exactitude du codage
 
 Une valeur inductive `Derivation` est un arbre, tandis qu’une archive β est une
-suite de lignes référant vers le passé. Construire une linéarisation qui :
+suite de lignes référant vers le passé. La linéarisation actuelle :
 
 ```text
 concatène les archives des prémisses ;
@@ -448,53 +501,144 @@ ajoute la ligne de la règle courante ;
 place la conclusion à la dernière position.
 ```
 
-Le rebasing des références doit être une fonction calculable et préserver la
-validité de chaque ligne.
+Le rebasing des références est calculable. Sa préservation de la chronologie et
+de l’alignement avec les sous-dérivations reste à exporter explicitement.
 
-Construire deux directions explicites :
+La direction encodage et la direction de reconstruction sont maintenant
+présentes :
 
 ```text
 encodeDerivation : Derivation(T,Γ,φ) → ProofArchive
 
-decodeCheckedDerivation :
-  ChecksDerivation(Tcode,Γcode,archive,⌜φ⌝)
-  → Derivation(T,Γ,φ).
+encodeStandardDerivation :
+  Derivation(mode,standardArithmeticTheory,Γ,φ) → ProofArchive
+
+checkPAArchiveForSentence :
+  proofCode → sentence
+  → Option(Derivation(PA,[],sentence)).
 ```
 
-La deuxième direction ne doit pas choisir arbitrairement une formule depuis
-un code. Elle doit utiliser `decodeFormula`, les preuves de scoping et les
-égalités de codage déjà disponibles.
+La reconstruction ne choisit jamais arbitrairement une formule depuis un code.
+Elle utilise les décodeurs, les certificats de scoping et les égalités de codes.
+
+La complétude PA doit viser `encodeStandardDerivation`, pas
+`encodeDerivation`. Le second encodeur utilise volontairement une charge utile
+d’axiome vide pour une théorie générique ; le premier inscrit les paramètres
+finis nécessaires à la reconstruction des axiomes arithmétiques standards.
+
+### 4.5 Invariant chronologique et complétude de l’encodeur
+
+Le vérificateur est déjà causal par construction : à la ligne `i`, il ne reçoit
+que la liste des dérivations acceptées avant `i`. Il manque cependant le
+certificat dual portant sur la sortie de l’encodeur.
+
+Définir un invariant décalé :
+
+```text
+ChronologicalFrom(offset,lines)
+:⇔ pour toute ligne locale i et toute référence r de cette ligne,
+    r < offset + i.
+
+Chronological(archive)
+:⇔ ChronologicalFrom(0,archive.lines).
+```
+
+Le décalage est nécessaire pour exprimer proprement le rebasing d’un bloc. Il
+faut prouver :
+
+```text
+ChronologicalFrom_rebase :
+  ChronologicalFrom(offset,lines)
+  → ChronologicalFrom(delta + offset,rebase(delta,lines)) ;
+
+Chronological_appendRebased :
+  Chronological(earlier) → Chronological(later)
+  → Chronological(earlier.appendRebased(later)) ;
+
+Chronological_finish :
+  Chronological(archive)
+  → (∀r dans line.premises, r < archive.lineCount)
+  → Chronological(archive.finish(line)) ;
+
+encodeStandardDerivation_chronological.
+```
+
+La chronologie ne suffit pas à la complétude. Une archive peut ne contenir que
+des références passées tout en citant les mauvaises prémisses. Ajouter donc un
+invariant de rejeu qui relie chaque ligne encodée à la dérivation reconstruite
+à cette position. Cet invariant doit être stable sous `rebase`, sous
+`appendRebased` et sous l’ajout de la ligne finale.
+
+Fermer ensuite les deux lemmes terminaux :
+
+```text
+decodeNonemptyProofArchiveLines_quote :
+  0 < archive.lineCount
+  → decodeNonemptyProofArchiveLines(archive.quote) = some archive.lines ;
+
+checkPAArchive_encodeStandardDerivation :
+  pour toute dérivation PA fermée p de la phrase φ,
+  il existe p′ tel que
+  checkPAArchiveForSentence((encodeStandardDerivation p).quote,φ)
+  = some p′.
+```
+
+Le résultat ne demande pas `p′ = p`. Il demande une dérivation effective du
+même jugement. L’identité des valeurs de preuve n’est ni requise par `Prov_PA`
+ni utilisée dans la suite.
 
 ### Sorties exigées
 
 ```text
 ProofRuleTag
 ProofLine
+ProofLine.quote
+ProofLine.rebase
 ProofArchive
 ProofArchive.quote
-ContextCode
-TheoryHistory
-TheoryHistory.quote
-linearizeDerivation
-rebaseProofArchive
+ProofArchive.rebase
+ProofArchive.appendRebased
 encodeDerivation
-checkArchive
-checkArchive_encodeDerivation
-decodeCheckedDerivation
+encodeStandardDerivation
+decodeProofLine
+decodeNonemptyProofArchiveLines
+checkPAProofRule
+checkPAProofLines
+checkPAArchiveForSentence
+ChronologicalFrom
+Chronological
+encodeStandardDerivation_chronological
+decodeNonemptyProofArchiveLines_quote
+checkPAArchive_encodeStandardDerivation
 ```
+
+Les déclarations allant de `ProofRuleTag` à `checkPAArchiveForSentence` sont
+acquises. Les cinq dernières sont les sorties restantes de P2.
 
 ### Porte P2
 
 ```text
 le code final contient toutes les données nécessaires à la vérification ;
-la conclusion est exactement la dernière ligne de toute archive non vide ;
+les archives encodées sont non vides et leur conclusion est leur dernière ligne ;
 aucune référence de ligne ne pointe vers le futur ;
 la linéarisation rebase correctement toutes les références ;
+les références encodées désignent exactement les sous-dérivations attendues ;
+la quotation β d’une archive encodée se décode en ses lignes originales ;
 le décodage d’une archive acceptée reconstruit une vraie dérivation ;
+le vérificateur accepte toute archive produite par encodeStandardDerivation ;
 la vérification ne dépend d’aucune égalité de propositions.
 ```
 
 ## 5. Vérificateur primitif récursif
+
+Le vérificateur actuel est proof-producing et dépendant : son succès retourne
+une valeur `Derivation`. Il constitue la spécification constructive de ce qui
+est accepté, mais ce n’est pas encore un arbre primitif récursif sur les codes.
+
+P3 doit construire un second vérificateur, purement numérique, puis prouver sa
+correspondance avec le premier. Il ne faut pas tenter de supprimer les types
+dépendants du vérificateur actuel par une égalité de propositions, ni embarquer
+une valeur `Derivation` dans un programme `PRFunction`.
 
 ### 5.1 Reconnaisseurs syntaxiques
 
@@ -533,6 +677,18 @@ les références strictement antérieures ;
 la correspondance exacte entre prémisses et conclusion ;
 les conditions de scoping ;
 l’appartenance aux axiomes de PA ou à l’histoire finie.
+```
+
+Les comparaisons numériques doivent être justifiées règle par règle contre les
+constructeurs déjà certifiés de `checkPAProofRule`. La correction prend la
+forme de deux implications explicites :
+
+```text
+checkProofLine = 1
+→ la ligne proof-producing correspondante est acceptée ;
+
+la ligne proof-producing correspondante est acceptée
+→ checkProofLine = 1.
 ```
 
 ### 5.3 Vérification de l’archive
@@ -593,7 +749,8 @@ proofCheckBit_eq_one_iff
 proofCheck est un vrai arbre PRFunction ;
 aucun constructeur n’embarque une fonction Lean ;
 le test est total sur tous les nombres ;
-acceptation ↔ existence d’une dérivation décodée ;
+acceptation numérique ↔ acceptation par le vérificateur proof-producing ;
+acceptation ↔ existence d’une dérivation décodée du jugement demandé ;
 la preuve de correction est constructive.
 ```
 
@@ -731,7 +888,13 @@ preuve interne de fonctionnalité.
 
 ### 7.3 Conditions de dérivabilité
 
-Établir les transformations effectives correspondant aux conditions usuelles :
+Le noyau directement consommé par Rosser est plus précis que la simple liste
+des conditions de Hilbert–Bernays : preuves et réfutations sur numéraux pour le
+vérificateur, manipulation interne des codes de négation et de substitution,
+raisonnement borné sur les codes de preuves, puis point fixe interne.
+
+En renforcement, établir aussi les transformations effectives correspondant
+aux conditions usuelles :
 
 ```text
 D1 : T ⊢ φ → T ⊢ Prov_T(⌜φ⌝)
@@ -747,6 +910,21 @@ D3 : T ⊢
 
 Chaque condition doit être obtenue par une fonction explicite transformant
 les codes ou les objets de dérivation.
+
+Ces trois conditions restent une sortie forte du paquet de prouvabilité, mais
+elles ne doivent pas masquer les lemmes numériques plus fins réellement
+utilisés par la preuve de Rosser. La documentation et le graphe de dépendances
+doivent enregistrer ces deux couches séparément :
+
+```text
+noyau Rosser
+  := représentabilité positive et négative du proofCheck
+     + raisonnement borné
+     + codage interne de la substitution et de la négation ;
+
+renforcement de dérivabilité
+  := D1 + D2 + D3.
+```
 
 ### Sorties exigées
 
@@ -766,6 +944,7 @@ TheoryProvable.internalPositiveIntrospection
 aucune utilisation de la vérité sémantique ne remplace une dérivation PA ;
 les preuves internes sont des valeurs de Derivation ;
 la diagonalisation interne peut consommer ces valeurs ;
+les lemmes numériques requis par Rosser sont disponibles séparément ;
 les trois transformations de dérivabilité sont calculables.
 ```
 
@@ -1283,14 +1462,36 @@ eval(initialPAState,u) ≃mem eval(initialPAState,v)
 
 ## 14. Découpage des fichiers
 
-Créer les fichiers dans cet ordre :
+### 14.1 Modules acquis
+
+Les modules suivants existent. Ils ne doivent pas être recréés sous d’anciens
+noms :
 
 ```text
-Meta/Tarski/BareArithmetic/PrimitiveRecursiveGeneralSubstitution.lean
+Meta/Tarski/BareArithmetic/GeneralInstantiation.lean
+Meta/Tarski/BareArithmetic/PrimitiveRecursiveTermRaising.lean
+Meta/Tarski/BareArithmetic/GeneralSubstitutionMachine.lean
+Meta/Tarski/BareArithmetic/PrimitiveRecursiveGeneralSubstitutionMachine.lean
 Meta/Tarski/BareArithmetic/PrimitiveRecursiveDivision.lean
 Meta/Tarski/BareArithmetic/PrimitiveRecursiveBetaLookup.lean
-Meta/Tarski/BareArithmetic/ProofSystem.lean
+Meta/Tarski/BareArithmetic/ProofCalculus.lean
 Meta/Tarski/BareArithmetic/ProofCoding.lean
+Meta/Tarski/BareArithmetic/ProofDecoding.lean
+Meta/Tarski/BareArithmetic/ArithmeticAxiomChecking.lean
+Meta/Tarski/BareArithmetic/ProofLeafChecking.lean
+Meta/Tarski/BareArithmetic/ProofRuleChecking.lean
+Meta/Tarski/BareArithmetic/ProofArchiveChecking.lean
+```
+
+### 14.2 Modules à construire
+
+Créer les prochains fichiers dans cet ordre :
+
+```text
+Meta/Tarski/BareArithmetic/ProofChronology.lean
+Meta/Tarski/BareArithmetic/ProofEncodingCorrectness.lean
+Meta/Tarski/BareArithmetic/TheoryHistoryCoding.lean
+Meta/Tarski/BareArithmetic/PrimitiveRecursiveFormulaOperations.lean
 Meta/Tarski/BareArithmetic/PrimitiveRecursiveProofChecking.lean
 Meta/Tarski/BareArithmetic/ProofRepresentability.lean
 Meta/Tarski/BareArithmetic/InternalRepresentability.lean
@@ -1306,24 +1507,27 @@ Meta/Tarski/BareArithmetic/ProvabilityClosedOrbit.lean
 Dépendances :
 
 ```text
-PrimitiveRecursiveGeneralSubstitution
-  ← Syntax + Scoping + Substitution
+ProofChronology
+  ← ProofCoding
 
-ProofSystem
-  ← Syntax + Scoping + Substitution
+ProofEncodingCorrectness
+  ← ProofChronology
+  ← ProofDecoding
+  ← ProofArchiveChecking
 
-ProofCoding
-  ← ProofSystem
+TheoryHistoryCoding
+  ← ProofCalculus
+  ← ProofCoding
 
-PrimitiveRecursiveDivision
-  ← PrimitiveRecursiveArithmetic
-
-PrimitiveRecursiveBetaLookup
-  ← PrimitiveRecursiveDivision
+PrimitiveRecursiveFormulaOperations
+  ← PrimitiveRecursiveTermRaising
+  ← PrimitiveRecursiveGeneralSubstitutionMachine
+  ← ProofCoding
 
 PrimitiveRecursiveProofChecking
-  ← ProofCoding
-  ← PrimitiveRecursiveGeneralSubstitution
+  ← ProofEncodingCorrectness
+  ← TheoryHistoryCoding
+  ← PrimitiveRecursiveFormulaOperations
   ← PrimitiveRecursiveBetaLookup
 
 ProofRepresentability
@@ -1331,19 +1535,19 @@ ProofRepresentability
 
 InternalRepresentability
   ← ProofRepresentability
-  ← ProofSystem
+  ← ProofCalculus
 
 InternalLiarDiagonal
   ← InternalRepresentability
 
 NegativeTranslation
-  ← ProofSystem
+  ← ProofCalculus
 
 PAConsistency
   ← NegativeTranslation
 
 FiniteExtensionDeduction
-  ← ProofSystem
+  ← ProofCalculus
 
 Rosser
   ← InternalLiarDiagonal
@@ -1363,77 +1567,100 @@ portes P1 à P10.
 
 ## 15. Ordre d’exécution
 
-### Lot A — calcul et codes
+### Lot A — socle acquis
 
 ```text
-A1  substitution générale de termes codés
+A1  instanciation par un terme codé arbitraire
 A2  division et reste primitifs récursifs
 A3  accès β primitif récursif
-A4  ProofSystem avec règles quantifiées et DNE exactes
+A4  ProofCalculus avec règles quantifiées et DNE exactes
 A5  ProofCoding et linéarisation avec rebasing
-A6  équivalence dérivation ↔ archive vérifiée
+A6  décodage total des lignes et des en-têtes
+A7  vérificateur PA proof-producing des 23 règles
+A8  vérificateur terminal des archives closes
 ```
 
-Sortie : une preuve PA possède un code fini vérifiable, mais `Prov_PA` n’est
-pas encore déclaré.
+Sortie acquise : une archive acceptée retourne une dérivation PA réelle, mais
+la complétude de l’encodeur n’est pas encore démontrée et `Prov_PA` n’est pas
+déclaré.
 
-### Lot B — calculabilité et formule
+### Lot B — fermeture de P2
 
 ```text
-B1  reconnaisseurs syntaxiques PR
-B2  vérificateur de lignes PR
-B3  vérificateur d’archives PR
-B4  Proof_h et Prov_h
-B5  provPA_spec
+B1  ChronologicalFrom et Chronological
+B2  stabilité sous rebase, appendRebased et finish
+B3  chronologie de encodeStandardDerivation
+B4  round-trip β de ProofArchive.quote
+B5  invariant de rejeu et alignement des références
+B6  checkPAArchive_encodeStandardDerivation
+```
+
+Sortie : dérivation PA fermée → archive encodée → archive décodée → dérivation
+PA fermée du même jugement.
+
+### Lot C — calculabilité numérique et formule
+
+```text
+C1  codage des histoires finies de théories
+C2  opérations PR restantes sur formules et contextes
+C3  reconnaisseurs syntaxiques PR
+C4  vérificateur numérique de lignes
+C5  vérificateur numérique d’archives
+C6  équivalence avec le vérificateur proof-producing
+C7  PRFunction.proofCheck
+C8  Proof_h, Prov_h et provPA_spec
 ```
 
 Sortie : `Prov_PA` est une vraie formule arithmétique dont la sémantique
 standard coïncide avec l’existence d’une dérivation PA.
 
-### Lot C — preuves internes
+### Lot D — preuves internes
 
 ```text
-C1  calculs PR prouvables sur numéraux
-C2  réfutations PR prouvables sur numéraux
-C3  fonctionnalité interne des graphes
-C4  conditions D1, D2, D3
-C5  lemme diagonal négatif interne
+D1  calculs PR prouvables sur numéraux
+D2  réfutations PR prouvables sur numéraux
+D3  fonctionnalité interne des graphes
+D4  raisonnement borné requis par Rosser
+D5  codage interne de la négation et de la substitution
+D6  conditions D1, D2, D3
+D7  lemme diagonal négatif interne
 ```
 
-Sortie : PA peut raisonner syntaxiquement sur son propre prédicat de preuve.
+Sortie : PA peut raisonner syntaxiquement sur son propre prédicat de preuve et
+possède le point fixe interne nécessaire à Rosser.
 
-### Lot D — cohérence fermée
+### Lot E — cohérence fermée
 
 ```text
-D1  traduction négative
-D2  transport PA → HA
-D3  correction constructive de HA
-D4  paConsistent
+E1  traduction négative
+E2  transport PA → HA
+E3  correction constructive de HA
+E4  paConsistent
 ```
 
 Sortie : la cohérence initiale n’est plus une hypothèse.
 
-### Lot E — Rosser et avance
+### Lot F — Rosser et avance
 
 ```text
-E1  prédicat de Rosser
-E2  point fixe négatif interne
-E3  deux non-prouvabilités
-E4  théorème de déduction pour extension finie
-E5  conservation de la cohérence
+F1  prédicat de Rosser
+F2  point fixe négatif interne
+F3  deux non-prouvabilités
+F4  théorème de déduction pour extension finie
+F5  conservation de la cohérence
 ```
 
 Sortie : `advance` peut être itéré sans pont terminal.
 
-### Lot F — système causal fermé
+### Lot G — système causal fermé
 
 ```text
-F1  CertifiedTheoryState
-F2  EventMemory exacte
-F3  Theorems monotone
-F4  instance AccumulatingCausalSystem
-F5  fidélité additive et totalité historique
-F6  paquet terminal fermé
+G1  CertifiedTheoryState
+G2  EventMemory exacte
+G3  Theorems monotone
+G4  instance AccumulatingCausalSystem
+G5  fidélité additive et totalité historique
+G6  paquet terminal fermé
 ```
 
 ## 16. Vérifications
@@ -1455,8 +1682,12 @@ lake build Meta
 Audits décisifs :
 
 ```text
-#print axioms Meta.BareArithmeticTarski.PRFunction.substituteTermCode
+#print axioms Meta.BareArithmeticTarski.PRFunction.raiseTermCode
+#print axioms Meta.BareArithmeticTarski.PRFunction.machineInstantiateTerm
 #print axioms Meta.BareArithmeticTarski.PRFunction.betaLookup
+#print axioms Meta.BareArithmeticTarski.encodeStandardDerivation_chronological
+#print axioms Meta.BareArithmeticTarski.checkPAArchive_encodeStandardDerivation
+#print axioms Meta.BareArithmeticTarski.PRFunction.proofCheck
 #print axioms Meta.BareArithmeticTarski.provPA
 #print axioms Meta.BareArithmeticTarski.provPA_spec
 #print axioms Meta.BareArithmeticTarski.internalLiarDiagonal_derivable
