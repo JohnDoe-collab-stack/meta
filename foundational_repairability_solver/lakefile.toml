@@ -1,0 +1,6 @@
+name = "foundational_repairability_solver"
+version = "0.1.0"
+defaultTargets = ["Repairability"]
+
+[[lean_lib]]
+name = "Repairability"
