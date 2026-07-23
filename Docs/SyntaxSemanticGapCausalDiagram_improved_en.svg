@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1900" height="820" viewBox="0 0 1900 820">
+<rect width="100%" height="100%" fill="white"/>
+<text x="950.0" y="32.0" text-anchor="middle" font-family="DejaVu Sans" font-size="20" fill="#222222"><tspan x="950.0" dy="0" font-weight="700">Gap-mediated causal morphism</tspan></text>
+<rect x="30" y="75" width="1840" height="280" rx="14" fill="none" stroke="#315d80" stroke-width="2"/>
+<text x="950.0" y="100.0" text-anchor="middle" font-family="DejaVu Sans" font-size="15" fill="#315d80"><tspan x="950.0" dy="0" font-weight="700">Realization T — local Tarskian correction</tspan></text>
+<rect x="30" y="465" width="1840" height="280" rx="14" fill="none" stroke="#315d80" stroke-width="2"/>
+<text x="950.0" y="490.0" text-anchor="middle" font-family="DejaVu Sans" font-size="15" fill="#315d80"><tspan x="950.0" dy="0" font-weight="700">Realization P — local provability</tspan></text>
+<line x1="185.0" y1="220.0" x2="260.0" y2="220.0" stroke="#4a4a4a" stroke-width="1.6"/>
+<polygon points="260.0,220.0 252.0,224.2 252.0,215.8" fill="#4a4a4a"/>
+<rect x="170.9" y="209.0" width="103.2" height="20" rx="4" fill="white"/>
+<text x="222.5" y="223.0" text-anchor="middle" font-family="DejaVu Sans" font-size="10" fill="#4a4a4a"><tspan x="222.5" dy="0" font-weight="400">constructs gap_T</tspan></text>
+<line x1="520.0" y1="220.0" x2="577.5" y2="220.0" stroke="#4a4a4a" stroke-width="1.6"/>
+<polygon points="577.5,220.0 569.5,224.2 569.5,215.8" fill="#4a4a4a"/>
+<rect x="471.5" y="209.0" width="154.5" height="20" rx="4" fill="white"/>
+<text x="548.8" y="223.0" text-anchor="middle" font-family="DejaVu Sans" font-size="10" fill="#4a4a4a"><tspan x="548.8" dy="0" font-weight="400">incorporated by advance_T</tspan></text>
+<line x1="822.5" y1="220.0" x2="870.0" y2="220.0" stroke="#4a4a4a" stroke-width="1.6"/>
+<polygon points="870.0,220.0 862.0,224.2 862.0,215.8" fill="#4a4a4a"/>
+<rect x="805.2" y="209.0" width="82.0" height="20" rx="4" fill="white"/>
+<text x="846.2" y="223.0" text-anchor="middle" font-family="DejaVu Sans" font-size="10" fill="#4a4a4a"><tspan x="846.2" dy="0" font-weight="400">none branch</tspan></text>
+<line x1="1150.0" y1="220.0" x2="1197.5" y2="220.0" stroke="#4a4a4a" stroke-width="1.6"/>
+<polygon points="1197.5,220.0 1189.5,224.2 1189.5,215.8" fill="#4a4a4a"/>
+<rect x="1110.8" y="209.0" width="126.0" height="20" rx="4" fill="white"/>
+<text x="1173.8" y="223.0" text-anchor="middle" font-family="DejaVu Sans" font-size="10" fill="#4a4a4a"><tspan x="1173.8" dy="0" font-weight="400">position_evaluated_T</tspan></text>
+<line x1="822.5" y1="220.0" x2="1500.0" y2="220.0" stroke="#4a4a4a" stroke-width="1.6"/>
+<polygon points="1500.0,220.0 1492.0,224.2 1492.0,215.8" fill="#4a4a4a"/>
+<rect x="1120.2" y="209.0" width="82.0" height="20" rx="4" fill="white"/>
+<text x="1161.2" y="223.0" text-anchor="middle" font-family="DejaVu Sans" font-size="10" fill="#4a4a4a"><tspan x="1161.2" dy="0" font-weight="400">new frontier</tspan></text>
+<line x1="202.5" y1="610.0" x2="260.0" y2="610.0" stroke="#4a4a4a" stroke-width="1.6"/>
+<polygon points="260.0,610.0 252.0,614.2 252.0,605.8" fill="#4a4a4a"/>
+<rect x="179.7" y="599.0" width="103.2" height="20" rx="4" fill="white"/>
+<text x="231.2" y="613.0" text-anchor="middle" font-family="DejaVu Sans" font-size="10" fill="#4a4a4a"><tspan x="231.2" dy="0" font-weight="400">constructs gap_P</tspan></text>
+<line x1="520.0" y1="610.0" x2="577.5" y2="610.0" stroke="#4a4a4a" stroke-width="1.6"/>
+<polygon points="577.5,610.0 569.5,614.2 569.5,605.8" fill="#4a4a4a"/>
+<rect x="471.5" y="599.0" width="154.5" height="20" rx="4" fill="white"/>
+<text x="548.8" y="613.0" text-anchor="middle" font-family="DejaVu Sans" font-size="10" fill="#4a4a4a"><tspan x="548.8" dy="0" font-weight="400">incorporated by advance_P</tspan></text>
+<line x1="822.5" y1="610.0" x2="870.0" y2="610.0" stroke="#4a4a4a" stroke-width="1.6"/>
+<polygon points="870.0,610.0 862.0,614.2 862.0,605.8" fill="#4a4a4a"/>
+<rect x="805.2" y="599.0" width="82.0" height="20" rx="4" fill="white"/>
+<text x="846.2" y="613.0" text-anchor="middle" font-family="DejaVu Sans" font-size="10" fill="#4a4a4a"><tspan x="846.2" dy="0" font-weight="400">none branch</tspan></text>
+<line x1="1150.0" y1="610.0" x2="1197.5" y2="610.0" stroke="#4a4a4a" stroke-width="1.6"/>
+<polygon points="1197.5,610.0 1189.5,614.2 1189.5,605.8" fill="#4a4a4a"/>
+<rect x="1110.8" y="599.0" width="126.0" height="20" rx="4" fill="white"/>
+<text x="1173.8" y="613.0" text-anchor="middle" font-family="DejaVu Sans" font-size="10" fill="#4a4a4a"><tspan x="1173.8" dy="0" font-weight="400">position_evaluated_P</tspan></text>
+<line x1="822.5" y1="610.0" x2="1500.0" y2="610.0" stroke="#4a4a4a" stroke-width="1.6"/>
+<polygon points="1500.0,610.0 1492.0,614.2 1492.0,605.8" fill="#4a4a4a"/>
+<rect x="1120.2" y="599.0" width="82.0" height="20" rx="4" fill="white"/>
+<text x="1161.2" y="613.0" text-anchor="middle" font-family="DejaVu Sans" font-size="10" fill="#4a4a4a"><tspan x="1161.2" dy="0" font-weight="400">new frontier</tspan></text>
+<line x1="115.0" y1="255.0" x2="115.0" y2="575.0" stroke="#315d80" stroke-width="1.6" stroke-dasharray="9 7"/>
+<polygon points="115.0,575.0 110.8,567.0 119.2,567.0" fill="#315d80"/>
+<rect x="74.0" y="404.0" width="82.0" height="20" rx="4" fill="white"/>
+<text x="115.0" y="418.0" text-anchor="middle" font-family="DejaVu Sans" font-size="10" fill="#315d80"><tspan x="115.0" dy="0" font-weight="400">φ</tspan></text>
+<line x1="700.0" y1="257.5" x2="700.0" y2="565.0" stroke="#315d80" stroke-width="1.6" stroke-dasharray="9 7"/>
+<polygon points="700.0,565.0 695.8,557.0 704.2,557.0" fill="#315d80"/>
+<rect x="628.5" y="400.2" width="143.1" height="20" rx="4" fill="white"/>
+<text x="700.0" y="414.2" text-anchor="middle" font-family="DejaVu Sans" font-size="10" fill="#315d80"><tspan x="700.0" dy="0" font-weight="400">φ commutes with advance</tspan></text>
+<line x1="1010.0" y1="267.5" x2="1010.0" y2="562.5" stroke="#315d80" stroke-width="1.6" stroke-dasharray="9 7"/>
+<polygon points="1010.0,562.5 1005.8,554.5 1014.2,554.5" fill="#315d80"/>
+<rect x="929.9" y="404.0" width="160.2" height="20" rx="4" fill="white"/>
+<text x="1010.0" y="418.0" text-anchor="middle" font-family="DejaVu Sans" font-size="10" fill="#315d80"><tspan x="1010.0" dy="0" font-weight="400">positionMap: new_T ↦ new_P</tspan></text>
+<rect x="45.0" y="185.0" width="140.0" height="70.0" rx="12" fill="#eef4fb" stroke="#315d80" stroke-width="2"/>
+<text x="115.0" y="224.0" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#222222"><tspan x="115.0" dy="0" font-weight="700">State S_T</tspan></text>
+<rect x="260.0" y="167.5" width="260.0" height="105.0" rx="12" fill="#fff8e6" stroke="#8a6500" stroke-width="2"/>
+<text x="390.0" y="205.0" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#222222"><tspan x="390.0" dy="0" font-weight="700">d_T := gap_T(S_T)</tspan><tspan x="390.0" dy="19" font-weight="400">frontier_open_T</tspan><tspan x="390.0" dy="19" font-weight="400">¬ Evaluated_T(S_T, d_T)</tspan></text>
+<rect x="577.5" y="182.5" width="245.0" height="75.0" rx="12" fill="#eef4fb" stroke="#315d80" stroke-width="2"/>
+<text x="700.0" y="224.0" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#222222"><tspan x="700.0" dy="0" font-weight="700">S_T⁺ := advance_T(S_T)</tspan></text>
+<rect x="870.0" y="172.5" width="280.0" height="95.0" rx="12" fill="#edf8ef" stroke="#35733b" stroke-width="2"/>
+<text x="1010.0" y="214.5" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#222222"><tspan x="1010.0" dy="0" font-weight="700">new_T(S_T) : Position_T(S_T⁺)</tspan><tspan x="1010.0" dy="19" font-weight="400">label_T[S_T⁺](new_T(S_T)) = d_T</tspan></text>
+<rect x="1197.5" y="175.0" width="245.0" height="90.0" rx="12" fill="#f5f0fb" stroke="#6a4b8a" stroke-width="2"/>
+<text x="1320.0" y="214.5" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#222222"><tspan x="1320.0" dy="0" font-weight="700">frontier_closed_T</tspan><tspan x="1320.0" dy="19" font-weight="400">Evaluated_T(S_T⁺, d_T)</tspan></text>
+<rect x="1500.0" y="167.5" width="270.0" height="105.0" rx="12" fill="#fff8e6" stroke="#8a6500" stroke-width="2"/>
+<text x="1635.0" y="205.0" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#222222"><tspan x="1635.0" dy="0" font-weight="700">d_T⁺ := gap_T(S_T⁺)</tspan><tspan x="1635.0" dy="19" font-weight="400">frontier_open_T</tspan><tspan x="1635.0" dy="19" font-weight="400">¬ Evaluated_T(S_T⁺, d_T⁺)</tspan></text>
+<rect x="27.5" y="575.0" width="175.0" height="70.0" rx="12" fill="#eef4fb" stroke="#315d80" stroke-width="2"/>
+<text x="115.0" y="614.0" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#222222"><tspan x="115.0" dy="0" font-weight="700">State S_P := φ(S_T)</tspan></text>
+<rect x="260.0" y="557.5" width="260.0" height="105.0" rx="12" fill="#fff8e6" stroke="#8a6500" stroke-width="2"/>
+<text x="390.0" y="595.0" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#222222"><tspan x="390.0" dy="0" font-weight="700">d_P := gap_P(S_P)</tspan><tspan x="390.0" dy="19" font-weight="400">frontier_open_P</tspan><tspan x="390.0" dy="19" font-weight="400">¬ Evaluated_P(S_P, d_P)</tspan></text>
+<rect x="577.5" y="565.0" width="245.0" height="90.0" rx="12" fill="#eef4fb" stroke="#315d80" stroke-width="2"/>
+<text x="700.0" y="604.5" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#222222"><tspan x="700.0" dy="0" font-weight="700">S_P⁺ := advance_P(S_P)</tspan><tspan x="700.0" dy="19" font-weight="400">= φ(S_T⁺)</tspan></text>
+<rect x="870.0" y="562.5" width="280.0" height="95.0" rx="12" fill="#edf8ef" stroke="#35733b" stroke-width="2"/>
+<text x="1010.0" y="604.5" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#222222"><tspan x="1010.0" dy="0" font-weight="700">new_P(S_P) : Position_P(S_P⁺)</tspan><tspan x="1010.0" dy="19" font-weight="400">label_P[S_P⁺](new_P(S_P)) = d_P</tspan></text>
+<rect x="1197.5" y="565.0" width="245.0" height="90.0" rx="12" fill="#f5f0fb" stroke="#6a4b8a" stroke-width="2"/>
+<text x="1320.0" y="604.5" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#222222"><tspan x="1320.0" dy="0" font-weight="700">frontier_closed_P</tspan><tspan x="1320.0" dy="19" font-weight="400">Evaluated_P(S_P⁺, d_P)</tspan></text>
+<rect x="1500.0" y="557.5" width="270.0" height="105.0" rx="12" fill="#fff8e6" stroke="#8a6500" stroke-width="2"/>
+<text x="1635.0" y="595.0" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#222222"><tspan x="1635.0" dy="0" font-weight="700">d_P⁺ := gap_P(S_P⁺)</tspan><tspan x="1635.0" dy="19" font-weight="400">frontier_open_P</tspan><tspan x="1635.0" dy="19" font-weight="400">¬ Evaluated_P(S_P⁺, d_P⁺)</tspan></text>
+<rect x="1155.0" y="372.5" width="330.0" height="75.0" rx="12" fill="#fff1f1" stroke="#9b3d3d" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="1320.0" y="405.5" text-anchor="middle" font-family="DejaVu Sans" font-size="12" fill="#222222"><tspan x="1320.0" dy="0" font-weight="700">NO VERTICAL SEMANTIC COMPONENT</tspan><tspan x="1320.0" dy="17" font-weight="400">Evaluated_T ↛ Evaluated_P</tspan></text>
+</svg>

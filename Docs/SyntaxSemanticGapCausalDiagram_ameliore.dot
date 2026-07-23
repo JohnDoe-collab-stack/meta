@@ -1,0 +1,82 @@
+digraph CausalMorphism {
+  graph [
+    rankdir=TB,
+    bgcolor="white",
+    pad="0.25",
+    nodesep="0.35",
+    ranksep="0.75",
+    fontname="DejaVu Sans",
+    fontsize=20,
+    labelloc=t,
+    label="Morphisme causal médiatisé par le gap"
+  ];
+  node [
+    shape=box,
+    style="rounded,filled",
+    fontname="DejaVu Sans",
+    fontsize=10,
+    margin="0.13,0.08"
+  ];
+  edge [
+    fontname="DejaVu Sans",
+    fontsize=9,
+    color="#4a4a4a",
+    arrowsize=0.7
+  ];
+
+  subgraph cluster_T {
+    label="Réalisation T — correction tarskienne locale";
+    color="#315d80";
+    penwidth=1.2;
+    style="rounded";
+
+    T0 [fillcolor="#eef4fb", color="#315d80", label="État S_T"];
+    TG [fillcolor="#fff8e6", color="#8a6500", label="d_T := gap_T(S_T)\nfrontier_open_T\n¬ Evaluated_T(S_T, d_T)"];
+    T1 [fillcolor="#eef4fb", color="#315d80", label="S_T⁺ := advance_T(S_T)"];
+    TN [fillcolor="#edf8ef", color="#35733b", label="new_T(S_T) : Position_T(S_T⁺)\nlabel_T[S_T⁺](new_T(S_T)) = d_T"];
+    TC [fillcolor="#f5f0fb", color="#6a4b8a", label="frontier_closed_T\nEvaluated_T(S_T⁺, d_T)"];
+    TG1 [fillcolor="#fff8e6", color="#8a6500", label="d_T⁺ := gap_T(S_T⁺)\nfrontier_open_T\n¬ Evaluated_T(S_T⁺, d_T⁺)"];
+
+    T0 -> TG [label="construit gap_T"];
+    TG -> T1 [label="incorporé par advance_T"];
+    T1 -> TN [label="branche none"];
+    TN -> TC [label="position_evaluated_T"];
+    T1 -> TG1 [label="nouvelle frontière"];
+  }
+
+  subgraph cluster_P {
+    label="Réalisation P — prouvabilité locale";
+    color="#315d80";
+    penwidth=1.2;
+    style="rounded";
+
+    P0 [fillcolor="#eef4fb", color="#315d80", label="État S_P := φ(S_T)"];
+    PG [fillcolor="#fff8e6", color="#8a6500", label="d_P := gap_P(S_P)\nfrontier_open_P\n¬ Evaluated_P(S_P, d_P)"];
+    P1 [fillcolor="#eef4fb", color="#315d80", label="S_P⁺ := advance_P(S_P)\n= φ(S_T⁺)"];
+    PN [fillcolor="#edf8ef", color="#35733b", label="new_P(S_P) : Position_P(S_P⁺)\nlabel_P[S_P⁺](new_P(S_P)) = d_P"];
+    PC [fillcolor="#f5f0fb", color="#6a4b8a", label="frontier_closed_P\nEvaluated_P(S_P⁺, d_P)"];
+    PG1 [fillcolor="#fff8e6", color="#8a6500", label="d_P⁺ := gap_P(S_P⁺)\nfrontier_open_P\n¬ Evaluated_P(S_P⁺, d_P⁺)"];
+
+    P0 -> PG [label="construit gap_P"];
+    PG -> P1 [label="incorporé par advance_P"];
+    P1 -> PN [label="branche none"];
+    PN -> PC [label="position_evaluated_P"];
+    P1 -> PG1 [label="nouvelle frontière"];
+  }
+
+  T0 -> P0 [style=dashed, color="#315d80", label="φ"];
+  T1 -> P1 [style=dashed, color="#315d80", label="φ commute avec advance"];
+  TN -> PN [style=dashed, color="#315d80", label="positionMap : new_T ↦ new_P"];
+
+  nosem [
+    fillcolor="#fff1f1",
+    color="#9b3d3d",
+    style="rounded,filled,dashed",
+    label="AUCUNE COMPOSANTE SÉMANTIQUE VERTICALE\nEvaluated_T ↛ Evaluated_P"
+  ];
+  TC -> nosem [style=invis];
+  nosem -> PC [style=invis];
+
+  { rank=same; T0; TG; T1; TN; TC; TG1; }
+  { rank=same; P0; PG; P1; PN; PC; PG1; }
+}

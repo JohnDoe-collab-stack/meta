@@ -684,9 +684,21 @@ evaluation_preserved_P
     transformation explicite des anciennes dérivations.
 ```
 
-Cette correspondance a été vérifiée dans le texte source, mais elle ne doit pas
-encore être qualifiée de théorème fermé du dépôt courant : la chaîne d'imports
-arithmétique ne compile pas intégralement à l'état vérifié plus bas.
+Ces déclarations sont présentes dans le texte source. Leur présence établit
+que les lois locales de `P` ont été écrites et raccordées aux structures
+attendues ; elle ne suffit toutefois pas, à elle seule, à certifier l'état de
+compilation de toute leur chaîne d'imports. Il faut donc distinguer :
+
+```text
+présence des déclarations et de leurs preuves dans les sources ;
+
+fermeture vérifiée du côté P
+= compilation réussie de la cible terminale
+  + audit axiomatique réussi dans le même état du dépôt.
+```
+
+Le statut causal et conceptuel décrit ici ne dépend pas d'une confusion entre
+ces deux niveaux de vérification.
 
 La preuve de `frontier_closed_P` est directe une fois la phrase ajoutée : tout
 axiome de l'histoire courante possède immédiatement une dérivation. Cela ne
@@ -924,15 +936,17 @@ positions qui apparaissent dans les états successeurs :
 
 ```text
 gap_T(S)
-= label_T(new_T(S))
+= label_T[advance_T(S)](new_T(S))
 
 gap_P(φ(S))
-= label_P(new_P(φ(S))).
+= label_P[advance_P(φ(S))](new_P(φ(S))).
 ```
 
 Comme `φ` commute avec `advance` et que `positionMap_advance` envoie la nouvelle
 position sur la nouvelle position, le morphisme apparie les deux événements
-frontière sans identifier leurs phrases.
+frontière sans identifier leurs phrases. Les indices d'état écrits entre
+crochets sont essentiels : `new_T(S)` et `new_P(φ(S))` sont des positions des
+états successeurs, pas des positions des états sources.
 
 Pour toute position historique `p`, la paire de phrases transportée est :
 
@@ -1066,6 +1080,70 @@ est local à un code, tandis qu'une extension de théorie peut créer de nombreu
 nouveaux théorèmes. La correspondance des histoires n'implique donc pas
 l'identité des phrases.
 
+### Factorisation universelle candidate
+
+La construction directe de `φ` par récursion sur `CausalMemory` possède une
+reformulation plus canonique. On introduit un objet intrinsèque `K` ne portant
+que la provenance :
+
+```text
+KState :
+  root
+  step(previous)
+
+KPosition(root) = Empty
+
+KPosition(step(previous))
+≃ Option(KPosition(previous)).
+```
+
+`K` ne contient ni phrase, ni gap syntaxique, ni évaluateur. Il est le candidat
+objet initial de la structure `GapOrbit⁺` des orbites positives pointées et des
+morphismes préservant `root`, `advance`, `new` et `old`. L’unicité y est
+formulée point par point, relativement à une équivalence explicite entre
+morphismes, sans quotient ni extensionalité fonctionnelle.
+
+Les deux réalisations doivent alors être construites séparément :
+
+```text
+r_T : K → K_T⁺
+r_P : K → K_P⁺.
+```
+
+Le diagramme fondamental devient le span :
+
+```text
+T ← K → P.
+```
+
+Si `r_T` et `r_P` sont des équivalences sur les orbites engendrées, le morphisme
+direct est dérivé :
+
+```text
+F = r_P ∘ r_T⁻¹.
+```
+
+Cette formule porte uniquement sur les orbites engendrées. Elle ne fournit pas
+d'inverse sur d'éventuels états bruts inaccessibles depuis la racine.
+
+Les étiquettes sont ensuite deux décorations locales du même événement
+universel :
+
+```text
+k ↦ label_T(r_T(k))
+k ↦ label_P(r_P(k)).
+```
+
+Elles ne sont pas identifiées. Chaque étiquette médiatise séparément
+l'extension de son évaluateur local. Ainsi la propriété universelle porte sur
+la provenance causale, tandis que le rôle évaluatif du gap demeure propre à
+chaque réalisation.
+
+Cette factorisation ne doit pas encore être annoncée comme un théorème. Elle
+devient la cible précise à prouver : définir `GapOrbit⁺`, construire `K`,
+établir son initialité, puis montrer que les orbites tarskienne et de Rosser
+sont les deux réalisations indiquées.
+
 ## Portée du morphisme
 
 Le morphisme ne doit établir aucune proposition de la forme :
@@ -1094,7 +1172,7 @@ reste valide dans sa propre réalisation. Il ne transforme jamais une preuve de
 `Evaluated_T` en preuve de `Evaluated_P`, ni réciproquement. La sémantique
 tarskienne et la prouvabilité restent des certificats locaux aux deux systèmes.
 
-## État vérifié et ordre de construction restant
+## État des sources et ordre de construction restant
 
 La chaîne arithmétique qui était auparavant décrite comme préalable est
 maintenant présente dans les fichiers sources :
@@ -1110,56 +1188,91 @@ P9  CertifiedTheoryState, advance, Theorems et mémoire événementielle exacte 
 P10 paProvabilityAccumulatingSystem et les déclarations de son orbite causale.
 ```
 
-La vérification distingue cependant deux statuts.
-
-Les modules `Meta.Tarski.CausalClock` et
-`Meta.Tarski.BareArithmetic.TheoryHistoryCoding` compilent et leurs audits ne
-déclarent aucun axiome. Le premier contient déjà les positions positives
-exactes de T. Le second confirme constructivement le support requis pour P :
-`TheoryHistory`, `TheoryHistory.Contains` et l'extension positive des axiomes.
-
-Le fichier `Meta.Tarski.BareArithmetic.ProvabilityProgression` contient bien
-les cinq déclarations locales nécessaires côté P :
-`historyMember_provable`, `provabilityGap_not_provable`,
-`provabilityGap_provable_after_advance`, `provabilityTheorems_preserved` et
-`provabilityAdvance_memory_iff`. Mais la commande de compilation de la chaîne
-complète échoue actuellement dans des dépendances antérieures, notamment
-`InternalTermNormalization.lean`, avec des erreurs de typage et de syntaxe. La
-récupération sur ces erreurs fait apparaître `sorryAx` dans l'audit de ce
-module. Tant que ces erreurs ne sont pas résolues, P3–P10 doivent être décrits
-comme présents dans le source et architecturalement assemblés, non comme une
-fermeture Lean constructive vérifiée.
-
-Le travail restant pour le morphisme est désormais circonscrit :
+Le plan d'implémentation marque ces dix portes comme fermées. Le protocole qui
+doit certifier cette affirmation dans un état donné du dépôt est :
 
 ```text
-M1  définir l'interface PositiveGapMediatedEvaluation et sa projection
-    vers GapMediatedEvaluation puis vers (A)(I)(C) ;
+lake clean
+lake build Meta.Tarski.BareArithmetic.ProvabilityClosedOrbit
+lake build Meta
+```
 
-M2  empaqueter les positions tarskiennes déjà existantes ;
+Ces commandes sont un critère de validation, pas une conséquence de la seule
+présence des fichiers. À l'état de travail relu le 23 juillet 2026, une
+recompilation de la cible terminale n'a pas abouti : le premier module en échec
+est `PrimitiveRecursiveProofCorrectness.lean`. Il n'est donc pas exact
+d'écrire, pour cet état précis du dépôt, que la fermeture par compilation
+froide a été rétablie.
 
-M3  définir Position_P := Σ d, TheoryHistory.Contains d,
-    son étiquette et son équivalence d'extension par Option ;
+```text
+paProvabilityClosedSystem : PAProvabilityClosedSystem
+```
 
-M4  empaqueter la progression de Rosser dans l'interface positive ;
+est bien une déclaration présente dans les sources. Son statut de valeur
+fermée sans axiome doit être réaffirmé seulement après réussite du protocole
+ci-dessus et lecture de son bloc `AXIOM_AUDIT` dans le même état du dépôt.
 
-M5  définir φ par récursion sur CausalMemory et prouver
-    φ(advance_T(S)) = advance_P(φ(S)) ;
+La cohérence initiale possède maintenant le raccord syntaxique complet prévu :
 
-M6  définir positionMap par la même récursion et prouver sa compatibilité
-    avec les constructeurs new et old ;
+```text
+Derivation.negativeTranslate :
+  Derivation(classical,PA,Γ,φ)
+  → Derivation(intuitionistic,HA,Γᴺ,φᴺ)
 
-M7  en déduire le transport des frontières, des mémoires propositionnelles
-    et des certificats locaux d'évaluation ;
+haDerivation_sound :
+  Derivation(intuitionistic,HA,Γ,φ)
+  → Holds(Γ) → Holds(φ).
+```
 
-M8  optionnellement, prouver l'injectivité de label_P sur l'orbite engendrée
+Ainsi `paConsistent` passe effectivement par PA → HA → sémantique standard de
+HA ; il n'est ni un champ supposé ni une simple invocation informelle de la
+traduction négative.
+
+La formule de prouvabilité reste distinguée de cette preuve de cohérence. Le
+dépôt construit D1 comme quotation d'une dérivation réelle et deux
+transformations admissibles de composition et d'introspection. Il ne présente
+pas ces dernières comme les schémas arithmétiques uniformes D2/D3 sur des codes
+variables. Ces schémas plus forts ne sont pas consommés par Rosser ni par le
+système causal P.
+
+Le travail restant doit suivre la factorisation universelle plutôt que poser
+le morphisme direct comme donnée première :
+
+```text
+M1  définir le squelette positif de provenance, la structure GapOrbit⁺
+    et son équivalence pointwise entre morphismes ;
+
+M2  construire l'objet intrinsèque K par root / step et prouver
+    son initialité constructive ;
+
+M3  empaqueter les positions tarskiennes et construire
+    r_T : K → K_T⁺ ;
+
+M4  définir Position_P := Σ d, TheoryHistory.Contains d,
+    son extension par Option, puis construire r_P : K → K_P⁺ ;
+
+M5  restreindre explicitement aux orbites engendrées et prouver que
+    r_T et r_P y sont des équivalences ;
+
+M6  dériver φ et positionMap par F = r_P ∘ r_T⁻¹,
+    puis retrouver leurs lois de commutation new / old ;
+
+M7  ajouter les décorations syntaxiques D_T et D_P, puis empaqueter
+    séparément leurs évaluateurs dans PositiveGapMediatedEvaluation ;
+
+M8  en déduire le transport des frontières comme événements, des mémoires
+    propositionnelles et des certificats locaux, sans flèche sémantique ;
+
+M9  optionnellement, prouver l'injectivité de label_P sur l'orbite engendrée
     et étudier la descente vers une transformation syntaxique globale χ.
 ```
 
-Ainsi, `Evaluated_P` et le système causal P ont désormais des définitions
-sources précises, mais leur fermeture constructive doit d'abord être rétablie
-par une compilation complète sans `sorryAx`. Après cette fermeture, ce qui
-restera à introduire comme déclarations Lean sera l'interface positive commune,
-le paquet de positions P, `φ`, `positionMap` et leurs lois de cohérence. Cette
-seconde difficulté est une construction intrinsèque par récursion sur les
-histoires, sans rang numérique, sans choix et sans pont terminal externe.
+Du point de vue de l'architecture, la construction de `Evaluated_P` et du
+système causal `P` est écrite ; du point de vue de la certification du dépôt,
+sa fermeture doit être rétablie par compilation et audit avant d'être annoncée
+comme acquise. Une fois ce point confirmé, ce qui restera propre au présent
+document sera le morphisme supplémentaire entre les deux réalisations :
+`GapOrbit⁺`, l'objet libre intrinsèque `K`, ses deux réalisations, puis `φ`,
+`positionMap` et leurs lois de cohérence dérivées. Cette construction devra
+rester intrinsèque, par récursion sur les histoires, sans rang numérique, sans
+choix et sans pont terminal externe.

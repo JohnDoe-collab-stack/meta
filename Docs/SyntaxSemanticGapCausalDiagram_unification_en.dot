@@ -1,0 +1,120 @@
+digraph GapUniversalUnification {
+  graph [
+    rankdir=TB,
+    bgcolor="white",
+    pad="0.35",
+    nodesep="0.45",
+    ranksep="0.62",
+    fontname="DejaVu Sans",
+    fontsize=20,
+    labelloc=t,
+    label="Universal gap-mediated causal unification"
+  ];
+  node [
+    shape=box,
+    style="rounded,filled",
+    fontname="DejaVu Sans",
+    fontsize=11,
+    color="#4d4d4d",
+    penwidth=1.3,
+    margin="0.16,0.10"
+  ];
+  edge [
+    fontname="DejaVu Sans",
+    fontsize=9,
+    color="#4a4a4a",
+    arrowsize=0.72,
+    penwidth=1.1
+  ];
+
+  syn [
+    fillcolor="#f4f4f4",
+    label="COMMON SYNTACTIC LAYER\nSentence · Predicate · diagonal\nno evaluation"
+  ];
+  k [
+    fillcolor="#eaf3ff",
+    color="#245a8d",
+    penwidth=2.1,
+    label="K — INTENDED INTRINSIC FREE OBJECT\nroot · step · Position\nEmpty at the root · Option at the successor\nno sentence · no evaluator"
+  ];
+  gaporbit [
+    fillcolor="#eef7f7",
+    color="#276b6b",
+    label="GapOrbit⁺ — PROVENANCE STRUCTURE\npointed positive orbits\nmorphisms preserving root · advance · new · old\npointwise equivalence · no quotient or funext"
+  ];
+  universal [
+    fillcolor="#fafafa",
+    color="#777777",
+    style="rounded,filled,dashed",
+    label="CANDIDATE UNIVERSAL PROPERTY\nfor every orbit R: a unique morphism K → R\npointwise uniqueness\nnot yet proved"
+  ];
+
+  kt [
+    fillcolor="#edf8ef",
+    color="#34743c",
+    label="K_T⁺ — TARSKIAN SKELETON\nstate · advance · positions\nnew_T / old_T"
+  ];
+  kp [
+    fillcolor="#edf8ef",
+    color="#34743c",
+    label="K_P⁺ — PROVABILITY SKELETON\ncertified history · advance · positions\nnew_P / old_P"
+  ];
+  dt [
+    fillcolor="#fff8e5",
+    color="#886500",
+    label="D_T — SYNTACTIC DECORATION\ndiagonal gap · patch\nlabel_T"
+  ];
+  dp [
+    fillcolor="#fff8e5",
+    color="#886500",
+    label="D_P — SYNTACTIC DECORATION\nRosser sentence · extension\nlabel_P"
+  ];
+  et [
+    fillcolor="#f5f0fb",
+    color="#6c4a8c",
+    label="ℰ_T — LOCAL EVALUATION\nCorrectAt · models · truthAt\nfrontier_open · position_evaluated"
+  ];
+  ep [
+    fillcolor="#f5f0fb",
+    color="#6c4a8c",
+    label="ℰ_P — LOCAL EVALUATION\nTheoryProvable · derivations · consistency\nfrontier_open · position_evaluated"
+  ];
+  nosem [
+    fillcolor="#fff0f0",
+    color="#9a3434",
+    style="rounded,filled,dashed",
+    label="NO SEMANTIC UNIFICATION\nEvaluated_T ↛ Evaluated_P\nEvaluated_P ↛ Evaluated_T"
+  ];
+  span [
+    fillcolor="#eaf3ff",
+    color="#245a8d",
+    label="INTENDED CANONICAL SPAN\nT ← K → P\nF = r_P ∘ r_T⁻¹ only on the generated orbits"
+  ];
+
+  syn -> dt [label="local syntax"];
+  syn -> dp [label="local syntax"];
+  k -> gaporbit [style=dashed, color="#276b6b", label="candidate initiality"];
+  gaporbit -> universal [style=dashed, color="#777777"];
+
+  k -> kt [color="#245a8d", penwidth=2.0, label="r_T"];
+  k -> kp [color="#245a8d", penwidth=2.0, label="r_P"];
+  kt -> kp [
+    dir=both,
+    style=dashed,
+    color="#315d80",
+    label="F derived on generated orbits"
+  ];
+
+  kt -> dt [label="local decoration"];
+  kp -> dp [label="local decoration"];
+  dt -> et [label="the gap mediates evaluation"];
+  dp -> ep [label="the gap mediates evaluation"];
+
+  et -> nosem [style=dashed, arrowhead=none, color="#9a3434"];
+  ep -> nosem [style=dashed, arrowhead=none, color="#9a3434"];
+  k -> span [color="#245a8d", penwidth=1.6];
+
+  { rank=same; kt; kp; }
+  { rank=same; dt; dp; }
+  { rank=same; et; nosem; ep; }
+}

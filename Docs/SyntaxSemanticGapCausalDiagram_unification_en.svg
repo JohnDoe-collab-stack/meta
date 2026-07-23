@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1200" viewBox="0 0 1600 1200">
+<rect width="100%" height="100%" fill="white"/>
+<text x="800.0" y="32.0" text-anchor="middle" font-family="DejaVu Sans" font-size="20" fill="#222222"><tspan x="800.0" dy="0" font-weight="700">Universal gap-mediated causal unification</tspan></text>
+<line x1="291.7" y1="177.5" x2="378.3" y2="567.5" stroke="#4a4a4a" stroke-width="1.6"/>
+<polygon points="378.3,567.5 372.5,560.6 380.7,558.8" fill="#4a4a4a"/>
+<rect x="294.0" y="361.5" width="82.0" height="20" rx="4" fill="white"/>
+<text x="335.0" y="375.5" text-anchor="middle" font-family="DejaVu Sans" font-size="10" fill="#4a4a4a"><tspan x="335.0" dy="0" font-weight="400">local syntax</tspan></text>
+<line x1="363.8" y1="177.5" x2="986.2" y2="567.5" stroke="#4a4a4a" stroke-width="1.6"/>
+<polygon points="986.2,567.5 977.2,566.8 981.7,559.7" fill="#4a4a4a"/>
+<rect x="634.0" y="361.5" width="82.0" height="20" rx="4" fill="white"/>
+<text x="675.0" y="375.5" text-anchor="middle" font-family="DejaVu Sans" font-size="10" fill="#4a4a4a"><tspan x="675.0" dy="0" font-weight="400">local syntax</tspan></text>
+<line x1="1020.0" y1="155.8" x2="1095.0" y2="154.3" stroke="#276b6b" stroke-width="1.6" stroke-dasharray="9 7"/>
+<polygon points="1095.0,154.3 1087.1,158.6 1086.9,150.3" fill="#276b6b"/>
+<line x1="1320.0" y1="217.5" x2="1320.0" y2="225.0" stroke="#777777" stroke-width="1.6" stroke-dasharray="9 7"/>
+<polygon points="1320.0,225.0 1315.8,217.0 1324.2,217.0" fill="#777777"/>
+<line x1="689.3" y1="227.5" x2="480.2" y2="355.0" stroke="#245a8d" stroke-width="2.1"/>
+<polygon points="480.2,355.0 484.9,347.3 489.2,354.4" fill="#245a8d"/>
+<rect x="543.8" y="280.2" width="82.0" height="20" rx="4" fill="white"/>
+<text x="584.8" y="294.2" text-anchor="middle" font-family="DejaVu Sans" font-size="10" fill="#245a8d"><tspan x="584.8" dy="0" font-weight="400">r_T</tspan></text>
+<line x1="872.9" y1="227.5" x2="1010.6" y2="355.0" stroke="#245a8d" stroke-width="2.1"/>
+<polygon points="1010.6,355.0 1001.9,352.6 1007.6,346.5" fill="#245a8d"/>
+<rect x="900.8" y="280.2" width="82.0" height="20" rx="4" fill="white"/>
+<text x="941.8" y="294.2" text-anchor="middle" font-family="DejaVu Sans" font-size="10" fill="#245a8d"><tspan x="941.8" dy="0" font-weight="400">r_P</tspan></text>
+<line x1="585.0" y1="410.0" x2="865.0" y2="410.0" stroke="#315d80" stroke-width="1.6" stroke-dasharray="9 7"/>
+<polygon points="865.0,410.0 857.0,414.2 857.0,405.8" fill="#315d80"/>
+<polygon points="585.0,410.0 593.0,405.8 593.0,414.2" fill="#315d80"/>
+<rect x="636.4" y="399.0" width="177.3" height="20" rx="4" fill="white"/>
+<text x="725.0" y="413.0" text-anchor="middle" font-family="DejaVu Sans" font-size="10" fill="#315d80"><tspan x="725.0" dy="0" font-weight="400">F derived on generated orbits</tspan></text>
+<line x1="390.0" y1="465.0" x2="390.0" y2="567.5" stroke="#4a4a4a" stroke-width="1.6"/>
+<polygon points="390.0,567.5 385.8,559.5 394.2,559.5" fill="#4a4a4a"/>
+<rect x="338.4" y="505.2" width="103.2" height="20" rx="4" fill="white"/>
+<text x="390.0" y="519.2" text-anchor="middle" font-family="DejaVu Sans" font-size="10" fill="#4a4a4a"><tspan x="390.0" dy="0" font-weight="400">local decoration</tspan></text>
+<line x1="1070.0" y1="465.0" x2="1070.0" y2="567.5" stroke="#4a4a4a" stroke-width="1.6"/>
+<polygon points="1070.0,567.5 1065.8,559.5 1074.2,559.5" fill="#4a4a4a"/>
+<rect x="1018.4" y="505.2" width="103.2" height="20" rx="4" fill="white"/>
+<text x="1070.0" y="519.2" text-anchor="middle" font-family="DejaVu Sans" font-size="10" fill="#4a4a4a"><tspan x="1070.0" dy="0" font-weight="400">local decoration</tspan></text>
+<line x1="371.7" y1="672.5" x2="330.9" y2="790.0" stroke="#4a4a4a" stroke-width="1.6"/>
+<polygon points="330.9,790.0 329.6,781.1 337.4,783.8" fill="#4a4a4a"/>
+<rect x="268.4" y="720.2" width="165.9" height="20" rx="4" fill="white"/>
+<text x="351.3" y="734.2" text-anchor="middle" font-family="DejaVu Sans" font-size="10" fill="#4a4a4a"><tspan x="351.3" dy="0" font-weight="400">the gap mediates evaluation</tspan></text>
+<line x1="1097.4" y1="672.5" x2="1158.7" y2="790.0" stroke="#4a4a4a" stroke-width="1.6"/>
+<polygon points="1158.7,790.0 1151.3,784.8 1158.7,781.0" fill="#4a4a4a"/>
+<rect x="1045.1" y="720.2" width="165.9" height="20" rx="4" fill="white"/>
+<text x="1128.0" y="734.2" text-anchor="middle" font-family="DejaVu Sans" font-size="10" fill="#4a4a4a"><tspan x="1128.0" dy="0" font-weight="400">the gap mediates evaluation</tspan></text>
+<line x1="525.0" y1="850.0" x2="585.0" y2="850.0" stroke="#9a3434" stroke-width="1.6" stroke-dasharray="9 7"/>
+<polygon points="585.0,850.0 577.0,854.2 577.0,845.8" fill="#9a3434"/>
+<line x1="970.0" y1="850.0" x2="915.0" y2="850.0" stroke="#9a3434" stroke-width="1.6" stroke-dasharray="9 7"/>
+<polygon points="915.0,850.0 923.0,845.8 923.0,854.2" fill="#9a3434"/>
+<line x1="800.0" y1="227.5" x2="800.0" y2="1027.5" stroke="#245a8d" stroke-width="1.8"/>
+<polygon points="800.0,1027.5 795.8,1019.5 804.2,1019.5" fill="#245a8d"/>
+<rect x="85.0" y="72.5" width="390.0" height="105.0" rx="12" fill="#f4f4f4" stroke="#4d4d4d" stroke-width="2"/>
+<text x="280.0" y="110.0" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#222222"><tspan x="280.0" dy="0" font-weight="700">COMMON SYNTACTIC LAYER</tspan><tspan x="280.0" dy="19" font-weight="400">Sentence · Predicate · diagonal</tspan><tspan x="280.0" dy="19" font-weight="400">no evaluation</tspan></text>
+<rect x="580.0" y="92.5" width="440.0" height="135.0" rx="12" fill="#eaf3ff" stroke="#245a8d" stroke-width="2"/>
+<text x="800.0" y="135.5" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#222222"><tspan x="800.0" dy="0" font-weight="700">K — INTENDED INTRINSIC FREE OBJECT</tspan><tspan x="800.0" dy="19" font-weight="400">root · step · Position</tspan><tspan x="800.0" dy="19" font-weight="400">Empty at the root · Option at the successor</tspan><tspan x="800.0" dy="19" font-weight="400">no sentence · no evaluator</tspan></text>
+<rect x="1095.0" y="82.5" width="450.0" height="135.0" rx="12" fill="#eef7f7" stroke="#276b6b" stroke-width="2"/>
+<text x="1320.0" y="127.0" text-anchor="middle" font-family="DejaVu Sans" font-size="13" fill="#222222"><tspan x="1320.0" dy="0" font-weight="700">GapOrbit⁺ — PROVENANCE STRUCTURE</tspan><tspan x="1320.0" dy="18" font-weight="400">pointed positive orbits</tspan><tspan x="1320.0" dy="18" font-weight="400">morphisms preserving root · advance · new · old</tspan><tspan x="1320.0" dy="18" font-weight="400">pointwise equivalence · no quotient or funext</tspan></text>
+<rect x="1105.0" y="225.0" width="430.0" height="110.0" rx="12" fill="#fafafa" stroke="#777777" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="1320.0" y="257.0" text-anchor="middle" font-family="DejaVu Sans" font-size="13" fill="#222222"><tspan x="1320.0" dy="0" font-weight="700">CANDIDATE UNIVERSAL PROPERTY</tspan><tspan x="1320.0" dy="18" font-weight="400">for every orbit R: a unique morphism K → R</tspan><tspan x="1320.0" dy="18" font-weight="400">pointwise uniqueness</tspan><tspan x="1320.0" dy="18" font-weight="400">not yet proved</tspan></text>
+<rect x="195.0" y="355.0" width="390.0" height="110.0" rx="12" fill="#edf8ef" stroke="#34743c" stroke-width="2"/>
+<text x="390.0" y="395.0" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#222222"><tspan x="390.0" dy="0" font-weight="700">K_T⁺ — TARSKIAN SKELETON</tspan><tspan x="390.0" dy="19" font-weight="400">state · advance · positions</tspan><tspan x="390.0" dy="19" font-weight="400">new_T / old_T</tspan></text>
+<rect x="865.0" y="355.0" width="410.0" height="110.0" rx="12" fill="#edf8ef" stroke="#34743c" stroke-width="2"/>
+<text x="1070.0" y="395.0" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#222222"><tspan x="1070.0" dy="0" font-weight="700">K_P⁺ — PROVABILITY SKELETON</tspan><tspan x="1070.0" dy="19" font-weight="400">certified history · advance · positions</tspan><tspan x="1070.0" dy="19" font-weight="400">new_P / old_P</tspan></text>
+<rect x="210.0" y="567.5" width="360.0" height="105.0" rx="12" fill="#fff8e5" stroke="#886500" stroke-width="2"/>
+<text x="390.0" y="605.0" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#222222"><tspan x="390.0" dy="0" font-weight="700">D_T — SYNTACTIC DECORATION</tspan><tspan x="390.0" dy="19" font-weight="400">diagonal gap · patch</tspan><tspan x="390.0" dy="19" font-weight="400">label_T</tspan></text>
+<rect x="885.0" y="567.5" width="370.0" height="105.0" rx="12" fill="#fff8e5" stroke="#886500" stroke-width="2"/>
+<text x="1070.0" y="605.0" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#222222"><tspan x="1070.0" dy="0" font-weight="700">D_P — SYNTACTIC DECORATION</tspan><tspan x="1070.0" dy="19" font-weight="400">Rosser sentence · extension</tspan><tspan x="1070.0" dy="19" font-weight="400">label_P</tspan></text>
+<rect x="95.0" y="790.0" width="430.0" height="120.0" rx="12" fill="#f5f0fb" stroke="#6c4a8c" stroke-width="2"/>
+<text x="310.0" y="835.0" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#222222"><tspan x="310.0" dy="0" font-weight="700">ℰ_T — LOCAL EVALUATION</tspan><tspan x="310.0" dy="19" font-weight="400">CorrectAt · models · truthAt</tspan><tspan x="310.0" dy="19" font-weight="400">frontier_open · position_evaluated</tspan></text>
+<rect x="970.0" y="790.0" width="440.0" height="120.0" rx="12" fill="#f5f0fb" stroke="#6c4a8c" stroke-width="2"/>
+<text x="1190.0" y="835.0" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#222222"><tspan x="1190.0" dy="0" font-weight="700">ℰ_P — LOCAL EVALUATION</tspan><tspan x="1190.0" dy="19" font-weight="400">TheoryProvable · derivations · consistency</tspan><tspan x="1190.0" dy="19" font-weight="400">frontier_open · position_evaluated</tspan></text>
+<rect x="585.0" y="797.5" width="330.0" height="105.0" rx="12" fill="#fff0f0" stroke="#9a3434" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="750.0" y="836.0" text-anchor="middle" font-family="DejaVu Sans" font-size="13" fill="#222222"><tspan x="750.0" dy="0" font-weight="700">NO SEMANTIC UNIFICATION</tspan><tspan x="750.0" dy="18" font-weight="400">Evaluated_T ↛ Evaluated_P</tspan><tspan x="750.0" dy="18" font-weight="400">Evaluated_P ↛ Evaluated_T</tspan></text>
+<rect x="540.0" y="1027.5" width="520.0" height="105.0" rx="12" fill="#eaf3ff" stroke="#245a8d" stroke-width="2"/>
+<text x="800.0" y="1065.0" text-anchor="middle" font-family="DejaVu Sans" font-size="14" fill="#222222"><tspan x="800.0" dy="0" font-weight="700">INTENDED CANONICAL SPAN</tspan><tspan x="800.0" dy="19" font-weight="400">T ← K → P</tspan><tspan x="800.0" dy="19" font-weight="400">F = r_P ∘ r_T⁻¹ only on the generated orbits</tspan></text>
+</svg>
