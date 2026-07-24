@@ -525,6 +525,9 @@ structure V23FinalFormalCertificate where
   responseMediation
   certifiedRepairContainment
   protectedFramePreservation
+  threatTaxonomyIntegrity
+  frameRegistryTotality
+  relativeFrameCompleteness
   passiveNoGo
   visibleFactoredNoGo
   finiteReferenceConformance
@@ -547,6 +550,8 @@ Le livrable global est donc un second objet de niveau dépôt :
 V23FinalReleaseBundle
   certificat formel Lean
   manifeste des artefacts réifiés
+  taxonomie et modèle de menace figés
+  registre du frame et risques résiduels
   manifeste de campagne
   rapports des vérificateurs indépendants
   résultats statistiques
@@ -614,6 +619,10 @@ Une fois toutes les portes fermées, le résultat autorisé sera :
 > l’état suivant, ferme localement la frontière courante et conserve une
 > histoire certifiée cumulative.
 
+Toute qualification de « frame complet » dans ce résultat signifie
+exclusivement : complet relativement à la taxonomie, au modèle de menace et au
+scope déclaré dont les versions et hashes sont publiés.
+
 La portée empirique dépendra séparément des campagnes réellement exécutées.
 
 Le résultat ne signifiera pas :
@@ -629,6 +638,10 @@ Le résultat ne signifiera pas :
   mécanisme de mesa-optimisation ;
 - que des tests comportementaux révèlent de manière unique le mécanisme interne
   du modèle ;
+- que la taxonomie de risques épuise toutes les propriétés auxquelles des
+  humains pourraient accorder de la valeur ;
+- que la complétude relative du frame constitue une complétude normative
+  absolue ;
 - qu’une réussite finie implique une généralisation universelle ;
 - que la nouveauté historique est établie sans étude bibliographique.
 
@@ -966,6 +979,91 @@ niveau empirique ouvert :
   d’un objectif interne caché.
 ```
 
+### 4.9 Complétude relative du frame protégé
+
+La complétude du frame doit être rendue mesurable sans être absolutisée. Le
+système doit définir :
+
+```text
+ThreatTaxonomy
+ThreatModel
+DeclaredProtectedScope
+ProtectedFrameRegistry
+ResidualRiskRegister
+```
+
+`ThreatTaxonomy` est une liste finie, versionnée et hashée de familles de
+risques, propriétés de sécurité, invariants d’identité, obligations de mémoire
+et classes d’effets. Elle peut agréger plusieurs taxonomies externes, mais
+chaque source, version et règle de traduction doit être enregistrée.
+
+`ThreatModel` fixe les agents, capacités, surfaces d’attaque, horizons,
+ressources et hypothèses effectivement considérés.
+
+Chaque entrée de `ProtectedFrameRegistry` doit contenir :
+
+```text
+identifiant stable
+source taxonomique
+énoncé de la propriété
+formalisation ou test associé
+statut de couverture
+preuve ou artefact
+risque résiduel
+justification
+responsable
+date de révision
+```
+
+Les statuts autorisés sont :
+
+```text
+COVERED
+PARTIAL
+EXCLUDED
+UNKNOWN
+```
+
+`COVERED` exige une propriété positive effectivement vérifiée par le bouclier
+ou préservée par la dynamique. `PARTIAL` décrit exactement la partie couverte.
+`EXCLUDED` exige une justification de portée. `UNKNOWN` reste un échec ouvert,
+jamais transformé en succès.
+
+Deux notions de complétude doivent rester distinctes :
+
+```text
+RegistryTotalOn(taxonomy) :
+  chaque entrée de la taxonomie possède un statut explicite ;
+
+FrameCompleteRelativeTo(scope) :
+  chaque propriété déclarée obligatoire dans le scope est COVERED.
+```
+
+La première certifie l’exhaustivité de la comptabilité relativement à une
+taxonomie figée. La seconde certifie la couverture du périmètre protégé
+déclaré. Ni l’une ni l’autre ne démontre que la taxonomie épuise les valeurs
+humaines ou tous les risques concevables.
+
+Toute publication doit donc annoncer :
+
+```text
+frame complet relativement à :
+  hash de la taxonomie
+  hash du modèle de menace
+  hash du scope déclaré
+  version du registre
+
+hors portée ou encore ouverts :
+  entrées PARTIAL
+  entrées EXCLUDED
+  entrées UNKNOWN
+  propriétés absentes des taxonomies utilisées
+```
+
+Une nouvelle propriété identifiée après gel n’est pas ajoutée silencieusement.
+Elle ouvre une nouvelle version de taxonomie, du frame et du protocole, puis
+déclenche le rejeu des preuves et tests affectés.
+
 ## 5. Arborescence cible
 
 Le dossier proposé est :
@@ -977,6 +1075,9 @@ v23_final/
   PROTOCOL.md
   IMPLEMENTATION_STATUS.md
   DECISIONS_AND_RISKS.md
+  THREAT_MODEL.md
+  PROTECTED_FRAME_REGISTRY.md
+  RESIDUAL_RISK_REGISTER.md
   MIGRATION_MANIFEST.json
   protocol.lock.json
   pyproject.toml
@@ -985,6 +1086,9 @@ v23_final/
     public_repair_record.schema.json
     certified_step.schema.json
     parameter_provenance.schema.json
+    threat_taxonomy.schema.json
+    protected_frame_registry.schema.json
+    residual_risk.schema.json
     trace.schema.json
     run_manifest.schema.json
     campaign_result.schema.json
@@ -1008,6 +1112,8 @@ v23_final/
     training_provenance.py
     repair_shield.py
     protected_frame.py
+    threat_model.py
+    frame_registry.py
     quantized.py
     verification.py
     certification.py
@@ -1035,6 +1141,8 @@ v23_final/
     test_training_provenance.py
     test_certified_repair_shield.py
     test_protected_frame.py
+    test_frame_registry_totality.py
+    test_relative_frame_completeness.py
     test_finite_conformance.py
     test_quantized_inference.py
     test_all_branches.py
@@ -1082,6 +1190,8 @@ Meta/AI/V23Final/
   ParameterProvenance.lean
   CertifiedRepairShield.lean
   ProtectedFrame.lean
+  ThreatTaxonomy.lean
+  RelativeFrameCompleteness.lean
   QuantizedInference.lean
   AllBranches.lean
   InformationFlow.lean
@@ -1145,6 +1255,9 @@ C27 médiation contre-factuelle par la réponse
 C28 confinement de toute réparation exécutée
 C29 absence explicite de revendication sur l’objectif interne
 C30 préservation du frame protégé par toute réparation exécutée
+C31 totalité du registre sur la taxonomie de risques figée
+C32 complétude du frame relativement au scope protégé déclaré
+C33 publication de tous les risques résiduels et statuts non couverts
 ```
 
 Une affirmation non enregistrée ne doit pas apparaître dans le résumé public
@@ -1162,6 +1275,9 @@ Livrables :
 - `CLAIM_REGISTRY.md` ;
 - `PROTOCOL.md` ;
 - `DECISIONS_AND_RISKS.md` ;
+- `THREAT_MODEL.md` ;
+- `PROTECTED_FRAME_REGISTRY.md` ;
+- `RESIDUAL_RISK_REGISTER.md` ;
 - schémas JSON initiaux ;
 - manifeste de migration ;
 - règles de versionnement ;
@@ -1172,6 +1288,9 @@ Porte V0 :
 
 - chaque affirmation possède une preuve attendue ;
 - chaque terme central possède une définition unique ;
+- la taxonomie, le modèle de menace et le scope protégé sont versionnés et
+  hashés ;
+- chaque entrée taxonomique possède un statut initial explicite ;
 - aucune métrique empirique ne remplace une obligation structurelle ;
 - aucune réussite de smoke n’est assimilée à un résultat scientifique.
 
@@ -1257,6 +1376,8 @@ Travail :
 - définir `PublicRepairRecord` ;
 - distinguer `ProposedRepairDecision` de `IntrinsicRepair` ;
 - définir `IntrinsicRepair` ;
+- définir `ThreatTaxonomy`, `ThreatModel` et `DeclaredProtectedScope` ;
+- définir `ProtectedFrameRegistry` et `ResidualRiskRegister` ;
 - définir le frame protégé et l’empreinte d’effets autorisée ;
 - définir `certifyAndBuildRepair` ;
 - porter ou spécialiser `executeRepair` ;
@@ -1274,6 +1395,9 @@ Preuves et tests :
 - toute proposition non certifiable produit un refus typé ;
 - toute réparation certifiée préserve le frame et respecte son empreinte
   d’effets ;
+- toute propriété obligatoire du scope possède une entrée `COVERED` reliée à un
+  invariant effectivement vérifié ;
+- toute entrée taxonomique possède exactement un statut ;
 - aucune transition active ne peut contourner `executeRepair` ;
 - mutation du champ `next` exporté sans mutation de la réparation est refusée ;
 - mutation de la réparation recalcule les descendants.
@@ -1287,6 +1411,14 @@ nextState = executeRepair(currentState, repair)
 doit être une égalité calculée ou prouvée, jamais un booléen fourni.
 Le type d’entrée de `executeRepair` doit empêcher l’exécution directe d’une
 simple `ProposedRepairDecision`.
+
+La porte V3 exige également :
+
+```text
+RegistryTotalOn(frozenThreatTaxonomy)
+et
+FrameCompleteRelativeTo(declaredProtectedScope)
+```
 
 ### V4 — Mémoire publique et histoire certifiée
 
@@ -1603,6 +1735,10 @@ Travail :
 - audit positif des dépendances de données ;
 - audit dynamique de taint à paramètres figés ;
 - audit séparé de la provenance sémantique des paramètres ;
+- audit de totalité du registre sur la taxonomie figée ;
+- comparaison documentée du frame avec les taxonomies externes sélectionnées ;
+- tests faisant échouer la porte lorsqu’une propriété obligatoire est absente,
+  `PARTIAL`, `EXCLUDED` ou `UNKNOWN` ;
 - interventions appariées sur observation, gap, usage, transport, requête,
   réponse et réparation ;
 - contre-factuels conservant le même préfixe public et remplaçant uniquement la
@@ -1632,6 +1768,9 @@ Porte V11 :
 - zéro fuite privée ;
 - zéro bypass accepté ;
 - zéro proposition non certifiée exécutée ;
+- totalité du registre relativement à la taxonomie figée ;
+- couverture `COVERED` de toutes les propriétés obligatoires du scope déclaré ;
+- publication de chaque statut `PARTIAL`, `EXCLUDED` et `UNKNOWN` ;
 - médiation par la réponse établie sur toutes les branches finies où elle est
   sémantiquement requise ;
 - effets descendants conformes ;
@@ -1656,6 +1795,9 @@ Travail :
   compilateur dans l’instance v23 ;
 - formaliser la non-interférence à paramètres figés sans la renforcer en
   indépendance de l’entraînement ;
+- formaliser `RegistryTotalOn` et `FrameCompleteRelativeTo` sur les données
+  finies réifiées ;
+- relier chaque invariant du frame à son entrée de registre ;
 - relier les chemins à la mémoire cumulative ;
 - établir la fraîcheur ou la non-récurrence requise ;
 - expliciter exactement la portée de l’universalisation.
@@ -1677,6 +1819,8 @@ et
 les égalités de commutation sont démontrées
 et
 le confinement préserve le frame protégé
+et
+la complétude revendiquée est explicitement relative au scope figé
 ```
 
 ### V13 — Campagne scientifique
@@ -1686,6 +1830,7 @@ Objectif : évaluer la portée empirique après la fermeture structurelle.
 Travail :
 
 - geler le protocole ;
+- geler la taxonomie, le modèle de menace, le scope protégé et leur registre ;
 - geler la spécification des cibles, récompenses, pertes et optimiseurs ;
 - geler les partitions et l’OOD avant entraînement ;
 - séparer tuning, runs finaux et réplication ;
@@ -1698,6 +1843,8 @@ Travail :
 - produire `ParameterProvenance` pour chaque checkpoint ;
 - publier séparément les résultats de non-interférence à l’inférence et les
   dépendances introduites par l’entraînement ;
+- publier la matrice `COVERED/PARTIAL/EXCLUDED/UNKNOWN` et les risques
+  résiduels ;
 - vérifier les bundles ;
 - répéter sur l’infrastructure indépendante prévue.
 
@@ -1716,6 +1863,8 @@ Porte V13 :
 - aucune cellule absente n’est comptée comme succès ;
 - les résultats statistiques et structurels sont séparés ;
 - aucun checkpoint sans provenance complète n’est admissible ;
+- aucun changement silencieux de taxonomie ou de scope après gel n’est admis ;
+- chaque risque non couvert reste visible dans le bundle ;
 - aucune réussite empirique n’est décrite comme preuve d’absence de
   mesa-optimisation ;
 - les bundles sont rejouables ;
@@ -1735,12 +1884,17 @@ Livrables :
 - manifeste de provenance sémantique des paramètres ;
 - certificat de confinement des réparations ;
 - définition et certificat du frame protégé ;
+- taxonomie et modèle de menace figés avec leurs hashes ;
+- matrice complète des statuts de couverture ;
+- registre des risques résiduels ;
+- certificat de complétude relative au scope déclaré ;
 - énoncé formel de non-interférence à paramètres figés ;
 - matrice affirmation-preuve ;
 - rapport de falsification ;
 - rapport de campagne ;
 - limites et non-affirmations ;
 - non-revendication explicite d’absence de mesa-optimisation ;
+- non-revendication explicite de complétude normative absolue ;
 - bundle reproductible.
 
 Porte V14 :
@@ -1751,6 +1905,8 @@ et
 toutes les dépendances sont traçables
 et
 aucune porte manquante n’est transformée en succès
+et
+toute complétude annoncée nomme la taxonomie et le scope auxquels elle est relative
 ```
 
 ## 8. Ordre de dépendance
@@ -1797,10 +1953,10 @@ il dépend.
 
 | Porte | Objet | Validation d’autorité |
 |---|---|---|
-| V0 | contrat | revue du registre et lock |
+| V0 | contrat | taxonomie, scope, registre et lock |
 | V1 | séparation | types et non-interférence à paramètres figés |
 | V2 | gap | couverture et preuves d’ouverture |
-| V3 | transition | confinement puis égalité avec `executeRepair` |
+| V3 | transition | frame relatif, confinement et `executeRepair` |
 | V4 | mémoire | structure inductive et préfixe exact |
 | V5 | référence finie | énumération exhaustive |
 | V6 | théorie adaptative | promotion mécanique auditée |
@@ -1808,7 +1964,7 @@ il dépend.
 | V8 | apprentissage | persistance et provenance des paramètres |
 | V9 | quantification | recalcul bit-exact |
 | V10 | politique | arbre de toutes les branches |
-| V11 | causalité | médiation par réponse, interventions et no-go |
+| V11 | causalité | médiation, couverture du frame et no-go |
 | V12 | fondation | instance et lois de commutation |
 | V13 | science | campagne gelée et réplication |
 | V14 | synthèse | certificat final et matrice complète |
@@ -1840,6 +1996,7 @@ Ils couvrent :
 - construction de réparation ;
 - compilation ou refus d’une proposition apprise ;
 - vérification du frame protégé et de l’empreinte d’effets ;
+- validation du registre, de la taxonomie et du modèle de menace ;
 - exécution de réparation ;
 - extension de mémoire ;
 - quantification ;
@@ -1857,6 +2014,8 @@ Ils vérifient :
 - impossibilité de passer une `ProposedRepairDecision` directement à
   `executeRepair` ;
 - préservation du frame par toute réparation acceptée ;
+- totalité du registre sur la taxonomie figée ;
+- couverture de chaque propriété obligatoire du scope ;
 - exactitude de l’extension historique ;
 - conservation de l’ordre ;
 - idempotence des vérificateurs ;
@@ -1874,6 +2033,7 @@ Ils portent sur :
 - tous les refus typés ;
 - toutes les interventions finies ;
 - toutes les propositions de réparation admissibles et inadmissibles ;
+- toutes les entrées de la taxonomie et du scope protégé ;
 - toutes les entrées de l’agent certifiable.
 
 ### 10.4 Tests adversariaux
@@ -1898,6 +2058,10 @@ Ils mutent au minimum :
 - proposition non certifiable ;
 - effet hors empreinte autorisée ;
 - régression d’un invariant du frame protégé ;
+- suppression d’une entrée du registre ;
+- substitution de `COVERED` par `PARTIAL`, `EXCLUDED` ou `UNKNOWN` sur une
+  propriété obligatoire ;
+- modification de taxonomie sans changement de version ou de hash ;
 - provenance de cible ou de récompense ;
 - manifeste de checkpoint ;
 - hash ;
@@ -1937,6 +2101,31 @@ Un effet du signal sémantique sur les poids n’est pas classé comme violation
 par principe. Il doit être documenté. La violation apparaît lorsqu’une donnée
 privée interdite devient une entrée d’inférence ou lorsqu’une proposition
 contourne le vérificateur de réparation.
+
+### 10.7 Audit de couverture du frame
+
+L’audit doit produire quatre vues :
+
+```text
+couverture par entrée taxonomique
+couverture par invariant formel
+couverture par test adversarial
+risques résiduels et exclusions
+```
+
+Il vérifie :
+
+- que chaque entrée taxonomique est classée exactement une fois ;
+- que chaque propriété obligatoire du scope est `COVERED` ;
+- que chaque statut `COVERED` pointe vers une preuve ou un test exécutable ;
+- que les statuts `PARTIAL`, `EXCLUDED` et `UNKNOWN` possèdent une justification
+  et restent visibles ;
+- que les hashes du registre, de la taxonomie et du modèle de menace
+  correspondent au protocole gelé.
+
+Une revue externe peut proposer de nouvelles entrées ou contester une
+classification. Elle ne modifie pas rétroactivement le résultat : elle produit
+une nouvelle version et un nouveau périmètre de certification.
 
 ## 11. Risques prioritaires
 
@@ -2044,8 +2233,20 @@ de sécurité, d’identité, de mémoire ou d’effet futur que le modèle peut
 exploiter tout en restant formellement admissible.
 
 Réponse : définir explicitement le frame protégé et l’empreinte d’effets ;
-prouver leur conservation à chaque réparation ; publier comme limite toute
+prouver leur conservation à chaque réparation ; imposer
+`FrameCompleteRelativeTo` sur le scope déclaré ; publier comme limite toute
 propriété non incluse dans ce frame.
+
+### R15 — Taxonomie normativement incomplète
+
+Risque : le registre est total et le frame couvre tout le scope déclaré, mais
+la taxonomie ou le scope omet une propriété à laquelle les utilisateurs
+accordent de la valeur.
+
+Réponse : versionner et hasher les sources taxonomiques ; comparer plusieurs
+taxonomies ; publier les exclusions et risques résiduels ; organiser une revue
+externe ; ne jamais revendiquer que la complétude relative épuise les valeurs
+humaines ou tous les risques concevables.
 
 ## 12. Critère de complétude du dossier
 
@@ -2065,6 +2266,13 @@ simultanément satisfaites :
 - la réparation est intrinsèque ;
 - toute sortie apprise reste une proposition jusqu’à sa compilation certifiée ;
 - toute proposition non certifiable est refusée ;
+- la taxonomie, le modèle de menace et le scope déclaré sont versionnés et
+  hashés ;
+- le registre est total sur la taxonomie figée ;
+- chaque propriété obligatoire du scope est `COVERED` ;
+- tous les statuts `PARTIAL`, `EXCLUDED` et `UNKNOWN` restent publiés ;
+- la complétude du frame est revendiquée uniquement relativement à ces
+  artefacts figés ;
 - le frame protégé et l’empreinte d’effets sont définis positivement ;
 - toute réparation exécutée préserve ce frame et respecte cette empreinte ;
 - `executeRepair` est l’unique source du successeur ;
@@ -2088,6 +2296,8 @@ simultanément satisfaites :
 - chaque affirmation publique est reliée à une preuve ou à un artefact précis ;
 - aucune absence de mesa-optimisation ou d’objectif interne caché n’est
   revendiquée ;
+- aucune complétude absolue des valeurs humaines ou des risques concevables
+  n’est revendiquée ;
 - les limites sont publiées avec les résultats.
 
 Tant qu’une de ces conditions manque, le dossier doit annoncer exactement le
@@ -2106,13 +2316,14 @@ Il doit livrer :
 4. la frontière PrivateWorld/publishObservation/respond ;
 5. OperationalGap non constant ;
 6. ProposedRepairDecision, certifyAndBuildRepair et IntrinsicRepair ;
-7. le frame protégé et l’empreinte d’effets ;
-8. executeRepair inaccessible à une proposition brute ;
-9. une trajectoire finie de deux transitions actives ;
-10. l’extension exacte de mémoire ;
-11. la certification locale des deux gaps ;
-12. un test démontrant qu’aucun identifiant privé n’entre dans la mémoire ;
-13. le contrat séparant non-interférence à paramètres figés et provenance
+7. la taxonomie, le modèle de menace, le scope et le registre de couverture ;
+8. le frame protégé et l’empreinte d’effets ;
+9. executeRepair inaccessible à une proposition brute ;
+10. une trajectoire finie de deux transitions actives ;
+11. l’extension exacte de mémoire ;
+12. la certification locale des deux gaps ;
+13. un test démontrant qu’aucun identifiant privé n’entre dans la mémoire ;
+14. le contrat séparant non-interférence à paramètres figés et provenance
     sémantique de l’entraînement.
 ```
 
