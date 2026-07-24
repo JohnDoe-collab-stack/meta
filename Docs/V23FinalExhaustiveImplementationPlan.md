@@ -11,6 +11,8 @@ reproduire une seconde fois le noyau Lean. Il doit réunir, sans les affaiblir :
 - la dynamique causale déjà définie dans `Meta/AI` ;
 - la réalisation finie exacte du v23 historique ;
 - une politique apprise, persistante et quantifiée ;
+- la provenance sémantique explicite de ses paramètres appris ;
+- le confinement de toute proposition apprise avant exécution ;
 - la certification de toutes les branches publiques réalisables ;
 - les interventions causales, les no-go et la campagne empirique ;
 - un certificat formel constructif pour les obligations mathématiques ;
@@ -62,9 +64,10 @@ Couche privée de l’environnement :
   certification sémantique
 ```
 
-Le monde privé ne peut pas être lu par le détecteur de gap, la politique,
-l’encodeur public, les têtes apprises, le constructeur de réparation ou
-l’exécuteur de réparation.
+Pendant l’inférence, le monde privé ne peut pas être lu par le détecteur de
+gap, la politique, l’encodeur public, les têtes apprises, le constructeur de
+réparation ou l’exécuteur de réparation. L’entraînement et la provenance des
+poids sont traités séparément en section 1.4.
 
 Deux opérations de frontière doivent être distinguées :
 
@@ -78,8 +81,10 @@ interaction sémantique active :
 
 Dans le noyau Lean actuel, la première opération s’appelle
 `ActiveClosureData.observe`. Elle construit l’observation publique initiale.
-La seconde est le seul canal sémantique actif après qu’un gap a produit une
-requête.
+La seconde est le seul canal sémantique privé dynamique de la boucle
+d’inférence après qu’un gap a produit une requête. Cette affirmation ne porte
+pas sur la provenance historique des paramètres appris, traitée en section
+1.4.
 
 Une nouvelle observation exogène ultérieure doit être représentée comme un
 nouvel événement public explicitement typé, ou comme le début d’un nouvel
@@ -202,7 +207,99 @@ Dans l’exécutable Python, `PrivateWorld` et `PublicState` restent séparés.
 Seul le vérificateur ou le certificat recompose leur couple pour établir la
 propriété sémantique.
 
-### 1.4 Thèse générale
+### 1.4 Canal sémantique d’entraînement
+
+La séparation de types de la boucle active porte sur l’inférence pour des
+paramètres figés. Elle garantit conceptuellement :
+
+```text
+paramètres θ fixés
++ mêmes entrées publiques autorisées à la phase considérée
+→ même sortie de politique
+```
+
+Avant la réponse, ces entrées sont l’état et la mémoire publics. Après la
+réponse, elles comprennent également le gap, l’usage, le transport, la requête
+et la réponse publique effectivement reçue.
+
+Elle ne garantit pas que les paramètres `θ` ont été produits indépendamment de
+toute information sémantique privée. Lors d’un apprentissage supervisé ou
+renforcé, un second canal causal existe :
+
+```text
+PrivateTrainingEvidence
+→ cible ou récompense
+→ fonction de perte
+→ gradients
+→ optimiseur
+→ FrozenParameters θ
+→ politique déployée
+```
+
+Les poids peuvent donc conserver des régularités apprises depuis un signal
+sémantique sans que `PrivateWorld` soit lu directement à l’inférence. Ce fait
+n’est ni nié ni classé automatiquement comme une fuite : apprendre depuis une
+évaluation sémantique est précisément l’objet de l’entraînement. En revanche,
+ce canal doit être déclaré, tracé et distingué des canaux d’inférence.
+
+La garantie structurelle autorisée est :
+
+```text
+RuntimeNoninterferenceAtFixedParameters
+```
+
+Elle signifie qu’à paramètres fixés, la politique ne peut distinguer deux
+situations ayant exactement la même projection publique à la même phase
+d’inférence.
+
+La garantie suivante n’est pas revendiquée :
+
+```text
+TrainingNoninterference
+```
+
+Elle exigerait que changer le signal privé d’entraînement sans changer les
+données publiques ne puisse jamais changer les poids ou la politique. Une telle
+propriété serait généralement incompatible avec l’apprentissage sémantique
+recherché.
+
+Les ablations, gradients et interventions peuvent établir des dépendances
+comportementales dans une classe et un domaine donnés. Aucun ensemble fini de
+tests ne démontre l’absence générale d’un objectif interne caché ou d’une
+mesa-optimisation.
+
+La réponse structurelle du projet n’est donc pas de prétendre connaître
+l’objectif interne du modèle. Elle consiste à confiner son pouvoir
+opérationnel :
+
+```text
+proposition apprise
+→ compilation depuis le gap et la réponse effectivement reçue
+→ construction d’une IntrinsicRepair typée
+→ vérification de provenance et d’admissibilité
+→ executeRepair
+```
+
+Une proposition qui ne peut pas être transformée en réparation intrinsèque
+certifiée produit un refus typé. Elle ne produit jamais un état suivant.
+
+Dans le domaine fini exhaustif, cette discipline peut certifier le comportement
+sur toutes les entrées et toutes les réponses réalisables. Elle empêche une
+éventuelle mesa-optimisation de produire une action exécutée hors de l’espace
+d’actions certifié dans ce domaine ; elle ne prouve pas son inexistence interne
+et ne neutralise pas automatiquement les choix encore permis à l’intérieur de
+cet espace. Dans les domaines ouverts ou OOD non exhaustifs, la portée
+supplémentaire reste empirique, sauf si chaque action est accompagnée d’un
+certificat local vérifiable en ligne.
+
+Le confinement n’est donc jamais plus fort que son contrat. Si deux réparations
+restent autorisées mais diffèrent sur une propriété absente du frame protégé,
+le modèle peut encore choisir entre elles. Les invariants de sécurité, de
+mémoire, d’identité et d’effets revendiqués doivent être inscrits positivement
+dans ce frame ; ils ne peuvent pas être déduits du seul fait que le gap courant
+se ferme.
+
+### 1.5 Thèse générale
 
 La thèse générale visée est que cette forme causale peut recevoir plusieurs
 réalisations, indépendamment de leur ontologie particulière, dès lors qu’elles
@@ -412,6 +509,8 @@ Sa forme conceptuelle est :
 ```lean
 structure V23FinalFormalCertificate where
   publicPrivateSeparation
+  fixedParameterRuntimeNoninterference
+  parameterProvenance
   publicPolicy
   quantizedInference
   allRealizableBranches
@@ -423,6 +522,9 @@ structure V23FinalFormalCertificate where
   openOrbitNonRecurrence
   typedInterventions
   causalMediation
+  responseMediation
+  certifiedRepairContainment
+  protectedFramePreservation
   passiveNoGo
   visibleFactoredNoGo
   finiteReferenceConformance
@@ -473,7 +575,13 @@ Le système final doit démontrer, pour chaque transition active certifiée :
 9. le nouveau record est ajouté à la mémoire publique ;
 10. une histoire certifiée relie le record à sa preuve de fermeture ;
 11. toutes les certifications antérieures restent valides ;
-12. aucune tête directe ne calcule l’état suivant.
+12. aucune tête directe ne calcule l’état suivant ;
+13. la sortie apprise est seulement une proposition de décision ;
+14. toute réparation exécutée est reconstruite depuis le gap, la requête et la
+    réponse effectivement reçue ;
+15. toute proposition non certifiable est refusée avant `executeRepair` ;
+16. la réparation certifiée respecte le frame protégé, l’empreinte d’effets et
+    les obligations cumulatives.
 ```
 
 ### 3.3 Résultat appris
@@ -486,6 +594,12 @@ La composante apprise doit établir :
 - une quantification dont les opérations, arrondis, bornes et argmax sont
   reproduits exactement ;
 - une preuve de toutes les décisions sur le domaine fini certifiable ;
+- un manifeste reliant chaque checkpoint à ses données, cibles, pertes,
+  optimiseur et scripts d’entraînement ;
+- une garantie de non-interférence à l’inférence, explicitement conditionnée
+  par des paramètres figés ;
+- un confinement certifié entre la proposition apprise et la réparation
+  effectivement exécutée ;
 - une évaluation empirique séparée sur les domaines de campagne ;
 - des interventions qui testent la médiation plutôt qu’une simple corrélation.
 
@@ -495,9 +609,10 @@ Une fois toutes les portes fermées, le résultat autorisé sera :
 
 > Il existe une réalisation finie et apprise d’une dynamique dans laquelle une
 > frontière syntaxique publique ouverte produit causalement une requête, reçoit
-> une réponse par l’unique canal sémantique actif après requête, engendre une réparation
-> intrinsèque qui est l’unique source de l’état suivant, ferme localement la
-> frontière courante et conserve une histoire certifiée cumulative.
+> une réponse par l’unique canal sémantique privé dynamique après requête,
+> engendre une réparation intrinsèque certifiée qui est l’unique source de
+> l’état suivant, ferme localement la frontière courante et conserve une
+> histoire certifiée cumulative.
 
 La portée empirique dépendra séparément des campagnes réellement exécutées.
 
@@ -508,6 +623,12 @@ Le résultat ne signifiera pas :
 - que toute frontière ouverte peut être fermée ;
 - que la sémantique est réductible à la syntaxe ;
 - que le gap possède lui-même un contenu de vérité ;
+- que les poids ont été produits indépendamment du signal sémantique
+  d’entraînement ;
+- que le modèle ne contient aucun objectif interne, optimiseur appris ou
+  mécanisme de mesa-optimisation ;
+- que des tests comportementaux révèlent de manière unique le mécanisme interne
+  du modèle ;
 - qu’une réussite finie implique une généralisation universelle ;
 - que la nouveauté historique est établie sans étude bibliographique.
 
@@ -741,6 +862,110 @@ afin de vérifier :
 - qu’aucune donnée privée n’est introduite lors de cette relecture ;
 - qu’une intervention sur la réparation modifie les descendants attendus.
 
+### 4.8 Entraînement, paramètres figés et confinement
+
+Le système doit représenter séparément :
+
+```text
+TrainingPublicInput
+TrainingPrivateEvidence
+SupervisionTarget
+LossSpecification
+OptimizerSpecification
+FrozenParameters
+ParameterProvenance
+```
+
+`ParameterProvenance` doit indiquer, pour chaque checkpoint :
+
+- les hashes des données publiques d’entraînement ;
+- la nature exacte des cibles ou récompenses privées ;
+- les fonctions qui ont produit ces cibles ;
+- la fonction de perte ;
+- l’optimiseur et ses hyperparamètres ;
+- les seeds ;
+- le script figé et sa commande ;
+- le checkpoint résultant.
+
+Le contrat d’inférence porte ensuite sur `FrozenParameters` et sépare deux
+phases :
+
+```text
+preResponsePolicy :
+  FrozenParameters
+  → PublicState
+  → ProposedGapUseTransportQuery
+
+postResponsePolicy :
+  FrozenParameters
+  → PublicState
+  → OperationalGap
+  → AuthorizedUse
+  → AuthorizedTransport
+  → Query
+  → Response
+  → ProposedRepairDecision
+```
+
+La proposition post-réponse n’est jamais exécutée directement. Le chemin
+autorisé est :
+
+```text
+ProposedRepairDecision
++ PublicState
++ OperationalGap
++ AuthorizedUse
++ AuthorizedTransport
++ Query
++ Response
+→ certifyAndBuildRepair
+→ Option IntrinsicRepair
+```
+
+`none` signifie refus typé. `some repair` contient ou permet de reconstruire
+les preuves de provenance exigées par le langage d’interaction. Seule cette
+réparation peut être donnée à `executeRepair`.
+
+Le bouclier doit vérifier ou construire au minimum :
+
+- la provenance depuis le gap et la réponse effectivement reçue ;
+- l’admissibilité de l’usage, du transport et de la requête ;
+- la forme autorisée du patch, de la mise à jour d’observation et du record ;
+- l’empreinte d’effets autorisée ;
+- la préservation du frame protégé ;
+- l’extension exacte de la mémoire ;
+- la conservation des obligations cumulatives déjà certifiées.
+
+Dans la réalisation finie, `certifyAndBuildRepair` doit être une fonction
+totale et décidable. Dans une réalisation ouverte, la proposition doit fournir
+les données positives permettant de construire le certificat local. Le plan
+n’autorise pas un oracle externe supposé correct.
+
+Le certificat de fermeture `GapClosedBy` reste postérieur à l’exécution. Il ne
+doit pas être confondu avec l’admissibilité préalable de la proposition :
+
+```text
+avant exécution :
+  la proposition est compilable en IntrinsicRepair autorisée
+
+après exécution :
+  GapClosedBy certifie la fermeture locale obtenue
+```
+
+Trois niveaux de conclusion doivent rester séparés :
+
+```text
+niveau structurel :
+  aucune action non certifiée ne peut être exécutée ;
+
+niveau exhaustif fini :
+  toutes les entrées et réponses réalisables satisfont le contrat ;
+
+niveau empirique ouvert :
+  les tests soutiennent une généralisation, sans prouver l’absence
+  d’un objectif interne caché.
+```
+
 ## 5. Arborescence cible
 
 Le dossier proposé est :
@@ -759,6 +984,7 @@ v23_final/
     public_state.schema.json
     public_repair_record.schema.json
     certified_step.schema.json
+    parameter_provenance.schema.json
     trace.schema.json
     run_manifest.schema.json
     campaign_result.schema.json
@@ -779,6 +1005,9 @@ v23_final/
     policy.py
     models.py
     training.py
+    training_provenance.py
+    repair_shield.py
+    protected_frame.py
     quantized.py
     verification.py
     certification.py
@@ -802,6 +1031,10 @@ v23_final/
     test_execute_repair.py
     test_certified_history.py
     test_multistep_recurrence.py
+    test_fixed_parameter_noninterference.py
+    test_training_provenance.py
+    test_certified_repair_shield.py
+    test_protected_frame.py
     test_finite_conformance.py
     test_quantized_inference.py
     test_all_branches.py
@@ -845,6 +1078,10 @@ Meta/AI/V23Final/
   ExecuteRepair.lean
   FiniteConformance.lean
   PublicPolicy.lean
+  RuntimeNoninterference.lean
+  ParameterProvenance.lean
+  CertifiedRepairShield.lean
+  ProtectedFrame.lean
   QuantizedInference.lean
   AllBranches.lean
   InformationFlow.lean
@@ -890,7 +1127,7 @@ C09 extension exacte de la mémoire publique
 C10 histoire certifiée positive
 C11 conservation cumulative
 C12 récurrence multistep effective
-C13 inference quantifiée exacte
+C13 inférence quantifiée exacte
 C14 couverture de toutes les branches publiques réalisables
 C15 interventions causales typées
 C16 absence de bypass
@@ -902,6 +1139,12 @@ C21 réalisation fondationnelle
 C22 provenance scientifique complète
 C23 campagne apprise exécutée
 C24 réplication indépendante
+C25 non-interférence à l’inférence pour paramètres figés
+C26 provenance sémantique complète des paramètres
+C27 médiation contre-factuelle par la réponse
+C28 confinement de toute réparation exécutée
+C29 absence explicite de revendication sur l’objectif interne
+C30 préservation du frame protégé par toute réparation exécutée
 ```
 
 Une affirmation non enregistrée ne doit pas apparaître dans le résumé public
@@ -934,7 +1177,8 @@ Porte V0 :
 
 ### V1 — Frontière publique et privée
 
-Objectif : rendre impossible par construction l’accès direct au monde privé.
+Objectif : rendre impossible par construction l’accès direct au monde privé
+pendant l’inférence, pour des paramètres figés.
 
 Travail :
 
@@ -943,8 +1187,12 @@ Travail :
 - retirer `world_id`, cible, réponse future, clé OOD et réparation correcte de
   l’état et de la mémoire publics ;
 - définir `publishObservation` comme canal d’exposition initiale ;
-- définir `respond` comme unique canal sémantique actif après requête ;
+- définir `respond` comme unique canal sémantique privé dynamique de
+  l’inférence après requête ;
 - séparer les données de certification hors de l’entrée de l’agent ;
+- formuler `RuntimeNoninterferenceAtFixedParameters` ;
+- déclarer explicitement que cette propriété ne porte pas sur la production
+  des poids par l’entraînement ;
 - créer des contrôleurs de sérialisation qui refusent les champs privés.
 
 Preuves et tests :
@@ -954,7 +1202,7 @@ Preuves et tests :
 - renommage bijectif des identifiants privés, à contenu de monde constant, sans
   changement des sorties publiques ;
 - mondes différents mais publiquement indistinguables donnant la même décision
-  avant réponse ;
+  avant réponse, à paramètres identiques ;
 - échec volontaire si un identifiant privé entre dans l’encodeur public.
 
 Porte V1 :
@@ -964,9 +1212,11 @@ aucune fonction publique ne lit PrivateWorld
 et
 publishObservation est l’unique exposition initiale
 et
-respond est le seul canal privé de la boucle active
+respond est le seul canal privé dynamique de la boucle d’inférence
 et
 RuntimeMemory est entièrement publique
+et
+la garantie est explicitement conditionnée par FrozenParameters
 ```
 
 ### V2 — Gap public non trivial
@@ -1005,7 +1255,10 @@ Objectif : faire de la réparation la cause structurelle unique du successeur.
 Travail :
 
 - définir `PublicRepairRecord` ;
+- distinguer `ProposedRepairDecision` de `IntrinsicRepair` ;
 - définir `IntrinsicRepair` ;
+- définir le frame protégé et l’empreinte d’effets autorisée ;
+- définir `certifyAndBuildRepair` ;
 - porter ou spécialiser `executeRepair` ;
 - supprimer toute valeur `next` calculée parallèlement ;
 - conserver le posterior comme outil de vérification ;
@@ -1018,6 +1271,9 @@ Preuves et tests :
   exécuté doivent produire la différence publique prescrite par ce champ ;
 - même réparation donne le même successeur ;
 - toute transition active possède un témoin de réparation ;
+- toute proposition non certifiable produit un refus typé ;
+- toute réparation certifiée préserve le frame et respecte son empreinte
+  d’effets ;
 - aucune transition active ne peut contourner `executeRepair` ;
 - mutation du champ `next` exporté sans mutation de la réparation est refusée ;
 - mutation de la réparation recalcule les descendants.
@@ -1029,6 +1285,8 @@ nextState = executeRepair(currentState, repair)
 ```
 
 doit être une égalité calculée ou prouvée, jamais un booléen fourni.
+Le type d’entrée de `executeRepair` doit empêcher l’exécution directe d’une
+simple `ProposedRepairDecision`.
 
 ### V4 — Mémoire publique et histoire certifiée
 
@@ -1181,10 +1439,16 @@ Travail :
 - définir l’encodeur public ;
 - définir l’encodeur de mémoire publique ;
 - définir l’état latent persistant ;
+- définir `TrainingPrivateEvidence`, `SupervisionTarget` et
+  `ParameterProvenance` ;
+- enregistrer le chemin cible ou récompense, perte, gradient, optimiseur et
+  poids figés ;
 - entraîner les têtes dans l’ordre causal ;
 - faire dépendre la mise à jour récurrente de la réparation exécutée ;
 - entraîner sur des épisodes comportant plusieurs transitions actives ;
 - conserver des baselines de capacité comparable ;
+- faire produire au modèle des `ProposedRepairDecision`, jamais des réparations
+  exécutables directement ;
 - interdire une tête directe `NextHead`.
 
 Têtes minimales :
@@ -1223,6 +1487,10 @@ Tests décisifs :
 - comparaison d’épisodes partageant le présent mais différant par leur passé ;
 - vérification que l’état réparé influence les logits futurs ;
 - gradient causal non nul sur la voie prescrite ;
+- entraînements appariés où seul le signal privé de supervision change, afin de
+  mesurer et publier son effet sur les poids et les sorties ;
+- renommage et permutation des identifiants privés pour détecter la
+  mémorisation accidentelle d’identifiants ;
 - à l’inférence, absence de valeur, activation ou branche de contrôle provenant
   d’un champ privé interdit.
 
@@ -1230,6 +1498,14 @@ Les cibles privées éventuellement autorisées pour la supervision doivent êtr
 isolées dans le calcul de perte. Elles ne peuvent pas être concaténées aux
 entrées, recopiées dans la mémoire ou rendues disponibles à l’inférence. Le
 rapport doit distinguer explicitement flux d’entraînement et flux d’inférence.
+
+Cette isolation ne signifie pas que les poids sont indépendants des cibles :
+les gradients sont précisément un canal causal entre les deux. Le manifeste
+doit rendre ce canal visible au lieu de le classer comme une absence de fuite.
+
+Les tests de médiation et les audits de gradients ne peuvent être présentés
+comme une preuve d’absence de mesa-optimisation. Ils établissent uniquement les
+dépendances comportementales effectivement testées.
 
 Porte V8 :
 
@@ -1239,6 +1515,10 @@ et
 la récurrence est effective
 et
 la réparation modifie réellement les décisions ultérieures
+et
+la provenance sémantique des paramètres est complète
+et
+aucune conclusion sur l’absence d’objectif interne n’est revendiquée
 ```
 
 ### V9 — Quantification et inférence exacte
@@ -1258,6 +1538,9 @@ Travail :
 - spécifier l’argmax et ses égalités ;
 - exporter les poids et entrées ;
 - recalculer activations, logits et décisions dans Lean ;
+- interpréter la décision quantifiée comme une proposition ;
+- recalculer le compilateur qui transforme cette proposition, le gap et la
+  réponse en `IntrinsicRepair`, ou en refus typé ;
 - prouver les marges nécessaires ;
 - couvrir les cinq familles de décisions.
 
@@ -1275,6 +1558,8 @@ Porte V9 :
 - parité bit-exacte ;
 - activations et logits recalculés ;
 - argmax prouvé ;
+- aucune proposition n’est exécutable sans passage par
+  `CertifiedRepairShield` ;
 - couverture exhaustive des entrées certifiables ;
 - tests de mutation des poids, entrées, échelles et arrondis.
 
@@ -1287,6 +1572,8 @@ Travail :
 - énumérer les réponses réalisables à chaque requête ;
 - construire l’arbre public complet ;
 - appliquer la politique quantifiée sur chaque branche ;
+- vérifier sur chaque branche que la proposition est compilée en réparation
+  intrinsèque ou refusée avant exécution ;
 - prouver la fermeture sur chaque feuille terminale ;
 - prouver la conservation cumulative le long de chaque chemin ;
 - justifier la finitude de l’arbre par la mesure interne de conflit déjà portée
@@ -1302,6 +1589,8 @@ Porte V10 :
 ```text
 la preuve porte sur toutes les réponses réalisables
 et non uniquement sur la réponse du monde courant
+et
+aucune branche n’exécute une proposition non certifiée
 ```
 
 ### V11 — Information, causalité et absence de bypass
@@ -1312,13 +1601,19 @@ dans la classe testée.
 Travail :
 
 - audit positif des dépendances de données ;
-- audit dynamique de taint ;
+- audit dynamique de taint à paramètres figés ;
+- audit séparé de la provenance sémantique des paramètres ;
 - interventions appariées sur observation, gap, usage, transport, requête,
   réponse et réparation ;
+- contre-factuels conservant le même préfixe public et remplaçant uniquement la
+  réponse par une autre réponse réalisable ;
+- preuve que les réponses exigeant des corrections distinctes conduisent à des
+  réparations certifiées distinctes ;
 - recalcul de tous les descendants ;
 - maintien fixe de l’amont ;
 - refus des injections mal typées ;
 - test direct d’un bypass du successeur ;
+- test direct d’une proposition de réparation non certifiable ;
 - médiation et ablations preregistrées ;
 - no-go passif et visible factorisé appariés.
 
@@ -1336,9 +1631,14 @@ Porte V11 :
 
 - zéro fuite privée ;
 - zéro bypass accepté ;
+- zéro proposition non certifiée exécutée ;
+- médiation par la réponse établie sur toutes les branches finies où elle est
+  sémantiquement requise ;
 - effets descendants conformes ;
 - no-go établis dans les classes précisément définies ;
-- falsificateurs capables de faire échouer chaque vérificateur pertinent.
+- falsificateurs capables de faire échouer chaque vérificateur pertinent ;
+- aucune conclusion sur l’objectif interne ne dépasse les propriétés
+  extensionnelles et causales effectivement certifiées.
 
 ### V12 — Réalisation fondationnelle
 
@@ -1351,6 +1651,11 @@ Travail :
 - identifier l’état, le gap, la mémoire et l’avance ;
 - prouver les égalités de transport nécessaires ;
 - relier les étapes apprises à `CertifiedInferenceStep` ;
+- relier `ProposedRepairDecision` au compilateur intrinsèque de réparation ;
+- prouver que `executeRepair` n’accepte que la sortie certifiée de ce
+  compilateur dans l’instance v23 ;
+- formaliser la non-interférence à paramètres figés sans la renforcer en
+  indépendance de l’entraînement ;
 - relier les chemins à la mémoire cumulative ;
 - établir la fraîcheur ou la non-récurrence requise ;
 - expliciter exactement la portée de l’universalisation.
@@ -1370,6 +1675,8 @@ Porte V12 :
 les objets appris instancient effectivement la structure fondationnelle
 et
 les égalités de commutation sont démontrées
+et
+le confinement préserve le frame protégé
 ```
 
 ### V13 — Campagne scientifique
@@ -1379,6 +1686,7 @@ Objectif : évaluer la portée empirique après la fermeture structurelle.
 Travail :
 
 - geler le protocole ;
+- geler la spécification des cibles, récompenses, pertes et optimiseurs ;
 - geler les partitions et l’OOD avant entraînement ;
 - séparer tuning, runs finaux et réplication ;
 - exécuter les domaines prévus ;
@@ -1387,6 +1695,9 @@ Travail :
 - exécuter les interventions ;
 - calculer les statistiques preregistrées ;
 - produire les checkpoints et traces ;
+- produire `ParameterProvenance` pour chaque checkpoint ;
+- publier séparément les résultats de non-interférence à l’inférence et les
+  dépendances introduites par l’entraînement ;
 - vérifier les bundles ;
 - répéter sur l’infrastructure indépendante prévue.
 
@@ -1404,6 +1715,9 @@ Porte V13 :
 - toutes les cellules prévues ont un statut ;
 - aucune cellule absente n’est comptée comme succès ;
 - les résultats statistiques et structurels sont séparés ;
+- aucun checkpoint sans provenance complète n’est admissible ;
+- aucune réussite empirique n’est décrite comme preuve d’absence de
+  mesa-optimisation ;
 - les bundles sont rejouables ;
 - la réplication est identifiée distinctement.
 
@@ -1418,10 +1732,15 @@ Livrables :
 - manifeste final des déclarations ;
 - rapport complet des audits d’axiomes ;
 - manifeste de provenance ;
+- manifeste de provenance sémantique des paramètres ;
+- certificat de confinement des réparations ;
+- définition et certificat du frame protégé ;
+- énoncé formel de non-interférence à paramètres figés ;
 - matrice affirmation-preuve ;
 - rapport de falsification ;
 - rapport de campagne ;
 - limites et non-affirmations ;
+- non-revendication explicite d’absence de mesa-optimisation ;
 - bundle reproductible.
 
 Porte V14 :
@@ -1479,17 +1798,17 @@ il dépend.
 | Porte | Objet | Validation d’autorité |
 |---|---|---|
 | V0 | contrat | revue du registre et lock |
-| V1 | séparation | types, taint, tests adversariaux |
+| V1 | séparation | types et non-interférence à paramètres figés |
 | V2 | gap | couverture et preuves d’ouverture |
-| V3 | transition | égalité avec `executeRepair` |
+| V3 | transition | confinement puis égalité avec `executeRepair` |
 | V4 | mémoire | structure inductive et préfixe exact |
 | V5 | référence finie | énumération exhaustive |
 | V6 | théorie adaptative | promotion mécanique auditée |
 | V7 | pont formel | preuves Lean constructives |
-| V8 | apprentissage | épisodes multistep et interventions |
+| V8 | apprentissage | persistance et provenance des paramètres |
 | V9 | quantification | recalcul bit-exact |
 | V10 | politique | arbre de toutes les branches |
-| V11 | causalité | interventions, taint et no-go |
+| V11 | causalité | médiation par réponse, interventions et no-go |
 | V12 | fondation | instance et lois de commutation |
 | V13 | science | campagne gelée et réplication |
 | V14 | synthèse | certificat final et matrice complète |
@@ -1519,11 +1838,13 @@ Ils couvrent :
 - transport ;
 - construction de requête ;
 - construction de réparation ;
+- compilation ou refus d’une proposition apprise ;
+- vérification du frame protégé et de l’empreinte d’effets ;
 - exécution de réparation ;
 - extension de mémoire ;
 - quantification ;
 - déterminisme ;
-- provenance.
+- provenance des paramètres et des réparations.
 
 ### 10.2 Tests de propriétés
 
@@ -1531,6 +1852,11 @@ Ils vérifient :
 
 - déterminisme des fonctions pures ;
 - absence de champ privé dans les sorties publiques ;
+- non-interférence des situations publiquement équivalentes à paramètres
+  figés ;
+- impossibilité de passer une `ProposedRepairDecision` directement à
+  `executeRepair` ;
+- préservation du frame par toute réparation acceptée ;
 - exactitude de l’extension historique ;
 - conservation de l’ordre ;
 - idempotence des vérificateurs ;
@@ -1547,6 +1873,7 @@ Ils portent sur :
 - toutes les stases ;
 - tous les refus typés ;
 - toutes les interventions finies ;
+- toutes les propositions de réparation admissibles et inadmissibles ;
 - toutes les entrées de l’agent certifiable.
 
 ### 10.4 Tests adversariaux
@@ -1568,6 +1895,11 @@ Ils mutent au minimum :
 - activation ;
 - logits ;
 - décision ;
+- proposition non certifiable ;
+- effet hors empreinte autorisée ;
+- régression d’un invariant du frame protégé ;
+- provenance de cible ou de récompense ;
+- manifeste de checkpoint ;
 - hash ;
 - seed ;
 - partition ;
@@ -1585,6 +1917,26 @@ Ils comprennent au minimum :
   protocole affirme que l’histoire appartient à l’identité causale ;
 - intervention au pas `n` et effet contrôlé au pas `n + 1` ;
 - conservation des fermetures des pas antérieurs.
+
+### 10.6 Tests séparés d’entraînement et d’inférence
+
+Les audits d’inférence utilisent un checkpoint figé. Ils vérifient :
+
+- l’absence de lecture privée à l’exécution ;
+- l’équivalence des sorties pour des projections publiques identiques ;
+- le passage obligatoire par le confinement des réparations.
+
+Les audits d’entraînement utilisent des runs appariés. Ils mesurent :
+
+- l’effet d’une modification de cible privée sur les gradients et les poids ;
+- la mémorisation éventuelle d’identifiants privés ;
+- la stabilité aux renommages sans contenu sémantique ;
+- la dépendance des politiques finales au signal d’évaluation.
+
+Un effet du signal sémantique sur les poids n’est pas classé comme violation
+par principe. Il doit être documenté. La violation apparaît lorsqu’une donnée
+privée interdite devient une entrée d’inférence ou lorsqu’une proposition
+contourne le vérificateur de réparation.
 
 ## 11. Risques prioritaires
 
@@ -1658,6 +2010,43 @@ sur toute mathématique.
 Réponse : séparer interface générale, réalisations prouvées et conjectures de
 portée.
 
+### R11 — Canal sémantique caché dans les poids
+
+Risque : la séparation des signatures d’inférence est présentée comme si elle
+impliquait l’indépendance des poids envers les cibles ou récompenses privées.
+
+Réponse : modéliser le canal cible, perte, gradient, optimiseur et paramètres ;
+publier `ParameterProvenance` ; formuler la non-interférence uniquement à
+paramètres figés.
+
+### R12 — Surinterprétation des tests de mesa-optimisation
+
+Risque : des ablations, gradients ou interventions réussis sont présentés comme
+une preuve que le modèle ne contient aucun objectif interne caché.
+
+Réponse : limiter les conclusions aux dépendances comportementales observées ;
+ne revendiquer aucune transparence motivationnelle ; confiner toute action
+exécutée par un compilateur de réparation certifié.
+
+### R13 — Vérificateur décoratif
+
+Risque : le modèle prédit une réparation et un booléen de validité, puis cette
+réparation est exécutée sans reconstruction indépendante.
+
+Réponse : faire du vérificateur une fonction fail-closed qui reçoit la
+proposition, le gap et la réponse, puis construit elle-même une
+`IntrinsicRepair` typée ou renvoie un refus.
+
+### R14 — Contrat de confinement incomplet
+
+Risque : le bouclier certifie la fermeture locale du gap mais omet une propriété
+de sécurité, d’identité, de mémoire ou d’effet futur que le modèle peut alors
+exploiter tout en restant formellement admissible.
+
+Réponse : définir explicitement le frame protégé et l’empreinte d’effets ;
+prouver leur conservation à chaque réparation ; publier comme limite toute
+propriété non incluse dans ce frame.
+
 ## 12. Critère de complétude du dossier
 
 `v23_final` est complet seulement si les conditions suivantes sont
@@ -1667,9 +2056,17 @@ simultanément satisfaites :
 - la frontière publique/privée résiste aux audits statiques et dynamiques ;
 - le gap est public, ouvert, individué et non constant ;
 - l’observation initiale est exposée uniquement par `publishObservation` ;
-- après cette exposition, `respond` est l’unique apport sémantique privé de la
-  boucle active ;
+- après cette exposition, `respond` est l’unique apport sémantique privé
+  dynamique de la boucle d’inférence ;
+- la non-interférence est démontrée à paramètres figés ;
+- la provenance sémantique historique de chaque checkpoint est publiée ;
+- le canal cible, perte, gradient, optimiseur et paramètres est distingué du
+  canal d’inférence ;
 - la réparation est intrinsèque ;
+- toute sortie apprise reste une proposition jusqu’à sa compilation certifiée ;
+- toute proposition non certifiable est refusée ;
+- le frame protégé et l’empreinte d’effets sont définis positivement ;
+- toute réparation exécutée préserve ce frame et respecte cette empreinte ;
 - `executeRepair` est l’unique source du successeur ;
 - le gap courant est certifié fermé dans le successeur ;
 - la mémoire publique est étendue exactement ;
@@ -1680,6 +2077,8 @@ simultanément satisfaites :
 - le modèle est réellement persistant sur plusieurs étapes ;
 - l’inférence quantifiée est recalculée exactement ;
 - toutes les branches publiques réalisables sont certifiées ;
+- la médiation par la réponse est vérifiée sur les branches finies où des
+  réponses distinctes exigent des réparations distinctes ;
 - les interventions établissent les dépendances causales revendiquées ;
 - les bypass et fuites sont falsifiés ;
 - les no-go sont établis dans leurs classes exactes ;
@@ -1687,6 +2086,8 @@ simultanément satisfaites :
 - la campagne scientifique est gelée, exécutée et rejouable ;
 - le certificat final Lean est constructif et sans axiome ;
 - chaque affirmation publique est reliée à une preuve ou à un artefact précis ;
+- aucune absence de mesa-optimisation ou d’objectif interne caché n’est
+  revendiquée ;
 - les limites sont publiées avec les résultats.
 
 Tant qu’une de ces conditions manque, le dossier doit annoncer exactement le
@@ -1704,11 +2105,15 @@ Il doit livrer :
 3. les types PublicState, RuntimeMemory et CertifiedHistory ;
 4. la frontière PrivateWorld/publishObservation/respond ;
 5. OperationalGap non constant ;
-6. IntrinsicRepair et executeRepair ;
-7. une trajectoire finie de deux transitions actives ;
-8. l’extension exacte de mémoire ;
-9. la certification locale des deux gaps ;
-10. un test démontrant qu’aucun identifiant privé n’entre dans la mémoire.
+6. ProposedRepairDecision, certifyAndBuildRepair et IntrinsicRepair ;
+7. le frame protégé et l’empreinte d’effets ;
+8. executeRepair inaccessible à une proposition brute ;
+9. une trajectoire finie de deux transitions actives ;
+10. l’extension exacte de mémoire ;
+11. la certification locale des deux gaps ;
+12. un test démontrant qu’aucun identifiant privé n’entre dans la mémoire ;
+13. le contrat séparant non-interférence à paramètres figés et provenance
+    sémantique de l’entraînement.
 ```
 
 Ce premier incrément ferme le risque architectural principal. Il fournit
